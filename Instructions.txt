@@ -29,5 +29,3 @@ comment out the following lines:
       --require = nil           -- comment this out
       --loadlib = nil           -- comment this out
     end
-
-samplechange
