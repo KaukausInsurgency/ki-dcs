@@ -1,0 +1,33 @@
+In order to make this mission work, the following is required:
+
+A - unrestrict certain libraries from missionscripting environment
+
+KI uses lfs and io to read/write to a file when saving/loading mission data. By default these libraries are restricted in the mission scripting environment, hence a file needs to be tweaked inside DCS main folder to give access to these for KI.
+
+Go to your DCS Install/Scripts/MissionScripting.lua and open in notepad ++
+
+comment out the following lines:
+
+    --Initialization script for the Mission lua Environment (SSE)
+
+    dofile('Scripts/ScriptingSystem.lua')
+
+    --Sanitize Mission Scripting environment
+    --This makes unavailable some unsecure functions. 
+    --Mission downloaded from server to client may contain potentialy harmful lua code that may use these functions.
+    --You can remove the code below and make availble these functions at your own risk.
+
+    local function sanitizeModule(name)
+      _G[name] = nil
+      package.loaded[name] = nil
+    end
+
+    do
+      sanitizeModule('os')
+      --sanitizeModule('io')    -- comment this out
+      --sanitizeModule('lfs')   -- comment this out
+      --require = nil           -- comment this out
+      --loadlib = nil           -- comment this out
+    end
+
+samplechange
