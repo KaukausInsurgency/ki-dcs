@@ -39,7 +39,7 @@ function CP:Fortify(resource, count)
   if self.Defenses[resource] then
     local _dqty = self.Defenses[resource].qty
     local _cap = self.Defenses[resource].cap
-    -- if the depot has enough capacity to store the resource, do so
+    -- if the capture point has enough capacity to reinforce, allow it
     if (count + _dqty) <= _cap then
       env.info("CP:Fortify - CP has enough capacity to accept this fortification")
       _dqty = _dqty + count
