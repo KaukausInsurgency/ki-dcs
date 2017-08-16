@@ -9,7 +9,9 @@ KI.Config = {}
 KI.Config.SpawnID = 0
 
 function KI.IncrementSpawnID()
+  env.info("KI.IncrementSpawnID called")
   KI.Config.SpawnID = KI.Config.SpawnID + 1
+  env.info("KI.IncrementSpawnID - New ID: " .. tostring(KI.Config.SpawnID))
   return KI.Config.SpawnID
 end
 
@@ -57,9 +59,9 @@ KI.Config.PathScores = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Scores.lu
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "Beslan City", zone = "BeslanCityZone" },
-  { name = "Beslan Airport", zone = "BeslanAirportZone" },
-  { name = "Kirovo City", zone = "KirovoCityZone" }
+  { name = "Beslan City", zone = "BeslanCityZone", spawnzone = "BeslanCitySpawnZone" },
+  { name = "Beslan Airport", zone = "BeslanAirportZone", spawnzone = "BeslanAirportSpawnZone" },
+  { name = "Kirovo City", zone = "KirovoCityZone", spawnzone = "KirovoCitySpawnZone" }
 }
 
 -- configures side missions and their properties

@@ -7,10 +7,12 @@ CP =
   Zone = nil,           -- Mission Editor Trigger Zone
   BlueUnits = 0,
   RedUnits = 0,
-  Owner = ""
+  Owner = "",
+  SpawnZone = nil       -- zone where units ai units are spawned for attacking
 }
 
-function CP:New(name, zone)
+function CP:New(name, zone, spawnZone)
+  env.info("CP:New called")
   local self = KI.Toolbox.DeepCopy(CP)
 
 	if self ~= nil then
@@ -20,13 +22,14 @@ function CP:New(name, zone)
   
   self.Name = name
   self.Zone = ZONE:New(zone)
-  
+  self.SpawnZone = ZONE:New(spawnZone)
   return self
 end
 
 -- defines a defense unit with an initial count and limit for the capture zone
 -- ie define that a maximum of 30 infantry can be in this cap zone
 function CP:SetDefenseUnit(keyDef, maxcap)
+  env.info("CP.SetDefenseUnit called")
   if not maxcap then
     maxcap = 1
   end
@@ -34,6 +37,7 @@ function CP:SetDefenseUnit(keyDef, maxcap)
 end
 
 function CP:Fortify(resource, count)
+  env.info("CP.Fortify called")
   local msg = ""
   local result = false
   if self.Defenses[resource] then
@@ -66,6 +70,7 @@ function CP:ViewResources()
 end
 
 function CP:SetCoalitionCounts(reds, blues)
+  env.info("CP.SetCoalitionCounts called")
   self.BlueUnits = blues
   self.RedUnits = reds
   local own = CP.GetOwnership(self)
@@ -76,6 +81,7 @@ function CP:SetCoalitionCounts(reds, blues)
 end
 
 function CP:GetOwnership()
+  env.info("CP.GetOwnership called")
   if self.BlueUnits > 0 and self.RedUnits <= 0 then
     return "Blue"
   elseif self.RedUnits > 0 and self.BlueUnits <= 0 then

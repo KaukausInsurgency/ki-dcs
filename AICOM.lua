@@ -10,7 +10,7 @@ AICOM.Config.Forces =
 {
   {
     Name = "Infantry Platoon",
-    Templates = { "InsInfSqdA", "InsInfSqdB", "InsInfSqdA", "InsInfSqdC" }, -- group templates to use
+    Templates = { "InsInfSqdA", "InsInfSqdB", "InsInfSqdA", "InsInfSqdA" }, -- group templates to use
     Cost = 30,            -- cost to play / use
     Strength = 40,        -- Strength in number of units generated
     AAEffectiveness = 5,  -- Effectiveness against air units
@@ -20,18 +20,26 @@ AICOM.Config.Forces =
     Name = "MANPAD Section",
     Templates = { "InsMANPADSqd", "InsMANPADSqd", "InsInfSqdA" },
     Cost = 15,
-    Strength = 20,
+    Strength = 16,
     AAEffectiveness = 75,
     GNDEffectiveness = 5
   },
   {
     Name = "Tank Platoon",
-    Templates = { "InsTankPlt1", "InsTankPlt2" },
+    Templates = { "InsTankPlt1", "InsTankPlt1" },
     Cost = 20,
-    Strength = 10,
+    Strength = 8,
     AAEffectiveness = 15,
     GNDEffectiveness = 45
-  }
+  },
+  {
+    Name = "BMP Platoon",
+    Templates = { "InsMechPlt1", "InsMechPlt2" },
+    Cost = 20,
+    Strength = 8,
+    AAEffectiveness = 25,
+    GNDEffectiveness = 25
+  },
 }
 
 AICOM.Enum = {}
@@ -57,22 +65,22 @@ function AICOM.Init()
   
   
   local function sortCostAA (a, b )
-    if (a.AAEffectiveness < b.AAEffectiveness) then
+    if (b.AAEffectiveness < a.AAEffectiveness) then
       return true
-    elseif (a.AAEffectiveness > b.AAEffectiveness) then
+    elseif (b.AAEffectiveness > a.AAEffectiveness) then
       return false
     else
-      return a.Cost < b.Cost
+      return b.Cost < a.Cost
     end
   end
   
   local function sortCostGND (a, b )
-    if (a.GNDEffectiveness < b.GNDEffectiveness) then
+    if (b.GNDEffectiveness < a.GNDEffectiveness) then
       return true
-    elseif (a.GNDEffectiveness > b.GNDEffectiveness) then
+    elseif (b.GNDEffectiveness > a.GNDEffectiveness) then
       return false
     else
-      return a.Cost < b.Cost
+      return b.Cost < a.Cost
     end
   end
   
@@ -84,9 +92,14 @@ end
 
 function AICOM.Analyze(CapturePoints)
   env.info("AICOM.Analyze Called")
+  if CapturePoints then
+    env.info("AICOM.Analyze - CapturePoints not null")
+  else
+    env.info("AICOM.Analyze - WARNING CapturePoints null")
+  end
   local _cpAnalysis = {}
   for i = 1, #CapturePoints do
-    local _cp = CapturePoints(i)
+    local _cp = CapturePoints[i]
     local _cost = 0
     local _own = _cp:GetOwnership()
     local _type = 0
@@ -118,12 +131,15 @@ function AICOM.Analyze(CapturePoints)
     table.insert(_cpAnalysis, { CapturePoint = _cp, Cost = _cost, Action = _type })
   end
   
+  env.info("AICOM.Analyze - Dumping results")
+  env.info(KI.Toolbox.Dump(_cpAnalysis))
   return _cpAnalysis
 end
 
 -- analyzes what the AI is willing to pay for units
 -- split into two categories - AA units, and Ground units
 function AICOM.AnalyzePay(action)
+  env.info("AICOM.AnalyzePay called")
   local _result = { AA = 0, GND = 0 }
   
   -- the amount the AI is willing to pay for AA units - will never pay for anything higher than this
@@ -132,19 +148,25 @@ function AICOM.AnalyzePay(action)
   if action == AICOM.Enum.Actions.Attack then
     _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(10)
     _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(20)
-  elseif action == AICOOM.Enum.Actions.Reinforce then
+  elseif action == AICOM.Enum.Actions.Reinforce then
     _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(20)
     _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(5)
   else
     _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(20)
     _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(5)
   end
+  
+  env.info("AICOM.AnalyzePay - dumping results")
+  env.info(KI.Toolbox.Dump(_result))
+  return _result
 end
 --
 
 
 -- attempt to buy AA units with the budget passed in as parameter
 function AICOM.TryBuyAA(budget)
+  env.info("AICOM.TryBuyAA Called")
+  env.info("AICOM.TryBuyAA - Budget: " .. tostring(budget))
   local _cart = {}
   
   for i = 1, #AICOM.ForcesAACostSorted do
@@ -154,23 +176,30 @@ function AICOM.TryBuyAA(budget)
     if _aa.Cost <= budget then
       -- see if we can afford multiple copies of this AA unit?
       if (_aa.Cost * 2) <= budget then
+        env.info("AICOM.TryBuyAA - buying 2 copies of AA unit " .. _aa.Name)
         -- Buy two of this unit
         table.insert(_cart, _aa)
         table.insert(_cart, _aa)
         budget = budget - (_aa.Cost * 2)
       else
+        env.info("AICOM.TryBuyAA - buying 1 copy of AA unit " .. _aa.Name)
         -- just buy one copy
         table.insert(_cart, _aa)
         budget = budget - _aa.Cost
       end
+    else
+      env.info("AICOM.TryBuyAA - could not afford AA unit " .. _aa.Name .. " - skipping")
     end
     
     -- If we have run out of money, break from the loop
     if budget <= 0 then
+      env.info("AICOM.TryBuyAA - budget is <= 0 - exiting")
       break
     end
   end
   
+  env.info("AICOM.TryBuyAA - dumping results")
+  env.info(KI.Toolbox.Dump(_cart))
   return _cart
 end
 --
@@ -178,6 +207,8 @@ end
 
 -- similar to TryBuyAA, buy some ground units based on budget
 function AICOM.TryBuyGND(budget)
+  env.info("AICOM.TryBuyGND called")
+  env.info("AICOM.TryBuyGND - Budget: " .. tostring(budget))
   local _cart = {}
   
   for i = 1, #AICOM.ForcesGNDCostSorted do
@@ -187,28 +218,37 @@ function AICOM.TryBuyGND(budget)
     if _gnd.Cost <= budget then
       -- see if we can afford multiple copies of this GND unit?
       if (_gnd.Cost * 3) <= budget then
+        env.info("AICOM.TryBuyGND - buying 3 copies of GND unit " .. _gnd.Name)
         -- Buy 3 of this unit
         table.insert(_cart, _gnd)
         table.insert(_cart, _gnd)
         table.insert(_cart, _gnd)
         budget = budget - (_gnd.Cost * 3)
       elseif (_gnd.Cost * 2) <= budget then
+        env.info("AICOM.TryBuyGND - buying 2 copies of GND unit " .. _gnd.Name)
         -- Buy 2 of this unit
         table.insert(_cart, _gnd)
         table.insert(_cart, _gnd)
         budget = budget - (_gnd.Cost * 2)
       else
+        env.info("AICOM.TryBuyGND - buying 1 copy of GND unit " .. _gnd.Name)
         -- just buy one copy
         table.insert(_cart, _aa)
         budget = budget - _gnd.Cost
       end
+    else
+      env.info("AICOM.TryBuyGND - could not afford GND unit " .. _gnd.Name .. " - skipping")
     end
     
     -- If we have run out of money, break from the loop
     if budget <= 0 then
+      env.info("AICOM.TryBuyGND - budget is <= 0 - exiting")
       break
     end
   end
+  
+  env.info("AICOM.TryBuyGND - dumping results")
+  env.info(KI.Toolbox.Dump(_cart))
   
   return _cart
 end
@@ -217,17 +257,19 @@ end
 
 -- Spawns forces into a zone
 function AICOM.Spawn(AAGroups, GNDGroups, zone)
+  env.info("AICOM.Spawn called")
   local _moneySpent = 0
   
   -- iterate over the AA Force Groups
   for i = 1, #AAGroups do
     local _grp = AAGroups[i]
     _moneySpent = _moneySpent + _grp.Cost
-    
+    env.info("AICOM.Spawn - _grp : " .. _grp.Name)
     -- iterate over template groups and spawn them
     for t = 1, #_grp.Templates do
+      env.info("AICOM.Spawn - Iterating over grp.Templates")
       local _template = _grp.Templates[t]
-      local SpawnObj = SPAWN:New(_template)
+      local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
       local NewGroup = SpawnObj:SpawnInZone(zone, true)
       if NewGroup ~= nil then
         env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. zone:GetName())
@@ -245,7 +287,7 @@ function AICOM.Spawn(AAGroups, GNDGroups, zone)
     -- iterate over all template groups and spawn them
     for t = 1, #_grp.Templates do
       local _template = _grp.Templates[t]
-      local SpawnObj = SPAWN:New(_template)
+      local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
       local NewGroup = SpawnObj:SpawnInZone(zone, true)
       if NewGroup ~= nil then
         env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. zone:GetName())
@@ -263,6 +305,7 @@ end
 
 -- NOTE: parameter cost is unused in this function - consider removing
 function AICOM.PerformAction(action, cost, capturepoint)
+  env.info("AICOM.PerformAction called")
   local _moneySpent = 0
   local _willingToPay = AICOM.AnalyzePay(action)
   local _buyAAUnits = AICOM.TryBuyAA(_willingToPay.AA)
@@ -288,7 +331,7 @@ function AICOM.DoTurn(args, time)
   AICOM.CurrentMoney = AICOM.Config.InitResource
   AICOM.MovesRemaining = AICOM.Config.InitMoves
   
-  
+  env.info("AICOM.DoTurn - KI.Data.CapturePoints length: " .. tostring(#KI.Data.CapturePoints))
   -- do some cost analysis on each capture point
   local _cpAnalysis = AICOM.Analyze(KI.Data.CapturePoints)
   

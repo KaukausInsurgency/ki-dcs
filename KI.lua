@@ -15,6 +15,7 @@ assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Loader.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Scheduled.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Hooks.lua"))()
+assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM.lua"))()
 
 
 
@@ -28,9 +29,13 @@ KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
 SLC.InitSLCRadioItemsForUnits()
+AICOM.Init()
+
+
 
 timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)
 timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + 5)
-
+timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + 5)
+--AICOM.DoTurn({}, 5)
 --KI.Loader.SaveData()
 KI.Loader.LoadData()
