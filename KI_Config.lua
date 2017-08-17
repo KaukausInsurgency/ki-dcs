@@ -56,6 +56,15 @@ KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Enti
 -- path to saved scores file
 KI.Config.PathScores = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Scores.lua"
 
+-- IP Address of Database Server (mySQL)
+KI.Config.DBServerIP = "192.168.1.254"
+
+-- Port Number of Database Server Connection
+KI.Config.DBServerPort = 9983
+
+-- Your server name (Only really used if supporting multi-tenant game servers)
+KI.Config.ServerName = "My Kaukasus Insurgency Server"
+
 -- configures capture points in mission
 KI.Config.CP =
 {

@@ -256,7 +256,7 @@ end
 
 
 -- Spawns forces into a zone
-function AICOM.Spawn(AAGroups, GNDGroups, zone)
+function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
   env.info("AICOM.Spawn called")
   local _moneySpent = 0
   
@@ -270,11 +270,15 @@ function AICOM.Spawn(AAGroups, GNDGroups, zone)
       env.info("AICOM.Spawn - Iterating over grp.Templates")
       local _template = _grp.Templates[t]
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
-      local NewGroup = SpawnObj:SpawnInZone(zone, true)
+                          :OnSpawnGroup(function( spawngrp, atkzone ) 
+                            env.info("AICOM.Spawn - OnSpawnGroup called")
+                            spawngrp:TaskRouteToZone(ZONE:New(atkzone), true, 40, "Off Road" )
+                          end, CPObj.Zone)
+      local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then
-        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. zone:GetName())
+        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       else
-        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. zone:GetName())
+        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       end
     end
   end
@@ -288,11 +292,15 @@ function AICOM.Spawn(AAGroups, GNDGroups, zone)
     for t = 1, #_grp.Templates do
       local _template = _grp.Templates[t]
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
-      local NewGroup = SpawnObj:SpawnInZone(zone, true)
+                          :OnSpawnGroup(function( spawngrp, atkzone ) 
+                            env.info("AICOM.Spawn - OnSpawnGroup called")
+                            spawngrp:TaskRouteToZone(ZONE:New(atkzone), true, 40, "Off Road" )
+                          end, CPObj.Zone)
+      local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then
-        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. zone:GetName())
+        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       else
-        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. zone:GetName())
+        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       end
     end
   end
@@ -314,7 +322,7 @@ function AICOM.PerformAction(action, cost, capturepoint)
   if action == AICOM.Enum.Actions.Ambush then
     
   else
-    _moneySpent = AICOM.Spawn(_buyAAUnits, _buyGNDUnits, capturepoint.SpawnZone)
+    _moneySpent = AICOM.Spawn(_buyAAUnits, _buyGNDUnits, capturepoint)
   end
   
   AICOM.MovesRemaining = AICOM.MovesRemaining - 1
