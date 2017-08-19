@@ -107,7 +107,18 @@ function KI.Scheduled.CheckSideMissions(args, time)
 end
 
 
-
+function KI.Scheduled.DataTransmission(args, time)
+  if KI.Socket.IsConnected then
+    -- send / receive some data
+  else
+    -- try to reconnect
+    if KI.Socket.Connect() then
+      
+    end
+  end
+  
+  return time + KI.Config.DataTransmissionUpdateRate
+end
 
 
 

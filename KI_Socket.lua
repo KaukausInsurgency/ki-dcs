@@ -36,6 +36,12 @@ function KI.Socket.Connect()
   end
 end
 
+function KI.Socket.Disconnect()
+  env.info("KI.Socket.Disconnect called")
+  KI.Socket.Object:close()
+  KI.Socket.IsConnected = false
+end
+
 
 -- Creates the message in the correct format the server expects
 -- Encodes into JSON, and appends size of message in first 6 characters of string
@@ -49,7 +55,7 @@ function KI.Socket.CreateMessage(message_type, data)
     Data = data,
   }
   local _jsonmsg = JSON:encode(_msg)
-  
+  -- sending 6 char header that is size of msg string
   local _m = string.format("%06d", string.len(_jsonmsg)) .. _jsonmsg
   env.info("KI.Socket.CreateMessage - dumping message")
   env.info(_m)
@@ -81,6 +87,7 @@ function KI.Socket.SendUntilComplete(msg)
       else
         -- complete failure - log
         env.info("KI.Socket.SendUntilComplete - ERROR in sending data (reason: " .. _error .. ")")
+        KI.Socket.Disconnect()
         return false
       end
     end
@@ -92,4 +99,40 @@ function KI.Socket.SendUntilComplete(msg)
   end
   
   return true
+end
+
+
+function KI.Socket.ReceiveUntilComplete()
+  local l, _error, header = KI.Socket.Object:receive(6)
+  
+	if header and header:len() == 6 then
+    local msg_size = tonumber(header)
+    local l, _error, msg = KI.Socket.Object:receive(msg_size)
+    
+    if msg and msg:len() == msg_size then
+      env.info("KI.Socket.ReceiveUntilComplete - received data transmission")
+      return msg
+    elseif msg and msg:len() < msg_size then
+      env.info("KI.Socket.ReceiveUntilComplete - partial data received (Reason: " .. _error .. ")")
+      env.info("KI.Socket.ReceiveUntilComplete - trying again")
+      local l, _error, partmsg = KI.Socket.Object:receive(msg_size - msg:len())
+      -- check if the partial message came through and is the size we are expecting it to be
+      if partmsg and partmsg:len() == (msg_size - msg:len()) then
+        msg = msg .. partmsg
+        return msg
+      else
+        env.info("KI.Socket.ReceiveUntilComplete - second try failed to receive (Reason: " .. _error .. ")")
+        KI.Socket.Disconnect()
+        return nil
+      end
+    else
+      env.info("KI.Socket.ReceiveUntilComplete - ERROR in receiving body data (Reason: " .. _error .. ")")
+      KI.Socket.Disconnect()
+      return nil
+    end
+  else
+    env.info("KI.Socket.ReceiveUntilComplete - ERROR in receiving header data (reason: " .. _error .. ")")
+    KI.Socket.Disconnect()
+    return nil
+  end
 end
