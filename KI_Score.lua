@@ -1,4 +1,4 @@
-env.setErrorMessageBoxEnabled(false)
+--env.setErrorMessageBoxEnabled(false)
 
 koScoreBoard = {}
 -----------------------------------
@@ -155,35 +155,35 @@ function koScoreBoard.log(txt)
 end
 
 function koScoreBoard.loadScoreBoardFile()
-	koEngine.debugText("koScoreBoard.loadScoreBoardFile()")
+	env.info("koScoreBoard.loadScoreBoardFile()")
 	
-	local dataLoader = loadfile(koEngine.scoreboardFileName)
+	local dataLoader = loadfile(KI.Config.PathScores)
 	if dataLoader ~= nil then		-- File open?
-		--koEngine.debugText(" - success!")
+		--env.info(" - success!")
 		koScoreBoard.ScoreBoard = dataLoader()
 	else
-		koEngine.debugText("Scoreboard not found! Starting from scratch")
+		env.info("Scoreboard not found! Starting from scratch")
 		koScoreBoard.ScoreBoard = {}
 	end
 end
 
 function koScoreBoard.loadScoreID()
-	local dataLoader = loadfile(koEngine.scoreIDFileName)
+	local dataLoader = loadfile(KI.Config.PathScoreID)
 	if dataLoader ~= nil then		-- File open?
 		koScoreBoard.scoreID = dataLoader()
-		koEngine.debugText("current ScoreID: "..koScoreBoard.scoreID.." loaded!")
+		env.info("current ScoreID: "..koScoreBoard.scoreID.." loaded!")
 	else
-		koEngine.debugText("Score ID not found, starting at ID=0")
+		env.info("Score ID not found, starting at ID=0")
 		koScoreBoard.scoreID = 0
 	end
 end
 
 
 function koScoreBoard.save()
-	koEngine.debugText("koScoreBoard.save()")
+	env.info("koScoreBoard.save()")
 	-- save the scoreboard to a separate file!
-	local exportData = "local t = " .. koEngine.TableSerialization(koScoreBoard.ScoreBoard) .. "return t"
-	local exportFile = assert(io.open(koEngine.scoreboardFileName, "w"))
+	local exportData = "local t = " .. KI.Toolbox.SerializeTable(koScoreBoard.ScoreBoard) .. "return t"
+	local exportFile = assert(io.open(KI.Config.PathScores, "w"))
 	exportFile:write(exportData)
 	exportFile:flush()
 	exportFile:close()
@@ -191,14 +191,14 @@ function koScoreBoard.save()
 	
 	koScoreBoard.saveSorties()
 	
-	koEngine.debugText("Scoreboard Saved")
+	env.info("Scoreboard Saved")
 end
 
 function koScoreBoard.saveSingleScore(scoreTable, scoreID)
-	koEngine.debugText("koScoreBoard.saveSingleScore()")
+	env.info("koScoreBoard.saveSingleScore()")
 	-- save the scoreboard to a separate file!
-	local exportData = "local t = " .. koEngine.TableSerialization(scoreTable) .. "return t"
-	local exportFile = assert(io.open(koEngine.scoreboardFileName2..scoreID..".lua", "w"))
+	local exportData = "local t = " .. kKI.Toolbox.SerializeTable(scoreTable) .. "return t"
+	local exportFile = assert(io.open(KI.Config.PathScores2..scoreID..".lua", "w"))
 	exportFile:write(exportData)
 	exportFile:flush()
 	exportFile:close()
@@ -206,46 +206,46 @@ function koScoreBoard.saveSingleScore(scoreTable, scoreID)
 	
 	koScoreBoard.saveSorties()
 	
-	koEngine.debugText("Scoreboard Saved")
+	env.info("Scoreboard Saved")
 end
 
 function koScoreBoard.saveScoreID()
 	local exportData = "return "..koScoreBoard.scoreID
-	local exportFile = assert(io.open(koEngine.scoreIDFileName, "w"))
+	local exportFile = assert(io.open(KI.Config.PathScoreID, "w"))
 	exportFile:write(exportData)
 	exportFile:flush()
 	exportFile:close()
 	exportFile = nil
 	
-	koEngine.debugText("ScoreID Saved")
+	env.info("ScoreID Saved")
 end
 
 function koScoreBoard.loadSortiesFile()
-	koEngine.debugText("koScoreBoard.loadSortiesFile()")
+	env.info("koScoreBoard.loadSortiesFile()")
 	
-	local dataLoader = loadfile(koEngine.activeSortiesFileName)
+	local dataLoader = loadfile(KI.Config.PathSorties)
 	if dataLoader ~= nil then		-- File open?
-		--koEngine.debugText(" - success!")
+		--env.info(" - success!")
 		koScoreBoard.activeSorties = dataLoader()
 	else
-		koEngine.debugText("Sorties not found! Starting from scratch")
+		env.info("Sorties not found! Starting from scratch")
 		koScoreBoard.activeSorties = {}
 	end
 end
 
 function koScoreBoard.saveSorties()
-	local exportData = "local t = " .. koEngine.TableSerialization(koScoreBoard.activeSorties) .. "return t"
-	local exportFile = assert(io.open(koEngine.activeSortiesFileName, "w"))
+	local exportData = "local t = " .. KI.Toolbox.SerializeTable(koScoreBoard.activeSorties) .. "return t"
+	local exportFile = assert(io.open(KI.Config.PathSorties, "w"))
 	exportFile:write(exportData)
 	exportFile:flush()
 	exportFile:close()
 	exportFile = nil
 	
-	koEngine.debugText("Sorties Saved")
+	env.info("Sorties Saved")
 end
 
 function koScoreBoard.getScoreBoardForPlayer(playerName)
-	local playerUcid = koEngine.getPlayerUCID(playerName)
+	local playerUcid = KI.MP.GetPlayerUCID(playerName)
 	
 	koScoreBoard.loadScoreBoardFile()
 	koScoreBoard.ScoreBoard[playerUcid] = koScoreBoard.ScoreBoard[playerUcid] or {}
@@ -254,15 +254,15 @@ function koScoreBoard.getScoreBoardForPlayer(playerName)
 end
 
 function koScoreBoard.insertScoreForPlayer(playerName, newScore)
-	koEngine.debugText("koScoreBoard.insertScoreForPlayer("..playerName..", "..newScore.achievment..")")
+	env.info("koScoreBoard.insertScoreForPlayer("..playerName..", "..newScore.achievment..")")
 	koScoreBoard.loadScoreID()
 	koScoreBoard.scoreID = koScoreBoard.scoreID + 1
 	newScore.scoreID = koScoreBoard.scoreID
-	newScore.sessionID = koEngine.sessionID
+	newScore.sessionID = KI.Config.SessionID
 	newScore.timer = timer.getTime()
 	
 	-- TODO Hand out some cash!
-	koEngine.debugText("hand out some cash")
+	env.info("hand out some cash")
 	if newScore.achievment ~= "landing" then	-- landing will get cash per flight minute in calcAirTimeForSortie()!
 		local achievment = newScore.achievment
 		
@@ -290,13 +290,13 @@ function koScoreBoard.insertScoreForPlayer(playerName, newScore)
 				achievment = "kill_ground2ground"
 			end
 			
-			koEngine.debugText("converted kill event to "..achievment)
+			env.info("converted kill event to "..achievment)
 		end
 		local cash = koScoreBoard.cashForAchievement[achievment]
 		
-		koEngine.debugText("cash = "..koEngine.TableSerialization(cash))
+		env.info("cash = "..KI.Toolbox.SerializeTable(cash))
 		if cash and cash.value > 0 then
-			koEngine.debugText("adding "..cash.value.."$ to '"..playerName.."s' wallet")
+			env.info("adding "..cash.value.."$ to '"..playerName.."s' wallet")
 			koScoreBoard.addCashToPlayer(playerName, cash.value, cash.desc)
 		end
 	end
@@ -305,7 +305,7 @@ function koScoreBoard.insertScoreForPlayer(playerName, newScore)
 		-- koScoreBoard.linkToSortie(playerName, newScore)
 		local sortie = koScoreBoard.getActiveSortie(playerName)
 		if sortie then
-			koEngine.debugText("linking score to sortie "..sortie.ID)
+			env.info("linking score to sortie "..sortie.ID)
 			--sortie.achievments[newScore.achievment] =  sortie.achievments[newScore.achievment] or {}
 			
 			newScore.sortieID = sortie.ID
@@ -314,16 +314,16 @@ function koScoreBoard.insertScoreForPlayer(playerName, newScore)
 			if newScore.achievment == "takeoff" then
 				sortie.status = "airborne"
 			elseif newScore.achievment == "landing" then
-				koEngine.debugText("player hast to have been airborne after landing, calculating airtime")
+				env.info("player hast to have been airborne after landing, calculating airtime")
 				sortie.status = "landed"
 				koScoreBoard.calcAirTimeForSortie(sortie, newScore.timer)
 			elseif newScore.achievment == "emergencylanding" then
-				koEngine.debugText("player hast to have been airborne after emergencylandingAirborne, calculating airtime")
+				env.info("player hast to have been airborne after emergencylandingAirborne, calculating airtime")
 				sortie.status = "emergencylanded"
 				koScoreBoard.calcAirTimeForSortie(sortie, newScore.timer)
 			elseif newScore.achievment == "crashed" then
 				if sortie.status == "airborne" then
-					koEngine.debugText("player was Airborne, calculating airtime")
+					env.info("player was Airborne, calculating airtime")
 					koScoreBoard.calcAirTimeForSortie(sortie, newScore.timer)
 				end
 				sortie.status = "crashed"
@@ -334,7 +334,7 @@ function koScoreBoard.insertScoreForPlayer(playerName, newScore)
 				sortie.hasEjected = true
 			elseif newScore.achievment == "died" then
 				if sortie.status == "airborne" then
-					koEngine.debugText("player was Airborne, calculating airtime")
+					env.info("player was Airborne, calculating airtime")
 					koScoreBoard.calcAirTimeForSortie(sortie, newScore.timer)
 				end
 				sortie.status = "dead"
@@ -343,16 +343,16 @@ function koScoreBoard.insertScoreForPlayer(playerName, newScore)
 			
 			table.insert(sortie.achievments, newScore)
 		--else
-			--koEngine.debugText("insertScoreForPlayer: no active sortie for "..playerName..", cannot insert score "..newScore.achievment.." into sortie")
+			--env.info("insertScoreForPlayer: no active sortie for "..playerName..", cannot insert score "..newScore.achievment.." into sortie")
 		end
 	end
 	
-	koEngine.debugText("inserting score for '"..playerName.."' - achievment = "..newScore.achievment)
+	env.info("inserting score for '"..playerName.."' - achievment = "..newScore.achievment)
 	--table.insert(koScoreBoard.getScoreBoardForPlayer(playerName), newScore)
 	--koScoreBoard.save()
 	koScoreBoard.log("dispatching score: "..newScore.scoreID)
 	local scoreToSave = {}
-	scoreToSave[koEngine.getPlayerUCID(playerName)] = newScore
+	scoreToSave[KI.MP.GetPlayerUCID(playerName)] = newScore
 	koScoreBoard.saveSingleScore(scoreToSave, newScore.scoreID)
 	koScoreBoard.saveScoreID()
 	koTCPSocket.send(scoreToSave, "Score")
@@ -362,37 +362,37 @@ end
 -- calculates the airtime of the last flight (from last takeoff till last score or endtime) 
 function koScoreBoard.calcAirTimeForSortie(sortie, endTime) 
 	if #sortie.achievments == 0 then
-		koEngine.debugText("koScoreboard.calcAirTimeForSortie() - no takeoff for sortie, not calculating airtime")
+		env.info("koScoreboard.calcAirTimeForSortie() - no takeoff for sortie, not calculating airtime")
 		return
 	end
 	
 	-- if no endTime is supplied, use the last known time the player saved a score
 	if not endTime then
-		koEngine.debugText("koScoreboard.calcAirTimeForSortie() - using last score.timer for endTime!")
+		env.info("koScoreboard.calcAirTimeForSortie() - using last score.timer for endTime!")
 		endTime = sortie.achievments[#sortie.achievments].timer
 	end
 	
-	koEngine.debugText("koScoreboard.calcAirTimeForSortie(endTime = "..endTime..")")
+	env.info("koScoreboard.calcAirTimeForSortie(endTime = "..endTime..")")
 	
 	local scoreIdx = #sortie.achievments
 	
-	--koEngine.debugText("scoreIdx = "..scoreIdx)
-	--koEngine.debugText("sortie.achievments = "..koEngine.TableSerialization(sortie.achievments))
-	--koEngine.debugText("init: sortie.achievments[scoreIdx] = "..sortie.achievments[scoreIdx].achievment)
+	--env.info("scoreIdx = "..scoreIdx)
+	--env.info("sortie.achievments = "..KI.Toolbox.SerializeTable(sortie.achievments))
+	--env.info("init: sortie.achievments[scoreIdx] = "..sortie.achievments[scoreIdx].achievment)
 	
 	while sortie.achievments[scoreIdx].achievment ~= "takeoff" do
-		--koEngine.debugText("idx: "..scoreIdx..", achievment: "..sortie.achievments[scoreIdx].achievment..", reducing index")
+		--env.info("idx: "..scoreIdx..", achievment: "..sortie.achievments[scoreIdx].achievment..", reducing index")
 		scoreIdx = scoreIdx - 1
 		if scoreIdx <=  0 then break end
 	end
 	
-	koEngine.debugText("takeoff scoreIndex = "..scoreIdx)
+	env.info("takeoff scoreIndex = "..scoreIdx)
 	
 	local takeoff = sortie.achievments[scoreIdx]
 	if takeoff and takeoff.achievment == "takeoff" then
 		local newAirTime = endTime - takeoff.timer		-- latest airtime in seconds
 		sortie.airTime = sortie.airTime + newAirTime
-		koEngine.debugText(" - airTime = "..sortie.airTime.." of which are new: "..newAirTime)
+		env.info(" - airTime = "..sortie.airTime.." of which are new: "..newAirTime)
 		
 		-- hand out some cash for landings:
 		 if sortie.status == "landed" or sortie.status == "emergencylanded" then
@@ -403,58 +403,58 @@ function koScoreBoard.calcAirTimeForSortie(sortie, endTime)
 			end
 		end
 	else
-		koEngine.debugText("koScoreboard: FATAL ERROR - no takeoff event in sortie, can't close it")
+		env.info("koScoreboard: FATAL ERROR - no takeoff event in sortie, can't close it")
 	end
 end
 
 function koScoreBoard.newSortie(playerName)
-	koEngine.debugText("koScoreBoard.newSortie("..playerName..")")
+	env.info("koScoreBoard.newSortie("..playerName..")")
 	
 	-- load sortieID
-	DataLoader = loadfile(koEngine.sortieIDFileName)
+	DataLoader = loadfile(KI.Config.PathSortieID)
 	if DataLoader ~= nil then		-- File open?
 		koScoreBoard.sortieID = DataLoader()
 		koScoreBoard.sortieID = koScoreBoard.sortieID + 1
-		koEngine.debugText("current sortieID: "..koScoreBoard.sortieID.." loaded!")
+		env.info("current sortieID: "..koScoreBoard.sortieID.." loaded!")
 	else
-		koEngine.debugText("sortieID not found, starting at ID=0")
+		env.info("sortieID not found, starting at ID=0")
 		koScoreBoard.sortieID = 0
 	end
 
-	local exportFile = assert(io.open(koEngine.sortieIDFileName, "w"))
+	local exportFile = assert(io.open(KI.Config.PathSortieID, "w"))
 	exportFile:write("return "..koScoreBoard.sortieID)
 	exportFile:flush()
 	exportFile:close()
 	exportFile = nil
 	
-	koEngine.debugText("sortieID Saved")
+	env.info("sortieID Saved")
 	
 	-- create sortie
-	local playerUCID = koEngine.getPlayerUCID(playerName)
+	local playerUCID = KI.MP.GetPlayerUCID(playerName)
 	if playerUCID then
 		koScoreBoard.activeSorties[playerUCID] = {
 			achievment = "sortie",
 			playerName = playerName, 
 			playerUCID = playerUCID,
 			ID = koScoreBoard.sortieID,
-			sessionID = koEngine.sessionID,
+			sessionID = KI.Config.SessionID,
 			status = "just spawned",
 			airTime = 0,
 			achievments = {},
 		}
 		return koScoreBoard.activeSorties[playerUCID]
 	else
-		koEngine.debugText("koScoreBoard.newSortie: no UCID for playerName '"..playerName.."'")
+		env.info("koScoreBoard.newSortie: no UCID for playerName '"..playerName.."'")
 		return nil
 	end
 end
 
 function koScoreBoard.getActiveSortie(playerName)
-	return koScoreBoard.activeSorties[koEngine.getPlayerUCID(playerName)]
+	return koScoreBoard.activeSorties[KI.MP.GetPlayerUCID(playerName)]
 end
 
 function koScoreBoard.closeSortie(playerName, _reason)
-	koEngine.debugText("koScoreboard.closeSortie() - closing sortie for '"..playerName)
+	env.info("koScoreboard.closeSortie() - closing sortie for '"..playerName)
 	local sortie = koScoreBoard.getActiveSortie(playerName)
 	if sortie and sortie.status ~= "closed" then
 		local endReason = _reason or "undetermined"
@@ -473,11 +473,11 @@ function koScoreBoard.closeSortie(playerName, _reason)
 			sortie.status = "missionEnd"
 			koScoreBoard.calcAirTimeForSortie(sortie, timer.getTime())
 		else
-			koEngine.debugText("sortie endReason is undetermined, not landed, not emergencylanded and was not airborne")
+			env.info("sortie endReason is undetermined, not landed, not emergencylanded and was not airborne")
 		end
 		
 		if sortie.status == "airborne" and (endReason == "disconnected" or endReason == "returned_to_specators") then
-			koEngine.debugText("user has "..endReason..", calculating airtime")
+			env.info("user has "..endReason..", calculating airtime")
 			koScoreBoard.calcAirTimeForSortie(sortie)
 		end
 		
@@ -499,7 +499,7 @@ function koScoreBoard.closeSortie(playerName, _reason)
 				endReason = "ejected"
 				
 				if not sortie.hasCrashed then	-- if there is no crash score but an ejection score add a crashed score
-					koEngine.debugText("found an ejection without a crash, adding the crash to the scoreboard!")
+					env.info("found an ejection without a crash, adding the crash to the scoreboard!")
 					local newScore = mist.utils.deepCopy(sortie.achievments[scoreIdx])
 					newScore.achievment = "crashed"
 					koScoreBoard.insertScoreForPlayer(playerName,newScore)
@@ -509,7 +509,7 @@ function koScoreBoard.closeSortie(playerName, _reason)
 				endReason = "died"
 				
 				if not sortie.hasCrashed then	-- if there is no crash score but a died score add a crashed score
-					koEngine.debugText("found a death without a crash, adding the crash to the scoreboard!")
+					env.info("found a death without a crash, adding the crash to the scoreboard!")
 					local newScore = mist.utils.deepCopy(sortie.achievments[scoreIdx])
 					newScore.achievment = "crashed"
 					koScoreBoard.insertScoreForPlayer(playerName,newScore)
@@ -519,14 +519,14 @@ function koScoreBoard.closeSortie(playerName, _reason)
 				endReason = "crashed"
 			end
 		
-			koEngine.debugText("idx: "..scoreIdx..", achievment: "..sortie.achievments[scoreIdx].achievment..", reducing index")
+			env.info("idx: "..scoreIdx..", achievment: "..sortie.achievments[scoreIdx].achievment..", reducing index")
 			scoreIdx = scoreIdx - 1
 			if scoreIdx <=  0 then break end
 		end
 		
 		-- only save the sortie if there was a takeoff (sortie started with takeoff)
 		if hasTakenOff then
-			koEngine.debugText("Player had taken off: closing sortie: "..sortie.ID..", endReason = "..endReason)
+			env.info("Player had taken off: closing sortie: "..sortie.ID..", endReason = "..endReason)
 			sortie.status = "closed"
 			sortie.endTime = timer.getTime()
 			sortie.endReason = endReason
@@ -536,24 +536,24 @@ function koScoreBoard.closeSortie(playerName, _reason)
 		koScoreBoard.activeSorties[sortie.playerUCID] = nil
 		koScoreBoard.saveSorties()
 		
-		koEngine.debugText("end closing sortie")
+		env.info("end closing sortie")
 	else
-		koEngine.debugText("- no active sortie active for player, using id -1")
+		env.info("- no active sortie active for player, using id -1")
 	end
 end
 
 
 function koScoreBoard.getCashcountForPlayer(playerName)
-	return MissionData.properties.cashPile[koEngine.getPlayerUCID(playerName)] or 0
+	return MissionData.properties.cashPile[KI.MP.GetPlayerUCID(playerName)] or 0
 end
 
 function koScoreBoard.addCashToPlayer(playerName, cash, reason)
-	koEngine.debugText("koScoreBoard.addCashToPlayer("..playerName..", "..cash..")")
+	env.info("koScoreBoard.addCashToPlayer("..playerName..", "..cash..")")
 	
-	local playerUCID = koEngine.getPlayerUCID(playerName)
+	local playerUCID = KI.MP.GetPlayerUCID(playerName)
 	MissionData.properties.cashPile[playerUCID] = MissionData.properties.cashPile[playerUCID] or 0
 	MissionData.properties.cashPile[playerUCID] = MissionData.properties.cashPile[playerUCID] + cash
-	koEngine.debugText("added "..cash.." cash to Player "..playerName)
+	env.info("added "..cash.." cash to Player "..playerName)
 	
 	-- if a reason is supplied issue a message to the player who got cash
 	if reason then
@@ -564,30 +564,30 @@ function koScoreBoard.addCashToPlayer(playerName, cash, reason)
 		msg = msg.."_______________________________________________________________________________________________________\n"
 		
 		local groupID = false
-		for gID, playerTable in pairs(koEngine.PlayerUnitList) do
+		for gID, playerTable in pairs(KI.MP.PlayerUnitList) do
 			if playerTable.playerName == playerName then
 				groupID = gID
 			end
 		end
 		
-		if groupID then	koEngine.outTextForGroup(groupID, msg, 15) end
+		if groupID then	trigger.action.outTextForGroup(groupID, msg, 15) end
 	end 
 end
 
 -- returns the amount of cash left, nil if not enough cash are available
 function koScoreBoard.deductCashFromPlayer(playerName, cash)
-	koEngine.debugText("koScoreBoard.deductCashFromPlayer("..playerName..", "..cash..")")
+	env.info("koScoreBoard.deductCashFromPlayer("..playerName..", "..cash..")")
 	
-	local playerUCID = koEngine.getPlayerUCID(playerName)
+	local playerUCID = KI.MP.GetPlayerUCID(playerName)
 	
 	MissionData.properties.cashPile[playerUCID] = MissionData.properties.cashPile[playerUCID] or 0
 	
 	if MissionData.properties.cashPile[playerUCID] > cash then
 		MissionData.properties.cashPile[playerUCID] = MissionData.properties.cashPile[playerUCID] - cash
-		koEngine.debugText("deducted "..cash.." cash from Player "..playerName)
+		env.info("deducted "..cash.." cash from Player "..playerName)
 		return MissionData.properties.cashPile[playerUCID]
 	else
-		koEngine.debugText(playerName.." has only "..MissionData.properties.cashPile[playerUCID].." cash, not enough to deduct "..cash.." cash")
+		env.info(playerName.." has only "..MissionData.properties.cashPile[playerUCID].." cash, not enough to deduct "..cash.." cash")
 		return nil
 	end
 end
@@ -596,7 +596,7 @@ end
 
 
 function koScoreBoard.main()
-	--koEngine.debugText("koScoreBoard.main()")
+	--env.info("koScoreBoard.main()")
 	
 	-- cleanup recent hits, keep them for 2 minutes
 	for victimName, times in pairs(koScoreBoard.recentHits) do
@@ -618,23 +618,15 @@ function koScoreBoard.main()
 	
 	-- load kills from client side
 	local newScores = {}
-	--[[local DataLoader = loadfile(koScoreBoard.eventFileName)
-	if DataLoader then		-- File open?
-		--koEngine.debugText("Loading from '"..koScoreBoard.eventFileName.."' successful\n")
-		newScores = DataLoader()
-	else
-		koEngine.debugText("koScoreBoard.main(): dataloader failed")
-		--return -- dont return, would break the main loop/not reschedule the function. 
-	end--]]
 	
 	-- check if we receive killmessage from GameGui
 	local received = koEngine.UDPGameGuiReceiveSocket:receive()
 	
 	while received do
-		koEngine.debugText("koScoreBoard.main(): Message from GameGui received")
+		env.info("koScoreBoard.main(): Message from GameGui received")
 		local newScore = koEngine.JSON:decode(received)
 	    if newScore then
-	    	koEngine.debugText("received: "..koEngine.TableSerialization(newScore))
+	    	env.info("received: "..KI.Toolbox.SerializeTable(newScore))
 	    	table.insert(newScores,newScore)
 		end
 	
@@ -643,11 +635,11 @@ function koScoreBoard.main()
 	
 	-- if there's new kill score.
 	if newScores and #newScores > 0 then
-		koEngine.debugText("found "..#newScores.." new scores")
+		env.info("found "..#newScores.." new scores")
 		for i, score in pairs(newScores) do
 			if (score.achievment == "returned_to_specators" or score.achievment == "connected" or score.achievment == "disconnected")
 				and score.playerName and score.playerName ~= "" then
-				koEngine.debugText(i..": "..score.playerName.." was "..score.achievment.."!")
+				env.info(i..": "..score.playerName.." was "..score.achievment.."!")
 
 				local newScore = {
 					achievment = score.achievment,
@@ -662,7 +654,7 @@ function koScoreBoard.main()
 				koScoreBoard.closeSortie(score.playerName, score.achievment)
 				
 			elseif score.achievment == "kill" then
-				koEngine.debugText(i..": "..score.killerName.." has "..score.achievment.."ed "..score.victimName)
+				env.info(i..": "..score.killerName.." has "..score.achievment.."ed "..score.victimName)
 				
 				local newScore = {
 					achievment = score.achievment,
@@ -682,22 +674,21 @@ function koScoreBoard.main()
 				local killerName = score.killerName
 				
 				if score.killerName ~= "AI" then
-					koEngine.debugText("Not AI: looking for hit that lead to the kill")
+					env.info("Not AI: looking for hit that lead to the kill")
 					-- now look for the last hit on the target to get all the additional info the killmessage on the serverside does not provid
 					if koScoreBoard.recentHits[score.victimName] then
 						local shortestDelay = math.huge
 						local shortestDelayHit = false
 						
 						for time, hit in pairs(koScoreBoard.recentHits[score.victimName]) do	-- go through the recent hits table whre we store every hit by victimName
-							--koEngine.debugText("checking hit for victim: "..koEngine.TableSerialization(hit))
-							koEngine.debugText("checking hit.targetName ("..hit.targetName..") for score.victimName("..score.victimName..")")
+							env.info("checking hit.targetName ("..hit.targetName..") for score.victimName("..score.victimName..")")
 							if hit.targetName == score.victimName then						-- only look for those who share the same victim
-								koEngine.debugText("we found a hit with matching target and victimnames!")
+								env.info("we found a hit with matching target and victimnames!")
 								
 								local delay = (score.modelTime - hit.timer)
-								koEngine.debugText("delay = "..delay)
+								env.info("delay = "..delay)
 								if delay < shortestDelay then	-- not the newest hit
-									koEngine.debugText("this was the shortest delay so far")
+									env.info("this was the shortest delay so far")
 									shortestDelay = delay
 									shortestDelayHit = hit
 								end
@@ -710,14 +701,14 @@ function koScoreBoard.main()
 							newScore.targetCategory = shortestDelayHit.targetCategory
 							newScore.targetUnitName = shortestDelayHit.targetUnitName
 							if newScore.weapon == '' then
-								koEngine.debugText("added missing weapon to kill! "..shortestDelayHit.weapon)
+								env.info("added missing weapon to kill! "..shortestDelayHit.weapon)
 								--TODO 
 								newScore.weapon = shortestDelayHit.weapon
 							end
 							
 							-- sanitise MATRA against S530D and Magic II
 							if newScore.weapon == "MATRA" then
-								koEngine.debugText("detected a MATRA missile, checking guidance: "..shortestDelayHit.weaponGuidance)
+								env.info("detected a MATRA missile, checking guidance: "..shortestDelayHit.weaponGuidance)
 								if shortestDelayHit.weaponGuidance == 2 then -- if IR
 									newScore.weapon = "Matra Magic II"
 								else
@@ -729,15 +720,13 @@ function koScoreBoard.main()
 							newScore.weaponMissileCategory = shortestDelayHit.weaponMissileCategory
 							newScore.weaponGuidance = shortestDelayHit.weaponGuidance					
 							
-							koEngine.debugText("Found additional details for kill!")
+							env.info("Found additional details for kill!")
 						else
-							koEngine.debugText("did not find additional details for the kill")
+							env.info("did not find additional details for the kill")
 						end
 					else
-						koEngine.debugText("did not find a hit for the victim")
+						env.info("did not find a hit for the victim")
 					end
-					
-					--koEngine.debugText("Updated Score for Player = "..koEngine.TableSerialization(newScore))
 				end
 				
 				
@@ -745,29 +734,29 @@ function koScoreBoard.main()
 				---------------------------------------------
 				-- check if it was a player-deployed-SAM kill
 				if score.killerName == "AI" and koScoreBoard.recentHits[score.victimName] then
-					koEngine.debugText("killed by AI, checking recent hits the victim has taken")
+					env.info("killed by AI, checking recent hits the victim has taken")
 					-- we need to check if it was a player deployed SAM
 					local shortestDelay = math.huge
 					local shortestDelaySAM = false
 					local shortestDelaySAMdelay = math.huge
 					local shortestDelayHit = false
 					
-					koEngine.debugText("recent hits: "..koEngine.TableSerialization(koScoreBoard.recentHits))
+					env.info("recent hits: "..KI.Toolbox.SerializeTable(koScoreBoard.recentHits))
 					
-					--koEngine.debugText("checking "..#koScoreBoard.recentHits[score.victimName].." hits")
+					--env.info("checking "..#koScoreBoard.recentHits[score.victimName].." hits")
 					for time, hit in pairs(koScoreBoard.recentHits[score.victimName]) do	-- go through the recent hits table whre we store every hit by victimName
 						
-						koEngine.debugText("checking hit for victim: hit.targetName = "..hit.targetName..", score.victimName = "..score.victimName)
+						env.info("checking hit for victim: hit.targetName = "..hit.targetName..", score.victimName = "..score.victimName)
 						if hit.targetName == score.victimName then	-- only look for those who share the same victim
-							koEngine.debugText("we found a hit with matching target and victimnames!")
+							env.info("we found a hit with matching target and victimnames!")
 							
 							local delay = score.modelTime - hit.timer 
 							if delay<0 then delay = delay*(-1) end
 							
-							koEngine.debugText("delay = "..delay)
+							env.info("delay = "..delay)
 							
 							if delay < shortestDelay then	-- the newest hit
-								koEngine.debugText("shortest delay so far, trying to find a matching player deployed unit")
+								env.info("shortest delay so far, trying to find a matching player deployed unit")
 								shortestDelay = delay
 								shortestDelayHit = hit
 								
@@ -776,7 +765,7 @@ function koScoreBoard.main()
 									for j, unit in pairs(sam.groupSpawnTable.units) do 			-- check if the sam matches 
 										if unit.name == hit.unitName then						-- yes it does
 											-- we found a possible sam! 
-											koEngine.debugText("we found a matching SAM! Player "..sam.playerName.."has placed the sam!")
+											env.info("we found a matching SAM! Player "..sam.playerName.."has placed the sam!")
 											shortestDelaySAM = sam
 											shortestDelaySAMdelay = delay -- ugly but necessary to check if the sam is valid
 										end 
@@ -788,7 +777,7 @@ function koScoreBoard.main()
 									for j, unit in pairs(convoy.units) do 			-- check if the sam matches 
 										if unit.name == hit.unitName and convoy.playerName then						-- yes it does
 											-- we found a possible sam! 
-											koEngine.debugText("we found a matching SAM in convoys! Player "..convoy.playerName.."has requested the convoy!")
+											env.info("we found a matching SAM in convoys! Player "..convoy.playerName.."has requested the convoy!")
 											shortestDelaySAM = convoy
 											shortestDelaySAMdelay = delay -- ugly but necessary to check if the sam is valid
 										end 
@@ -802,10 +791,10 @@ function koScoreBoard.main()
 										for objectiveName, objectiveTable in pairs(categoryTable) do
 											for groupName, groupTable in pairs (objectiveTable.groups) do
 												for i, unit in pairs(groupTable.units) do
-													--koEngine.debugText("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
+													--env.info("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
 													if unit.name == hit.unitName and groupTable.playerName then
 														-- we found a possible sam! 
-														koEngine.debugText("we found a matching SAM in Objectivedata! Player "..groupTable.playerName.."has placed the sam!")
+														env.info("we found a matching SAM in Objectivedata! Player "..groupTable.playerName.."has placed the sam!")
 														shortestDelaySAM = groupTable
 														shortestDelaySAMdelay = delay -- ugly but necessary to check if the sam is valid
 													end
@@ -820,7 +809,7 @@ function koScoreBoard.main()
 					
 					-- check if we found a player deployed sam!
 					if shortestDelayHit then
-						koEngine.debugText("found a hit belonging to an AI kill, filling up missing info")
+						env.info("found a hit belonging to an AI kill, filling up missing info")
 						newScore.targetCategory = shortestDelayHit.targetCategory
 						newScore.targetUnitName = shortestDelayHit.targetUnitName
 						newScore.weapon = shortestDelayHit.weapon
@@ -832,42 +821,42 @@ function koScoreBoard.main()
 					end 
 					 
 					if shortestDelaySAM and shortestDelaySAMdelay == shortestDelay then
-						koEngine.debugText("we found a player deployed sam!")
+						env.info("we found a player deployed sam!")
 						newScore.unitCategory = "DEPLOYED";
 						killerName = shortestDelaySAM.playerName
-						koEngine.outText("("..string.upper(newScore.side)..") Player '"..killerName.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with a '"..newScore.unitType.."' he deployed with a '"..shortestDelaySAM.playerType.."'", 25)
+						trigger.action.outText("("..string.upper(newScore.side)..") Player '"..killerName.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with a '"..newScore.unitType.."' he deployed with a '"..shortestDelaySAM.playerType.."'", 25)
 					else
-						koEngine.outText("("..string.upper(newScore.side)..") '"..killerName.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.unitType.."'", 25)
+						trigger.action.outText("("..string.upper(newScore.side)..") '"..killerName.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.unitType.."'", 25)
 					end
 				else
 					-- not AI Kill
 					if newScore.side == newScore.targetSide then
 						if newScore.targetName == newScore.killerName then
-							koEngine.outText("("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has killed himself with '"..newScore.weapon.."'", 25)
+							trigger.action.outText("("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has killed himself with '"..newScore.weapon.."'", 25)
 							newScore.achievment = "selfkill"
 						else
-							koEngine.outText("- TEAMKILL! -\n\n("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has teamkilled ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.weapon.."'", 25)
+							trigger.action.outText("- TEAMKILL! -\n\n("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has teamkilled ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.weapon.."'", 25)
 							newScore.achievment = "teamkill"
 						end
 					else
-						koEngine.outText("("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.weapon.."'", 25)
+						trigger.action.outText("("..string.upper(newScore.side)..") "..killerName.."' in '"..newScore.unitType.."' has killed ("..string.upper(newScore.targetSide)..") '"..newScore.targetName.."' in '"..newScore.targetType.."' with '"..newScore.weapon.."'", 25)
 					end
 					
 				end
 							
-				--koEngine.debugText("inserting kill score for "..killerName..", he killed "..newScore.targetName)
+				--env.info("inserting kill score for "..killerName..", he killed "..newScore.targetName)
 				koScoreBoard.insertScoreForPlayer(killerName, newScore)
 			end
 		end
 		
-		--[[koEngine.debugText("deleting file")
+		--[[env.info("deleting file")
 		local exportFile = assert(io.open(koScoreBoard.eventFileName, 'w'))
 		exportFile:write("")
 		exportFile:flush()
 		exportFile:close()
 		exportFile = nil--]]
 	else
-		--koEngine.debugText("no scores to check")	
+		--env.info("no scores to check")	
 	end
 	
 	koScoreBoard.lastMainLoop = timer.getTime()
@@ -886,17 +875,17 @@ end
 
 koScoreBoard.eventHandler = {}
 function koScoreBoard.eventHandler:onEvent(event)
-	--koEngine.debugText("koScoreBoard.eventHandler("..eventTable[event.id]..")"..tostring(event.id), 1)
+	--env.info("koScoreBoard.eventHandler("..eventTable[event.id]..")"..tostring(event.id), 1)
 	
 	if 	event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT or event.id == world.event.S_EVENT_BASE_CAPTURED then
 		return
 	end
 	
 	if event.initiator then
-		koEngine.debugText("koScoreBoard.eventHandler("..eventTable[event.id]..")"..tostring(event.id), 1)	
-		--koEngine.debugText(koEngine.TableSerialization(event))
+		env.info("koScoreBoard.eventHandler("..eventTable[event.id]..")"..tostring(event.id), 1)	
+		--env.info(KI.Toolbox.SerializeTable(event))
 		
-		koEngine.debugText("finding player Name")
+		env.info("finding player Name")
 		--create vars
 		local playerName
 		local initiatorCategory = Object.getCategory(event.initiator)
@@ -904,48 +893,44 @@ function koScoreBoard.eventHandler:onEvent(event)
 			playerName = event.initiator:getPlayerName() or "AI"
 		elseif initiatorCategory == Object.Category.STATIC then
 			playerName = "Static Object"
-			koEngine.debugText("initiator is Static Object")
+			env.info("initiator is Static Object")
 			return
 		elseif initiatorCategory == Object.Category.BASE then
 			playerName = "Airbase Object"
-			koEngine.debugText("initiator is Base Object")
+			env.info("initiator is Base Object")
 			return
 		else
 			playerName = "unknown object"
-			koEngine.debugText("initiator exception: category = "..tostring(initiatorCategory))
+			env.info("initiator exception: category = "..tostring(initiatorCategory))
 			return
 		end
 		
 		if playerName == '' then
-			koEngine.debugText("FATAL WARNING: playerName is empty String! Trying to find original player")
-			--koEngine.debugText("player unitName: "..event.initiator:getName())
-			--koEngine.debugText("player groupID: "..tostring(getGroupId(event.initiator)))
-			--koEngine.debugText("player zone: "..tostring(koEngine.isUnitInObjectiveZone(event.initiator)))
-			--koEngine.debugText("PlayerUnitList: "..koEngine.TableSerialization(koEngine.PlayerUnitList))
+			env.info("FATAL WARNING: playerName is empty String! Trying to find original player")
 			
 			-- try to find the player in PlayerUnitList
-			for groupID, player in pairs(koEngine.PlayerUnitList) do
+			for groupID, player in pairs(KI.MP.PlayerUnitList) do
 				if tonumber(groupID) == getGroupId(event.initiator) then
-					koEngine.debugText("found groupID in PlayerUnitList: playerName = '"..player.playerName.."'")
+					env.info("found groupID in PlayerUnitList: playerName = '"..player.playerName.."'")
 					playerName = player.playerName
 				elseif player.unit == event.iniator then
 					-- found the player
 					playerName = player.playerName
-					koEngine.debugText("found playername for empty-string Player in PlayerUnitList")
+					env.info("found playername for empty-string Player in PlayerUnitList")
 				end	
 			end
 		end
 		
-		koEngine.debugText("playerName = "..tostring(playerName))
+		env.info("playerName = "..tostring(playerName))
 		
-		local playerUCID = koEngine.getPlayerUCID(playerName)
+		local playerUCID = KI.MP.GetPlayerUCID(playerName)
 		local playerUnitName = event.initiator:getName() or "invalid"
 		local coalition = coalitionTable[event.initiator:getCoalition()]
 		
 		if event.id == world.event.S_EVENT_SHOOTING_END then
-			koEngine.debugText("S_EVENT_SHOOTING_END")
+			env.info("S_EVENT_SHOOTING_END")
 			
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))			
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))			
 		end
 		
 		--------------------------------------
@@ -962,9 +947,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 			}
 		--]]  
 		if event.id == world.event.S_EVENT_SHOOTING_START then
-			koEngine.debugText("S_EVENT_SHOOTING_START")
-			
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
+			env.info("S_EVENT_SHOOTING_START")
 					
 			local weapon = "Cannon"
 			if event.weapon then
@@ -1008,20 +991,20 @@ function koScoreBoard.eventHandler:onEvent(event)
 			}
 		--]]  
 		if event.id == world.event.S_EVENT_HIT then
-			koEngine.debugText("S_EVENT_HIT")
+			env.info("S_EVENT_HIT")
 			
-			--koEngine.debugText("weaponDesc = "..koEngine.TableSerialization(Weapon.getDesc(event.weapon)))
+			--env.info("weaponDesc = "..KI.Toolbox.SerializeTable(Weapon.getDesc(event.weapon)))
 		
 			
 			if not event.weapon then
-				koEngine.debugText("hit event without weapon is strange (BUG)")
-				--koEngine.debugText("no-weapon event: "..koEngine.TableSerialization(event))
+				env.info("hit event without weapon is strange (BUG)")
+				--env.info("no-weapon event: "..KI.Toolbox.SerializeTable(event))
 				--return
 			end
 			
 			if not event.target and not Weapon.getTarget(event.weapon) then
-				koEngine.debugText("hit event without target is strange (BUG)")
-				--koEngine.debugText("no-target event: "..koEngine.TableSerialization(event))
+				env.info("hit event without target is strange (BUG)")
+				--env.info("no-target event: "..KI.Toolbox.SerializeTable(event))
 				--return
 			end
 
@@ -1030,12 +1013,12 @@ function koScoreBoard.eventHandler:onEvent(event)
 			if event.weapon == event.initiator then
 				--	check if collision is valid
 				--  one collision message is enough! -- borrowed from Ciribobs CSAR huey double ejection - genious!
-				local _name = koEngine.getPlayerNameFix(event.initiator:getPlayerName() or "AI")
+				local _name = KI.MP.GetPlayerNameFix(event.initiator:getPlayerName() or "AI")
 				
 	            local _time = koScoreBoard.lastCollisions[_name]	
 	            
 				if _time ~= nil and timer.getTime() - _time < 5 then
-	                koEngine.log("Ignore! double collision")
+	                env.info("Ignore! double collision")
 	                koScoreBoard.lastCollisions[_name] = timer.getTime()
 	                return
 	            end	
@@ -1043,7 +1026,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 	            koScoreBoard.lastCollisions[_name] = timer.getTime()
 	            
 				--TODO 
-				koEngine.outText((event.initiator:getPlayerName() or "AI").." ("..event.initiator:getTypeName()") collided with "..(event.target:getPlayerName() or "AI ("..event.initiator:getTypeName()")"))
+				trigger.action.outText((event.initiator:getPlayerName() or "AI").." ("..event.initiator:getTypeName()") collided with "..(event.target:getPlayerName() or "AI ("..event.initiator:getTypeName()")"))
 				
 				-- choppers deserve a score!
 				local newScore = {
@@ -1065,19 +1048,19 @@ function koScoreBoard.eventHandler:onEvent(event)
 			--------------------------
 	        -- now handle the hit
 	        -- 
-	        --koEngine.debugText("weapon hit confirmed, event: "..koEngine.TableSerialization(event))
-	       -- koEngine.debugText("initiator: "..event.initiator:getName())
+	        --env.info("weapon hit confirmed, event: "..KI.Toolbox.SerializeTable(event))
+	       -- env.info("initiator: "..event.initiator:getName())
 	        
 	        local weapon = "unknown"
 	        if event.weapon then
-	        	koEngine.debugText("valid weapon supplied with hit-event.")
+	        	env.info("valid weapon supplied with hit-event.")
 				weapon = Weapon.getDesc(event.weapon)
 				weapon.category = weaponCategory[weapon.category]
 				weapon.missileCategory = weaponMissileCategory[weapon.weaponMissileCategory]
 				
 				-- sanitise MATRA against S530D and Magic II
 				if weapon.displayName == "MATRA" then
-					koEngine.debugText("detected a MATRA missile, checking guidance: "..weapon.guidance)
+					env.info("detected a MATRA missile, checking guidance: "..weapon.guidance)
 					if weapon.guidance == 2 then -- if IR
 						weapon.displayName = "Matra Magic II"
 					else
@@ -1086,16 +1069,16 @@ function koScoreBoard.eventHandler:onEvent(event)
 				end		
 			else
 				-- lets check if a recent shot matches
-				--koEngine.debugText("recentShots: "..koEngine.TableSerialization(koScoreBoard.recentShots))
+				--env.info("recentShots: "..KI.Toolbox.SerializeTable(koScoreBoard.recentShots))
 				if koScoreBoard.recentShots[playerUnitName] then
 					local shortestDelay = math.huge
 					local shortestDelayShot = false
 					for time, shot in pairs(koScoreBoard.recentShots[playerUnitName]) do 
-						--koEngine.debugText("checking shot: "..koEngine.TableSerialization(shot))
+						--env.info("checking shot: "..KI.Toolbox.SerializeTable(shot))
 						if shot.unitName == playerUnitName then
 							local delay = timer.getTime() - shot.timer
 						
-							--koEngine.debugText("delay = "..delay)
+							--env.info("delay = "..delay)
 							
 							if delay < shortestDelay then	-- the newest hit
 								shortestDelay = delay
@@ -1107,7 +1090,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 					
 					-- we found the missing weapon in the last shot fired by the iniator!
 					if shortestDelayShot then
-						--koEngine.debugText("found the missing weapon in the shot table")
+						--env.info("found the missing weapon in the shot table")
 						weapon = { 
 							displayName = shortestDelayShot.weapon,
 							category = shortestDelayShot.weaponCategory,
@@ -1115,14 +1098,14 @@ function koScoreBoard.eventHandler:onEvent(event)
 							guidance = shortestDelayShot.weaponGuidance,
 						}
 					else 
-						koEngine.debugText("Did not find the missing weapon in the shot table")
+						env.info("Did not find the missing weapon in the shot table")
 					end
 				else
-					koEngine.debugText("no recent shots for playerUnitName "..playerUnitName.."...")
+					env.info("no recent shots for playerUnitName "..playerUnitName.."...")
 				end
 			end
 			
-			--koEngine.debugText("checked weapon: "..koEngine.TableSerialization(weapon))
+			--env.info("checked weapon: "..KI.Toolbox.SerializeTable(weapon))
 			
 			
 			local target = event.target
@@ -1133,22 +1116,22 @@ function koScoreBoard.eventHandler:onEvent(event)
 			local targetUnitName = "unkown"
 			
 			if target and Object.getCategory(target) == Object.Category.UNIT then 
-				--koEngine.debugText("Object.getCategory(target) == Object.Category.UNIT")
+				--env.info("Object.getCategory(target) == Object.Category.UNIT")
 				targetName = target:getPlayerName() or "AI" 
 				targetUnitName = target:getName()
 				targetType = target:getTypeName()
 				targetSide = coalitionTable[target:getCoalition()]
 				targetCategory = unitCategoryTable[target:getDesc().category];
 			elseif target and Object.getCategory(target) == Object.Category.STATIC then
-				--koEngine.debugText("Object.getCategory(target) == Object.Category.STATIC")
+				--env.info("Object.getCategory(target) == Object.Category.STATIC")
 				targetName = "Static Object"
 				targetUnitName = target:getName()
 				targetType = target:getTypeName()
 				targetCategory = "STATIC"
 			--elseif target then
-				--koEngine.debugText("exception: category = "..tostring(Object.getCategory(target)))
+				--env.info("exception: category = "..tostring(Object.getCategory(target)))
 			--else
-				--koEngine.debugText("target = nil")
+				--env.info("target = nil")
 			end	
 			
 			if targetName == "no target" and targetSide == "unknown" then
@@ -1162,9 +1145,9 @@ function koScoreBoard.eventHandler:onEvent(event)
 					for j, unit in pairs(sam.groupSpawnTable.units) do 			-- check if the sam matches 
 						if unit.name == event.initiator:getName() then						-- yes it does
 							-- we found a possible sam! 
-							--koEngine.debugText("we found a matching player deployed SAM for the Hit! "..sam.playerName.." has placed the sam!")
+							--env.info("we found a matching player deployed SAM for the Hit! "..sam.playerName.." has placed the sam!")
 							playerName = sam.playerName
-							playerUCID = koEngine.getPlayerUCID(playerName)
+							playerUCID = KI.MP.GetPlayerUCID(playerName)
 						end 
 					end					
 				end
@@ -1174,9 +1157,9 @@ function koScoreBoard.eventHandler:onEvent(event)
 					for j, unit in pairs(convoy.units) do 			-- check if the sam matches 
 						if unit.name == event.initiator:getName() and convoy.playerName then						-- yes it does
 							-- we found a possible sam! 
-							--koEngine.debugText("we found a matching SAM! Player "..convoy.playerName.."has placed the sam!")
+							--env.info("we found a matching SAM! Player "..convoy.playerName.."has placed the sam!")
 							playerName = convoy.playerName
-							playerUCID = koEngine.getPlayerUCID(playerName)
+							playerUCID = KI.MP.GetPlayerUCID(playerName)
 						end 
 					end
 				end
@@ -1188,12 +1171,12 @@ function koScoreBoard.eventHandler:onEvent(event)
 						for objectiveName, objectiveTable in pairs(categoryTable) do
 							for groupName, groupTable in pairs (objectiveTable.groups) do
 								for i, unit in pairs(groupTable.units) do
-									--koEngine.debugText("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
+									--env.info("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
 									if unit.name == event.initiator:getName() and groupTable.playerName then
 										-- we found a possible sam! 
-										--koEngine.debugText("we found a matching player deployed SAM for the Hit in Objectivedata! "..groupTable.playerName.." has placed the sam!")
+										--env.info("we found a matching player deployed SAM for the Hit in Objectivedata! "..groupTable.playerName.." has placed the sam!")
 										playerName = groupTable.playerName
-										playerUCID = koEngine.getPlayerUCID(playerName)
+										playerUCID = KI.MP.GetPlayerUCID(playerName)
 									end
 								end
 							end
@@ -1271,7 +1254,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 					targetUnitName = playerUnitName,
 					targetCategory = unitCategoryTable[event.initiator:getDesc().category],
 					playerName = targetName,
-					playerUCID = koEngine.getPlayerUCID(targetName),
+					playerUCID = KI.MP.GetPlayerUCID(targetName),
 					side = targetSide,
 				}
 				
@@ -1282,11 +1265,11 @@ function koScoreBoard.eventHandler:onEvent(event)
             local time = koScoreBoard.lastHits[playerName]
             
 			if time ~= nil and timer.getTime() - time < 1 then
-                koEngine.log("Ignore! double hits")
+                env.info("Ignore! double hits")
                 koScoreBoard.lastHits[playerName] = timer.getTime()
                 return
             else	
-				koEngine.debugText("("..string.upper(coalition)..") "..playerName.." has hit ("..string.upper(targetSide)..") "..targetName.." with "..(weapon.displayName or "'unknown weapon'").." (initiator = "..event.initiator:getName()..")")	
+				env.info("("..string.upper(coalition)..") "..playerName.." has hit ("..string.upper(targetSide)..") "..targetName.." with "..(weapon.displayName or "'unknown weapon'").." (initiator = "..event.initiator:getName()..")")	
 			end
 			
 			koScoreBoard.lastHits[playerName] = timer.getTime()
@@ -1323,26 +1306,26 @@ function koScoreBoard.eventHandler:onEvent(event)
 			}
 		--]]  
 		if event.id == world.event.S_EVENT_SHOT then
-			koEngine.debugText("Scoreboard handling S_EVENT_SHOT")
+			env.info("Scoreboard handling S_EVENT_SHOT")
 			
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
-			--koEngine.debugText("weaponDesc = "..koEngine.TableSerialization(Weapon.getDesc(event.weapon)))
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))
+			--env.info("weaponDesc = "..KI.Toolbox.SerializeTable(Weapon.getDesc(event.weapon)))
 			
 			if not event.weapon then
-				--koEngine.debugText("shot with no weapon supplied!"..koEngine.TableSerialization(event))
-				koEngine.debugText("shot with no weapon supplied!")
+				--env.info("shot with no weapon supplied!"..KI.Toolbox.SerializeTable(event))
+				env.info("shot with no weapon supplied!")
 				return
 			end
 			
 			
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))
 			
 			local weapon = Weapon.getDesc(event.weapon)
-			--koEngine.debugText("weapon = "..koEngine.TableSerialization(weapon))
+			--env.info("weapon = "..KI.Toolbox.SerializeTable(weapon))
 			
 			-- sanitise MATRA against S530D and Magic II
 			if weapon.displayName == "MATRA" then
-				koEngine.debugText("detected a MATRA missile, checking guidance: "..weapon.guidance)
+				env.info("detected a MATRA missile, checking guidance: "..weapon.guidance)
 				if weapon.guidance == 2 then -- if IR
 					weapon.displayName = "Matra Magic II"
 				else
@@ -1352,7 +1335,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 			
 			local target = Weapon.getTarget(event.weapon)
 			
-			--koEngine.debugText("target = "..koEngine.TableSerialization(target))
+			--env.info("target = "..KI.Toolbox.SerializeTable(target))
 			
 			local targetName = "no target"
 			local targetType = "no target"
@@ -1360,23 +1343,23 @@ function koScoreBoard.eventHandler:onEvent(event)
 			local targetSide = "unknown"
 			local targetUnitName = "unkown"
 			if target and Object.getCategory(target) == Object.Category.UNIT then 
-				--koEngine.debugText("Object.getCategory(target) == Object.Category.UNIT")
+				--env.info("Object.getCategory(target) == Object.Category.UNIT")
 				targetName = target:getPlayerName() or "AI" 
 				targetUnitName = target:getName()
 				targetType = target:getTypeName()
 				targetSide = coalitionTable[target:getCoalition()]
 				targetCategory = unitCategoryTable[target:getDesc().category];
 			elseif target and Object.getCategory(target) == Object.Category.STATIC then
-				--koEngine.debugText("Object.getCategory(target) == Object.Category.STATIC")
+				--env.info("Object.getCategory(target) == Object.Category.STATIC")
 				targetName = "Static Object"
 				targetUnitName = target:getName()
 				targetType = target:getTypeName()
 				targetSide = coalitionTable[target:getCoalition()]
 				targetCategory = "STATIC"
 			--elseif target then
-			--	koEngine.debugText("exception: category = "..Object.getCategory(target))
+			--	env.info("exception: category = "..Object.getCategory(target))
 			--else
-			--	koEngine.debugText("target = nil")
+			--	env.info("target = nil")
 			end	
 			
 			if playerName == "AI" then
@@ -1386,9 +1369,9 @@ function koScoreBoard.eventHandler:onEvent(event)
 					for j, unit in pairs(sam.groupSpawnTable.units) do 			-- check if the sam matches 
 						if unit.name == event.initiator:getName() then						-- yes it does
 							-- we found a possible sam! 
-							--koEngine.debugText("we found a matching player deployed SAM for the shot! "..sam.playerName.." has placed the sam!")
+							--env.info("we found a matching player deployed SAM for the shot! "..sam.playerName.." has placed the sam!")
 							playerName = sam.playerName
-							playerUCID = koEngine.getPlayerUCID(playerName)
+							playerUCID = KI.MP.GetPlayerUCID(playerName)
 						end 
 					end					
 				end
@@ -1398,9 +1381,9 @@ function koScoreBoard.eventHandler:onEvent(event)
 					for j, unit in pairs(convoy.units) do 			-- check if the sam matches 
 						if unit.name == event.initiator:getName() and convoy.playerName then						-- yes it does
 							-- we found a possible sam! 
-							--koEngine.debugText("we found a matching SAM! Player "..convoy.playerName.."has placed the sam!")
+							--env.info("we found a matching SAM! Player "..convoy.playerName.."has placed the sam!")
 							playerName = convoy.playerName
-							playerUCID = koEngine.getPlayerUCID(playerName)
+							playerUCID = KI.MP.GetPlayerUCID(playerName)
 						end 
 					end
 				end
@@ -1412,12 +1395,12 @@ function koScoreBoard.eventHandler:onEvent(event)
 						for objectiveName, objectiveTable in pairs(categoryTable) do
 							for groupName, groupTable in pairs (objectiveTable.groups) do
 								for i, unit in pairs(groupTable.units) do
-									--koEngine.debugText("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
+									--env.info("comparing unit.name '"..unit.name.."' with hit.unitName '"..hit.unitName.."'")
 									if unit.name == event.initiator:getName() and groupTable.playerName then
 										-- we found a possible sam! 
-										--koEngine.debugText("we found a matching player deployed SAM for the Hit in Objectivedata! "..groupTable.playerName.." has placed the sam!")
+										--env.info("we found a matching player deployed SAM for the Hit in Objectivedata! "..groupTable.playerName.." has placed the sam!")
 										playerName = groupTable.playerName
-										playerUCID = koEngine.getPlayerUCID(playerName)
+										playerUCID = KI.MP.GetPlayerUCID(playerName)
 									end
 								end
 							end
@@ -1426,7 +1409,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 				end
 			end
 			
-			koEngine.debugText(playerName.." has launched a "..weapon.displayName.." on "..targetName.." (initiator = "..event.initiator:getName()..")")
+			env.info(playerName.." has launched a "..weapon.displayName.." on "..targetName.." (initiator = "..event.initiator:getName()..")")
 			
 				
 			
@@ -1461,11 +1444,11 @@ function koScoreBoard.eventHandler:onEvent(event)
 		--------------------------------------
 		--	CRASH event
 		if event.id == world.event.S_EVENT_CRASH then
-			koEngine.debugText("S_EVENT_CRASH")
+			env.info("S_EVENT_CRASH")
 			
-			--koEngine.outText("crash time: "..event.time)
+			--trigger.action.outText("crash time: "..event.time)
 			
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))
 			
 			local newScore = {
 				achievment = "crashed",
@@ -1476,7 +1459,7 @@ function koScoreBoard.eventHandler:onEvent(event)
 				timestamp = event.time,
 				side = coalitionTable[event.initiator:getCoalition()],
 				playerName = playerName,
-				playerUCID = koEngine.getPlayerUCID(playerName),
+				playerUCID = KI.MP.GetPlayerUCID(playerName),
 			}
 			koScoreBoard.insertScoreForPlayer(playerName, newScore)
 			koScoreBoard.eventInfo(playerName.." crashed ...")
@@ -1488,8 +1471,8 @@ function koScoreBoard.eventHandler:onEvent(event)
 		--------------------------------------
 		--	EJECT event
 		if event.id == world.event.S_EVENT_EJECTION then
-			koEngine.debugText("S_EVENT_EJECTION")
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
+			env.info("S_EVENT_EJECTION")
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))
 			
 			local newScore = {
 				unitGroupID = getGroupId(event.initiator),
@@ -1509,11 +1492,11 @@ function koScoreBoard.eventHandler:onEvent(event)
 		--------------------------------------
 		--	PILOT_DEAD event 
 		if event.id == world.event.S_EVENT_PILOT_DEAD then
-			--koEngine.debugText("S_EVENT_PILOT_DEAD")
-			--koEngine.debugText("event = "..koEngine.TableSerialization(event))
-			--koEngine.debugText("unitName = "..event.initiator:getName())
-			--koEngine.debugText(":gePlayerName() = "..event.initiator:getPlayerName())
-			--koEngine.debugText(":geTypeName() = "..event.initiator:getTypeName())
+			--env.info("S_EVENT_PILOT_DEAD")
+			--env.info("event = "..KI.Toolbox.SerializeTable(event))
+			--env.info("unitName = "..event.initiator:getName())
+			--env.info(":gePlayerName() = "..event.initiator:getPlayerName())
+			--env.info(":geTypeName() = "..event.initiator:getTypeName())
 			
 			-- normal died event
 			local newScore = {
@@ -1534,12 +1517,12 @@ function koScoreBoard.eventHandler:onEvent(event)
 	-- DEBUGGING STUFF
 	else
 		if not event.initiator then
-			koEngine.debugText("no iniator event: "..koEngine.TableSerialization(event))
+			env.info("no iniator event: "..KI.Toolbox.SerializeTable(event))
 			if event.weapon then
-				koEngine.debugText("weapon = "..event.weapon:getName())
+				env.info("weapon = "..event.weapon:getName())
 			end
 			if event.target then
-				koEngine.debugText("target:getName = "..event.target:getName())
+				env.info("target:getName = "..event.target:getName())
 			end
 		end
 	end
@@ -1548,13 +1531,12 @@ function koScoreBoard.eventHandler:onEvent(event)
 	--	DEAD event
 	--	Initiator : The unit that was destroyed.
 	if event.id == world.event.S_EVENT_DEAD then
-		--koEngine.debugText("died = " .. koEngine.TableSerialization(event))
 	end
 end
 
 
 function koScoreBoard.eventInfo(text)
-	koEngine.log("koScoreBoard.eventInfo: "..text)
+	env.info("koScoreBoard.eventInfo: "..text)
 	trigger.action.outText(text, koScoreBoard.eventInfoDisplayTime, false)
 end
 

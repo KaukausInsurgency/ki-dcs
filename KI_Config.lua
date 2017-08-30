@@ -59,6 +59,15 @@ KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Enti
 -- path to saved scores file
 KI.Config.PathScores = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Scores.lua"
 
+-- taken from KO - need to understand what these do
+KI.Config.PathScoreID = lfs.writedir() .. KI.Config.ParentFolder .. "KI_ScoreID.lua"
+KI.Config.PathScores2 = lfs.writedir() .. KI.Config.ParentFolder .. "\\scores\\KI_Scores_"
+KI.Config.PathSorties = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Sorties.lua"
+KI.Config.PathSortieID = lfs.writedir() .. KI.Config.ParentFolder .. "KI_SortieID.lua"
+KI.Config.PlayerListFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayersOnline.lua"
+KI.Config.PlayerDataFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayerData.lua"
+KI.Config.SessionID = 1
+
 -- IP Address of Database Server (mySQL)
 KI.Config.DBServerIP = "192.168.1.254"
 
