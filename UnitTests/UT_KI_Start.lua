@@ -1,3 +1,8 @@
+--math.random(5)
+--math.randomseed(5)
+
+--assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\luaunit\\luaunit.lua"))()
+
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\Spatial.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Toolbox.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\GC.lua"))()
