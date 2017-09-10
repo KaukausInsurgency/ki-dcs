@@ -22,9 +22,11 @@ function UT.WriteToFile()
     _filehandle:flush()
     _filehandle:close()
     _filehandle = nil
+    UT.FileData = {}
     return true
   else
     env.info("UT.WriteToFile ERROR: " .. _err)
+    UT.FileData = {}
     return false
   end
 end

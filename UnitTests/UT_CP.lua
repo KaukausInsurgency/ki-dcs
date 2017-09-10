@@ -11,11 +11,12 @@ UT.TestCase("CP",
       end
       
       -- testing constructor
-      UT.TestCompare(function() return CP:New("Test CP", "TestCPZone") ~= nil end)
-      local _cp = CP:New("Test CP", "TestCPZone")
+      UT.TestCompare(function() return CP:New("Test CP", "TestCPZone", "TestCPZone") ~= nil end)
+      local _cp = CP:New("Test CP", "TestCPZone", "TestCPZone")
       UT.TestCompare(function() return _cp.Zone ~= nil end)
       UT.TestCompare(function() return _cp.Name == "Test CP" end)
       UT.TestCompare(function() return _cp.Zone.ZoneName == "TestCPZone" end)
+      UT.TestCompare(function() return _cp.SpawnZone.ZoneName == "TestCPZone" end)
       UT.TestCompare(function() return _cp.Defenses ~= nil end)
       UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
       

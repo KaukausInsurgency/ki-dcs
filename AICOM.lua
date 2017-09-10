@@ -5,6 +5,8 @@ AICOM.Config = {}
 AICOM.Config.TurnRate = 600     -- the rate at which the AI Commander can make moves/actions
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
 AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
+AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
+AICOM.Config.Random = math.random
 
 AICOM.Config.Forces =
 {
@@ -70,7 +72,7 @@ function AICOM.Init()
     elseif (b.AAEffectiveness > a.AAEffectiveness) then
       return false
     else
-      return b.Cost < a.Cost
+      return b.Cost > a.Cost
     end
   end
   
@@ -80,7 +82,7 @@ function AICOM.Init()
     elseif (b.GNDEffectiveness > a.GNDEffectiveness) then
       return false
     else
-      return b.Cost < a.Cost
+      return b.Cost > a.Cost
     end
   end
   
@@ -118,6 +120,7 @@ function AICOM.Analyze(CapturePoints)
       _cost = _cost + 7
       _type = AICOM.Enum.Actions.Reinforce
     else
+      -- contested
       _cost = _cost + 3
       _type = AICOM.Enum.Actions.Reinforce
     end
@@ -139,21 +142,21 @@ end
 -- analyzes what the AI is willing to pay for units
 -- split into two categories - AA units, and Ground units
 function AICOM.AnalyzePay(action)
-  env.info("AICOM.AnalyzePay called")
+  env.info("AICOM.AnalyzePay called (CurrentMoney: " .. tostring(AICOM.CurrentMoney) .. ", MovesRemaining: " .. tostring(AICOM.MovesRemaining) .. ")")
   local _result = { AA = 0, GND = 0 }
   
   -- the amount the AI is willing to pay for AA units - will never pay for anything higher than this
   -- when attacking the AI should get cheaper AA, and buy expensive AA when reinforcing a position
   -- when ambushing the AI ?? need to decide what kind of behaviour needed
   if action == AICOM.Enum.Actions.Attack then
-    _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(10)
-    _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(20)
+    _result.AA = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) - AICOM.Config.Random(10)
+    _result.GND = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) + AICOM.Config.Random(20)
   elseif action == AICOM.Enum.Actions.Reinforce then
-    _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(20)
-    _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(5)
+    _result.AA = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) + AICOM.Config.Random(20)
+    _result.GND = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) - AICOM.Config.Random(5)
   else
-    _result.AA = (AICOM.CurrentMoney / AICOM.MovesRemaining) - math.random(20)
-    _result.GND = (AICOM.CurrentMoney / AICOM.MovesRemaining) + math.random(5)
+    _result.AA = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) - AICOM.Config.Random(20)
+    _result.GND = ((AICOM.CurrentMoney / AICOM.MovesRemaining) / 2) + AICOM.Config.Random(5)
   end
   
   env.info("AICOM.AnalyzePay - dumping results")
@@ -205,7 +208,7 @@ end
 --
 
 
--- similar to TryBuyAA, buy some ground units based on budget
+-- similar to TryBuyAA, but instead buy some ground units based on budget
 function AICOM.TryBuyGND(budget)
   env.info("AICOM.TryBuyGND called")
   env.info("AICOM.TryBuyGND - Budget: " .. tostring(budget))
@@ -233,7 +236,7 @@ function AICOM.TryBuyGND(budget)
       else
         env.info("AICOM.TryBuyGND - buying 1 copy of GND unit " .. _gnd.Name)
         -- just buy one copy
-        table.insert(_cart, _aa)
+        table.insert(_cart, _gnd)
         budget = budget - _gnd.Cost
       end
     else
@@ -267,18 +270,17 @@ function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
     env.info("AICOM.Spawn - _grp : " .. _grp.Name)
     -- iterate over template groups and spawn them
     for t = 1, #_grp.Templates do
-      env.info("AICOM.Spawn - Iterating over grp.Templates")
       local _template = _grp.Templates[t]
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
                           :OnSpawnGroup(function( spawngrp, atkzone ) 
-                            env.info("AICOM.Spawn - OnSpawnGroup called")
-                            spawngrp:TaskRouteToZone(ZONE:New(atkzone), true, 40, "Off Road" )
+                            env.info("AICOM.Spawn - OnSpawnGroup called (AA)")
+                            spawngrp:TaskRouteToZone(atkzone, true, 40, "Off Road" )
                           end, CPObj.Zone)
       local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then
-        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
+        env.info("AICOM.Spawn - Successfully spawned AA group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       else
-        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
+        env.info("AICOM.Spawn - ERROR - Failed to spawn AA group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       end
     end
   end
@@ -293,18 +295,19 @@ function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
       local _template = _grp.Templates[t]
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
                           :OnSpawnGroup(function( spawngrp, atkzone ) 
-                            env.info("AICOM.Spawn - OnSpawnGroup called")
-                            spawngrp:TaskRouteToZone(ZONE:New(atkzone), true, 40, "Off Road" )
+                            env.info("AICOM.Spawn - OnSpawnGroup called (GND)")
+                            spawngrp:TaskRouteToZone(atkzone, true, 40, "Off Road" )
                           end, CPObj.Zone)
       local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then
-        env.info("AICOM.Spawn - Successfully spawned group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
+        env.info("AICOM.Spawn - Successfully spawned GND group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       else
-        env.info("AICOM.Spawn - ERROR - Failed to spawn group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
+        env.info("AICOM.Spawn - ERROR - Failed to spawn GND group " .. _template .. " in zone " .. CPObj.SpawnZone:GetName())
       end
     end
   end
   
+  env.info("AICOM.Spawn - Total Money Spent : " .. tostring(_moneySpent))
   return _moneySpent
 end
 --
@@ -362,18 +365,18 @@ function AICOM.DoTurn(args, time)
     
     elseif t == 2 then
     -- for the second turn, pick a random point from the 2nd to 5th cheapest actions in the list
-      local _index = math.random(2, 5)
+      local _index = AICOM.Config.Random(2, 5)
       _action = _cpAnalysis[_keys[_index]].Action
       _cost = _cpAnalysis[_keys[_index]].Cost
       _cp = _cpAnalysis[_keys[_index]].CapturePoint
     elseif t == 3 then
     -- for the third turn, create a 10% chance it will be an ambush action, otherwise pick an item from the bottom of the Capture List
-      if math.random(1, 100) < 11 then 
-        _cp = AICOM.Config.AmbushPoints[math.random(#AICOM.Config.AmbushPoints)]
+      if AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability then 
+        _cp = AICOM.Config.AmbushPoints[AICOM.Config.Random(#AICOM.Config.AmbushPoints)]
         _cost = 10
         _action = AICOM.Enum.Actions.Ambush
       else 
-        local _index = math.random(6, 10)
+        local _index = AICOM.Config.Random(6, 10)
         _action = _cpAnalysis[_keys[_index]].Action
         _cost = _cpAnalysis[_keys[_index]].Cost
         _cp = _cpAnalysis[_keys[_index]].CapturePoint
@@ -383,5 +386,5 @@ function AICOM.DoTurn(args, time)
     AICOM.PerformAction(_action, _cost, _cp)
   end
   
-  return time + AICOM.Config.TurnRate + math.random(AICOM.Config.TurnRate / 2)
+  return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
 end
