@@ -1,13 +1,12 @@
-SLC = 
-{ 
-  CargoInstances = {},  -- collection of tuples CargoInstances[1].Object, CargoInstances[1].Component
-  ZoneInstances = {},   -- collection of ZONE
-  TransportInstances = {},  -- collection of { TransportUnit, GroupTemplate }
-  InfantryInstances = {} -- collection of { GROUP, SpawnTemplate }
-}
+if not SLC then
+  SLC = {}
+end
 
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\SLC_Config.lua"))()
-
+SLC.CargoInstances = {}      -- collection of tuples CargoInstances[1].Object, CargoInstances[1].Component
+SLC.ZoneInstances = {}       -- collection of ZONE
+SLC.TransportInstances = {}  -- collection of { TransportUnit, GroupTemplate }
+SLC.InfantryInstances = {}   -- collection of { GROUP, SpawnTemplate }
+  
 --Internal Function
 function SLC.RelinkCargo(cargo)
   env.info("SLC.RelinkCargo called")
@@ -78,7 +77,8 @@ end
 
 
 
--- Returns list of cargo near the player/pilot in format { Object{DCSStaticObject}, Component{KeyName, ParentMenu, MenuName, SpawnName, Type, Weight, Assembler}, Distance }
+-- Returns list of cargo near the player/pilot in format 
+-- { Object{DCSStaticObject}, Component{KeyName, ParentMenu, MenuName, SpawnName, Type, Weight, Assembler}, Distance }
 function SLC.GetNearbyCargo(groupTransport)
   local crate_results = {}
   local gPos = groupTransport:GetVec3()
@@ -443,7 +443,7 @@ end
 --Accepts parameter MOOSE:GROUP Object
 function SLC.AddSLCRadioItems(g, pilotname)
   env.info("SLC.AddSLCRadioItems Group name - " .. g.GroupName)
-  local m_main = MENU_GROUP:New(g, "CSL Menu")
+  local m_main = MENU_GROUP:New(g, "SLC Menu")
   
   -- Depot Management Sub Menu
   local m_depot = MENU_GROUP:New(g, "Depot Management", m_main)

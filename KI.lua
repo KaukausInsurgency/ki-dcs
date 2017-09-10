@@ -5,6 +5,7 @@ end
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\Spatial.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Toolbox.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\GC.lua"))()
+assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\SLC_Config.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\SLC.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\DWM.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\DSMT.lua"))()
@@ -17,7 +18,7 @@ assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Scheduled.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Hooks.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM.lua"))()
-
+assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM_Config.lua"))()
 
 
 --================= START OF INIT ================
