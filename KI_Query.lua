@@ -6,7 +6,7 @@ end
 KI.Query = {}
 
 
--- returns nearest depot or nil with MOOSE group as paramter
+-- returns nearest depot or nil with MOOSE group as parameter
 function KI.Query.FindDepot_Group(transGroup)
   env.info("KI.FindDepot_Group called")
   for i = 1, #KI.Data.Depots do
