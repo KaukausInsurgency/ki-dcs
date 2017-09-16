@@ -82,7 +82,7 @@ KI.Config.CP =
 {
   { name = "Beslan City", zone = "BeslanCityZone", spawnzone = "BeslanCitySpawnZone" },
   { name = "Beslan Airport", zone = "BeslanAirportZone", spawnzone = "BeslanAirportSpawnZone" },
-  { name = "Kirovo City", zone = "KirovoCityZone", spawnzone = "KirovoCitySpawnZone" }
+  { name = "Kirovo City", zone = "KirovoCityZone", spawnzone = "KirovoCitySpawnZone" },
 }
 
 -- configures side missions and their properties

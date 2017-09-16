@@ -11,11 +11,11 @@ UT.TestCase("DWM",
       end
       
       -- testing constructor
-      UT.TestCompare(function() return DWM:New("Test Depot", "TestDepotZone") ~= nil end)
-      local _d = DWM:New("Test Depot", "TestDepotZone")
+      UT.TestCompare(function() return DWM:New("Test Depot", "Test Depot Zone") ~= nil end)
+      local _d = DWM:New("Test Depot", "Test Depot Zone")
       UT.TestCompare(function() return _d.Zone ~= nil end)
       UT.TestCompare(function() return _d.Name == "Test Depot" end)
-      UT.TestCompare(function() return _d.Zone.ZoneName == "TestDepotZone" end)
+      UT.TestCompare(function() return _d.Zone.ZoneName == "Test Depot Zone" end)
       UT.TestCompare(function() return _d.Resources ~= nil end)
       UT.TestCompare(function() return count_hash(_d.Resources) == 0 end)
       UT.TestCompare(function() return _d.Capacity == 100 end)
