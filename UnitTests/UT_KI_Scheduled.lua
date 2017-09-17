@@ -1,4 +1,4 @@
-UT.TestCase("KI_Scheduled", 
+UT.TestCase("KI_Scheduled", nil, nil,
 function()
       
   -- KI.Scheduled.UpdateCPStatus(arg, time)

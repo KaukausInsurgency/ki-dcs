@@ -1,6 +1,6 @@
 -- Unit Tests for Capture Point Class
 
-UT.TestCase("CP", 
+UT.TestCase("CP", nil, nil,
     function()
       local function count_hash(hash)
         local _c = 0

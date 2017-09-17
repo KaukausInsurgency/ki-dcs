@@ -17,8 +17,9 @@ assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Loader.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Scheduled.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Hooks.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM.lua"))()
 assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM_Config.lua"))()
+assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM.lua"))()
+
 
 
 --================= START OF INIT ================
@@ -35,12 +36,12 @@ AICOM.Init()
 
 
 -- taken from KO - score tracking init
-world.addEventHandler(koScoreBoard.eventHandler)
-timer.scheduleFunction(koScoreBoard.main, {}, timer.getTime() + koScoreBoard.loopFreq)
-for ucid, sortie in pairs(koScoreBoard.activeSorties) do
-	koEngine.debugText("found active Sortie for player "..sortie.playerName..", closing it")
-	koScoreBoard.closeSortie(sortie.playerName, "Mission Restart")
-end
+--world.addEventHandler(koScoreBoard.eventHandler)
+--timer.scheduleFunction(koScoreBoard.main, {}, timer.getTime() + koScoreBoard.loopFreq)
+--for ucid, sortie in pairs(koScoreBoard.activeSorties) do
+--	koEngine.debugText("found active Sortie for player "..sortie.playerName..", closing it")
+--	koScoreBoard.closeSortie(sortie.playerName, "Mission Restart")
+--end
 
 
 timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)

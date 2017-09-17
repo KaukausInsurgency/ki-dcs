@@ -1,4 +1,4 @@
-UT.TestCase("AICOM", 
+UT.TestCase("AICOM", nil, nil,
     function()
       
       --========================================= START TEST DATA =====================================================

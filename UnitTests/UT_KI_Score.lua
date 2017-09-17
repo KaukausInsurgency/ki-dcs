@@ -1,4 +1,4 @@
-UT.TestCase("KI_Score", 
+UT.TestCase("KI_Score", nil, nil,
 function()
       
       

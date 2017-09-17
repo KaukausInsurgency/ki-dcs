@@ -1,4 +1,4 @@
-UT.TestCase("KI.Toolbox", 
+UT.TestCase("KI.Toolbox", nil, nil,
   function()
     local _testTable =
     {

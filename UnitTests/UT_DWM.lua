@@ -1,6 +1,6 @@
 -- Unit Tests for Depot Warehouse Management class
 
-UT.TestCase("DWM", 
+UT.TestCase("DWM", nil, nil,
     function()
       local function count_hash(hash)
         local _c = 0

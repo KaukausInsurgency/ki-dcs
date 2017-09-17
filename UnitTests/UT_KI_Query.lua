@@ -1,45 +1,45 @@
-UT.Setup = function()
+  KI.Init.Depots()
+  KI.Init.CapturePoints()
+  KI.Init.SideMissions()
+
+UT.TestCase("KI_Query", 
+  -- Validate
+function()
+  UT.ValidateSetup(function() return GROUP:FindByName("TestGroupInsideDepotZone") ~= nil end)
+  UT.ValidateSetup(function() return GROUP:FindByName("TestGroupOutsideDepotZone") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("TestStaticInsideDepotZone") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("TestStaticOutsideDepotZone") ~= nil end)
+  UT.ValidateSetup(function() 
+      -- this depot must exist for this test case to run
+      for i = 1, #KI.Data.Depots do
+        if KI.Data.Depots[i].Name == "TestDepotKIQuery" then
+          return true
+        end
+      end
+      return false
+    end)
+  UT.ValidateSetup(function() 
+      -- this capture point must exist for this test case to run
+      for i = 1, #KI.Data.CapturePoints do
+        if KI.Data.CapturePoints[i].Name == "TestCPKIQuery" then
+          return true
+        end
+      end
+      return false
+    end)
+end,
+
+-- Setup
+function()
   UT.TestData.testGroupInZone = GROUP:FindByName("TestGroupInsideDepotZone")
   UT.TestData.testGroupOutZone = GROUP:FindByName("TestGroupOutsideDepotZone")
   UT.TestData.testStaticInZone = StaticObject.getByName("TestStaticInsideDepotZone")
   UT.TestData.testStaticOutZone = StaticObject.getByName("TestStaticOutsideDepotZone")
   UT.TestData.DepotName = "TestDepotKIQuery"
   UT.TestData.CPName = "TestCPKIQuery"
-  KI.Init.Depots()
-  KI.Init.CapturePoints()
-  KI.Init.SideMissions()
-end
+end,
 
-UT.TearDown = function()
-  KI.Data.CapturePoints = {}
-  KI.Data.SideMissions = {}
-  KI.Data.Depots = {}
-end
-
-UT.AddSetupValidation(function() return GROUP:FindByName("TestGroupInsideDepotZone") ~= nil end)
-UT.AddSetupValidation(function() return GROUP:FindByName("TestGroupOutsideDepotZone") ~= nil end)
-UT.AddSetupValidation(function() return StaticObject.getByName("TestStaticInsideDepotZone") ~= nil end)
-UT.AddSetupValidation(function() return StaticObject.getByName("TestStaticOutsideDepotZone") ~= nil end)
-UT.AddSetupValidation(function() 
-    -- this depot must exist for this test case to run
-    for i = 1, #KI.Data.Depots do
-      if KI.Data.Depots[i].Name == "TestDepotKIQuery" then
-        return true
-      end
-    end
-    return false
-  end)
-UT.AddSetupValidation(function() 
-    -- this capture point must exist for this test case to run
-    for i = 1, #KI.Data.CapturePoints do
-      if KI.Data.CapturePoints[i].Name == "TestCPKIQuery" then
-        return true
-      end
-    end
-    return false
-  end)
-
-UT.TestCase("KI_Query", 
+-- Test Case
 function()
   
   -- KI.Query.FindDepot_Group
@@ -86,4 +86,11 @@ function()
     UT.TestCompare(function() return KI.Query.FindCP_Static(UT.TestData.testStaticOutZone) == nil end)
   end
   
+end,
+
+-- TearDown
+function()
+  KI.Data.CapturePoints = {}
+  KI.Data.SideMissions = {}
+  KI.Data.Depots = {}
 end)

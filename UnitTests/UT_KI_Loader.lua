@@ -1,45 +1,140 @@
-UT.AddPreInitValidation(function() return GROUP.FindByName("TestGroupKILoader") ~= nil end)
-UT.AddPreInitValidation(function() return StaticObject.getByName("TestStaticKILoader") ~= nil end)
-UT.AddPreInitValidation(function() return StaticObject.getByName("TestCargoKILoader") ~= nil end)
-
-UT.Setup = function()
-  UT.TestData.groupObj = GROUP.FindByName("TestGroupKILoader")
-  UT.TestData.unitObj = UT.TestData.groupObj.Units[1]
-  UT.TestData.staticObj = StaticObject.getByName("TestStaticKILoader")
-  UT.TestData.cargoObj = StaticObject.getByName("TestCargoKILoader")
-end
-
 UT.TestCase("KI_Loader", 
 function()
+  UT.ValidateSetup(function() return GROUP:FindByName("TestGroupKILoader") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("TestStaticKILoader") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("TestCargoKILoader") ~= nil end)
+end,
+function()
+  -- NOTE - GenerateUnitsTable takes the file data object, not DCS Group or MOOSE GROUP
+  UT.TestData.groupExtract =
+  {
+    ['Coalition'] = 1,
+    ['Name'] = 'MANPADSSquadTemplate',
+    ['Category'] = 2,
+    ['ID'] = 36,
+    ['Country'] = 0,
+    ['Units'] = {
+      [1] = {
+        ['Type'] = 'SA-18 Igla-S manpad',
+        ['Name'] = 'Unit #040',
+        ['Position'] = {
+          ['y'] = {
+            ['y'] = 1,
+            ['x'] = 0,
+            ['z'] = 0,
+          },
+          ['x'] = {
+            ['y'] = -0,
+            ['x'] = 1,
+            ['z'] = 0,
+          },
+          ['p'] = {
+            ['y'] = 491.50051879883,
+            ['x'] = -138875.71875,
+            ['z'] = 829949.125,
+          },
+          ['z'] = {
+            ['y'] = 0,
+            ['x'] = -0,
+            ['z'] = 1,
+          },
+        },
+        ['ID'] = '74',
+        ['Heading'] = 0,
+      },
+      [2] = {
+        ['Type'] = 'SA-18 Igla-S manpad',
+        ['Name'] = 'Unit #041',
+        ['Position'] = {
+          ['y'] = {
+            ['y'] = 1,
+            ['x'] = 0,
+            ['z'] = 0,
+          },
+          ['x'] = {
+            ['y'] = -0,
+            ['x'] = 1,
+            ['z'] = 0,
+          },
+          ['p'] = {
+            ['y'] = 491.49337768555,
+            ['x'] = -138878.28125,
+            ['z'] = 829944,
+          },
+          ['z'] = {
+            ['y'] = 0,
+            ['x'] = -0,
+            ['z'] = 1,
+          },
+        },
+        ['ID'] = '75',
+        ['Heading'] = 0,
+      },
+      [3] = {
+        ['Type'] = 'SA-18 Igla-S comm',
+        ['Name'] = 'Unit #042',
+        ['Position'] = {
+          ['y'] = {
+            ['y'] = 1,
+            ['x'] = 0,
+            ['z'] = 0,
+          },
+          ['x'] = {
+            ['y'] = -0,
+            ['x'] = 1,
+            ['z'] = 0,
+          },
+          ['p'] = {
+            ['y'] = 491.52261352539,
+            ['x'] = -138878.28125,
+            ['z'] = 829953.6875,
+          },
+          ['z'] = {
+            ['y'] = 0,
+            ['x'] = -0,
+            ['z'] = 1,
+          },
+        },
+        ['ID'] = '76',
+        ['Heading'] = 0,
+      },
+    },
+    ['Size'] = 3
+  }
+  UT.TestData.unitExtract = UT.TestData.groupExtract.Units[1]
+  UT.TestData.staticObj = StaticObject.getByName("TestStaticKILoader")
+  UT.TestData.cargoObj = StaticObject.getByName("TestCargoKILoader")
+end,
+function()
     -- GenerateUnitsTable tests
-    local unitTable = KI.Loader.GenerateUnitsTable(UT.TestData.groupObj.Units)
+    local unitTable = KI.Loader.GenerateUnitsTable(UT.TestData.groupExtract.Units)
     
     -- Basic checks
     UT.TestCompare(function() return unitTable ~= nil end)
-    UT.TestCompare(function() return #unitTable == 1 end)
+    UT.TestCompare(function() return #unitTable == 3 end)
     
     -- Test the schema of the table
-    UT.TestCompare(function() return unitTable[1]["type"] == UT.TestData.unitObj.Type end)
-    UT.TestCompare(function() return unitTable[1]["unitId"] == UT.TestData.unitObj.ID end)
-    UT.TestCompare(function() return unitTable[1]["y"] == UT.TestData.unitObj.Position.p.z end)
-    UT.TestCompare(function() return unitTable[1]["x"] == UT.TestData.unitObj.Position.p.x end)
-    UT.TestCompare(function() return unitTable[1]["name"] == UT.TestData.unitObj.Name end)
-    UT.TestCompare(function() return unitTable[1]["heading"] == UT.TestData.unitObj.Heading end)
+    UT.TestCompare(function() return unitTable[1]["type"] == UT.TestData.unitExtract.Type end)
+    UT.TestCompare(function() return unitTable[1]["unitId"] == UT.TestData.unitExtract.ID end)
+    UT.TestCompare(function() return unitTable[1]["y"] == UT.TestData.unitExtract.Position.p.z end)
+    UT.TestCompare(function() return unitTable[1]["x"] == UT.TestData.unitExtract.Position.p.x end)
+    UT.TestCompare(function() return unitTable[1]["name"] == UT.TestData.unitExtract.Name end)
+    UT.TestCompare(function() return unitTable[1]["heading"] == UT.TestData.unitExtract.Heading end)
     
     
     -- GenerateGroupTable tests
-    local groupTable = KI.Loader.GenerateGroupTable(UT.TestData.groupObj)
+    local groupTable = KI.Loader.GenerateGroupTable(UT.TestData.groupExtract)
     
     -- Basic checks
     UT.TestCompare(function() return groupTable ~= nil end)
     
     -- Test the schema of the table
-    UT.TestCompare(function() return groupTable["groupId"] == UT.TestData.groupObj.ID end)
+    UT.TestCompare(function() return groupTable["groupId"] == UT.TestData.groupExtract.ID end)
     UT.TestCompare(function() return groupTable["hidden"] == true end)
-    UT.TestCompare(function() return groupTable["units"] == UT.TestData.unitTable end)
-    UT.TestCompare(function() return groupTable["y"] == UT.TestData.unitObj.Position.p.z end)
-    UT.TestCompare(function() return groupTable["x"] == UT.TestData.unitObj.Position.p.x end)
-    UT.TestCompare(function() return groupTable["name"] == UT.TestData.groupObj.Name end)
+    --UT.TestCompare(function() return groupTable["units"] == unitTable end)
+    UT.TestCompare(function() return groupTable["y"] == UT.TestData.unitExtract.Position.p.z end)
+    UT.TestCompare(function() return groupTable["x"] == UT.TestData.unitExtract.Position.p.x end)
+    UT.TestCompare(function() return groupTable["name"] == UT.TestData.groupExtract.Name end)
     
     
     -- KI.Loader.GenerateStaticTable tests

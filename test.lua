@@ -1,5 +1,5 @@
 --KI.Scheduled.UpdateCPStatus(nil, 10)
---KI.Loader.SaveData()
+KI.Loader.SaveData()
 
 local _t =
 { 

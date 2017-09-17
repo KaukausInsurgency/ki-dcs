@@ -423,7 +423,7 @@ function KI.Loader.LoadData()
     end
     
     if not KI.Loader.ImportCapturePoints(_dataTable) then
-      env.info("KI.Loader.LoadData ERROR - ImportStaticObjects returned false")
+      env.info("KI.Loader.LoadData ERROR - ImportCapturePoints returned false")
       return false
     end
     

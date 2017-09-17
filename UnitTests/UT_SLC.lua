@@ -1,4 +1,4 @@
-UT.TestCase("SLC", 
+UT.TestCase("SLC", nil, nil,
 function()
       
   -- SLC.RelinkCargo(cargo)

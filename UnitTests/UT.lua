@@ -7,10 +7,7 @@ UT.Fail = 0
 UT.FileData = {}
 UT.FilePath = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Tests\\UnitTestResults.txt"
 UT.TestData = {}
-UT.Setup = nil
-UT.TearDown = nil
-UT.SetupValidationCollection = {}
-UT.PreInitValidationCollection = {}
+UT.AbortTest = false
 UT.CaughtError = ""
 
 function UT.Log(data)
@@ -60,14 +57,6 @@ function UT.Reset()
   UT.SetupValidationCollection = {}
 end
 
-function UT.AddSetupValidation(fnc)
-  table.insert(UT.SetupValidationCollection, fnc)
-end
-
-function UT.AddPreInitValidation(fnc)
-  table.insert(UT.PreInitValidationCollection, fnc)
-end
-
 function UT.TestFunction(fnc, ...)
   local args = { ... } 
   local n = select("#", ...) 
@@ -96,6 +85,15 @@ function UT.TestCompare(cmp)
   end
 end
 
+function UT.ValidateSetup(cmp)
+  local _success, _result = xpcall(cmp, UT.ErrorHandler)
+  if not _success or not _result then
+    local m = "UT: Setup Validate Failed - ERROR - " .. UT.GetCaughtError() .. " - " .. debug.traceback("TestCompare TraceBack", 2)
+    UT.Log(m)
+    UT.AbortTest = true
+  end
+end
+
 function UT.TestCompareOnce(cmp)
   if cmp() then
     --env.info("UT: PASS - " .. debug.getinfo(2, "n").name .. " - Line: " .. debug.getinfo(2).currentline)
@@ -107,67 +105,40 @@ function UT.TestCompareOnce(cmp)
   end
 end
   
-function UT.TestCase(casename, fnc)
+function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   -- setup file path
   UT.FilePath = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Tests\\" .. casename .. ".txt"
   
   UT.Log("============================================================")
   UT.Log("UT - Starting Test for " .. casename)
   
-  
-  
-  -- If there is any preinit code that must be run - validate it first, then run it
-  
-  -- if there is any validation, check that the resources are valid before attempting preinit
-  if #UT.PreInitValidationCollection > 0 then
-    UT.Log("UT - Validating PreInit")
-  else
-    UT.Log("UT - No PreInit Validation - Ignoring")
-  end
-  
-  for i = 1, #UT.PreInitValidationCollection do
-    assert(UT.PreInitValidationCollection[i]() == true, "ASSERT FAILED")
-    local _validSuccess, _result = xpcall (UT.PreInitValidationCollection[i], UT.ErrorHandler)
-    if (not _validSuccess) or (not _result) then
-      UT.Log("UT - PreInit Validation FAILED - ERROR - " .. UT.GetCaughtError() 
-             .. " - " .. debug.traceback( "PreInitValidate TraceBack", 1))
-      UT.Log("UT - Test Case FAILED - PreInit is not valid!")
+  UT.AbortTest = false
+  -- if there is any validation, check that the resources are valid before attempting test case
+  if validFnc ~= nil then
+    UT.Log("UT - Validating Test Setup")
+    local _success, _r = xpcall (validFnc, UT.ErrorHandler)
+    if _success and (not UT.AbortTest) then
+      UT.Log("UT - Test Setup Validation Complete")
+    else
+      UT.Log("UT - Test Setup Validation FAILED - ERROR - " .. UT.GetCaughtError())
+      UT.Log("UT - Test Case FAILED - Setup is not valid!")
       UT.WriteToFile()
       UT.Reset()
       return false
     end
+  else
+    UT.Log("UT - No PreInit Validation - Ignoring")
   end
   
-  UT.Log("UT - PreInit Validation Complete")
-  
   -- check if a setup function exists and run it
-  if UT.Setup ~= nil then
+  if setupFnc ~= nil then
     UT.Log("UT - Running Setup for " .. casename)
-    local _setupSuccess, _r = xpcall (UT.Setup, UT.ErrorHandler)
+    local _setupSuccess, _r = xpcall (setupFnc, UT.ErrorHandler)
     if _setupSuccess then
       UT.Log("UT - Setup Complete")
-      -- if there is any validation, check that the resources are valid before attempting setup
-      if #UT.SetupValidationCollection > 0 then
-        UT.Log("UT - Validating Setup")
-      else
-        UT.Log("UT - No Setup Validation - Ignoring")
-      end
-      
-      for i = 1, #UT.SetupValidationCollection do
-        local _validSuccess, _result = xpcall (UT.SetupValidationCollection[i], UT.ErrorHandler)
-        if (not _validSuccess) or (not _result) then
-          UT.Log("UT - Setup Validation FAILED - ERROR - " .. UT.GetCaughtError() 
-                 .. " - " .. debug.traceback( "ValidateSetup TraceBack", 1))
-          UT.Log("UT - Test Case FAILED - Setup is not valid!")
-          UT.WriteToFile()
-          UT.Reset()
-          return false
-        end
-      end
-      UT.Log("UT - Setup Validation Completed")
     else
-      UT.Log("UT - Setup FAILED - ERROR - " .. UT.GetCaughtError() .. " - " .. debug.traceback("Setup TraceBack", 1))
-      UT.Log("UT - Test Case FAILED - Setup is not valid!")
+      UT.Log("UT - Setup FAILED - ERROR - " .. UT.GetCaughtError())
+      UT.Log("UT - Test Case FAILED - Setup failed to complete!")
       UT.WriteToFile()
       UT.Reset()
       return false
@@ -186,23 +157,22 @@ function UT.TestCase(casename, fnc)
     UT.Log("Fail: " .. tostring(UT.Fail))
     UT.Log("============================================================")
   else
-    UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. UT.GetCaughtError() .. " - " .. debug.traceback("TestCase TraceBack", 2))
+    UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. UT.GetCaughtError() .. " - TraceBack - " .. debug.traceback())
     UT.Log("UT - Test Case FAILED - Error in Test Case!")
   end
   
   -- tear down the test data
-  if UT.TearDown ~= nil then
+  if teardownFnc ~= nil then
     UT.Log("Tearing Down Test Case Data")
-    local _TearDownResult, _result = xpcall(UT.TearDown, UT.ErrorHandler)
+    local _TearDownResult, _result = xpcall(teardownFnc, UT.ErrorHandler)
     if (not _TearDownResult) then
-      UT.Log("Tear Down FAILED - ERROR - " .. UT.GetCaughtError() .. " - " .. debug.traceback("TearDown TraceBack", 2))
+      UT.Log("Tear Down FAILED - ERROR - " .. UT.GetCaughtError())
     end
   end
   
   -- reset all data
   UT.WriteToFile()
   UT.Reset()
- 
 end
   
   

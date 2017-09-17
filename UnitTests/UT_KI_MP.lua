@@ -1,4 +1,4 @@
-UT.TestCase("KI_MP", 
+UT.TestCase("KI_MP", nil, nil,
 function()
       
       
