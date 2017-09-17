@@ -77,7 +77,7 @@ end
 
 
 
--- Returns list of cargo near the player/pilot in format 
+-- Returns list of cargo near the player/pilot in format (Parameter groupTransport is MOOSE:GROUP)
 -- { Object{DCSStaticObject}, Component{KeyName, ParentMenu, MenuName, SpawnName, Type, Weight, Assembler}, Distance }
 function SLC.GetNearbyCargo(groupTransport)
   local crate_results = {}
@@ -333,6 +333,10 @@ end
 function SLC.UnloadTroops(g, p)
   env.info("SLC.UnloadTroops called")
   local troopInfo = SLC.TransportInstances[p]
+  if troopInfo == nil then
+    env.info("SLC.UnloadTroops - pilot " .. p .. " is not carrying any troops - aborting")
+    return nil
+  end
   --assert(troopInfo.Group == nil, "ASSERT FAILED: GROUP WAS NOT NIL IN UNLOADTROOPS(g, p) CALL")
   
   local pos = Spatial.PositionAt12Oclock(g, SLC.Config.ObjectSpawnDistance)
@@ -353,6 +357,10 @@ end
 
 function SLC.LoadTroops(g, p)
   env.info("SLC.LoadTroops Called")
+  if SLC.TransportInstances[p] then
+    env.info("SLC.LoadTroops - Pilot " .. p .. " already has troop cargo - exiting")
+    return false
+  end
   -- check if g is in zone
   -- get infantry groups inside zone
   local infantryGroups = SLC.GetNearbyInfantryGroups(g)

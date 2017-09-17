@@ -2,18 +2,43 @@
 
 
 UT = {}
-UT.Pass = 0
-UT.Fail = 0
-UT.FileData = {}
-UT.FilePath = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Tests\\UnitTestResults.txt"
-UT.TestData = {}
-UT.AbortTest = false
-UT.CaughtError = ""
+UT.Pass = 0           -- Tracks how many tests passed in this case
+UT.Fail = 0           -- Tracks how many tests failed in this case
+UT.FileData = {}      -- Stores log data to be written after test case completion
+UT.FilePath = ""      -- File path that is dynamically generated based on test case
+UT.TestData = {}      -- Stores User Test Data - used in Setup and Teardown functions
+UT.AbortTest = false  -- Whether the test must be aborted because of an error during validation
+UT.CaughtError = ""   -- Stores an error that was caught in the UT.ErrorHandler when using xpcall
+UT.FilePathAllFailures = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Tests\\UnitTestResults.txt"
+UT.FailedTestCases = {} -- stores an array of failed test cases to be written to a special file
 
 function UT.Log(data)
   table.insert(UT.FileData, data)
   env.info(data)
-  --UT.FileData = UT.FileData .. data .. "\n"
+end
+
+function UT.EndTest()
+  local msg = ""
+  if #UT.FailedTestCases > 0 then
+    for i = 1, #UT.FailedTestCases do
+      msg = msg .. "TEST CASE " .. UT.FailedTestCases[i] .. " FAILED\n"
+    end
+  else
+    msg = "ALL TEST CASES PASSED"
+  end
+  local _filehandle, _err = io.open(UT.FilePathAllFailures, "w")
+  if _filehandle then
+    _filehandle:write(msg, "\n")
+    _filehandle:flush()
+    _filehandle:close()
+    _filehandle = nil
+    UT.FailedTestCases  = {}
+    return true
+  else
+    env.info("UT.EndTest ERROR: " .. _err)
+    UT.FailedTestCases  = {}
+    return false
+  end
 end
 
 function UT.WriteToFile()
@@ -52,9 +77,6 @@ function UT.Reset()
   UT.Pass = 0
   UT.Fail = 0
   UT.TestData = {}
-  UT.Setup = nil
-  UT.TearDown = nil
-  UT.SetupValidationCollection = {}
 end
 
 function UT.TestFunction(fnc, ...)
@@ -122,6 +144,7 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     else
       UT.Log("UT - Test Setup Validation FAILED - ERROR - " .. UT.GetCaughtError())
       UT.Log("UT - Test Case FAILED - Setup is not valid!")
+      table.insert(UT.FailedTestCases, casename)
       UT.WriteToFile()
       UT.Reset()
       return false
@@ -141,6 +164,7 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
       UT.Log("UT - Test Case FAILED - Setup failed to complete!")
       UT.WriteToFile()
       UT.Reset()
+      table.insert(UT.FailedTestCases, casename)
       return false
     end
   else
@@ -156,9 +180,16 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     UT.Log("Pass: " .. tostring(UT.Pass))
     UT.Log("Fail: " .. tostring(UT.Fail))
     UT.Log("============================================================")
+    if UT.Fail > 0 then
+      table.insert(UT.FailedTestCases, casename)
+    end
   else
     UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. UT.GetCaughtError() .. " - TraceBack - " .. debug.traceback())
     UT.Log("UT - Test Case FAILED - Error in Test Case!")
+    table.insert(UT.FailedTestCases, casename)
+    UT.WriteToFile()
+    UT.Reset()
+    return false
   end
   
   -- tear down the test data
@@ -167,12 +198,14 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     local _TearDownResult, _result = xpcall(teardownFnc, UT.ErrorHandler)
     if (not _TearDownResult) then
       UT.Log("Tear Down FAILED - ERROR - " .. UT.GetCaughtError())
+      table.insert(UT.FailedTestCases, casename)
     end
   end
   
   -- reset all data
   UT.WriteToFile()
   UT.Reset()
+  return true
 end
   
   

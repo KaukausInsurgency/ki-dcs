@@ -5,7 +5,7 @@ end
 KI.Loader = {}
 
 
-
+-- generates unit table that DCS Spawn Group expects
 function KI.Loader.GenerateUnitsTable(unitsObj)
   env.info("KI.Loader.GenerateUnitsTable called")
   local unitsData = {}
@@ -33,7 +33,7 @@ function KI.Loader.GenerateUnitsTable(unitsObj)
 end
 
 
-
+-- Generates table that DCS spawn group expects
 function KI.Loader.GenerateGroupTable(groupObj, hidden)
   env.info("KI.Loader.GenerateGroupTable called")
   hidden = hidden or true
@@ -139,7 +139,7 @@ function KI.Loader.ExtractStaticData()
 end
 --
 
-
+-- Generates a static table that written to file (similar to what DCS Spawn Static expects, but not 100%)
 function KI.Loader.GenerateStaticTable(staticObj, category, component, isCargo)
   env.info("KI.Loader.GenerateStaticTable called")
   --isHidden = isHidden or true
@@ -222,13 +222,14 @@ function KI.Loader.ImportStaticObjects(data)
       heading = _s["Heading"]
     })
   
+    -- if the static object belongs to SLC, Relink the Cargo with SLC module (and GC if necessary)
     if obj then
       env.info("KI.Loader.ImportStaticObjects - static object spawned (" .. _s["Name"] .. ")")
     
       if _s["Component"] == "SLC" then
         SLC.RelinkCargo(obj)
       elseif _s["Component"] == "DSMT" then
-        
+        -- somepoint will need to relink the GC and DSMT to this item
       end
     else
       env.info("KI.Loader.ImportStaticObjects - ERROR - Static Object failed to spawn (" .. _s["Name"] .. ")")

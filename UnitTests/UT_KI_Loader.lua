@@ -1,6 +1,5 @@
 UT.TestCase("KI_Loader", 
 function()
-  UT.ValidateSetup(function() return GROUP:FindByName("TestGroupKILoader") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestStaticKILoader") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestCargoKILoader") ~= nil end)
 end,

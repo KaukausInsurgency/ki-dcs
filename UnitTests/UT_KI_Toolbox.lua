@@ -1,4 +1,4 @@
-UT.TestCase("KI.Toolbox", nil, nil,
+UT.TestCase("KI_Toolbox", nil, nil,
   function()
     local _testTable =
     {
@@ -9,6 +9,11 @@ UT.TestCase("KI.Toolbox", nil, nil,
       list = { 23, 24, 25, 239 }
     }
     
+    -- Test TableEquality
+    UT.TestCompare(function() return KI.Toolbox.TablesEqual(_testTable, _testTable) end)
+    UT.TestCompare(function() return not KI.Toolbox.TablesEqual(_testTable, {}) end)   
+    UT.TestCompare(function() return KI.Toolbox.TablesEqual({}, {}) end) 
+        
     -- Test Deep Copy
     UT.TestFunction(KI.Toolbox.DeepCopy, _testTable)
     local _copy = KI.Toolbox.DeepCopy(_testTable)

@@ -2,23 +2,74 @@ if not KI then
   KI = {}
 end
 
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\Spatial.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Toolbox.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\GC.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\SLC_Config.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\SLC.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\DWM.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\DSMT.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\CP.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Config.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Socket.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Query.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Init.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Loader.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Scheduled.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\KI_Hooks.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM_Config.lua"))()
-assert(loadfile("C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\AICOM.lua"))()
+local function ValidateKIStart()
+  local requiredModules =
+  {
+    ["lfs"] = lfs,
+    ["io"] = io,
+    ["require"] = require,
+    ["loadfile"] = loadfile,
+    ["package.path"] = package.path,
+    ["package.cpath"] = package.cpath,
+    ["JSON"] = "Scripts\\JSON.lua",
+    ["Socket"] = "socket"
+  }
+  
+  local isValid = true    -- assume everything exists and is in place, then determine if it's false
+  local msg = ""
+  
+  local function errorHandler(err) 
+      -- do nothing
+  end
+
+  for key, item in pairs(requiredModules) do 
+    local callSuccess, callResult
+    if key == "JSON" then
+      callSuccess, callResult = xpcall(function() return loadfile(item)() ~= nil end, errorHandler)
+    elseif key == "Socket" then
+      callSuccess, callResult = xpcall(function() return require(item) ~= nil end, errorHandler)
+    else
+      callSuccess, callResult = xpcall(function() return item ~= nil end, errorHandler)
+    end
+    
+    if not callSuccess or not callResult then
+      isValid = false
+      msg = msg .. "\t" .. key
+    end
+  end
+  
+  if not isValid then
+    env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing:\n" .. msg)
+  else
+    env.info("KI - STARTUP VALIDATION COMPLETE")
+  end
+  
+  return isValid
+end
+
+if not ValidateKIStart() then
+  return false
+end
+
+local path = "C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\"
+
+assert(loadfile(path .. "Spatial.lua"))()
+assert(loadfile(path .. "KI_Toolbox.lua"))()
+assert(loadfile(path .. "GC.lua"))()
+assert(loadfile(path .. "SLC_Config.lua"))()
+assert(loadfile(path .. "SLC.lua"))()
+assert(loadfile(path .. "DWM.lua"))()
+assert(loadfile(path .. "DSMT.lua"))()
+assert(loadfile(path .. "CP.lua"))()
+assert(loadfile(path .. "KI_Config.lua"))()
+assert(loadfile(path .. "KI_Socket.lua"))()
+assert(loadfile(path .. "KI_Query.lua"))()
+assert(loadfile(path .. "KI_Init.lua"))()
+assert(loadfile(path .. "KI_Loader.lua"))()
+assert(loadfile(path .. "KI_Scheduled.lua"))()
+assert(loadfile(path .. "KI_Hooks.lua"))()
+assert(loadfile(path .. "AICOM_Config.lua"))()
+assert(loadfile(path .. "AICOM.lua"))()
 
 
 
@@ -50,3 +101,6 @@ timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + 5)
 --AICOM.DoTurn({}, 5)
 --KI.Loader.SaveData()
 KI.Loader.LoadData()
+
+
+return true

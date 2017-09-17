@@ -113,7 +113,7 @@ UT.TestCase("DSMT Core", nil, nil,
   
   
   
-  UT.TestCase("DSMT Manager", 
+  UT.TestCase("DSMT Manager", nil, nil,
     function()
       
       -- ================================== TEST DATA =========================================================--

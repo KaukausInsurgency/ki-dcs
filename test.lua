@@ -1,5 +1,11 @@
+local staticObj = StaticObject.getByName("TestCargoSLC")
+env.info("TestCargoSLC Alive (Should be true): " .. tostring(staticObj:isExist()))
+env.info("TestCargoSLC GetLife (Should be true): " .. tostring(staticObj:getLife()))
+staticObj:destroy()
+env.info("TestCargoSLC Alive (Should be false): " .. tostring(staticObj:isExist()))
+env.info("TestCargoSLC GetLife (Should be false): " .. tostring(staticObj:getLife()))
 --KI.Scheduled.UpdateCPStatus(nil, 10)
-KI.Loader.SaveData()
+--KI.Loader.SaveData()
 
 local _t =
 { 
