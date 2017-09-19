@@ -22,3 +22,21 @@ KI Loader
 -- Implement Map website
 -- Implement Simple Radio Auto Kick
 -- Implement CSAR script
+
+
+
+
+
+Server Side logic
+
+-- Slot block when a FARP or Airbase is not SIDE RED
+-- Track Banned Players
+	-- Save them to a database with their status
+	-- Upon Start Up of mission, Server should get the player status from File or Database?
+	-- When should the server refresh it's player data ?
+	-- When should the server send it's player data to database?
+-- Track how many lives a player has
+	-- Where do we get this information from?
+	-- How often should we refresh our data?
+	-- How often should we send data to database?
+
