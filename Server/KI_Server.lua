@@ -4,7 +4,16 @@ net = {}
 net.log = function(m) print(m) end
 net.get_player_info = function(id, param)
   local playerObj = {}
-  if id == 2 then
+  if id == 1 then
+    playerObj =
+    {
+      ucid = "SERVERUCID",
+      name = "Server",
+      id = 1,
+      ipaddr = "127.0.0.0:9999",
+      slot = 100
+    }
+  elseif id == 2 then
     playerObj =
     {
       ucid = "AAA",
@@ -21,6 +30,15 @@ net.get_player_info = function(id, param)
       id = 3,
       ipaddr = "127.0.0.2:9999",
       slot = 2
+    }
+  elseif id == 4 then
+    playerObj =
+    {
+      ucid = "CCC",
+      name = "Jon Snow",
+      id = 4,
+      ipaddr = "127.0.0.3:9999",
+      slot = 3
     }
   end
   
@@ -44,6 +62,8 @@ DCS.Clock = 20
 DCS.getUnitType = function(slotID)
   if slotID == 1 then
     return "KA50"
+  elseif slotID == 2 then
+    return "A10C"
   else
     return "observer"
   end
@@ -77,30 +97,56 @@ local function sleep(n)
 end
 
 local function Main()
-  while true do
-    
-    sleep(1)
+    if DCS.onPlayerTryConnect("127.0.0.0:9999", "Server", "SERVERUCID", 1) then
+      DCS.onPlayerConnect(1)
+    end
     DCS.onSimulationFrame()
     DCS.onShowPool()
-    sleep(1)
-    DCS.onPlayerTryConnect("127.0.0.1:9999", "Igneous", "AAA", 1)
-    DCS.onPlayerConnect(2)
-    sleep(1)
-    DCS.onPlayerTryChangeSlot(2, 1, 1)
+    
+    -- simulate 2 players connecting
+    if DCS.onPlayerTryConnect("127.0.0.1:9999", "Igneous", "AAA", 2) then
+      DCS.onPlayerConnect(2)
+    end
+    if DCS.onPlayerTryConnect("127.0.0.2:9999", "DemoPlayer", "BBB", 3) then
+      DCS.onPlayerConnect(3)
+    end
+    
+    -- simulate playerID 2 changing slots twice
+    DCS.onPlayerTryChangeSlot(2, 1, 1)    -- (playerID, side, slotID
+    DCS.onPlayerTryChangeSlot(2, 1, 2)
+    
+    -- simulate playerID 2 dying twice
     DCS.onGameEvent("self_kill",2,nil,nil,nil)
-    DCS.onSimulationFrame()
-    sleep(1)
     DCS.onGameEvent("self_kill",2,nil,nil,nil)
-    DCS.onPlayerTryChangeSlot(2, 1, 1)
+    
     DCS.onGameEvent("shot",2,nil,nil,nil)
-    DCS.onSimulationFrame()
-    sleep(1)
-    DCS.onPlayerTryConnect("127.0.0.2:9999", "DemoPlayer", "BBB", 3)
-    DCS.onPlayerConnect(3)
+    
     DCS.onSimulationFrame()
     DCS.onPlayerDisconnect(2, "Disconnected")
+    
+    -- try having fourth player connect
+    if DCS.onPlayerTryConnect("127.0.0.3:9999", "Jon Snow", "CCC", 4) then
+      DCS.onPlayerConnect(4)
+    end
+    -- try invalid player connecting
+    if DCS.onPlayerTryConnect("127.0.0.1:9999", nil, nil, 22) then
+      DCS.onPlayerConnect(22)
+    end
+    
+    DCS.onSimulationFrame()
+    
+    -- set PlayerID 4 (Jon Snow) out of lives
+    KIServer.NoLivesPlayers["CCC"] = true
+    DCS.onPlayerTryChangeSlot(4, 1, 2)    -- should fail
+    
+    -- simulate banning user
+    KIServer.BannedPlayers["BBB"] = true
     DCS.onPlayerDisconnect(3, "Disconnected")
-  end
+    if DCS.onPlayerTryConnect("127.0.0.2:9999", "DemoPlayer", "BBB", 3) then
+      DCS.onPlayerConnect(3)
+    else
+      DCS.onPlayerDisconnect(3, "Banned")
+    end
 end
 
 
@@ -124,7 +170,7 @@ KIServer = {}
 KIServer.OnlinePlayers = {} 			-- hash of current online players (using PlayerID as key)
 KIServer.BannedPlayers = {}				-- array of banned players (ucid, ucid, ucid, etc...)
 KIServer.NoLivesPlayers = {}      -- hash of players that have no more lives (using UCID as key)
-KIServer.SocketDelimiter = "\n\n\n\n\n"	-- delimiter used to segment messages
+KIServer.SocketDelimiter = "\n"	  -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
 
@@ -281,6 +327,8 @@ KIHooks.onSimulationFrame = function()
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
   if ElapsedTime >= KIServer.DataRefreshRate then
     
+    KIServer.LastOnFrameTime = DCS.getModelTime()
+    
     -- Receive updated Banned and No Lives Players list
     local received = KIServer.UDPReceiveSocket:receive()
     if received then
@@ -297,6 +345,7 @@ KIHooks.onSimulationFrame = function()
     -- send Online Player list to UI
     socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.OnlinePlayers) .. KIServer.SocketDelimiter, 
                "127.0.0.1", KIServer.GAMEGUI_SEND_TO_PORT))
+           
 	end
 end
 
