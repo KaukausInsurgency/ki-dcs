@@ -29,7 +29,7 @@ KI Loader
 
 Server Side logic
 
--- Slot block when a FARP or Airbase is not SIDE RED
+-- Slot block when a FARP or Airbase is not SIDE RED  - use SimpleSlotBlock in Mission Script code
 -- Track Banned Players
 	-- Save them to a database with their status
 	-- Upon Start Up of mission, Server should get the player status from File or Database?
