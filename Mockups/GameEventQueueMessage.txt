@@ -4,6 +4,8 @@
 	"Data" :
 	{
 		{ 
+			"SessionID" : 1,
+			"ServerID" : 1,
 			"SortieID" : 1,
 			"Event" : "TAKEOFF",
 			"UCID" : "AAAA",
@@ -15,6 +17,7 @@
 			"Airfield" : "Batumi",
 			"Weapon" : null,
 			"WeaponCategory" : null,
+			"TargetName" : null,
 			"Target" : null,
 			"TargetType" : null,
 			"TargetCategory" : null,
@@ -23,6 +26,8 @@
 			"TargetPlayerName" : null
 		},
 		{ 
+			"SessionID" : 1,
+			"ServerID" : 1,
 			"SortieID" : 1,
 			"Event" : "SHOT",
 			"UCID" : "AAAA",
@@ -34,14 +39,17 @@
 			"Airfield" : null,
 			"Weapon" : "Maverick",
 			"WeaponCategory" : "ATGM",
-			"Target" : "T-72",
-			"TargetType" : "Tank",
-			"TargetCategory" : "Ground",
+			"TargetName" : null,
+			"Target" : null,
+			"TargetType" : null,
+			"TargetCategory" : null,
 			"TargetIsPlayer" : false,
 			"TargetPlayerUCID" : null,
 			"TargetPlayerName" : null
 		},	
 		{ 
+			"SessionID" : 1,
+			"ServerID" : 1,
 			"SortieID" : 1,
 			"Event" : "HIT",
 			"UCID" : "AAAA",
@@ -53,6 +61,7 @@
 			"Airfield" : null,
 			"Weapon" : "Maverick",
 			"WeaponCategory" : "ATGM",
+			"TargetName" : "T-72 Spawn #001"
 			"Target" : "T-72",
 			"TargetType" : "Tank",
 			"TargetCategory" : "Ground",
@@ -61,6 +70,8 @@
 			"TargetPlayerName" : null
 		},
 		{ 
+			"SessionID" : 1,
+			"ServerID" : 1,
 			"SortieID" : 1,
 			"Event" : "LAND",
 			"UCID" : "AAAA",
@@ -72,6 +83,7 @@
 			"Airfield" : "Batumi",
 			"Weapon" : null,
 			"WeaponCategory" : null,
+			"TargetName" : null,
 			"Target" : null,
 			"TargetType" : null,
 			"TargetCategory" : null,
