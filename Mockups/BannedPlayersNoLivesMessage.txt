@@ -1,0 +1,7 @@
+{
+  "BannedPlayers" : 
+  {
+    "CCC" : true
+  }, 
+  "NoLivesPlayers" : ["DDD", "EEE", "AAA"]
+}  

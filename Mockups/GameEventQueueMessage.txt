@@ -1,0 +1,83 @@
+{
+	"Action" : "InsertGameEvent",
+	"BulkInsert" : true,
+	"Data" :
+	{
+		{ 
+			"SortieID" : 1,
+			"Event" : "TAKEOFF",
+			"UCID" : "AAAA",
+			"PlayerName" : "DemoPlayer",
+			"RealTime" : 1358,
+			"GameTime" : 900,
+			"Role" : "A10C",
+				
+			"Airfield" : "Batumi",
+			"Weapon" : null,
+			"WeaponCategory" : null,
+			"Target" : null,
+			"TargetType" : null,
+			"TargetCategory" : null,
+			"TargetIsPlayer" : false,
+			"TargetPlayerUCID" : null,
+			"TargetPlayerName" : null
+		},
+		{ 
+			"SortieID" : 1,
+			"Event" : "SHOT",
+			"UCID" : "AAAA",
+			"PlayerName" : "DemoPlayer",
+			"RealTime" : 1500,
+			"GameTime" : 990,
+			"Role" : "A10C",
+			
+			"Airfield" : null,
+			"Weapon" : "Maverick",
+			"WeaponCategory" : "ATGM",
+			"Target" : "T-72",
+			"TargetType" : "Tank",
+			"TargetCategory" : "Ground",
+			"TargetIsPlayer" : false,
+			"TargetPlayerUCID" : null,
+			"TargetPlayerName" : null
+		},	
+		{ 
+			"SortieID" : 1,
+			"Event" : "HIT",
+			"UCID" : "AAAA",
+			"PlayerName" : "DemoPlayer",
+			"RealTime" : 1505,
+			"GameTime" : 995,
+			"Role" : "A10C",
+			
+			"Airfield" : null,
+			"Weapon" : "Maverick",
+			"WeaponCategory" : "ATGM",
+			"Target" : "T-72",
+			"TargetType" : "Tank",
+			"TargetCategory" : "Ground",
+			"TargetIsPlayer" : false,
+			"TargetPlayerUCID" : null,
+			"TargetPlayerName" : null
+		},
+		{ 
+			"SortieID" : 1,
+			"Event" : "LAND",
+			"UCID" : "AAAA",
+			"PlayerName" : "DemoPlayer",
+			"RealTime" : 1658,
+			"GameTime" : 1100,
+			"Role" : "A10C",
+				
+			"Airfield" : "Batumi",
+			"Weapon" : null,
+			"WeaponCategory" : null,
+			"Target" : null,
+			"TargetType" : null,
+			"TargetCategory" : null,
+			"TargetIsPlayer" : false,
+			"TargetPlayerUCID" : null,
+			"TargetPlayerName" : null
+		}
+	}
+}

@@ -1,0 +1,20 @@
+{
+  "GameTime":155,
+  "ID":3,
+  "IP":"127.0.0.2",
+  "Name":"DemoPlayer",
+  "RealTime":160,
+  "Type":"DISCONNECTED",
+  "UCID":"BBB"
+}
+
+
+{
+  "GameTime":125,
+  "ID":4,
+  "IP":"127.0.0.3",
+  "Name":"Jon Snow",
+  "RealTime":130,
+  "Type":"CONNECTED",
+  "UCID":"CCC"
+}

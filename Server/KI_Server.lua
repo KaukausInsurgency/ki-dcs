@@ -115,12 +115,6 @@ local function Main()
     DCS.onPlayerTryChangeSlot(2, 1, 1)    -- (playerID, side, slotID
     DCS.onPlayerTryChangeSlot(2, 1, 2)
     
-    -- simulate playerID 2 dying twice
-    DCS.onGameEvent("self_kill",2,nil,nil,nil)
-    DCS.onGameEvent("self_kill",2,nil,nil,nil)
-    
-    DCS.onGameEvent("shot",2,nil,nil,nil)
-    
     DCS.onSimulationFrame()
     DCS.onPlayerDisconnect(2, "Disconnected")
     
@@ -167,39 +161,75 @@ local JSON = loadfile("S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.l
 local socket = require("socket")
 
 KIServer = {}
-KIServer.OnlinePlayers = {} 			-- hash of current online players (using PlayerID as key)
+KIServer.Config = {}
+KIServer.OnlinePlayers = {} 			-- hash of current online players (using PlayerID as key) format { UCID, UnitName }
 KIServer.BannedPlayers = {}				-- array of banned players (ucid, ucid, ucid, etc...)
 KIServer.NoLivesPlayers = {}      -- hash of players that have no more lives (using UCID as key)
 KIServer.SocketDelimiter = "\n"	  -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
+KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
+
+KIServer.WriteToFileJSON = function(path, data)
+  net.log("KIServer.WriteToFile called for path: " .. path)
+  local _exportData = KIServer.JSON:encode(data)
+	net.log("KIServer.WriteToFile - Data serialized")
+	local _filehandle, _err = io.open(path, "w")
+  if _filehandle then
+    _filehandle:write(_exportData)
+    _filehandle:flush()
+    _filehandle:close()
+    _filehandle = nil
+    return true
+  else
+    net.log("KIServer.WriteToFile ERROR: " .. _err)
+    return false
+  end
+end
+
+KIServer.ReadFileJSON = function(path)
+  net.log("KIServer.ReadFileJSON called for path: " .. path)
+	local _filehandle, _err = io.open(path, "r")
+  if _filehandle then
+    local _rawdata = _filehandle:read("*a")
+    _filehandle:close()
+    _filehandle = nil
+    if _rawdata then
+      local _error = ""
+      local _success, _data = xpcall(function() return KIServer.JSON:decode(_rawdata) end, 
+                                     function(err) _error = err end)
+      if _success and _data then
+        return _data
+      else
+        return nil, _error
+      end
+    else
+      return nil, "File Contents Empty"
+    end
+  else
+    return nil, _err
+  end
+end
 
 local function InitKIServerConfig()
   local UseDefaultConfig = false
   net.log("InitKIServerConfig() called")
   
-  local _file, _error = loadfile(lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua]])
-  if _file then
-    local _success, _config = xpcall(_file, function(err) end)
-    if _success and _config then
-      KIServer.MissionName = _config["MissionName"]
-      KIServer.DataRefreshRate = _config["DataRefreshRate"]
-      KIServer.ServerPlayerID = _config["ServerPlayerID"]
-      
-      KIServer.ConfigDirectory = _config["ConfigDirectory"]
-      KIServer.LogDirectory = _config["LogDirectory"]
-      KIServer.BannedPlayerFileDirectory = _config["BannedPlayerFileDirectory"]
-      
-      KIServer.GAMEGUI_SEND_TO_PORT = tonumber(_config["GAMEGUI_SEND_TO_PORT"])
-      KIServer.GAMEGUI_RECEIVE_PORT = tonumber(_config["GAMEGUI_RECEIVE_PORT"])	
-      
-      KIServer.WelcomeMessages = _config["WelcomeMessages"]
-      
-      
-    else
-      net.log("InitKIServerConfig() - ERROR - Configuration is empty or corrupt")
-      UseDefaultConfig = true
-    end
+  local _config, _error = KIServer.ReadFileJSON(KIServer.ConfigFileDirectory)
+  if _config then
+    net.log("InitKIServerConfig() - Reading From Config File")
+    KIServer.Config.MissionName = _config["MissionName"]
+    KIServer.Config.DataRefreshRate = _config["DataRefreshRate"]
+    KIServer.Config.ServerPlayerID = _config["ServerPlayerID"]
+    
+    KIServer.Config.ConfigDirectory = _config["ConfigDirectory"]
+    KIServer.Config.LogDirectory = _config["LogDirectory"]
+    KIServer.Config.BannedPlayerFileDirectory = _config["BannedPlayerFileDirectory"]
+    
+    KIServer.Config.GAMEGUI_SEND_TO_PORT = tonumber(_config["GAMEGUI_SEND_TO_PORT"])
+    KIServer.Config.GAMEGUI_RECEIVE_PORT = tonumber(_config["GAMEGUI_RECEIVE_PORT"])	
+    
+    KIServer.Config.WelcomeMessages = _config["WelcomeMessages"]
   else
     net.log("InitKIServerConfig() - ERROR opening Config file (reason: " .. _error .. ")")
     UseDefaultConfig = true
@@ -207,24 +237,27 @@ local function InitKIServerConfig()
   
   if UseDefaultConfig then
     net.log("InitKIServerConfig() - There was a problem reading from an existing config - using default settings")
-    KIServer.MissionName = "Kaukasus Insurgency"
-    KIServer.DataRefreshRate = 30   -- how often should the server check the UDP Socket to update its data in memory
-    KIServer.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
+    KIServer.Config.MissionName = "Kaukasus Insurgency"
+    KIServer.Config.DataRefreshRate = 30   -- how often should the server check the UDP Socket to update its data in memory
+    KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     
-    KIServer.ConfigDirectory = lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\]]
-    KIServer.LogDirectory = KIServer.ConfigDirectory .. [[KIServerLog.log]]
-    KIServer.BannedPlayerFileDirectory = KIServer.ConfigDirectory .. [[KIBannedPlayers.lua]]
+    KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\]]
+    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[KIServerLog.log]]
+    KIServer.Config.BannedPlayerFileDirectory = KIServer.Config.ConfigDirectory .. [[KIBannedPlayers.lua]]
     
-    KIServer.GAMEGUI_SEND_TO_PORT = 6005
-    KIServer.GAMEGUI_RECEIVE_PORT = 6006	
+    KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
+    KIServer.Config.GAMEGUI_RECEIVE_PORT = 6006	
     
-    KIServer.WelcomeMessages =
+    KIServer.Config.WelcomeMessages =
     {
       "Welcome to Kaukasus Insurgency - We hope you enjoy your time here",
       "Please check the briefing and the F10 Map for information about active missions, objectives, and enemies",
       "Our website is www.examplewebsite.com - please visit us for more info",
       "PLEASE UPDATE YOUR SIMPLE RADIO TO 1.2.8.1"
     }
+    
+    net.log("InitKIServerConfig() - Generating New Config file")
+    KIServer.WriteToFileJSON(KIServer.ConfigFileDirectory, KIServer.Config)
   end
 end
 
@@ -233,7 +266,7 @@ InitKIServerConfig()
 -- Initialize Sockets
 KIServer.UDPSendSocket = socket.udp()
 KIServer.UDPReceiveSocket = socket.udp()
-KIServer.UDPReceiveSocket:setsockname("*", KIServer.GAMEGUI_RECEIVE_PORT)
+KIServer.UDPReceiveSocket:setsockname("*", KIServer.Config.GAMEGUI_RECEIVE_PORT)
 KIServer.UDPReceiveSocket:settimeout(.0001) --receive timer
 
 
@@ -247,7 +280,7 @@ KIServer.IsRunning = function()
 	
 	net.log("KIServer.IsRunning() - Current Running Mission : " .. DCS.getMissionName())
 	local missionName = DCS.getMissionName()
-	if string.match(DCS.getMissionName(), KIServer.MissionName) then
+	if string.match(DCS.getMissionName(), KIServer.Config.MissionName) then
 		net.log("KIServer.IsRunning() - Kaukasus Insurgency Is ON")
 		return true
 	end
@@ -325,7 +358,7 @@ KIHooks.onSimulationFrame = function()
 	if not KIServer.IsRunning() then return end
 	
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
-  if ElapsedTime >= KIServer.DataRefreshRate then
+  if ElapsedTime >= KIServer.Config.DataRefreshRate then
     
     KIServer.LastOnFrameTime = DCS.getModelTime()
     
@@ -333,8 +366,8 @@ KIHooks.onSimulationFrame = function()
     local received = KIServer.UDPReceiveSocket:receive()
     if received then
       net.log("KIServer - UDP Data stream received")
-      local Data = KIServer.JSON:decode(received)
-      if Data then
+      local Success, Data = xpcall(KIServer.JSON:decode(received), function(err) end)
+      if Success and Data then
         net.log("Data received!")
         KIServer.BannedPlayers = Data["BannedPlayers"]
         KIServer.NoLivesPlayers = Data["NoLivesPlayers"]
@@ -344,7 +377,7 @@ KIHooks.onSimulationFrame = function()
     KIServer.OnlinePlayers = KIServer.SanitizeArray(KIServer.OnlinePlayers)
     -- send Online Player list to UI
     socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.OnlinePlayers) .. KIServer.SocketDelimiter, 
-               "127.0.0.1", KIServer.GAMEGUI_SEND_TO_PORT))
+               "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
            
 	end
 end
@@ -400,7 +433,7 @@ KIHooks.onPlayerConnect = function(playerID)
   
   
 	-- Validate the player object
-	if playerID == KIServer.ServerPlayerID then return end -- if the server is changing slot there is no action required
+	if playerID == KIServer.Config.ServerPlayerID then return end -- if the server is changing slot there is no action required
 	local player = net.get_player_info(playerID)
 	if not player then
 		net.log("no player, aborting")
@@ -411,7 +444,7 @@ KIHooks.onPlayerConnect = function(playerID)
 	end
 	
 	net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ") Time: " .. DCS.getRealTime() .. ")")
-	KIServer.OnlinePlayers[tostring(player.id)] = player.ucid
+	KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = "" }
 	local IsBanned = KIServer.IsPlayerBanned(player.ucid)
 
 	if IsBanned then
@@ -434,14 +467,14 @@ KIHooks.onPlayerConnect = function(playerID)
 	}
 	net.log("sending connect message to mission-side")
 	socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
-                                           "127.0.0.1", KIServer.GAMEGUI_SEND_TO_PORT))
+                                           "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
 	
 	-- send welcome messages
 	local _chatMessage = string.format("Hello %s! Welcome to  Kaukasus Insurgency!", player.name)
-	net.send_chat_to(_chatMessage, playerID, KIServer.ServerPlayerID)
-	if KIServer.WelcomeMessages then
-		for i = 1, #KIServer.WelcomeMessages do
-		  net.send_chat_to(tostring(KIServer.WelcomeMessages[i]), playerID, KIServer.ServerPlayerID)
+	net.send_chat_to(_chatMessage, playerID, KIServer.Config.ServerPlayerID)
+	if KIServer.Config.WelcomeMessages then
+		for i = 1, #KIServer.Config.WelcomeMessages do
+		  net.send_chat_to(tostring(KIServer.Config.WelcomeMessages[i]), playerID, KIServer.Config.ServerPlayerID)
 		end
 	end
 end
@@ -472,7 +505,7 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 		
 		net.log("sending disconnect message to mission-side")
 		socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
-                                             "127.0.0.1", KIServer.GAMEGUI_SEND_TO_PORT))	
+                                             "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))	
 	else
 		net.log("KIHooks.onPlayerDisconnect() - ERROR - disconnect unsuccessful, get_player_info returned nil")
 	end
@@ -480,79 +513,18 @@ end
 
 
 
---DOC
--- onGameEvent(eventName,arg1,arg2,arg3,arg4)
---"friendly_fire", playerID, weaponName, victimPlayerID
---"mission_end", winner, msg
---"kill", killerPlayerID, killerUnitType, killerSide, victimPlayerID, victimUnitType, victimSide, weaponName
---"self_kill", playerID
---"change_slot", playerID, slotID, prevSide
---"connect", id, name
---"disconnect", ID_, name, playerSide
---"crash", playerID, unit_missionID
---"eject", playerID, unit_missionID
---"takeoff", playerID, unit_missionID, airdromeName
---"landing", playerID, unit_missionID, airdromeName
---"pilot_death", playerID, unit_missionID
-KIHooks.onGameEvent = function(eventName,playerID,arg2,arg3,arg4)
-  -- must check this to prevent a possible CTD 
-  -- by using a_do_script before the game is ready to use a_do_script. -- Source GRIMES :)
-  if DCS.isServer() and DCS.isMultiplayer() and DCS.getModelTime() > 1 then
-    
-    if eventName == "self_kill"
-    or eventName == "crash"
-    or eventName == "eject"
-    or eventName == "pilot_death" then
-      -- obtain player information
-      local player = net.get_player_info(playerID)
-      if player ~= nil and player.side ~= 0 and player.slot ~= "" and player.slot ~= nil then
-        
-        -- check if the slot was a non flyable spot, ignore any events for those slots
-        local _unitRole = DCS.getUnitType(player.slot)
-        if _unitRole ~= nil and
-          ( _unitRole == "forward_observer"
-            or _unitRole == "instructor"
-            or _unitRole == "artillery_commander"
-            or _unitRole == "observer"
-          )
-        then 
-          return true 
-        end
-
-        local ServerEvent = 
-        {
-          Type = "DEATH",
-          Name = KIServer.GetPlayerNameFix(player.name),
-          UCID = player.ucid,
-          ID = player.id,
-          IP = player.ipaddr:sub(1, player.ipaddr:find(":")-1),
-          GameTime = DCS.getModelTime(),
-          RealTime = DCS.getRealTime()
-        }
-        
-        net.log("sending player death message to mission-side")
-        socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
-                                                "127.0.0.1", KIServer.GAMEGUI_SEND_TO_PORT))	
-
-      end  
-    end
-  end
-end
-
-
-
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
   if DCS.isServer() and DCS.isMultiplayer() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
-    local _ucid = net.get_player_info(playerID, 'ucid')
-    local _playerName = net.get_player_info(playerID, 'name')
+    local player = net.get_player_info(playerID)
+    local _playerName = player.name
     if _playerName == nil then return true end
 
     net.log("KIHooks.onPlayerTryChangeSlot - Player Selected slot - player: " 
-            .. _playerName .. " side:" .. side .. " slot: " .. slotID .. " ucid: " .. _ucid)
+            .. _playerName .. " side:" .. side .. " slot: " .. slotID .. " ucid: " .. player.ucid)
 
     local _unitRole = DCS.getUnitType(slotID)
-
+	
     if _unitRole ~= nil and
       (
         _unitRole == "forward_observer"
@@ -561,6 +533,7 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         or _unitRole == "observer"
       )
     then
+	  KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = _unitRole }
       return true   -- ignore attempts to slot into non airframe roles
     else
       
@@ -568,8 +541,10 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has run out of lives")
         local _chatMessage = string.format("*** %s - You have run out of lives and can no longer slot into an airframe! Player Lives return once every hour! ***",_playerName)
         net.send_chat_to(_chatMessage, playerID)
+		KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = "" }
         return false
       else
+		KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = _unitRole }
         return true
       end
       
