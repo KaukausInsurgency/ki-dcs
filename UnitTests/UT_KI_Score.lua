@@ -162,17 +162,102 @@ function()
 	--		UCID = "AAA",
 	--}
 	-- it appears there is no way to get the player UCID from the mission script environment - we will need to go to the Server Mod in order to obtain that information
+	
+	-- Test Case 1 - Raise Mock Event - GameEventQueue should record this event
+	KI.Score.eventHandler:handleEvent(UT.TestData.EvtPlayerTakeoffMock)	
+	
 	UT.TestCompare(function() return KI.Score.GameEventQueue ~= nil end)
 	UT.TestCompare(function() return #KI.Score.GameEventQueue == 1 end)
-	UT.TestCompare(function() return KI.Score.GameEventQueue[1].EventID = 15 end)
-	UT.TestCompare(function() return KI.Score.GameEventQueue[1].UCID = "AAAA" end)
-	UT.TestCompare(function() return KI.Score.GameEventQueue[1].Name = "BIRTH" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["SessionID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["ServerID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["SortieID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["Event"] == "TAKEOFF" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["UCID"] == "AAA" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["PlayerName"] == "DemoPlayer" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["RealTime"] == 1300 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["GameTime"] == 1200 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["Role"] == "KA50" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["Airfield"] == "Batumi" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["Weapon"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["WeaponCategory"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetName"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["Target"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["TargetType"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["TargetCategory"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["TargetIsPlayer"] == false end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["TargetPlayerUCID"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[1]["TargetPlayerName"] == nil end)
 	
+	-- Test 2 - Validate Generate Request is correct
+	local _SocketRequestMessage = KI.Score.GenerateRequest(KI.Score.GameEventQueue)
+	
+	UT.TestCompare(function() return _SocketRequestMessage.Action == "InsertGameEvent" end)
+	UT.TestCompare(function() return _SocketRequestMessage.BulkInsert == false end)
+	UT.TestCompare(function() return #_SocketRequestMessage.Data == 1 end)
+	UT.TestCompare(function() return KI.Toolbox.AreTablesEqual(_SocketRequestMessage.Data, KI.Score.GameEventQueue[1]) end)
+
+	-- Test 3 - raise 2 more events
+	KI.Score.eventHandler:handleEvent(UT.TestData.EvtShot2Mock)	
+	KI.Score.eventHandler:handleEvent(UT.TestData.EvtHitAir1Mock)
+	
+	UT.TestCompare(function() return KI.Score.GameEventQueue ~= nil end)
+	UT.TestCompare(function() return #KI.Score.GameEventQueue == 3 end)
+	
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["SessionID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["ServerID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["SortieID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["Event"] == "SHOT" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["UCID"] == "AAA" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["PlayerName"] == "DemoPlayer" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["RealTime"] == 930 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["GameTime"] == 930 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["Role"] == "KA50" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["Airfield"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["Weapon"] == "VIHKR" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["WeaponCategory"] == "ATGM" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetName"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["Target"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetType"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetCategory"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetIsPlayer"] == false end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetPlayerUCID"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetPlayerName"] == nil end)
+	
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["SessionID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["ServerID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["SortieID"] == 1 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["Event"] == "HIT" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["UCID"] == "AAA" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["PlayerName"] == "DemoPlayer" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["RealTime"] == 930 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["GameTime"] == 930 end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["Role"] == "KA50" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["Airfield"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["Weapon"] == "VIHKR" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["WeaponCategory"] == "ATGM" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[2]["TargetName"] == "SU27 Spawn #001" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["Target"] == "SU27" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["TargetType"] == "FIGHTER" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["TargetCategory"] == "AIR" end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["TargetIsPlayer"] == false end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["TargetPlayerUCID"] == nil end)
+	UT.TestCompare(function() return KI.Score.GameEventQueue[3]["TargetPlayerName"] == nil end)
+	
+	-- Test 3 - Ignores any events that are AI only and not death, crash, eject, pilot death (we want to track whether an AI unit was killed, and use the database to process who got the kill and apply scores)
+	KI.Score.eventHandler:handleEvent(UT.TestData.EvtAITakeoffMock)
+	UT.TestCompare(function() return #KI.Score.GameEventQueue == 3 end)		-- size should still be 3, ignoring this AI event
+	
+	-- Test 4 - Bulk Insert socket request message
+	local _SocketRequestMessageBulk = KI.Score.GenerateRequest(KI.Score.GameEventQueue)
+	UT.TestCompare(function() return _SocketRequestMessage.Action == "InsertGameEvent" end)
+	UT.TestCompare(function() return _SocketRequestMessage.BulkInsert == true end)
+	UT.TestCompare(function() return #_SocketRequestMessage.Data == 3 end)
+	UT.TestCompare(function() return KI.Toolbox.AreTablesEqual(_SocketRequestMessage.Data, KI.Score.GameEventQueue) end)
 	
 	
 	-- test sortie 
-	-- Sortie should start with when the airframe was born, or when the engines are started up
-	-- The sortie should end when either the airframe is destroyed, pilot killed, or pilot landed
+	-- Sortie should start when the airframe is taking off
+	-- The sortie should end when either the airframe is crashed, pilot killed, ejected, dead, or pilot landed
     KI.Score.eventHandler:handleEvent(UT.TestData.EvtPlayerTakeoffMock)														-- player has taken off 10 minutes after game time (600 seconds) from Batumi
 	KI.Score.eventHandler:handleEvent(UT.TestData.EvtAITakeoffMock)															-- AI has taken off 500 seconds after game time from Tbilisi
 	KI.Score.eventHandler:handleEvent(UT.TestData.EvtShot1Mock)																-- player fires a shot (aim-120) 5 minutes after (900 seconds)
