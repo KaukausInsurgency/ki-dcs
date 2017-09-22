@@ -444,7 +444,12 @@ KIHooks.onPlayerConnect = function(playerID)
 	end
 	
 	net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ") Time: " .. DCS.getRealTime() .. ")")
-	KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = "" }
+	KIServer.OnlinePlayers[tostring(player.id)] = 
+  { 
+    ["UCID"] = player.ucid, 
+    ["Name"] = KIServer.GetPlayerNameFix(player.name), 
+    ["Role"] = "" 
+  }
 	local IsBanned = KIServer.IsPlayerBanned(player.ucid)
 
 	if IsBanned then
@@ -541,10 +546,20 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has run out of lives")
         local _chatMessage = string.format("*** %s - You have run out of lives and can no longer slot into an airframe! Player Lives return once every hour! ***",_playerName)
         net.send_chat_to(_chatMessage, playerID)
-		KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = "" }
+        KIServer.OnlinePlayers[tostring(player.id)] = 
+        { 
+          ["UCID"] = player.ucid, 
+          ["Name"] = KIServer.GetPlayerNameFix(player.name), 
+          ["Role"] = "" 
+        }
         return false
       else
-		KIServer.OnlinePlayers[tostring(player.id)] = { ["UCID"] = player.ucid, ["Role"] = _unitRole }
+        KIServer.OnlinePlayers[tostring(player.id)] = 
+        { 
+          ["UCID"] = player.ucid, 
+          ["Name"] = KIServer.GetPlayerNameFix(player.name), 
+          ["Role"] = "" 
+        }
         return true
       end
       

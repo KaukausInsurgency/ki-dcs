@@ -70,3 +70,15 @@ function KI.Init.SideMissions()
     env.info("KI.Init.SideMissions - Side Mission Instance created for " .. _sm.Name)
   end
 end
+
+function KI.Init.SessionID()
+  env.info("KI.Init.SessionID called")
+  
+  return 1
+end
+
+function KI.Init.SortieID()
+  env.info("KI.Init.SortieID called")
+  
+  return 1
+end

@@ -86,6 +86,12 @@ function()
     UT.TestCompare(function() return KI.Query.FindCP_Static(UT.TestData.testStaticOutZone) == nil end)
   end
   
+  -- KI.Query.FindUCID_Player(name)
+  if true then
+    UT.TestCompare(function() return KI.Query.FindUCID_Player("DemoPlayer") == "AAAA" end)
+    UT.TestCompare(function() return KI.Query.FindUCID_Player("NOPLAYER") == nil end)
+  end
+  
 end,
 
 -- TearDown

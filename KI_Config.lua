@@ -66,7 +66,6 @@ KI.Config.PathSorties = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Sorties.
 KI.Config.PathSortieID = lfs.writedir() .. KI.Config.ParentFolder .. "KI_SortieID.lua"
 KI.Config.PlayerListFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayersOnline.lua"
 KI.Config.PlayerDataFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayerData.lua"
-KI.Config.SessionID = 1
 
 -- IP Address of Database Server (mySQL)
 KI.Config.DBServerIP = "192.168.1.254"
@@ -180,6 +179,12 @@ KI.Data =
     "Spawn TankT72 Template",
     "Spawn WatchTower Template",
     "Spawn Outpost Template"
-  }
+  },
+  OnlinePlayers = {},
+  GameEventQueue = {},
+  Sorties = {},
+  SortieID = 0,
+  SessionID = 0
+  
 }
 
