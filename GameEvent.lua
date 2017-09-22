@@ -1,3 +1,10 @@
+--[[
+GameEvent module
+
+Exposes some functions for wrapping up DCS and KI events into a message that can be sent to TCP Server
+
+Author: Igneous01
+]]--
 
 GameEvent = {}
 

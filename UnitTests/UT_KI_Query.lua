@@ -1,6 +1,6 @@
-  KI.Init.Depots()
-  KI.Init.CapturePoints()
-  KI.Init.SideMissions()
+KI.Init.Depots()
+KI.Init.CapturePoints()
+KI.Init.SideMissions()
 
 UT.TestCase("KI_Query", 
   -- Validate
@@ -37,6 +37,11 @@ function()
   UT.TestData.testStaticOutZone = StaticObject.getByName("TestStaticOutsideDepotZone")
   UT.TestData.DepotName = "TestDepotKIQuery"
   UT.TestData.CPName = "TestCPKIQuery"
+  KI.Data.OnlinePlayers = 
+  {
+    ["1"] = { UCID = "AAAA", Name = "DemoPlayer", Role = "A10C" }
+    
+  }
 end,
 
 -- Test Case
@@ -99,4 +104,5 @@ function()
   KI.Data.CapturePoints = {}
   KI.Data.SideMissions = {}
   KI.Data.Depots = {}
+  KI.Data.OnlinePlayers = {}
 end)

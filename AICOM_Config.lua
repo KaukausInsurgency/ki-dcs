@@ -1,3 +1,12 @@
+--[[
+AI Commander Configuration
+
+Configuration file for AICOM.lua
+
+Author: Igneous01
+
+]]--
+
 if not AICOM then
   AICOM = {}
 end
@@ -8,7 +17,7 @@ AICOM.Config.TurnRate = 600     -- the rate at which the AI Commander can make m
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
 AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
 AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
-AICOM.Config.Random = math.random
+AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
 
 AICOM.Config.Forces =
 {

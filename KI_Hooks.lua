@@ -290,16 +290,21 @@ end
 KI.Hooks.GameEventHandler = {}
 
 function KI.Hooks.GameEventHandler:onEvent(event)
-  -- catch all forms of shooting events
-	if event.id == world.event.S_EVENT_SHOT or
+  if not event.initiator then return end
+  local playerName = event.initiator:getPlayerName() or nil
+  
+  -- catch all forms of shooting events from a player
+	if (event.id == world.event.S_EVENT_SHOT or
      event.id == world.event.S_EVENT_SHOOTING_START or
-     event.id == world.event.S_EVENT_SHOOTING_END then
+     event.id == world.event.S_EVENT_SHOOTING_END) and
+     playerName then
        
-  elseif event.id == world.event.S_EVENT_HIT  then
+  -- catch all hit events that were initiated by a player
+  elseif event.id == world.event.S_EVENT_HIT and playerName then
     
-  elseif event.id == world.event.S_EVENT_TAKEOFF  then
+  elseif event.id == world.event.S_EVENT_TAKEOFF and playerName then
     
-  elseif event.id == world.event.S_EVENT_LAND  then
+  elseif event.id == world.event.S_EVENT_LAND and playerName then
     
   -- catch all forms of death / airframe destruction
   elseif event.id == world.event.S_EVENT_CRASH or 
@@ -309,13 +314,17 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
            
   elseif event.id == world.event.S_EVENT_REFUELING or
-         event.id == world.event.S_EVENT_REFUELING_STOP then
+         event.id == world.event.S_EVENT_REFUELING_STOP and playerName then
            
-  elseif event.id == world.event.S_EVENT_MISSION_START  then
+  elseif event.id == world.event.S_EVENT_MISSION_START then
     
-  elseif event.id == world.event.S_EVENT_MISSION_END  then
+  elseif event.id == world.event.S_EVENT_MISSION_END then
     
-  elseif event.id == world.event.S_EVENT_BIRTH  then
+  -- Initialize any radio menu items for the player
+  elseif event.id == world.event.S_EVENT_BIRTH and playerName then
+    SLC.InitSLCForUnit(event.initiator:getName())
+    return
+    
   --elseif event.id == world.event.S_EVENT_PLAYER_COMMENT  then
   else
     return

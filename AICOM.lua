@@ -1,3 +1,18 @@
+--[[
+AI Commander Module
+
+This module is responsible for managing the AI Insurgent Commanders behaviour in game.
+The AI Commander keeps the mission fun and engaging by 
+  - spawning in units
+  - deciding where to attack, where to defend
+  - when and where to setup an ambush
+
+The Commanders unit pool is user configurable and the logic that drives it is entirely based on the definitions provided in AICOM_Config.lua
+
+Author: Igneous01
+
+]]--
+
 if not AICOM then
   AICOM = {}
 end

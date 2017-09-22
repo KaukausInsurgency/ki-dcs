@@ -1,5 +1,9 @@
---Capture Point Class
---Handles Capture Zone related tasks
+--[[
+Capture Point Class
+Class creates a Capture and exposes methods for managing and maintaining the capture point.
+
+Author: Igneous01
+]]--
 CP = 
 {
   Defenses = {},        -- map based on key["DefenseType"] = [qty, cap]

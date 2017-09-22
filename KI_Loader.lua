@@ -1,3 +1,18 @@
+--[[
+KI.Loader Module
+
+This module is responsible for handling all forms of file read / write.
+Exposes functions for converting DCS Objects into extract tables to export to a file.
+Exports units, static objects, cargo, active side missions, SLC units, CapturePoints, Garbage Collection, and Depot Contents
+
+Exposes functions for importing extract tables into DCS.
+
+The bread and butter of persistent mission data is handled here.
+
+Author: Igneous01
+
+]]--
+
 if not KI then
   KI = {}
 end

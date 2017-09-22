@@ -532,6 +532,26 @@ function SLC.InitSLCRadioItemsForUnits()
 end
 
 
+-- Init SLC by pilotname
+function SLC.InitSLCForUnit(unit_name)
+  env.info("SLC - Calling InitSLCForUnit")
+  local u = UNIT:FindByName(unit_name)
+  if not u then 
+    env.info("SLC - InitSLCForUnit - unit does not exist - aborting")
+    return false 
+  end
+  for i = 1, #SLC.Config.PilotNames do
+    if SLC.Config.PilotNames[i] == unit_name then
+      env.info("SLC Pilot " .. unit_name .. " found, initializing")
+      SLC.AddSLCRadioItems(u:GetGroup(), SLC.Config.PilotNames[i])
+      return true
+    end
+  end
+  
+  env.info("SLC - InitSLCForUnit - Pilot Name not found in SLC table")
+  return false
+end
+
 
 
 -- Zone Functions
