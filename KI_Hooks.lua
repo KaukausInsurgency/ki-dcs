@@ -330,7 +330,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     return
 	end
 	
-	env.info("KI.eventHandler("..eventTable[event.id]..")"..tostring(event.id), 1)
+	env.info("KI.eventHandler()"..tostring(event.id), 1)
 	
 	if event.id == world.event.S_EVENT_MISSION_END then
 		

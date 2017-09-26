@@ -19,6 +19,7 @@ end
 
 function UT.EndTest()
   local msg = ""
+  env.info("UT.EndTest() Called (failed Cases: " .. #UT.FailedTestCases .. ")")
   if #UT.FailedTestCases > 0 then
     for i = 1, #UT.FailedTestCases do
       msg = msg .. "TEST CASE " .. UT.FailedTestCases[i] .. " FAILED\n"

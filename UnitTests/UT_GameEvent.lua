@@ -7,28 +7,15 @@ local GenerateEventMock = function(evt_id, target, t)
     }
 end
 
-local GameEvent = {}
-GameEvent.BIRTH = 15
-GameEvent.CRASH = 5
-GameEvent.EJECT = 6
-GameEvent.DEATH = 8
-GameEvent.PILOTDEATH = 9 
-GameEvent.ENGINESHUTDOWN = 18 
-GameEvent.ENGINESTART = 17 
-GameEvent.HUMANFAIL = 16 
-GameEvent.BASECAPTURE = 10 
-GameEvent.HIT = 10 
-GameEvent.SHOT = 1 
-GameEvent.TAKEOFF = 3
-GameEvent.LAND = 4
 
 UT.TestCase("KI_GameEvent", 
 function()
   UT.ValidateSetup(function() return Unit.getByName("SLCPilot1") ~= nil end)
   UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir1") ~= nil end)
   UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir2") ~= nil end)
-  UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir1"):getType() == "SU27" end)
-  UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir2"):getType() == "A10C" end)
+  UT.Log("GAME EVENT LOG: getTypename: " .. Unit.getByName("TestKIScoreEnemyAir1"):getTypeName() )
+  UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir1"):getTypeName() == "Su-25T" end)
+  UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyAir2"):getTypeName() == "A-10C" end)
   UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyGround1") ~= nil end)
   UT.ValidateSetup(function() return Unit.getByName("TestKIScoreEnemyGround2") ~= nil end)
   
@@ -36,15 +23,15 @@ function()
 end, 
 -- SETUP  
 function()
-  UT.TestData.EvtBirthMock = GenerateEventMock(GameEvent.BIRTH, Unit.getByName("SLCPilot1"))
-  UT.TestData.EvtCrashMock = GenerateEventMock(GameEvent.CRASH, Unit.getByName("SLCPilot1"), 1200)
-  UT.TestData.EvtEjectMock = GenerateEventMock(GameEvent.EJECT, Unit.getByName("SLCPilot1"), 1200)
-  UT.TestData.EvtDeathMock = GenerateEventMock(GameEvent.DEATH, Unit.getByName("SLCPilot1"), 1200)
-  UT.TestData.EvtPilotDeadMock = GenerateEventMock(GameEvent.PILOTDEATH, Unit.getByName("SLCPilot1"), 1600)
+  UT.TestData.EvtBirthMock = GenerateEventMock(world.event.S_EVENT_BIRTH, Unit.getByName("SLCPilot1"))
+  UT.TestData.EvtCrashMock = GenerateEventMock(world.event.S_EVENT_CRASH, Unit.getByName("SLCPilot1"), 1200)
+  UT.TestData.EvtEjectMock = GenerateEventMock(world.event.S_EVENT_EJECTION, Unit.getByName("SLCPilot1"), 1200)
+  UT.TestData.EvtDeathMock = GenerateEventMock(world.event.S_EVENT_DEAD, Unit.getByName("SLCPilot1"), 1200)
+  UT.TestData.EvtPilotDeadMock = GenerateEventMock(world.event.S_EVENT_PILOT_DEAD, Unit.getByName("SLCPilot1"), 1600)
   
   UT.TestData.EvtHitAirMock =
   {
-    id = GameEvent.HIT,
+    id = world.event.S_EVENT_HIT ,
     time = 945,
     initiator = Unit.getByName("SLCPilot1"),
     weapon = Weapon,
@@ -53,7 +40,7 @@ function()
   
   UT.TestData.EvtHitGroundMock =
   {
-    id = GameEvent.HIT,
+    id = world.event.S_EVENT_HIT ,
     time = 1110,
     initiator = Unit.getByName("SLCPilot1"),
     weapon = Weapon,
@@ -62,7 +49,7 @@ function()
   
   UT.TestData.EvtShotMock =
   {
-    id = GameEvent.SHOT,
+    id = world.event.S_EVENT_SHOT ,
     time = 900,
     initiator = Unit.getByName("SLCPilot1"),
     weapon = Weapon
@@ -70,7 +57,7 @@ function()
   
   UT.TestData.EvtPlayerTakeoffMock =
   {
-    id = GameEvent.TAKEOFF,
+    id = world.event.S_EVENT_TAKEOFF ,
     time = 600,
     initiator = Unit.getByName("SLCPilot1"),
     place = Airbase.getByName("Batumi"),
@@ -79,7 +66,7 @@ function()
   
   UT.TestData.EvtAITakeoffMock =
   {
-    id = GameEvent.TAKEOFF,
+    id = world.event.S_EVENT_TAKEOFF ,
     time = 500,
     initiator = Unit.getByName("TestKIScoreEnemyAir1"),
     place = Airbase.getByName("Tbilisi"),
@@ -88,7 +75,7 @@ function()
   
   UT.TestData.EvtLandMock =
   {
-    id = GameEvent.LAND,
+    id = world.event.S_EVENT_LAND ,
     time = 1200,
     initiator = Unit.getByName("SLCPilot1"),
     place = Airbase.getByName("Batumi"),
@@ -97,8 +84,88 @@ function()
   
 end,
 function()
+  
+  if true then
+    local ge = GameEvent.CreateGameEvent(1, 1, 1, "AAA", UT.TestData.EvtPlayerTakeoffMock, 1300)
+
+    UT.TestCompare(function() return ge ~= nil end)
+    UT.TestCompare(function() return ge["SessionID"] == 1 end)
+    UT.TestCompare(function() return ge["ServerID"] == 1 end)
+    UT.TestCompare(function() return ge["SortieID"] == 1 end)
+    UT.TestCompare(function() return ge["Event"] == "TAKEOFF" end)
+    UT.TestCompare(function() return ge["UCID"] == "AAA" end)
+    UT.TestCompare(function() return ge["PlayerName"] == "DemoPlayer" end)
+    UT.TestCompare(function() return ge["RealTime"] == 1300 end)
+    UT.TestCompare(function() return ge["GameTime"] == 600 end)
+    UT.TestCompare(function() return ge["Role"] == "Ka-50" end)
+    UT.TestCompare(function() return ge["Airfield"] == "Batumi" end)
+    UT.TestCompare(function() return ge["Weapon"] == nil end)
+    UT.TestCompare(function() return ge["WeaponCategory"] == nil end)
+    UT.TestCompare(function() return ge["TargetName"] == nil end)
+    UT.TestCompare(function() return ge["Target"] == nil end)
+    UT.TestCompare(function() return ge["TargetType"] == nil end)
+    UT.TestCompare(function() return ge["TargetCategory"] == nil end)
+    UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
+    UT.TestCompare(function() return ge["TargetPlayerUCID"] == nil end)
+    UT.TestCompare(function() return ge["TargetPlayerName"] == nil end)
+  end
+  
+  if true then
+    local ge = GameEvent.CreateGameEvent(1, 1, 1, "AAA", UT.TestData.EvtShotMock, 930)
+    UT.TestCompare(function() return ge["SessionID"] == 1 end)
+    UT.TestCompare(function() return ge["ServerID"] == 1 end)
+    UT.TestCompare(function() return ge["SortieID"] == 1 end)
+    UT.TestCompare(function() return ge["Event"] == "SHOT" end)
+    UT.TestCompare(function() return ge["UCID"] == "AAA" end)
+    UT.TestCompare(function() return ge["PlayerName"] == "DemoPlayer" end)
+    UT.TestCompare(function() return ge["RealTime"] == 930 end)
+    UT.TestCompare(function() return ge["GameTime"] == 930 end)
+    UT.TestCompare(function() return ge["Role"] == "KA50" end)
+    UT.TestCompare(function() return ge["Airfield"] == nil end)
+    UT.TestCompare(function() return ge["Weapon"] == "VIHKR" end)
+    UT.TestCompare(function() return ge["WeaponCategory"] == "ATGM" end)
+    UT.TestCompare(function() return ge["TargetName"] == nil end)
+    UT.TestCompare(function() return ge["Target"] == nil end)
+    UT.TestCompare(function() return ge["TargetType"] == nil end)
+    UT.TestCompare(function() return ge["TargetCategory"] == nil end)
+    UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
+    UT.TestCompare(function() return ge["TargetPlayerUCID"] == nil end)
+    UT.TestCompare(function() return ge["TargetPlayerName"] == nil end)
+  end
+  
+  if true then
+    local ge = GameEvent.CreateGameEvent(1, 1, 1, "AAA", UT.TestData.EvtHitAirMock, 930)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["SessionID"] == 1 end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["ServerID"] == 1 end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["SortieID"] == 1 end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Event"] == "HIT" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["UCID"] == "AAA" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["PlayerName"] == "DemoPlayer" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["RealTime"] == 930 end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["GameTime"] == 930 end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Role"] == "KA50" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Airfield"] == nil end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Weapon"] == "VIHKR" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["WeaponCategory"] == "ATGM" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetName"] == "TestKIScoreEnemyAir1" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Target"] == "Su-25T" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetType"] == "STRIKER" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetCategory"] == "AIR" end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetIsPlayer"] == false end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerUCID"] == nil end)
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerName"] == nil end)
+  end
+
+
+
+
+
+
+
+
+
   -- Test Case 1 - Raise Mock Event - GameEventQueue should record this event
-	KI.Score.eventHandler:handleEvent(UT.TestData.EvtPlayerTakeoffMock)	
+	KI.Hooks.GameEventHandler:onEvent(UT.TestData.EvtPlayerTakeoffMock)	
 	
 	UT.TestCompare(function() return KI.Data.GameEventQueue ~= nil end)
 	UT.TestCompare(function() return #KI.Data.GameEventQueue == 1 end)
@@ -133,8 +200,8 @@ function()
   end)
 
 	-- Test 3 - raise 2 more events
-	KI.Score.eventHandler:handleEvent(UT.TestData.EvtShotMock)	
-	KI.Score.eventHandler:handleEvent(UT.TestData.EvtHitAirMock)
+	KI.Hooks.GameEventHandler:onEvent(UT.TestData.EvtShotMock)	
+	KI.Hooks.GameEventHandler:onEvent(UT.TestData.EvtHitAirMock)
 	
 	UT.TestCompare(function() return KI.Data.GameEventQueue ~= nil end)
 	UT.TestCompare(function() return #KI.Data.GameEventQueue == 3 end)
@@ -171,16 +238,16 @@ function()
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Airfield"] == nil end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Weapon"] == "VIHKR" end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["WeaponCategory"] == "ATGM" end)
-	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetName"] == "SU27 Spawn #001" end)
-	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Target"] == "SU27" end)
-	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetType"] == "FIGHTER" end)
+	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetName"] == "TestKIScoreEnemyAir1" end)
+	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["Target"] == "Su-25T" end)
+	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetType"] == "STRIKER" end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetCategory"] == "AIR" end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetIsPlayer"] == false end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerUCID"] == nil end)
 	UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerName"] == nil end)
 	
 	-- Test 3 - Ignores any events that are AI only and not death, crash, eject, pilot death (we want to track whether an AI unit was killed, and use the database to process who got the kill and apply scores)
-	KI.Score.eventHandler:handleEvent(UT.TestData.EvtAITakeoffMock)
+	KI.Hooks.GameEventHandler:onEvent(UT.TestData.EvtAITakeoffMock)
 	UT.TestCompare(function() return #KI.Data.GameEventQueue == 3 end)		-- size should still be 3, ignoring this AI event
   
   -- Test 4 - Bulk Insert socket request message

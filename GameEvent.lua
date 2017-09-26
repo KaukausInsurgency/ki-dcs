@@ -8,12 +8,11 @@ Author: Igneous01
 
 GameEvent = {}
 
-function GameEvent.CreateGameEvent(sessionID, serverID, sortieID, dcs_event_obj, realTime)
+GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_obj, realTime)
   env.info("GameEvent.CreateGameEvent called")
   if not sessionID or 
      not serverID or 
      not sortieID or 
-     not ucid or 
      not dcs_event_obj or 
      not dcs_event_obj.initiator or
      not realTime then
@@ -63,7 +62,7 @@ function GameEvent.CreateGameEvent(sessionID, serverID, sortieID, dcs_event_obj,
     ServerID = serverID,
     SortieID = sortieID,
     UCID = KI.Query.FindUCID_Player(KI.MP.GetPlayerNameFix(playerName)),
-    Event = KI.GameEvent.EventKeyPair[dcs_event_obj.id],
+    Event = KI.Defines.EventNames[dcs_event_obj.id],
     PlayerName = playerName,
     RealTime = realTime,
     GameTime = dcs_event_obj.time,
