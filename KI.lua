@@ -40,8 +40,10 @@ local function ValidateKIStart()
   
   if not isValid then
     env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing:\n" .. msg)
+    return false
   else
     env.info("KI - STARTUP VALIDATION COMPLETE")
+    return true
   end
   
   return isValid

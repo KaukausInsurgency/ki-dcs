@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="KIWebApp.Global" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="KIWebApp.MvcApplication" Language="C#" %>

@@ -4,7 +4,6 @@
 
 env.info("KI - KAUKASUS INSURGENCY - STARTING UNIT TEST")
 
-
 local function ValidateKIStart()
   env.info("KI.ValidateKIStart() called")
   local requiredModules =
@@ -31,6 +30,8 @@ local function ValidateKIStart()
     if key == "JSON" then
       callSuccess, callResult = xpcall(function() return loadfile(item)() ~= nil end, errorHandler)
     elseif key == "Socket" then
+      package.path = package.path..";.\\LuaSocket\\?.lua"
+      package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
       callSuccess, callResult = xpcall(function() return require(item) ~= nil end, errorHandler)
     else
       callSuccess, callResult = xpcall(function() return item ~= nil end, errorHandler)
@@ -44,12 +45,12 @@ local function ValidateKIStart()
   
   if not isValid then
     env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing:\n" .. msg)
+    return false
   else
     env.info("KI - STARTUP VALIDATION COMPLETE")
+    return true
   end
 end
-
-ValidateKIStart()
 
 if not ValidateKIStart() then
   return false
@@ -58,6 +59,7 @@ end
 
 local path = "C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\"
 
+env.info("KI - Loading Files")
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
 assert(loadfile(path .. "GC.lua"))()
@@ -76,6 +78,8 @@ assert(loadfile(path .. "KI_Hooks.lua"))()
 assert(loadfile(path .. "AICOM_Config.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
 
+env.info("KI - Loading Tests")
+
 assert(loadfile(path .. "UnitTests\\UT.lua"))()
 
 -- IMPLEMENTED UNIT TESTS
@@ -87,13 +91,14 @@ assert(loadfile(path .. "UnitTests\\UT_AICOM.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Query.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
-
+assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 -- WIP
 
 
 -- TO BE IMPLEMENTED
 
-assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
+
 assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
@@ -113,5 +118,5 @@ UT.EndTest()
 --staticObj:destroy()
 --env.info("TestCargoSLC Alive (Should be false): " .. tostring(staticObj:isExist()))
 --env.info("TestCargoSLC GetLife (Should be false): " .. tostring(staticObj:getLife()))
-
+env.info("KI - Tests Complete")
 return true
