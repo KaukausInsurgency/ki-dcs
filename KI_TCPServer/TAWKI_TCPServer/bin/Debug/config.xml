@@ -1,0 +1,5 @@
+<Config>
+	<DBConnect>Server=localhost; Database=ki; Uid=root; Pwd=root;</DBConnect>
+	<Port>9983</Port>
+	<MaxConnections>4</MaxConnections>
+</Config>

@@ -2,7 +2,7 @@
 	"Action" : "InsertGameEvent",
 	"BulkInsert" : true,
 	"Data" :
-	{
+	[
 		{ 
 			"SessionID" : 1,
 			"ServerID" : 1,
@@ -91,5 +91,5 @@
 			"TargetPlayerUCID" : null,
 			"TargetPlayerName" : null
 		}
-	}
+	]
 }
