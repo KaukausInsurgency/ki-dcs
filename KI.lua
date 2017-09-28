@@ -86,6 +86,9 @@ GC.OnDespawn = KI.Hooks.GCOnDespawn
 KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
+KI.Init.SessionID()
+KI.Init.SortieID()
+KI.Init.ServerID()
 SLC.InitSLCRadioItemsForUnits()
 AICOM.Init()
 

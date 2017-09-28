@@ -110,6 +110,12 @@ KI.Data =
     "Spawn TankT72 Template",
     "Spawn WatchTower Template",
     "Spawn Outpost Template"
-  }
+  },
+  OnlinePlayers = {},
+  GameEventQueue = {},
+  Sorties = {},
+  SortieID = 0,
+  SessionID = 0,
+  ServerID = 0
+  
 }
-

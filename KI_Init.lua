@@ -73,12 +73,15 @@ end
 
 function KI.Init.SessionID()
   env.info("KI.Init.SessionID called")
-  
-  return 1
+  KI.Data.SessionID = 1
 end
 
 function KI.Init.SortieID()
   env.info("KI.Init.SortieID called")
-  
-  return 1
+  KI.Data.SortieID = 1
+end
+
+function KI.Init.ServerID()
+  env.info("KI.Init.ServerID called")
+  KI.Data.ServerID = 1
 end

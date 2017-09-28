@@ -184,7 +184,8 @@ KI.Data =
   GameEventQueue = {},
   Sorties = {},
   SortieID = 0,
-  SessionID = 0
+  SessionID = 0,
+  ServerID = 0
   
 }
 

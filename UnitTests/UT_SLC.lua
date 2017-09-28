@@ -1,3 +1,8 @@
+-- THERE ARE FAILURES IN THIS TEST CASE
+-- THESE ARE RELATED TO DCS BUG - When a StaticObject invokes :destroy(), 
+-- the :isExist() and :isAlive() still return true even though the object is dead 
+-- this causes duplicate unpacking of existing crates and fails test cases
+
 UT.TestCase("SLC INTERNAL", 
 function()
   UT.ValidateSetup(function() return GROUP:FindByName("KA50 SLC") ~= nil end)

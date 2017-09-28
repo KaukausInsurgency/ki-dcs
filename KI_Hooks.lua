@@ -298,24 +298,67 @@ function KI.Hooks.GameEventHandler:onEvent(event)
      event.id == world.event.S_EVENT_SHOOTING_START or
      event.id == world.event.S_EVENT_SHOOTING_END) and
      playerName then
-       
+    
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime())
+                )
+    return
   -- catch all hit events that were initiated by a player
   elseif event.id == world.event.S_EVENT_HIT and playerName then
-    
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime())
+                )
+    return
   elseif event.id == world.event.S_EVENT_TAKEOFF and playerName then
-    
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime())
+                )
+    return
   elseif event.id == world.event.S_EVENT_LAND and playerName then
-    
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime())
+                )
+    return
   -- catch all forms of death / airframe destruction
   elseif event.id == world.event.S_EVENT_CRASH or 
          event.id == world.event.S_EVENT_DEAD or
          event.id == world.event.S_EVENT_EJECTION or 
          event.id == world.event.S_EVENT_PILOT_DEAD or 
          event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
-           
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime())
+                )
+    return       
   elseif event.id == world.event.S_EVENT_REFUELING or
          event.id == world.event.S_EVENT_REFUELING_STOP and playerName then
-           
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           KI.Data.SortieID, 
+                                           event, 
+                                           timer.getTime()) 
+                )
+    return
   elseif event.id == world.event.S_EVENT_MISSION_START then
     
   elseif event.id == world.event.S_EVENT_MISSION_END then

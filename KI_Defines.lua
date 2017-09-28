@@ -40,15 +40,21 @@ KI.Defines.UnitCategories =
 
 KI.Defines.UnitTypes =
 {
+  ["Su-25T"] = "STRIKER",
+  
+  ["KA50"] = "ATTACK_HELO",
+  
+  ["UH1H"] = "TRANSPORT_HELO",
+  
+  ["T-55"] = "TANK",
   ["T72"] = "TANK",
   ["T90"] = "TANK",
   ["BTR80"] = "APC",
   ["SA11"] = "SAM",
   ["EWR"] = "RADAR",
   ["MANPAD"] = "MANPAD",
-  ["Rifleman"] = "INFANTRY",
-  ["KA50"] = "ATTACK_HELO",
-  ["UH1H"] = "TRANSPORT_HELO"
+  ["Rifleman"] = "INFANTRY"
+  
 }
 
 

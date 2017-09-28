@@ -9,13 +9,18 @@ Author: Igneous01
 GameEvent = {}
 
 GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_obj, realTime)
-  env.info("GameEvent.CreateGameEvent called")
-  if not sessionID or 
-     not serverID or 
-     not sortieID or 
-     not dcs_event_obj or 
-     not dcs_event_obj.initiator or
-     not realTime then
+  env.info("GameEvent.CreateGameEvent called (sessionID: " 
+           .. tostring(sessionID) .. ", serverID: " 
+           .. tostring(serverID) .. ", sortieID: " 
+           .. tostring(sortieID) .. ", dcs_event_obj: "
+           .. KI.Toolbox.Dump(dcs_event_obj) .. ", realTime: "
+           .. tostring(realTime) .. ")")
+  if sessionID == nil or 
+    serverID == nil or 
+    sortieID == nil or 
+    dcs_event_obj == nil or 
+    dcs_event_obj.initiator == nil or
+    realTime == nil then
     
     env.info("GameEvent.CreateGameEvent - invalid parameters (one or more is nil) exiting")
     return nil
@@ -38,7 +43,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
   end
   
   if dcs_event_obj.weapon then
-    weapon = dcs_event_obj.weapon:getTypeName()
+    weapon = dcs_event_obj.weapon:getDesc()["displayName"]
     weaponCategory = KI.Defines.WeaponCategories[dcs_event_obj.weapon:getCategory()]
   end
   
@@ -58,26 +63,26 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
   
   local gameevent =
   {
-    SessionID = sessionID,
-    ServerID = serverID,
-    SortieID = sortieID,
-    UCID = KI.Query.FindUCID_Player(KI.MP.GetPlayerNameFix(playerName)),
-    Event = KI.Defines.EventNames[dcs_event_obj.id],
-    PlayerName = playerName,
-    RealTime = realTime,
-    GameTime = dcs_event_obj.time,
-    Role = dcs_event_obj.initiator:getTypeName(),
+    ["SessionID"] = sessionID,
+    ["ServerID"] = serverID,
+    ["SortieID"] = sortieID,
+    ["UCID"] = KI.Query.FindUCID_Player(KI.MP.GetPlayerNameFix(playerName)),
+    ["Event"] = KI.Defines.EventNames[dcs_event_obj.id],
+    ["PlayerName"] = playerName,
+    ["RealTime"] = realTime,
+    ["GameTime"] = dcs_event_obj.time,
+    ["Role"] = dcs_event_obj.initiator:getTypeName(),
     -- optional fields
-    Airfield = airfield,
-    Weapon = weapon,
-    WeaponCategory = weaponCategory,
-    TargetName = targetName,
-    Target = target,
-    TargetType = targetType,
-    TargetCategory = targetCategory,
-    TargetIsPlayer = targetIsPlayer,
-    TargetPlayerUCID = targetPlayerUCID,
-    TargetPlayerName = targetPlayerName
+    ["Airfield"] = airfield,
+    ["Weapon"] = weapon,
+    ["WeaponCategory"] = weaponCategory,
+    ["TargetName"] = targetName,
+    ["TargetModel"] = target,
+    ["TargetType"] = targetType,
+    ["TargetCategory"] = targetCategory,
+    ["TargetIsPlayer"] = targetIsPlayer,
+    ["TargetPlayerUCID"] = targetPlayerUCID,
+    ["TargetPlayerName"] = targetPlayerName
   }
   
   return gameevent
