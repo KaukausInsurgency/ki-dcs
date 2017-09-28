@@ -304,7 +304,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            KI.Data.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
-                                           timer.getTime())
+                                           time.Now())
                 )
     return
   -- catch all hit events that were initiated by a player
@@ -314,26 +314,69 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            KI.Data.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
-                                           timer.getTime())
+                                           time.Now())
                 )
     return
   elseif event.id == world.event.S_EVENT_TAKEOFF and playerName then
-    table.insert(KI.Data.GameEventQueue, 
+    local pinfo = PlayerInfoList.FindPlayer(playerName)
+    
+    if pinfo then
+      
+      -- start a new sortie, and decrement lives counter
+      pinfo.SortieID = KI.IncrementSortieID()
+      pinfo.Lives = pinfo.Lives - 1
+      
+      if not PlayerInfoList.UpdatePlayer(pinfo) then
+        env.info("KI.Hooks.GameEventHandler:onEvent(TAKEOFF) - FATAL Error - failed to UpdatePlayer in PlayerInfoList")
+        return
+      end
+      
+      table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
                                            KI.Data.ServerID, 
-                                           KI.Data.SortieID, 
+                                           pinfo.SortieID, 
                                            event, 
-                                           timer.getTime())
+                                           time.Now())
                 )
+      
+      local placeName = event.place:getName() or "Ground"
+      local ownGroupID = 1    -- needs to be changed later so we can find out what group ID a player is part of
+      local msg = "_______________________________________________________________________________________________________\n\n"
+				msg = msg .. "  Have a good flight "..playerName.."\n\n"
+				msg = msg .. "  You took off from "..placeName..".\n\n"
+				msg = msg .. "  Lives - "..pinfo.Lives.."/".."5".."\n"
+				msg = msg .. "  Land your aircraft on a base to get your life back.\n"
+				msg = msg .. "_______________________________________________________________________________________________________\n"
+				
+				trigger.action.outTextForGroup(ownGroupID,msg,30)
+    else
+      env.info("KI.Hooks.GameEventHandler:onEvent(TAKEOFF) - FATAL Error - could not find player in PlayerInfoList")
+    end
+    
     return
   elseif event.id == world.event.S_EVENT_LAND and playerName then
-    table.insert(KI.Data.GameEventQueue, 
-                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
-                                           KI.Data.SortieID, 
-                                           event, 
-                                           timer.getTime())
-                )
+    local pinfo = PlayerInfoList.FindPlayer(playerName)
+    
+    if pinfo then
+      -- increment lives counter
+      pinfo.Lives = pinfo.Lives + 1
+      
+      if not PlayerInfoList.UpdatePlayer(pinfo) then
+        env.info("KI.Hooks.GameEventHandler:onEvent(LAND) - FATAL Error - failed to UpdatePlayer in PlayerInfoList")
+        return
+      end
+      
+      table.insert(KI.Data.GameEventQueue, 
+                   GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                             KI.Data.ServerID, 
+                                             pinfo.SortieID, 
+                                             event, 
+                                             time.Now())
+                  )
+    else
+      env.info("KI.Hooks.GameEventHandler:onEvent(LAND) - FATAL Error - could not find player in PlayerInfoList")
+    end
+    
     return
   -- catch all forms of death / airframe destruction
   elseif event.id == world.event.S_EVENT_CRASH or 
@@ -346,7 +389,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            KI.Data.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
-                                           timer.getTime())
+                                           time.Now())
                 )
     return       
   elseif event.id == world.event.S_EVENT_REFUELING or
@@ -356,7 +399,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            KI.Data.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
-                                           timer.getTime()) 
+                                           time.Now()) 
                 )
     return
   elseif event.id == world.event.S_EVENT_MISSION_START then
@@ -373,6 +416,31 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     return
 	end
 	
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 	env.info("KI.eventHandler()"..tostring(event.id), 1)
 	
 	if event.id == world.event.S_EVENT_MISSION_END then

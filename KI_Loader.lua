@@ -443,6 +443,23 @@ function KI.Loader.LoadData()
       return false
     end
     
+    if not _dataTable["SortieID"] then
+      env.info("KI.Loader.LoadData ERROR - SortieID could not be found in file")
+      return false
+    else
+      KI.Data.SortieID = _dataTable["SortieID"]
+    end
+    
+    if not _dataTable["SortieID"] then
+      env.info("KI.Loader.LoadData ERROR - SortieID could not be found in file")
+      return false
+    else
+      KI.Data.SortieID = _dataTable["SortieID"] -- load the current SortieID saved in memory
+    end
+    
+    -- Generate a new Session ID as this load function is only invoked once (at time of mission start)
+    KI.Data.SessionID = _dataTable["SessionID"] + 1
+    
     return true
   else
     env.info("KI.Loader.LoadData ERROR opening file (" .. KI.Config.PathMissionData .. ") error: " .. _err)

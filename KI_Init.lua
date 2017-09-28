@@ -85,3 +85,7 @@ function KI.Init.ServerID()
   env.info("KI.Init.ServerID called")
   KI.Data.ServerID = 1
 end
+
+function KI.Init.OnlinePlayers()
+  KI.Data.OnlinePlayers = PlayerInfoList
+end

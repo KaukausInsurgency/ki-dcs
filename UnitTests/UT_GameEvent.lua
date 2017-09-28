@@ -57,7 +57,7 @@ function()
     },
     ["TypeName"] = "weapons.missiles.Vikhr_M",
     ["Name"] = 16820992,
-    ["Category"] = 2,
+    ["Category"] = Weapon.Category.MISSILE,
   } 
   function UT.TestData.MockWeapon.getTypeName(me)
     return UT.TestData.MockWeapon["TypeName"]

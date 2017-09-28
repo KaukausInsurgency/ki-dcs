@@ -5,21 +5,6 @@ end
 
 KI.Config = {}
 
--- internal config - DO NOT TOUCH --
-KI.Config.SpawnID = 0
-
-function KI.IncrementSpawnID()
-  env.info("KI.IncrementSpawnID called")
-  KI.Config.SpawnID = KI.Config.SpawnID + 1
-  env.info("KI.IncrementSpawnID - New ID: " .. tostring(KI.Config.SpawnID))
-  return KI.Config.SpawnID
-end
-
-function KI.GenerateName(name)
-  return name .. tostring(KI.IncrementSpawnID())
-end
-
-
 -- 1 is red coalition, 2 is blue coalition -- no function at this time
 KI.Config.PlayerCoalition = 1 
 
@@ -154,38 +139,6 @@ KI.Config.SideMissions =
         KI.Toolbox.MessageRedCoalition("MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   }
-  
-}
-
-KI.Data = 
-{
-  CapturePoints = {},
-  FARPZones = {},
-  Depots = {},
-  FOBZones = {},
-  SideMissions = {},
-  ActiveMissions = {},
-  Templates = 
-  {
-    "TemplateInsCamp",
-    "InfantrySquadTemplate",
-    "ATSquadTemplate",
-    "MANPADSSquadTemplate",
-    "Spawn FuelTruck Template",
-    "Spawn CommandTruck Template",
-    "Spawn AmmoTruck Template",
-    "Spawn PowerTruck Template",
-    "Spawn MechBTR Template",
-    "Spawn TankT72 Template",
-    "Spawn WatchTower Template",
-    "Spawn Outpost Template"
-  },
-  OnlinePlayers = {},
-  GameEventQueue = {},
-  Sorties = {},
-  SortieID = 0,
-  SessionID = 0,
-  ServerID = 0
   
 }
 

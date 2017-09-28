@@ -65,6 +65,7 @@ assert(loadfile(path .. "DSMT.lua"))()
 assert(loadfile(path .. "CP.lua"))()
 assert(loadfile(path .. "GameEvent.lua"))()
 assert(loadfile(path .. "KI_Config.lua"))()
+assert(loadfile(path .. "KI_Data.lua"))()
 assert(loadfile(path .. "KI_Defines.lua"))()
 assert(loadfile(path .. "KI_Socket.lua"))()
 assert(loadfile(path .. "KI_Query.lua"))()
@@ -83,13 +84,17 @@ SLC.Config.PreOnRadioAction = KI.Hooks.SLCPreOnRadioAction
 SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
 --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
 GC.OnDespawn = KI.Hooks.GCOnDespawn
+
 KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
 KI.Init.SessionID()
 KI.Init.SortieID()
 KI.Init.ServerID()
+KI.Init.OnlinePlayers()
+
 SLC.InitSLCRadioItemsForUnits()
+
 AICOM.Init()
 
 
