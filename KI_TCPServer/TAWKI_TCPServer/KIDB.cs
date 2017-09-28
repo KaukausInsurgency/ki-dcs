@@ -30,43 +30,50 @@ namespace TAWKI_TCPServer
             }
         }
 
-        public static Tuple<object, string> SendToDB(string log, string action, bool isBulkInsert, 
-                                                     List<Dictionary<string, object>> dataDictionary)
+        public static ProtocolResponseSingleData SendToDBSingleData(string log, string action, dynamic j)
         {
-            Tuple<object, string> result = null;
+            // serialize a new json string for just the data by itself
+            string jdataString = Newtonsoft.Json.JsonConvert.SerializeObject(j["Data"]);
+            // now deserialize this string into a list of dictionaries for parsing
+            Dictionary<string, object> dataDictionary = 
+                Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(jdataString);
+
+            ProtocolResponseSingleData result = new ProtocolResponseSingleData();
+            result.Action = action;
+            result.Error = "";
+            result.Data = new List<object>();
+
             MySql.Data.MySqlClient.MySqlConnection _conn = null;
             MySql.Data.MySqlClient.MySqlDataReader rdr = null;
+
             try
             {
-                
-
+                _conn = new MySql.Data.MySqlClient.MySqlConnection(DBConnection);
+                _conn.Open();
+                MySql.Data.MySqlClient.MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(action);
+                cmd.Connection = _conn;
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 foreach (var d in dataDictionary)
                 {
-                    _conn = new MySql.Data.MySqlClient.MySqlConnection(DBConnection);
-                    _conn.Open();
-                    MySql.Data.MySqlClient.MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(action);
-                    cmd.Connection = _conn;
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    foreach (var kv in d)
+                    cmd.Parameters.AddWithValue(d.Key, d.Value);                 
+                }
+                rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    for (int i = 0; i < rdr.FieldCount; i++)
                     {
-                        cmd.Parameters.AddWithValue(kv.Key, kv.Value);
+                        result.Data.Add(rdr[i]);
                     }
-                    rdr = cmd.ExecuteReader();
-                    if (rdr.Read())
-                        result = new Tuple<object, string>(rdr[0], "");
-                    else
-                        result = new Tuple<object, string>(null, "No results returned");
-                    rdr.Close();
-                    _conn.Close();
-                    
                 }
 
+                rdr.Close();
+                _conn.Close();
             }
             catch (Exception ex)
             {
                 LogToFile("Error executing query against MySQL (Action: " + action + ") - " + ex.Message, log);
                 Console.WriteLine("Problem Encountered Sending Data to DB " + ex.Message);
-                result = new Tuple<object, string>(null, "Error executing query against MySQL (Action: " + action + ") - " + ex.Message);
+                result.Error = "Error executing query against MySQL (Action: " + action + ") - " + ex.Message;
             }
             finally
             {
@@ -80,6 +87,74 @@ namespace TAWKI_TCPServer
             }
             
             return result;
+        }
+
+        public static ProtocolResponseMultiData SendToDBMultiData(string log, string action, dynamic j)
+        {
+
+            // serialize a new json string for just the data by itself
+            string jdataString = Newtonsoft.Json.JsonConvert.SerializeObject(j["Data"]);
+            // now deserialize this string into a list of dictionaries for parsing
+            List<Dictionary<string, object>> dataDictionary = 
+                Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jdataString);
+
+            ProtocolResponseMultiData result = new ProtocolResponseMultiData();
+            result.Action = action;
+            result.Error = "";
+            result.Data = new List<List<object>>();
+
+            MySql.Data.MySqlClient.MySqlConnection _conn = null;
+            MySql.Data.MySqlClient.MySqlDataReader rdr = null;
+
+            try
+            {
+                foreach (var d in dataDictionary)
+                {
+                    _conn = new MySql.Data.MySqlClient.MySqlConnection(DBConnection);
+                    _conn.Open();
+                    MySql.Data.MySqlClient.MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(action);
+                    cmd.Connection = _conn;
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    foreach (var kv in d)
+                    {
+                        cmd.Parameters.AddWithValue(kv.Key, kv.Value);
+                    }
+                    rdr = cmd.ExecuteReader();
+                    if (rdr.Read())
+                    {
+                        List<object> result_set = new List<object>();
+                        for (int i = 0; i < rdr.FieldCount; i++)
+                        {
+                            result_set.Add(rdr[i]);
+                        }
+                        result.Data.Add(result_set);
+                    }
+                    else
+                    {
+                        result.Error += "No Results Returned\n";
+                    }
+                    rdr.Close();
+                    _conn.Close();            
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToFile("Error executing query against MySQL (Action: " + action + ") - " + ex.Message, log);
+                Console.WriteLine("Problem Encountered Sending Data to DB " + ex.Message);
+                result.Error = "Error executing query against MySQL (Action: " + action + ") - " + ex.Message;
+            }
+            finally
+            {
+                if (_conn != null)
+                    if (_conn.State == System.Data.ConnectionState.Open || _conn.State == System.Data.ConnectionState.Connecting)
+                        _conn.Close();
+
+                if (rdr != null)
+                    if (!rdr.IsClosed)
+                        rdr.Close();
+            }
+            
+            return result;         
         }
 
         public static void OnConnect(object sender, IPCConnectedEventArgs e)
@@ -108,26 +183,29 @@ namespace TAWKI_TCPServer
                 // Verify the request format is valid
                 if (j["Action"] != null && j["BulkInsert"] != null && j["Data"] != null)
                 {
-                    // serialize a new json string for just the data by itself
-                    string jdataString = Newtonsoft.Json.JsonConvert.SerializeObject(j["Data"]);
-                    // now deserialize this string into a list of dictionaries for parsing
-                    List<Dictionary<string, object>> jdict = 
-                        Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jdataString);
-
                     string action = j["Action"];
-                    bool bulkInsert = j["BulkInsert"];
-
-                    Tuple<object, string> result = SendToDB(((SocketClient)(sender)).LogFile, action, bulkInsert, jdict);
-
-                    if (result.Item1 == null)
+                    bool bulkInsert = j["BulkInsert"];   
+                    if (bulkInsert)
                     {
-                        string jsonResponse = "{ \"Action\" : " + j["Action"] + ", \"Result\" : false, \"Error\" : \"" + result.Item2 + "\", \"Data\" : null }";
-                        ((SocketClient)(sender)).Write(jsonResponse);
+                        ProtocolResponseMultiData resp = SendToDBMultiData(((SocketClient)(sender)).LogFile, action, j);
+                        if (!string.IsNullOrWhiteSpace(resp.Error))
+                            resp.Result = false;
+                        else
+                            resp.Result = true;
+
+                        string jsonResp = JsonConvert.SerializeObject(resp);
+                        ((SocketClient)(sender)).Write(jsonResp);
                     }
                     else
                     {
-                        string jsonResponse = "{ \"Action\" : " + j["Action"] + ", \"Result\" : true, \"Error\" : \"\", \"Data\" : " + result.Item1 + " }";
-                        ((SocketClient)(sender)).Write(jsonResponse);
+                        ProtocolResponseSingleData resp = SendToDBSingleData(((SocketClient)(sender)).LogFile, action, j);
+                        if (!string.IsNullOrWhiteSpace(resp.Error))
+                            resp.Result = false;
+                        else
+                            resp.Result = true;
+
+                        string jsonResp = JsonConvert.SerializeObject(resp);
+                        ((SocketClient)(sender)).Write(jsonResp);
                     }
                 }
                 else
@@ -141,6 +219,8 @@ namespace TAWKI_TCPServer
             {
                 Console.WriteLine("Exception encountered during OnReceived handler: " + ex.Message);
                 LogToFile("Exception encountered during OnReceived handler: " + ex.Message, ((SocketClient)(sender)).LogFile);
+                string jsonResponse = "{ \"Action\" : \"UNKNOWN\", \"Result\" : false, \"Error\" : \"Malformed JSON Request Received\", \"Data\" : null }";
+                ((SocketClient)(sender)).Write(jsonResponse);
             }
             finally
             {

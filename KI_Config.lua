@@ -60,6 +60,7 @@ KI.Config.DBServerPort = 9983
 
 -- Your server name (Only really used if supporting multi-tenant game servers)
 KI.Config.ServerName = "My Kaukasus Insurgency Server"
+KI.Config.ServerID = 1
 
 -- configures capture points in mission
 KI.Config.CP =

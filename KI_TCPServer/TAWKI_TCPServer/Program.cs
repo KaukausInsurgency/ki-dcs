@@ -15,8 +15,29 @@ namespace TAWKI_TCPServer
             //    Console.WriteLine("Invalid Arguments given - expected PORT MAXCONNECTIONS");
             //    return;
             //}
+            Console.WriteLine("Reading Config...");
             ConfigReader cr = new ConfigReader();
             KIDB.DBConnection = cr.DBConnect;
+
+            Console.WriteLine("Attempting To Connect to database...");
+            MySql.Data.MySqlClient.MySqlConnection test_connection = new MySql.Data.MySqlClient.MySqlConnection(cr.DBConnect);
+            try
+            {
+                test_connection.Open();
+                Console.WriteLine("Successful Connection to Database");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed To Connect to Database - " + ex.Message);
+            }
+            finally
+            {
+                if (test_connection != null)
+                    if (test_connection.State == System.Data.ConnectionState.Open 
+                        || test_connection.State == System.Data.ConnectionState.Connecting)
+                        test_connection.Close();
+                test_connection = null;
+            }
 
             SocketServer server;
             try

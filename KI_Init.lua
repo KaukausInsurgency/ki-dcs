@@ -71,19 +71,20 @@ function KI.Init.SideMissions()
   end
 end
 
-function KI.Init.SessionID()
-  env.info("KI.Init.SessionID called")
-  KI.Data.SessionID = 1
-end
-
-function KI.Init.SortieID()
-  env.info("KI.Init.SortieID called")
-  KI.Data.SortieID = 1
-end
-
-function KI.Init.ServerID()
-  env.info("KI.Init.ServerID called")
-  KI.Data.ServerID = 1
+-- sends message to database asking for a new session to be generated - SessionID is returned from DB
+function KI.Init.RequestNewSession()
+  env.info("KI.Init.RequestNewSession called")
+  local request = KI.Socket.CreateMessage("CreateSession", false, { ServerID = KI.Config.ServerID })
+  if KI.Socket.SendUntilComplete(request) then
+    local response = KI.Socket.ReceiveUntilComplete()
+    if response then
+      KI.Data.SessionID = response
+    else
+      env.info("KI.Init.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+    end
+  else
+    env.info("KI.Init.RequestNewSession - FATAL ERROR - COULD NOT OBTAIN SESSION ID FROM DATABASE")
+  end
 end
 
 function KI.Init.OnlinePlayers()

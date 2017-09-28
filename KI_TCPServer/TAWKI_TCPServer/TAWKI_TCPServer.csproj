@@ -58,6 +58,7 @@
     <Compile Include="IPCReceivedEventArgs.cs" />
     <Compile Include="IPCSendEventArgs.cs" />
     <Compile Include="KIDB.cs" />
+    <Compile Include="ProtocolResponse.cs" />
     <Compile Include="SocketServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

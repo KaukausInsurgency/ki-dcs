@@ -85,13 +85,13 @@ SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
 --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
 GC.OnDespawn = KI.Hooks.GCOnDespawn
 
+KI.Socket.Connect()
+
 KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
-KI.Init.SessionID()
-KI.Init.SortieID()
-KI.Init.ServerID()
 KI.Init.OnlinePlayers()
+KI.Init.RequestNewSession()
 
 SLC.InitSLCRadioItemsForUnits()
 

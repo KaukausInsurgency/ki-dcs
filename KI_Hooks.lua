@@ -301,7 +301,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
+                                           KI.Config.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
                                            time.Now())
@@ -311,7 +311,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
   elseif event.id == world.event.S_EVENT_HIT and playerName then
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
+                                           KI.Config.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
                                            time.Now())
@@ -333,7 +333,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
       
       table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
+                                           KI.Config.ServerID, 
                                            pinfo.SortieID, 
                                            event, 
                                            time.Now())
@@ -368,7 +368,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
       
       table.insert(KI.Data.GameEventQueue, 
                    GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                             KI.Data.ServerID, 
+                                             KI.Config.ServerID, 
                                              pinfo.SortieID, 
                                              event, 
                                              time.Now())
@@ -386,7 +386,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
+                                           KI.Config.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
                                            time.Now())
@@ -396,7 +396,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_REFUELING_STOP and playerName then
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Data.ServerID, 
+                                           KI.Config.ServerID, 
                                            KI.Data.SortieID, 
                                            event, 
                                            time.Now()) 

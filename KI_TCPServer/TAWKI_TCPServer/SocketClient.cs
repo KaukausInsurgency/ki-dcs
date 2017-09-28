@@ -296,8 +296,8 @@ namespace TAWKI_TCPServer
 
         public void Write(string msg)
         {
-            //string nmsg = string.Format("{0:D6}", msg.Length) + msg;
-            string nmsg = msg;
+            string nmsg = string.Format("{0:D6}", msg.Length) + msg;
+            //string nmsg = msg;
             _buffer.Clear();
             _buffer = new SockBuffer(nmsg.Length);
             _buffer.Encode(nmsg);
