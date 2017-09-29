@@ -1,102 +1,106 @@
 -- Mock objects for debugging outside of DCS
 
-net = {}
-net.log = function(m) print(m) end
-net.get_player_info = function(id, param)
-  local playerObj = {}
-  if id == 1 then
-    playerObj =
-    {
-      ucid = "SERVERUCID",
-      name = "Server",
-      id = 1,
-      ipaddr = "127.0.0.0:9999",
-      slot = 100
-    }
-  elseif id == 2 then
-    playerObj =
-    {
-      ucid = "AAA",
-      name = "Igneous",
-      id = 2,
-      ipaddr = "127.0.0.1:9999",
-      slot = 1
-    }
-  elseif id == 3 then
-    playerObj =
-    {
-      ucid = "BBB",
-      name = "DemoPlayer",
-      id = 3,
-      ipaddr = "127.0.0.2:9999",
-      slot = 2
-    }
-  elseif id == 4 then
-    playerObj =
-    {
-      ucid = "CCC",
-      name = "Jon Snow",
-      id = 4,
-      ipaddr = "127.0.0.3:9999",
-      slot = 3
-    }
-  end
-  
-  if param then
-    if param == "ucid" then
-      return playerObj.ucid
-    elseif param == "name" then
-      return playerObj.name
+local JSONPath = "\\Scripts\\JSON.lua"
+local IsMockTest = false
+
+if IsMockTest then
+  net = {}
+  net.log = function(m) print(m) end
+  net.get_player_info = function(id, param)
+    local playerObj = {}
+    if id == 1 then
+      playerObj =
+      {
+        ucid = "SERVERUCID",
+        name = "Server",
+        id = 1,
+        ipaddr = "127.0.0.0:9999",
+        slot = 100
+      }
+    elseif id == 2 then
+      playerObj =
+      {
+        ucid = "AAA",
+        name = "Igneous",
+        id = 2,
+        ipaddr = "127.0.0.1:9999",
+        slot = 1
+      }
+    elseif id == 3 then
+      playerObj =
+      {
+        ucid = "BBB",
+        name = "DemoPlayer",
+        id = 3,
+        ipaddr = "127.0.0.2:9999",
+        slot = 2
+      }
+    elseif id == 4 then
+      playerObj =
+      {
+        ucid = "CCC",
+        name = "Jon Snow",
+        id = 4,
+        ipaddr = "127.0.0.3:9999",
+        slot = 3
+      }
     end
-  else
-    return playerObj
+    
+    if param then
+      if param == "ucid" then
+        return playerObj.ucid
+      elseif param == "name" then
+        return playerObj.name
+      end
+    else
+      return playerObj
+    end
   end
-end
-net.send_chat_to = function(msg, toId, fromID)
-  print("to: " .. tostring(toId) .. " - " .. msg)
-end
-lfs = {}
-lfs.writedir = function() return "C:\\Users\\Sapphire\\Saved Games\\DCS\\" end
-DCS = {}
-DCS.Clock = 20
-DCS.getUnitType = function(slotID)
-  if slotID == 1 then
-    return "KA50"
-  elseif slotID == 2 then
-    return "A10C"
-  else
-    return "observer"
+  net.send_chat_to = function(msg, toId, fromID)
+    print("to: " .. tostring(toId) .. " - " .. msg)
   end
-end
-DCS.getMissionName = function() return "Kaukasus Insurgency" end
-DCS.setUserCallbacks = function(obj) 
-  DCS.onSimulationFrame = obj.onSimulationFrame
-  DCS.onPlayerTryConnect = obj.onPlayerTryConnect
-  DCS.onPlayerTryChangeSlot = obj.onPlayerTryChangeSlot
-  DCS.onGameEvent = obj.onGameEvent
-  DCS.onPlayerDisconnect = obj.onPlayerDisconnect
-  DCS.onPlayerConnect = obj.onPlayerConnect
-  DCS.onShowPool = obj.onShowPool
-end
-DCS.getUnitType = function(slotID) return "KA50" end
-DCS.isServer = function() return true end
-DCS.isMultiplayer = function() return true end
-DCS.getModelTime = function() 
-  local _t = DCS.Clock 
-  DCS.Clock = DCS.Clock + 5
-  return _t
-end
-DCS.getRealTime = function() 
-  local _t = DCS.Clock 
-  DCS.Clock = DCS.Clock + 5
-  return _t
-end
+  lfs = {}
+  lfs.writedir = function() return "C:\\Users\\Sapphire\\Saved Games\\DCS\\" end
+  DCS = {}
+  DCS.Clock = 20
+  DCS.getUnitType = function(slotID)
+    if slotID == 1 then
+      return "KA50"
+    elseif slotID == 2 then
+      return "A10C"
+    else
+      return "observer"
+    end
+  end
+  DCS.getMissionName = function() return "Kaukasus Insurgency" end
+  DCS.setUserCallbacks = function(obj) 
+    DCS.onSimulationFrame = obj.onSimulationFrame
+    DCS.onPlayerTryConnect = obj.onPlayerTryConnect
+    DCS.onPlayerTryChangeSlot = obj.onPlayerTryChangeSlot
+    DCS.onGameEvent = obj.onGameEvent
+    DCS.onPlayerDisconnect = obj.onPlayerDisconnect
+    DCS.onPlayerConnect = obj.onPlayerConnect
+    DCS.onShowPool = obj.onShowPool
+  end
+  DCS.getUnitType = function(slotID) return "KA50" end
+  DCS.isServer = function() return true end
+  DCS.isMultiplayer = function() return true end
+  DCS.getModelTime = function() 
+    local _t = DCS.Clock 
+    DCS.Clock = DCS.Clock + 5
+    return _t
+  end
+  DCS.getRealTime = function() 
+    local _t = DCS.Clock 
+    DCS.Clock = DCS.Clock + 5
+    return _t
+  end
 
-local function sleep(n)
-  if n > 0 then os.execute("ping -n " .. tonumber(n+1) .. " localhost > NUL") end
-end
+  local function sleep(n)
+    if n > 0 then os.execute("ping -n " .. tonumber(n+1) .. " localhost > NUL") end
+  end
 
-local function Main()
+  local function Main()
     if DCS.onPlayerTryConnect("127.0.0.0:9999", "Server", "SERVERUCID", 1) then
       DCS.onPlayerConnect(1)
     end
@@ -141,8 +145,10 @@ local function Main()
     else
       DCS.onPlayerDisconnect(3, "Banned")
     end
-end
-
+  end
+  
+  JSONPath = "S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua"
+end 
 -- END TEST MOCKUP DATA
 
 
@@ -157,14 +163,17 @@ net.log("KI Server Invoked - Starting KI Server Tools...")
 package.path  = package.path..";.\\LuaSocket\\?.lua;"
 package.cpath = package.cpath..";.\\LuaSocket\\?.dll;"
 
-local JSON = loadfile("S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua")()
+local JSON = loadfile(JSONPath)()
 local socket = require("socket")
+
+
 
 KIServer = {}
 KIServer.Config = {}
 KIServer.OnlinePlayers = {} 			-- hash of current online players (using PlayerID as key) format { UCID, UnitName }
-KIServer.BannedPlayers = {}				-- array of banned players (ucid, ucid, ucid, etc...)
-KIServer.NoLivesPlayers = {}      -- hash of players that have no more lives (using UCID as key)
+KIServer.BannedPlayers = {}
+KIServer.NoLivesPlayers = {}
+KIServer.SessionPlayers = {}			-- hash of player info (using UCID as key) format { UCID, Name, Lives, Banned }
 KIServer.SocketDelimiter = "\n"	  -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
@@ -228,6 +237,8 @@ local function InitKIServerConfig()
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = tonumber(_config["GAMEGUI_SEND_TO_PORT"])
     KIServer.Config.GAMEGUI_RECEIVE_PORT = tonumber(_config["GAMEGUI_RECEIVE_PORT"])	
+    KIServer.Config.TCP_SERVER_PORT = tonumber(_config["TCP_SERVER_PORT"])
+    KIServer.Config.TCP_SERVER_IP = tonumber(_config["TCP_SERVER_IP"])
     
     KIServer.Config.WelcomeMessages = _config["WelcomeMessages"]
   else
@@ -272,6 +283,10 @@ KIServer.UDPReceiveSocket:setsockname("*", KIServer.Config.GAMEGUI_RECEIVE_PORT)
 KIServer.UDPReceiveSocket:settimeout(.0001) --receive timer
 
 
+KIServer.ErrorHandler = function(err)
+  net.log("KIServer - Caught Error - " .. err)
+end
+
 -- Checks whether the KI Server is running, by checking if the current game session is Multiplayer + Server Side
 -- And if the mission name contains 'Kaukasus Insurgency'
 KIServer.IsRunning = function()
@@ -292,20 +307,54 @@ KIServer.IsRunning = function()
 end
 
 
+KIServer.RequestPlayerInfo = function(p_ucid)
+  net.log("KIServer.RequestPlayerInfo called")
+  
+  if not KIServer.TCPSocket.IsConnected then
+    if not KIServer.TCPSocket.Connect() then
+      return nil
+    end
+  else
+    local request = KIServer.TCPSocket.CreateMessage("GetPlayerInfo", false, { UCID = p_ucid })
+    if not KIServer.TCPSocket.SendUntilComplete(request) then
+      return nil
+    else
+      local response = KIServer.TCPServer.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete())
+      if response and response.Success then
+        local pinfo =
+        {
+          UCID = response.Data[0],
+          Name = response.Data[1],
+          Lives = response.Data[2],
+          Banned = response.Data[3]
+        }
+        return pinfo
+      elseif response and response.Error then
+        net.log("KIServer.RequestPlayerInfo ERROR - " .. response.Error)
+        return nil
+      else
+        net.log("KIServer.RequestPlayerInfo ERROR - UNKNOWN ERROR")
+        return nil
+      end
+    end
+  end
+end
+
 
 KIServer.IsPlayerBanned = function(ucid)
-	if KIServer.BannedPlayers[ucid] ~= nil then
-		return true
+  local pinfo = KIServer.SessionPlayers[ucid]
+	if pinfo ~= nil then
+		return pinfo.Banned
 	else
 		return false
 	end
 end
 
 
-
 KIServer.IsPlayerOutOfLives = function(ucid)
-  if KIServer.NoLivesPlayers[ucid] ~= nil then
-		return true
+  local pinfo = KIServer.SessionPlayers[ucid]
+  if pinfo ~= nil then
+		return pinfo.Lives < 1
 	else
 		return false
 	end
@@ -337,6 +386,157 @@ function KIServer.SanitizeArray(array)
 end
 
 
+
+
+
+
+
+-- TCPSocket INIT
+
+KIServer.TCPSocket = 
+{
+  Object = nil,
+  IsConnected = false
+}
+
+
+function KIServer.TCPSocket.Connect()
+	net.log("KIServer.TCPSocket.Connect called")
+	-- start connection
+	KIServer.TCPSocket.Object = socket.tcp()
+	KIServer.TCPSocket.Object:settimeout(.0001)
+  KIServer.TCPSocket.IsConnected = false
+	local _r, _err = KIServer.TCPSocket.Object:connect(KIServer.Config.TCP_SERVER_IP, KIServer.Config.TCP_SERVER_PORT)
+  
+  if _r ~= 1 or _err then
+    net.log("KIServer.TCPSocket.Connect - ERROR - Failed to connect to TCP Server (Reason: " .. _err .. ")")
+    KIServer.TCPSocket.IsConnected = false
+    return false
+  else
+    KIServer.TCPSocket.IsConnected = true
+    return true
+  end
+end
+
+function KIServer.TCPSocket.Disconnect()
+  net.log("KIServer.TCPSocket.Disconnect called")
+  KIServer.TCPSocket.Object:close()
+  KIServer.TCPSocket.IsConnected = false
+end
+
+
+-- Creates the message in the correct format the server expects
+-- Encodes into JSON, and appends size of message in first 6 characters of string
+function KIServer.TCPSocket.CreateMessage(action_name, is_bulk_query, data)
+  net.log("KIServer.TCPSocket.CreateMessage called")
+  local _msg = 
+  {
+    Action = action_name,
+    BulkQuery = is_bulk_query,
+    Data = data,
+  }
+  local _jsonmsg = JSON:encode(_msg)
+  -- sending 6 char header that is size of msg string
+  local _m = string.format("%06d", string.len(_jsonmsg)) .. _jsonmsg
+  net.log("KIServer.TCPSocket.CreateMessage - dumping message")
+  net.log(_m)
+  return _m
+end
+
+
+-- Decodes message from JSON string into LUA Table Object
+function KIServer.TCPSocket.DecodeMessage(msg)
+  net.log("KIServer.TCPSocket.DecodeMessage called")
+  local _err = ""
+  local _result, _luaObject = xpcall(JSON:decode(msg), function(err) _err = err end)
+  if _result and _luaObject ~= nil then
+    return _luaObject
+  elseif _err ~= "" then
+    net.log("KIServer.TCPSocket.DecodeMessage ERROR - " .. _err)
+    return nil
+  else
+    net.log("KIServer.TCPSocket.DecodeMessage ERROR - UNKNOWN ERROR")
+    return nil
+  end
+end
+
+
+
+function KIServer.TCPSocket.SendUntilComplete(msg)
+  net.log("KIServer.TCPSocket.SendUntilComplete called")
+  if not KIServer.TCPSocket.IsConnected then
+    net.log("KIServer.TCPSocket.SendUntilComplete - ERROR - Socket is not connected to DB server")
+    return false
+  end
+  local bytes_sent = 0
+  local msg_size = string.len(msg)
+  -- copy the original msg parameter as we want to manipulate the copy without changing the original (but if strings are not by ref - why bother?)
+  local _msgCopy = msg 
+  while bytes_sent ~= msg_size do
+    local _indexSent, _error, _lastIndexSent = KIServer.TCPSocket.Object:send(_msgCopy)
+    
+    -- successful send
+    if _indexSent then
+      bytes_sent = bytes_sent + _indexSent
+    else
+      -- error encountered - check third parameter to see if at least some data was sent and retry
+      if _lastIndexSent ~= 0 then
+        net.log("KI.Socket.SendUntilComplete - partial send occurred (reason: " .. _error .. ") - Continuing")
+        bytes_sent = bytes_sent + _lastIndexSent
+      else
+        -- complete failure - log
+        net.log("KI.Socket.SendUntilComplete - ERROR in sending data (reason: " .. _error .. ")")
+        KIServer.TCPSocket.Disconnect()
+        return false
+      end
+    end
+    net.log("KIServer.TCPSocket.SendUntilComplete - bytes sent: "..tostring(bytes_sent))
+    net.log("KIServer.TCPSocket.SendUntilComplete - sent string: '" .. _msgCopy:sub(1, bytes_sent).."'")
+    _msgCopy = _msgCopy:sub(bytes_sent + 1) -- shrink the msg down to what has not been sent
+    net.log("KIServer.TCPSocket.SendUntilComplete - Remaining buffer length: " 
+              .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
+  end
+  
+  return true
+end
+
+
+function KIServer.TCPSocket.ReceiveUntilComplete()
+  local l, _error, header = KIServer.TCPSocket.Object:receive(6)
+  
+	if header and header:len() == 6 then
+    local msg_size = tonumber(header)
+    local l, _error, msg = KIServer.TCPSocket.Object:receive(msg_size)
+    
+    if msg and msg:len() == msg_size then
+      net.log("KIServer.TCPSocket.ReceiveUntilComplete - received data transmission")
+      return msg
+    elseif msg and msg:len() < msg_size then
+      net.log("KIServer.TCPSocket.ReceiveUntilComplete - partial data received (Reason: " .. _error .. ")")
+      net.log("KIServer.TCPSocket.ReceiveUntilComplete - trying again")
+      local l, _error, partmsg = KIServer.TCPSocket.Object:receive(msg_size - msg:len())
+      -- check if the partial message came through and is the size we are expecting it to be
+      if partmsg and partmsg:len() == (msg_size - msg:len()) then
+        msg = msg .. partmsg
+        return msg
+      else
+        net.log("KIServer.TCPSocket.ReceiveUntilComplete - second try failed to receive (Reason: " .. _error .. ")")
+        KIServer.TCPSocket.Disconnect()
+        return nil
+      end
+    else
+      net.log("KIServer.TCPSocket.ReceiveUntilComplete - ERROR in receiving body data (Reason: " .. _error .. ")")
+      KIServer.TCPSocket.Disconnect()
+      return nil
+    end
+  else
+    net.log("KIServer.TCPSocket.ReceiveUntilComplete - ERROR in receiving header data (reason: " .. _error .. ")")
+    KIServer.TCPSocket.Disconnect()
+    return nil
+  end
+end
+
+-- end Server TCP Socket
 
 
 
@@ -417,6 +617,12 @@ KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID)
 		return false, "connection denied for invalid connection parameters"
 	end
 	
+  local player_info = KIServer.RequestPlayerInfo(ucid)  -- TCP Server / Database Call
+  
+  if player_info ~= nil then
+    KIServer.SessionPlayers[ucid] = player_info
+  end
+  
 	if KIServer.IsPlayerBanned(ucid) then
 		net.log("KIHooks.onPlayerTryConnect() - Banned player " .. name .. " tried to connect! Kicking him")
 		return false, "Player " .. name .. " is blacklisted from playing on this server!"
@@ -591,4 +797,6 @@ end
 DCS.setUserCallbacks(KIHooks)
 net.log("KI Server Tools Initialization Complete")
 
-Main()
+if IsMockTest then
+  Main()
+end
