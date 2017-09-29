@@ -52,11 +52,11 @@ KI.Config.PathSortieID = lfs.writedir() .. KI.Config.ParentFolder .. "KI_SortieI
 KI.Config.PlayerListFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayersOnline.lua"
 KI.Config.PlayerDataFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayerData.lua"
 
--- IP Address of Database Server (mySQL)
-KI.Config.DBServerIP = "192.168.1.254"
+-- IP Address of TCP Server
+KI.Config.TCPServerIP = "192.168.1.255"
 
--- Port Number of Database Server Connection
-KI.Config.DBServerPort = 9983
+-- Port Number of TCP Server
+KI.Config.TCPServerPort = 9983
 
 -- Your server name (Only really used if supporting multi-tenant game servers)
 KI.Config.ServerName = "My Kaukasus Insurgency Server"

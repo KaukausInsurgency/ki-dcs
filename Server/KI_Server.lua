@@ -247,6 +247,8 @@ local function InitKIServerConfig()
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
     KIServer.Config.GAMEGUI_RECEIVE_PORT = 6006	
+    KIServer.Config.TCP_SERVER_PORT = 9883
+    KIServer.Config.TCP_SERVER_IP = "192.168.1.255"
     
     KIServer.Config.WelcomeMessages =
     {

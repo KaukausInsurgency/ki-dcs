@@ -24,10 +24,10 @@ function KI.Socket.Connect()
 	KI.Socket.Object = socket.tcp()
 	KI.Socket.Object:settimeout(.0001)
   KI.Socket.IsConnected = false
-	local _r, _err = KI.Socket.Object:connect(KI.Config.DBServerIP, KI.Config.DBServerPort)
+	local _r, _err = KI.Socket.Object:connect(KI.Config.TCPServerIP, KI.Config.TCPServerPort)
   
   if _r ~= 1 or _err then
-    env.info("KI.Socket.Connect - ERROR - Failed to connect to Database Server (Reason: " .. _err .. ")")
+    env.info("KI.Socket.Connect - ERROR - Failed to connect to TCP Server (Reason: " .. _err .. ")")
     KI.Socket.IsConnected = false
     return false
   else
