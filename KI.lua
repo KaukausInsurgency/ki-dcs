@@ -91,7 +91,6 @@ KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
 KI.Init.OnlinePlayers()
-KI.Init.RequestNewSession()
 
 SLC.InitSLCRadioItemsForUnits()
 
@@ -114,5 +113,7 @@ timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + 5)
 --KI.Loader.SaveData()
 KI.Loader.LoadData()
 
+if not KI.Init.RequestNewSession() then
+end
 
 return true

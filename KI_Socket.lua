@@ -45,12 +45,12 @@ end
 
 -- Creates the message in the correct format the server expects
 -- Encodes into JSON, and appends size of message in first 6 characters of string
-function KI.Socket.CreateMessage(action_name, is_bulk_insert, data)
+function KI.Socket.CreateMessage(action_name, is_bulk_query, data)
   env.info("KI.Socket.CreateMessage called")
   local _msg = 
   {
     Action = action_name,
-    BulkInsert = is_bulk_insert,
+    BulkQuery = is_bulk_query,
     Data = data,
   }
   local _jsonmsg = JSON:encode(_msg)

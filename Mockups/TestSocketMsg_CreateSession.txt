@@ -1,1 +1,1 @@
-000076{"Action" : "CreateSession","BulkInsert" : false,"Data" : { "ServerID" : 1}}
+000075{"Action" : "CreateSession","BulkQuery" : false,"Data" : { "ServerID" : 1}}

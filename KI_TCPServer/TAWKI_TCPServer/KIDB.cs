@@ -181,11 +181,11 @@ namespace TAWKI_TCPServer
                 dynamic j = Newtonsoft.Json.JsonConvert.DeserializeObject(e.data);
 
                 // Verify the request format is valid
-                if (j["Action"] != null && j["BulkInsert"] != null && j["Data"] != null)
+                if (j["Action"] != null && j["BulkQuery"] != null && j["Data"] != null)
                 {
                     string action = j["Action"];
-                    bool bulkInsert = j["BulkInsert"];   
-                    if (bulkInsert)
+                    bool isBulkQuery = j["BulkQuery"];   
+                    if (isBulkQuery)
                     {
                         ProtocolResponseMultiData resp = SendToDBMultiData(((SocketClient)(sender)).LogFile, action, j);
                         if (!string.IsNullOrWhiteSpace(resp.Error))

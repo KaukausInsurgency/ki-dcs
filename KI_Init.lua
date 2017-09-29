@@ -74,17 +74,35 @@ end
 -- sends message to database asking for a new session to be generated - SessionID is returned from DB
 function KI.Init.RequestNewSession()
   env.info("KI.Init.RequestNewSession called")
+  
+  if not KI.Socket.IsConnected then
+    if not KI.Socket.Connect() then
+      env.info("KI.Init.RequestNewSession - ERROR - Failed to Connect Socket to Server")
+      return false
+    end
+  end
+  
   local request = KI.Socket.CreateMessage("CreateSession", false, { ServerID = KI.Config.ServerID })
+  local result = false
+  
   if KI.Socket.SendUntilComplete(request) then
     local response = KI.Socket.ReceiveUntilComplete()
-    if response then
-      KI.Data.SessionID = response
+    if response and response.Result then
+      KI.Data.SessionID = response.Data
+      result = true
+    elseif response and response.Error then
+      env.info("KI.Init.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
+      result = false
     else
       env.info("KI.Init.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      result = false
     end
   else
-    env.info("KI.Init.RequestNewSession - FATAL ERROR - COULD NOT OBTAIN SESSION ID FROM DATABASE")
+    env.info("KI.Init.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    result = false
   end
+  
+  return result
 end
 
 function KI.Init.OnlinePlayers()
