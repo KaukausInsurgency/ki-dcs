@@ -194,7 +194,7 @@ namespace TAWKI_TCPServer
                 {
 
                     int req_size = -1;
-                    Console.WriteLine("Request Data:" + _req_buffer.Decode(numBytes));
+                    //Console.WriteLine("Request Data:" + _req_buffer.Decode(numBytes));
                     if (!int.TryParse(_req_buffer.Decode(numBytes), out req_size))
                     {
                         throw new Exception("Client request is corrupted");

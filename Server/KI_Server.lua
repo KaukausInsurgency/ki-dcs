@@ -44,6 +44,15 @@ if IsMockTest then
         ipaddr = "127.0.0.3:9999",
         slot = 3
       }
+    elseif id == 5 then
+      playerObj =
+      {
+        ucid = "DDD",
+        name = "Shady Guy",
+        id = 5,
+        ipaddr = "127.0.0.4:9999",
+        slot = 4
+      }
     end
     
     if param then
@@ -59,6 +68,9 @@ if IsMockTest then
   net.send_chat_to = function(msg, toId, fromID)
     print("to: " .. tostring(toId) .. " - " .. msg)
   end
+  net.kick = function(pid, msg)
+    print("KICKED PLAYERID: " .. tostring(pid) .. " - " .. msg)
+  end
   lfs = {}
   lfs.writedir = function() return "C:\\Users\\Sapphire\\Saved Games\\DCS\\" end
   DCS = {}
@@ -68,6 +80,10 @@ if IsMockTest then
       return "KA50"
     elseif slotID == 2 then
       return "A10C"
+    elseif slotID == 3 then
+      return "F15C"
+    elseif slotID == 4 then
+      return "SU25T"
     else
       return "observer"
     end
@@ -82,17 +98,16 @@ if IsMockTest then
     DCS.onPlayerConnect = obj.onPlayerConnect
     DCS.onShowPool = obj.onShowPool
   end
-  DCS.getUnitType = function(slotID) return "KA50" end
   DCS.isServer = function() return true end
   DCS.isMultiplayer = function() return true end
   DCS.getModelTime = function() 
     local _t = DCS.Clock 
-    DCS.Clock = DCS.Clock + 5
+    DCS.Clock = DCS.Clock + 30
     return _t
   end
   DCS.getRealTime = function() 
     local _t = DCS.Clock 
-    DCS.Clock = DCS.Clock + 5
+    DCS.Clock = DCS.Clock + 30
     return _t
   end
 
@@ -101,8 +116,11 @@ if IsMockTest then
   end
 
   function Main()
-    if DCS.onPlayerTryConnect("127.0.0.0:9999", "Server", "SERVERUCID", 1) then
+    local result, msg = DCS.onPlayerTryConnect("127.0.0.0:9999", "Server", "SERVERUCID", 1)
+    if result then
       DCS.onPlayerConnect(1)
+    else
+      print("SERVER MESSAGE : " .. msg)
     end
     DCS.onSimulationFrame()
     DCS.onShowPool()
@@ -110,9 +128,15 @@ if IsMockTest then
     -- simulate 2 players connecting
     if DCS.onPlayerTryConnect("127.0.0.1:9999", "Igneous", "AAA", 2) then
       DCS.onPlayerConnect(2)
+    else
+      DCS.onPlayerDisconnect(2, "Banned")
     end
+    
+    -- should fail because BBB is banned in database
     if DCS.onPlayerTryConnect("127.0.0.2:9999", "DemoPlayer", "BBB", 3) then
       DCS.onPlayerConnect(3)
+    else
+      DCS.onPlayerDisconnect(3, "Banned")
     end
     
     -- simulate playerID 2 changing slots twice
@@ -126,6 +150,10 @@ if IsMockTest then
     if DCS.onPlayerTryConnect("127.0.0.3:9999", "Jon Snow", "CCC", 4) then
       DCS.onPlayerConnect(4)
     end
+    
+    -- PlayerID 4 (Jon Snow) out of lives in DB
+    DCS.onPlayerTryChangeSlot(4, 1, 2)    -- should fail
+    
     -- try invalid player connecting
     if DCS.onPlayerTryConnect("127.0.0.1:9999", nil, nil, 22) then
       DCS.onPlayerConnect(22)
@@ -133,23 +161,31 @@ if IsMockTest then
     
     DCS.onSimulationFrame()
     
-    -- set PlayerID 4 (Jon Snow) out of lives
-    KIServer.NoLivesPlayers["CCC"] = true
-    DCS.onPlayerTryChangeSlot(4, 1, 2)    -- should fail
-    
-    -- simulate banning user
-    KIServer.BannedPlayers["BBB"] = true
-    DCS.onPlayerDisconnect(3, "Disconnected")
-    if DCS.onPlayerTryConnect("127.0.0.2:9999", "DemoPlayer", "BBB", 3) then
-      DCS.onPlayerConnect(3)
-    else
-      DCS.onPlayerDisconnect(3, "Banned")
+    -- add 5th player connecting
+    if DCS.onPlayerTryConnect("127.0.0.4:9999", "Shady Guy", "DDD", 5) then
+      DCS.onPlayerConnect(5)
     end
+    
+    -- should receive updated player list with DDD being banned just after getting into the game
+    DCS.onSimulationFrame() -- first run syncs up the online list on the mission script side
+    DCS.onSimulationFrame() -- second run updates that player banned status to true
   end
   
   JSONPath = "S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua"
 end 
 -- END TEST MOCKUP DATA
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,10 +204,8 @@ local socket = require("socket")
 
 KIServer = {}
 KIServer.Config = {}
-KIServer.OnlinePlayers = {} 			-- hash of current online players (using PlayerID as key) format { UCID, UnitName }
-KIServer.BannedPlayers = {}
-KIServer.NoLivesPlayers = {}
-KIServer.SessionPlayers = {}			-- hash of player info (using UCID as key) format { UCID, Name, Lives, Banned }
+KIServer.OnlinePlayers = {} -- hash of current online players (using PlayerID as key) format { UCID, Name, Role, Lives, Banned }
+KIServer.OnlinePlayersUCIDHash = {} -- hash that holds references to OnlinePlayers using UCID as key instead
 KIServer.SocketDelimiter = "\n"	  -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
@@ -339,24 +373,50 @@ end
 
 
 KIServer.IsPlayerBanned = function(ucid)
-  local pinfo = KIServer.SessionPlayers[ucid]
-	if pinfo ~= nil then
-		return pinfo.Banned
-	else
-		return false
-	end
+  net.log("KIServer.IsPlayerBanned called")
+  local pid = KIServer.OnlinePlayersUCIDHash[ucid]
+  if pid then
+    local pinfo = KIServer.OnlinePlayers[pid]
+    if pinfo then
+      return pinfo.Banned
+    else
+      return false
+    end
+  end
+  return false
 end
 
 
 KIServer.IsPlayerOutOfLives = function(ucid)
-  local pinfo = KIServer.SessionPlayers[ucid]
-  if pinfo ~= nil then
-		return pinfo.Lives < 1
-	else
-		return false
-	end
+  net.log("KIServer.IsPlayerOutOfLives called")
+  local pid = KIServer.OnlinePlayersUCIDHash[ucid]
+  if pid then
+    local pinfo = KIServer.OnlinePlayers[pid]
+    if pinfo then
+      return pinfo.Lives < 1
+    else
+      return false
+    end
+  end
+  return false
 end
 
+
+KIServer.UpdateOnlinePlayers = function(data)
+  net.log("KIServer.UpdateOnlinePlayers called")
+  
+  -- loop through the data, and only update the number of Lives and the Banned status in the server mod
+  -- we dont care about anything else from the Mission Script layer but these 2 fields (everything else is managed by server mod)
+  for _, dop in pairs(data) do
+    local pid = KIServer.OnlinePlayersUCIDHash[dop.UCID]
+    if pid then
+      if KIServer.OnlinePlayers[pid] then
+        KIServer.OnlinePlayers[pid].Lives = dop.Lives
+        KIServer.OnlinePlayers[pid].Banned = dop.Banned
+      end
+    end
+  end
+end
 
 -- Used to get around issues with player names having invalid characters
 function KIServer.GetPlayerNameFix(playerName)
@@ -381,6 +441,9 @@ function KIServer.SanitizeArray(array)
     end
     return tbl
 end
+
+
+
 
 
 
@@ -433,7 +496,7 @@ function KIServer.TCPSocket.CreateMessage(action_name, is_bulk_query, data)
     BulkQuery = is_bulk_query,
     Data = data,
   }
-  local _jsonmsg = JSON:encode(_msg)
+  local _jsonmsg = KIServer.JSON:encode(_msg)
   -- sending 6 char header that is size of msg string
   local _m = string.format("%06d", string.len(_jsonmsg)) .. _jsonmsg
   net.log("KIServer.TCPSocket.CreateMessage - dumping message")
@@ -446,7 +509,7 @@ end
 function KIServer.TCPSocket.DecodeMessage(msg)
   net.log("KIServer.TCPSocket.DecodeMessage called")
   local _err = ""
-  local _result, _luaObject = xpcall(function() return JSON:decode(msg) end, function(err) _err = err end)
+  local _result, _luaObject = xpcall(function() return KIServer.JSON:decode(msg) end, function(err) _err = err end)
   if _result and _luaObject ~= nil then
     return _luaObject
   elseif _err ~= "" then
@@ -566,18 +629,25 @@ KIHooks.onSimulationFrame = function()
     
     KIServer.LastOnFrameTime = DCS.getModelTime()
     
-    -- Receive updated Banned and No Lives Players list
+    -- Receive updated player list of Banned Status, and Lives remaining
     local received = KIServer.UDPReceiveSocket:receive()
     if received then
       net.log("KIServer - UDP Data stream received")
-      local Success, Data = xpcall(KIServer.JSON:decode(received), function(err) end)
+      local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
       if Success and Data then
         net.log("Data received!")
-        KIServer.BannedPlayers = Data["BannedPlayers"]
-        KIServer.NoLivesPlayers = Data["NoLivesPlayers"]
+        KIServer.UpdateOnlinePlayers(Data.OnlinePlayers)
+        
+        -- check if any of the current online players have been banned while in game and kick them
+        for pid, op in pairs(KIServer.OnlinePlayers) do
+          if op.Banned then
+            net.kick(pid, KIServer.GetPlayerNameFix(op.Name) .. ": You are banned")
+          end
+        end
       end
     end
     
+    -- now send back to Mission Script the updated OnlinePlayer list (of banned and lives remaining) + any new connections we received since last onframe call
     KIServer.OnlinePlayers = KIServer.SanitizeArray(KIServer.OnlinePlayers)
     -- send Online Player list to UI
     socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.OnlinePlayers) .. KIServer.SocketDelimiter, 
@@ -589,7 +659,7 @@ end
 
 
 KIHooks.onShowPool = function()
-	if not KIServer.IsRunning() then return end
+	--if not KIServer.IsRunning() then return end
 	
 	-- stub for potential future handler message
 end
@@ -620,21 +690,23 @@ KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID)
 	
   -- valid event parameters
   
-  -- check the session if this person already exists (save a database call this way)
-  -- if the player does not exist in the current session list, go to DB, and add them to session list
-  if KIServer.SessionPlayers[ucid] == nil then
-    local player_info = KIServer.RequestPlayerInfo(ucid, name)  -- TCP Server / Database Call
-  
-    if player_info ~= nil then
-      KIServer.SessionPlayers[ucid] = player_info
-    end
+  -- go to DB to fetch player info
+  local player_info = KIServer.RequestPlayerInfo(ucid, name)  -- TCP Server / Database Call
+
+  if player_info ~= nil then
+    KIServer.OnlinePlayers[tostring(playerID)] = player_info
+    KIServer.OnlinePlayersUCIDHash[ucid] = tostring(playerID)
+  else
+    net.log("KIHooks.onPlayerTryConnect() - ERROR - Could not receive Player Info from database (UCID: '" .. ucid .. "')")
+    return false, "Unable to connect to server - Database Failed to respond"
   end
   
-  
-  
-	if KIServer.IsPlayerBanned(ucid) then
+	if player_info.Banned then
 		net.log("KIHooks.onPlayerTryConnect() - Banned player " .. name .. " tried to connect! Kicking him")
-		return false, "Player " .. name .. " is blacklisted from playing on this server!"
+    -- remove from OnlinePlayers list
+    KIServer.OnlinePlayers[playerID] = nil
+    KIServer.OnlinePlayersUCIDHash[ucid] = nil
+		return false, "Player " .. name .. " is banned from playing on this server!"
 	end
 	
 	return true
@@ -661,17 +733,9 @@ KIHooks.onPlayerConnect = function(playerID)
 	end
 	
 	net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ") Time: " .. DCS.getRealTime() .. ")")
-	KIServer.OnlinePlayers[tostring(player.id)] = 
-  { 
-    ["UCID"] = player.ucid, 
-    ["Name"] = KIServer.GetPlayerNameFix(player.name), 
-    ["Role"] = "",
-    ["Lives"] = KIServer.SessionPlayers[player.ucid].Lives,
-    ["Banned"] = KIServer.SessionPlayers[player.ucid].Banned
-  }
-	local IsBanned = KIServer.IsPlayerBanned(player.ucid)
+	
 
-	if IsBanned then
+	if KIServer.IsPlayerBanned(player.ucid) then
 		net.log("WARN: banned player made it to onConnect() should be intercepted by onTryConnect!")
 		net.log("Banned player" .. player.name .. " tried to connect! Kicking him")
 		net.kick(playerID, KIServer.GetPlayerNameFix(player.name) .. ": You are banned")
@@ -711,9 +775,12 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 	if not KIServer.IsRunning() then return true end
 	net.log("KIHooks.onPlayerDisconnect called (playerID = '" .. playerID .. "', reason = '" .. reason .. "')")
 	
+  local player = net.get_player_info(playerID)
+  
 	-- Remove person from the OnlinePlayers list
+  KIServer.OnlinePlayersUCIDHash[player.ucid] = nil
 	KIServer.OnlinePlayers[tostring(playerID)] = nil
-	local player = net.get_player_info(playerID)
+  
 	if player then
 		net.log("disconnecting player '" .. KIServer.GetPlayerNameFix(player.name) .. "'")
 		local ServerEvent = 
@@ -757,7 +824,7 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         or _unitRole == "observer"
       )
     then
-      KIServer.OnlinePlayers[tostring(player.id)]["Role"] = _unitRole
+      KIServer.OnlinePlayers[tostring(player.id)].Role = _unitRole
       return true   -- ignore attempts to slot into non airframe roles
     else
       
@@ -765,10 +832,10 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has run out of lives")
         local _chatMessage = string.format("*** %s - You have run out of lives and can no longer slot into an airframe! Player Lives return once every hour! ***",_playerName)
         net.send_chat_to(_chatMessage, playerID)
-        KIServer.OnlinePlayers[tostring(player.id)]["Role"] = ""
+        KIServer.OnlinePlayers[tostring(player.id)].Role = ""
         return false
       else
-        KIServer.OnlinePlayers[tostring(player.id)]["Role"] = _unitRole
+        KIServer.OnlinePlayers[tostring(player.id)].Role = _unitRole
         return true
       end
     end
