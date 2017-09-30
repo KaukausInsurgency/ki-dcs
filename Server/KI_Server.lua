@@ -203,13 +203,29 @@ local JSON = loadfile(JSONPath)()
 local socket = require("socket")
 
 KIServer = {}
-KIServer.Config = {}
-KIServer.OnlinePlayers = {} -- hash of current online players (using PlayerID as key) format { UCID, Name, Role, Lives, Banned }
-KIServer.OnlinePlayersUCIDHash = {} -- hash that holds references to OnlinePlayers using UCID as key instead
+
 KIServer.SocketDelimiter = "\n"	  -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
+
+KIServer.Config = {}
+KIServer.Actions = {}
+KIServer.Actions.GetBanList = "GetBanList"
+KIServer.Actions.GetOrAddPlayer = "GetOrAddPlayer"
+KIServer.Actions.AddConnectEvent = "AddConnectionEvent"
+
+KIServer.Data = {}
+KIServer.Data.PendingPlayerInfoQueue = {}   -- array of UCIDs, players that we are still waiting to receive data from DB
+KIServer.Data.OnlinePlayers = {} -- hash of current online players format [PlayerId] = { UCID, Name, Role, Lives }
+KIServer.Data.OnlinePlayersUCIDHash = {} -- hash that holds references to OnlinePlayers using UCID as key
+KIServer.Data.BanList = {}               -- stores banlist information in format [UCID] = { true }
+
+KIServer.Backup = {}
+KIServer.Backup.TCPQueue = {}  -- list of failed TCP Requests that failed to send - will write to file and try to resend when possible
+
+KIServer.Config.BanListRefreshRate = 60   -- retrieve a new banlist every 60 seconds
+KIServer.Config.TCPCheckReceiveRate = 60  -- check the TCP buffer every 60 seconds and attempt to read
                       
 KIServer.WriteToFileJSON = function(path, data)
   net.log("KIServer.WriteToFile called for path: " .. path)
@@ -374,13 +390,9 @@ end
 
 KIServer.IsPlayerBanned = function(ucid)
   net.log("KIServer.IsPlayerBanned called")
-  local pid = KIServer.OnlinePlayersUCIDHash[ucid]
-  if pid then
-    local pinfo = KIServer.OnlinePlayers[pid]
-    if pinfo then
-      return pinfo.Banned
-    else
-      return false
+  for i = 1, #KIServer.Data.Banlist do
+    if ucid == KIServer.Data.Banlist[i] then
+      return true
     end
   end
   return false
@@ -389,9 +401,9 @@ end
 
 KIServer.IsPlayerOutOfLives = function(ucid)
   net.log("KIServer.IsPlayerOutOfLives called")
-  local pid = KIServer.OnlinePlayersUCIDHash[ucid]
+  local pid = KIServer.Data.OnlinePlayersUCIDHash[ucid]
   if pid then
-    local pinfo = KIServer.OnlinePlayers[pid]
+    local pinfo = KIServer.Data.OnlinePlayers[pid]
     if pinfo then
       return pinfo.Lives < 1
     else
@@ -408,11 +420,10 @@ KIServer.UpdateOnlinePlayers = function(data)
   -- loop through the data, and only update the number of Lives and the Banned status in the server mod
   -- we dont care about anything else from the Mission Script layer but these 2 fields (everything else is managed by server mod)
   for _, dop in pairs(data) do
-    local pid = KIServer.OnlinePlayersUCIDHash[dop.UCID]
+    local pid = KIServer.Data.OnlinePlayersUCIDHash[dop.UCID]
     if pid then
-      if KIServer.OnlinePlayers[pid] then
-        KIServer.OnlinePlayers[pid].Lives = dop.Lives
-        KIServer.OnlinePlayers[pid].Banned = dop.Banned
+      if KIServer.Data.OnlinePlayers[pid] then
+        KIServer.Data.OnlinePlayers[pid].Lives = dop.Lives
       end
     end
   end
@@ -465,7 +476,7 @@ function KIServer.TCPSocket.Connect()
 	net.log("KIServer.TCPSocket.Connect called")
 	-- start connection
 	KIServer.TCPSocket.Object = socket.tcp()
-	KIServer.TCPSocket.Object:settimeout(5)
+	KIServer.TCPSocket.Object:settimeout(.0001)
   KIServer.TCPSocket.IsConnected = false
 	local _r, _err = KIServer.TCPSocket.Object:connect(KIServer.Config.TCP_SERVER_IP, KIServer.Config.TCP_SERVER_PORT)
   
@@ -625,33 +636,100 @@ KIHooks.onSimulationFrame = function()
 	if not KIServer.IsRunning() then return end
 	
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
-  if ElapsedTime >= KIServer.Config.DataRefreshRate then
     
+  if ElapsedTime >= KIServer.Config.DataRefreshRate then
     KIServer.LastOnFrameTime = DCS.getModelTime()
     
-    -- Receive updated player list of Banned Status, and Lives remaining
-    local received = KIServer.UDPReceiveSocket:receive()
-    if received then
-      net.log("KIServer - UDP Data stream received")
-      local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
-      if Success and Data then
-        net.log("Data received!")
-        KIServer.UpdateOnlinePlayers(Data.OnlinePlayers)
-        
-        -- check if any of the current online players have been banned while in game and kick them
-        for pid, op in pairs(KIServer.OnlinePlayers) do
-          if op.Banned then
-            net.kick(pid, KIServer.GetPlayerNameFix(op.Name) .. ": You are banned")
-          end
+    
+    --========================================================--
+    -- Try Receive Player Life count from Mission Script
+    if true then
+      
+      local received = KIServer.UDPReceiveSocket:receive()
+      if received then
+        net.log("KIServer - UDP Data stream received")
+        local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
+        if Success and Data then
+          net.log("Data received!")
+          KIServer.UpdateOnlinePlayers(Data.OnlinePlayers)
         end
       end
     end
     
-    -- now send back to Mission Script the updated OnlinePlayer list (of banned and lives remaining) + any new connections we received since last onframe call
-    KIServer.OnlinePlayers = KIServer.SanitizeArray(KIServer.OnlinePlayers)
-    -- send Online Player list to UI
-    socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.OnlinePlayers) .. KIServer.SocketDelimiter, 
-               "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
+    
+    
+    --=======================================================--
+    -- Try Send Requests for New Banlist
+    if true then
+      
+      if not KIServer.TCPSocket.IsConnected then
+        if not KIServer.TCPSocket.Connect() then
+          net.log("Failed to Get Banlist - TCP Socket is not connected")
+        end
+      end
+      
+      local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.GetBanList, false, {})
+      
+      if not KIServer.TCPSocket.SendUntilComplete(request) then
+        net.log("Failed to Get Banlist - TCP Socket failed to send")
+      end
+
+    end
+    
+    --========================================================--
+    -- now send back to Mission Script the updated OnlinePlayer list (of lives remaining) + any new connections we received since last time
+    if true then
+    
+      KIServer.Data.OnlinePlayers = KIServer.SanitizeArray(KIServer.Data.OnlinePlayers)
+      -- send Online Player list to UI
+      socket.try(
+        KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.Data.OnlinePlayers) .. KIServer.SocketDelimiter, 
+                                      "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT)
+      )
+           
+    end
+    
+    --========================================================--
+    -- Try Receive TCP DB Data
+    if true then
+      
+      while( local response = KIServer.Socket.ReceiveUntilComplete() ) do
+        if response.Action = KIServer.Actions.GetOrAddPlayer then
+          
+          -- GetOrAddPlayer returns array as [ UCID, Name, Lives ]
+          local ucid = response.Data[1]
+          local pid = KIServer.Data.PendingPlayerInfoQueue[ucid]
+          if pid then
+            KIServer.Data.OnlinePlayers[pid].Lives = response.Data[3]  -- got this fresh players life count
+          end
+          
+          -- remove from pending player queue
+          KIServer.Data.PendingPlayerInfoQueue[ucid] = nil
+          
+          net.log("KIServer - Successfully received and processed GetOrAddPlayer")
+          
+        elseif response.Action = KIServer.Actions.GetBanList then
+          
+          KIServer.Data.Banlist = response.Data -- get the array of UCIDs
+          
+          -- check if any of the current online players have been banned while in game and kick them
+          for pid, op in pairs(KIServer.Data.OnlinePlayers) do
+            if KIServer.IsPlayerBanned(op.UCID) then
+              net.kick(pid, KIServer.GetPlayerNameFix(op.Name) .. ": You are banned")
+            end
+          end
+        
+          net.log("KIServer - Successfully received and processed GetBanList")
+          
+        elseif response.Action = KIServer.Actions.AddConnectEvent then
+          net.log("KIServer - Successfully received and processed AddConnectEvent")
+        else
+          net.log("KIServer - Successfully received and processed " .. response.Action)
+        end
+        
+      end
+      
+    end
            
 	end
 end
@@ -666,54 +744,15 @@ end
 
 
 
--- Used to handle banned players, server not being up, invalid connect attempt, 
--- should return > true | false, "disconnect reason"
-KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID) 
-  -- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
-  -- the server may be hosting
-	if not KIServer.IsRunning() then return true end
-	net.log("KIHooks.onPlayerTryConnect() called")
-	
-  -- If the game simulation time has not started, or has not reached a certain period of time - Deny the connection
-	if not DCS.getModelTime() or DCS.getModelTime() < 20 then
-		net.log("KIHooks.onPlayerTryConnect() - refused connection due to mission not being loaded (addr: "
-            .. tostring(addr) .. ", name: " .. tostring(name) 
-            .. " ucid: " .. tostring(ucid) .. " playerID: " ..tostring(playerID) .. ")")
-		return false, "connection denied, server is still loading mission!"
-	end 
-
-	if not addr or not name or name == '' or name == ' ' or not ucid or not playerID then
-		net.log("KIHooks.onPlayerTryConnect() - WARNING - Player connection denied due to invalid parameters: addr: " 
-            .. tostring(addr) .. ", name: " .. tostring(name) .. " ucid: " .. tostring(ucid) .. " playerID: " .. tostring(playerID))
-		return false, "connection denied for invalid connection parameters"
-	end
-	
-  -- valid event parameters
-  
-  -- go to DB to fetch player info
-  local player_info = KIServer.RequestPlayerInfo(ucid, name)  -- TCP Server / Database Call
-
-  if player_info ~= nil then
-    KIServer.OnlinePlayers[tostring(playerID)] = player_info
-    KIServer.OnlinePlayersUCIDHash[ucid] = tostring(playerID)
-  else
-    net.log("KIHooks.onPlayerTryConnect() - ERROR - Could not receive Player Info from database (UCID: '" .. ucid .. "')")
-    return false, "Unable to connect to server - Database Failed to respond"
-  end
-  
-	if player_info.Banned then
-		net.log("KIHooks.onPlayerTryConnect() - Banned player " .. name .. " tried to connect! Kicking him")
-    -- remove from OnlinePlayers list
-    KIServer.OnlinePlayers[playerID] = nil
-    KIServer.OnlinePlayersUCIDHash[ucid] = nil
-		return false, "Player " .. name .. " is banned from playing on this server!"
-	end
-	
-	return true
-end
 
 
 
+-- This handler is responsible for 5 things
+-- 1) Kicking a player if they are banned
+-- 2) Sending to DB Connection Event
+-- 3) Adding to OnlinePlayer list
+-- 4) Sending to DB PlayerInfo (get or add)
+-- 5) Sending welcome messages
 KIHooks.onPlayerConnect = function(playerID)
 	-- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
 	-- the server may be hosting
@@ -732,31 +771,80 @@ KIHooks.onPlayerConnect = function(playerID)
 		return
 	end
 	
-	net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ") Time: " .. DCS.getRealTime() .. ")")
+	net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ")")
 	
-
+  
 	if KIServer.IsPlayerBanned(player.ucid) then
-		net.log("WARN: banned player made it to onConnect() should be intercepted by onTryConnect!")
 		net.log("Banned player" .. player.name .. " tried to connect! Kicking him")
 		net.kick(playerID, KIServer.GetPlayerNameFix(player.name) .. ": You are banned")
+    return
 	end
   
-	-- send connection message to mission side
-	net.log("Preparing UDP Send of connected event")
-	local ServerEvent = 
-	{
-		Type = "CONNECTED",
-		Name = KIServer.GetPlayerNameFix(player.name),
-		UCID = player.ucid,
-		ID = player.id,
-		IP = player.ipaddr:sub(1, player.ipaddr:find(":")-1),
-		GameTime = DCS.getModelTime(),
-		RealTime = DCS.getRealTime()
-	}
-	net.log("sending connect message to mission-side")
-	socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
-                                           "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
+  -- Try to send the connection event to the Database, or backup the request if it fails
+  if true then
+    local ServerEvent = 
+    {
+      Type = "CONNECTED",
+      Name = KIServer.GetPlayerNameFix(player.name),
+      UCID = player.ucid,
+      ID = player.id,
+      IP = player.ipaddr:sub(1, player.ipaddr:find(":")-1),
+      GameTime = DCS.getModelTime(),
+      RealTime = DCS.getRealTime()
+    }
+    
+    -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+    -- this should prevent any blocking on our end and keep the server from lagging out
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
+    
+    if not KIServer.TCPSocket.IsConnected then
+      if not KIServer.TCPSocket.Connect() then
+        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+        table.insert(KI.Backup.TCPQueue, request)
+      end
+    end
+    
+    if not KIServer.TCPSocket.SendUntilComplete(request) then
+      net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+      table.insert(KI.Backup.TCPQueue, request)
+    end
+  end
+	--net.log("sending connect message to mission-side")
+	--socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
+  --                                        "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
 	
+  
+  -- add an entry into OnlinePlayers 
+  -- since we're not sure how many lives this player has, we will set the value to -1 to indicate we are waiting to fetch data from database
+  KIServer.Data.OnlinePlayers[tostring(player.id)] = 
+  { 
+    UCID = player.ucid, 
+    Name = player.name, 
+    Role = "", 
+    Lives = -1
+  }
+  
+  -- add this player into the pending player list so that we can obtain the results from DB later
+  KIServer.Data.PendingPlayerInfoQueue[player.ucid] = player.id
+  
+  -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+  -- this should prevent any blocking on our end and keep the server from lagging out
+  if true then
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.GetOrAddPlayer, false, { UCID = p_ucid, Name = p_name })
+    
+    if not KIServer.TCPSocket.IsConnected then
+      if not KIServer.TCPSocket.Connect() then
+        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+        table.insert(KI.Backup.TCPQueue, request)
+      end
+    end
+    
+    if not KIServer.TCPSocket.SendUntilComplete(request) then
+      net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+      table.insert(KI.Backup.TCPQueue, request)
+    end
+  end
+  
 	-- send welcome messages
 	local _chatMessage = string.format("Hello %s! Welcome to  Kaukasus Insurgency!", player.name)
 	net.send_chat_to(_chatMessage, playerID, KIServer.Config.ServerPlayerID)
@@ -765,10 +853,16 @@ KIHooks.onPlayerConnect = function(playerID)
 		  net.send_chat_to(tostring(KIServer.Config.WelcomeMessages[i]), playerID, KIServer.Config.ServerPlayerID)
 		end
 	end
+  
 end
 
 
 
+
+-- This handler is responsible for the following
+-- 1) Sending a disconnect event to DB
+-- 2) Removing from online players
+-- 3) Sending to DB players life count
 function KIHooks.onPlayerDisconnect(playerID, reason)
 	-- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
   -- the server may be hosting
@@ -777,12 +871,11 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 	
   local player = net.get_player_info(playerID)
   
-	-- Remove person from the OnlinePlayers list
-  KIServer.OnlinePlayersUCIDHash[player.ucid] = nil
-	KIServer.OnlinePlayers[tostring(playerID)] = nil
-  
 	if player then
 		net.log("disconnecting player '" .. KIServer.GetPlayerNameFix(player.name) .. "'")
+    
+    local pinfo = KIServer.Data.OnlinePlayers[tostring(playerID)]
+    
 		local ServerEvent = 
 		{
 			Type = "DISCONNECTED",
@@ -794,16 +887,45 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 			RealTime = DCS.getRealTime()
 		}
 		
-		net.log("sending disconnect message to mission-side")
-		socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
-                                             "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))	
-	else
-		net.log("KIHooks.onPlayerDisconnect() - ERROR - disconnect unsuccessful, get_player_info returned nil")
+    -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+    -- this should prevent any blocking on our end and keep the server from lagging out
+    local request1 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
+    local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, pinfo)
+    
+    if not KIServer.TCPSocket.IsConnected then
+      if not KIServer.TCPSocket.Connect() then
+        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+        table.insert(KI.Backup.TCPQueue, request1)
+        table.insert(KI.Backup.TCPQueue, request2)
+      end
+    end
+    
+    if not KIServer.TCPSocket.SendUntilComplete(request1) then
+      net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+      table.insert(KI.Backup.TCPQueue, request1)
+    end
+    if not KIServer.TCPSocket.SendUntilComplete(request2) then
+      net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+      table.insert(KI.Backup.TCPQueue, request2)
+    end
+
+
+		--net.log("sending disconnect message to mission-side")
+		--socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(ServerEvent) .. KIServer.SocketDelimiter, 
+    --                                         "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))	
+
+    -- Remove person from the OnlinePlayers list
+    KIServer.Data.OnlinePlayersUCIDHash[player.ucid] = nil
+    KIServer.Data.OnlinePlayers[tostring(playerID)] = nil
 	end
 end
 
 
 
+
+-- Responsible for two things
+-- 1) Updating OnlinePlayers list with the new role
+-- 2) Checking if player has enough lives to continue with the swap
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
   if DCS.isServer() and DCS.isMultiplayer() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
@@ -815,16 +937,14 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
             .. _playerName .. " side:" .. side .. " slot: " .. slotID .. " ucid: " .. player.ucid)
 
     local _unitRole = DCS.getUnitType(slotID)
-	
-    if _unitRole ~= nil and
-      (
-        _unitRole == "forward_observer"
+    if _unitRole == nil then return true end
+    
+    if  _unitRole == "forward_observer"
         or _unitRole == "instructor"
         or _unitRole == "artillery_commander"
         or _unitRole == "observer"
-      )
     then
-      KIServer.OnlinePlayers[tostring(player.id)].Role = _unitRole
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
       return true   -- ignore attempts to slot into non airframe roles
     else
       
@@ -832,10 +952,10 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has run out of lives")
         local _chatMessage = string.format("*** %s - You have run out of lives and can no longer slot into an airframe! Player Lives return once every hour! ***",_playerName)
         net.send_chat_to(_chatMessage, playerID)
-        KIServer.OnlinePlayers[tostring(player.id)].Role = ""
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Role = ""
         return false
       else
-        KIServer.OnlinePlayers[tostring(player.id)].Role = _unitRole
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
         return true
       end
     end
@@ -845,24 +965,9 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 DCS.setUserCallbacks(KIHooks)
 net.log("KI Server Tools Initialization Complete")
+
 
 if IsMockTest then
   Main()
