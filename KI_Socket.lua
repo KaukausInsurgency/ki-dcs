@@ -11,6 +11,8 @@ package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
 local JSON = loadfile("Scripts\\JSON.lua")()
 local socket = require("socket")
 
+
+
 KI.Socket = 
 {
   Object = nil,
@@ -62,6 +64,24 @@ function KI.Socket.CreateMessage(action_name, is_bulk_query, data)
 end
 
 
+-- Decodes message from JSON string into LUA Table Object
+function KI.Socket.DecodeMessage(msg)
+  env.info("KI.Socket.DecodeMessage called")
+  local _err = ""
+  local _result, _luaObject = xpcall(function() return JSON:decode(msg) end, function(err) _err = err end)
+  if _result and _luaObject ~= nil then
+    return _luaObject
+  elseif _err ~= "" then
+    env.info("KI.Socket.DecodeMessage ERROR - " .. _err)
+    return nil
+  else
+    env.info("KI.Socket.DecodeMessage ERROR - UNKNOWN ERROR")
+    return nil
+  end
+end
+
+
+
 function KI.Socket.SendUntilComplete(msg)
   env.info("KI.Socket.SendUntilComplete called")
   if not KI.Socket.IsConnected then
@@ -102,11 +122,11 @@ end
 
 
 function KI.Socket.ReceiveUntilComplete()
-  local l, _error, header = KI.Socket.Object:receive(6)
+  local header, _error = KI.Socket.Object:receive(6)
   
 	if header and header:len() == 6 then
     local msg_size = tonumber(header)
-    local l, _error, msg = KI.Socket.Object:receive(msg_size)
+    local msg, _error = KI.Socket.Object:receive(msg_size)
     
     if msg and msg:len() == msg_size then
       env.info("KI.Socket.ReceiveUntilComplete - received data transmission")
@@ -114,7 +134,7 @@ function KI.Socket.ReceiveUntilComplete()
     elseif msg and msg:len() < msg_size then
       env.info("KI.Socket.ReceiveUntilComplete - partial data received (Reason: " .. _error .. ")")
       env.info("KI.Socket.ReceiveUntilComplete - trying again")
-      local l, _error, partmsg = KI.Socket.Object:receive(msg_size - msg:len())
+      local partmsg, _error = KI.Socket.Object:receive(msg_size - msg:len())
       -- check if the partial message came through and is the size we are expecting it to be
       if partmsg and partmsg:len() == (msg_size - msg:len()) then
         msg = msg .. partmsg
