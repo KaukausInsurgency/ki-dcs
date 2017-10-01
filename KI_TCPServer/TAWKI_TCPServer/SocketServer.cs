@@ -27,12 +27,13 @@ namespace TAWKI_TCPServer
         // signal object used to signal a close/cancel to thread(s)
         private ManualResetEvent signal_close;
         private int _request_size;
+        private List<string> _whitelist_clients;
 
-        public SocketServer(int maxConn, int port, int req_size = 6)
+        public SocketServer(int maxConn, int port, List<string> whitelist, int req_size = 6)
         {
             this._maxConnections = maxConn;
             this._port = port;
-
+            this._whitelist_clients = whitelist;
             signal_close = new ManualResetEvent(false);
             _thread = new Thread(ManageSocket);
             _serversock = new Socket(SocketType.Stream, ProtocolType.Tcp);
@@ -87,14 +88,15 @@ namespace TAWKI_TCPServer
             RestartSocket();
             // Restarts listening on socket
             // This outer loop manages connection (whether client connects, or loses connection)
-            while (!signal_close.WaitOne(1000))
+            while (!signal_close.WaitOne(200))
             {
                 // Wait for a connection to be made, or for the cancel event to be signaled
                 try
                 {
-                    if (WaitForConnectionEx(signal_close))
+                    string connect_msg = "";
+                    if (WaitForConnectionEx(signal_close, ref connect_msg))
                     {
-                        Console.WriteLine("Connection Accepted Successfully");
+                        Console.WriteLine(connect_msg);
                     }
 
                     for (int i = _clients.Count - 1; i >= 0; i--)
@@ -114,9 +116,10 @@ namespace TAWKI_TCPServer
             }
         }
 
-        private bool WaitForConnectionEx(ManualResetEvent cancelEvent)
+        private bool WaitForConnectionEx(ManualResetEvent cancelEvent, ref string message)
         {
             bool result = false;
+            string connect_msg = "";
             AutoResetEvent connectEvent = new AutoResetEvent(false);
             _serversock.BeginAccept(ar =>
             {
@@ -124,8 +127,32 @@ namespace TAWKI_TCPServer
                 {
                     SocketClient client = new SocketClient(_serversock.EndAccept(ar), _request_size, _clients.Count);
                     
-                    client.Start();
-                    _clients.Add(client);
+                    bool is_valid = false;
+                    foreach (string valid_ip in _whitelist_clients)
+                    {
+                        if (client.Address == valid_ip)
+                        {
+                            is_valid = true;
+                            break;
+                        }
+                    }
+
+                    if (!is_valid)
+                    {
+                        connect_msg = "Unknown client tried to connect (Address: " + client.Address + ") - this address is not whitelisted - dropping";
+                        client.Dispose();
+                    }
+                    else if (_clients.Count >= _maxConnections)
+                    {
+                        connect_msg = "A client tried to connect, but the maximum number of clients allowed (Count: " + _maxConnections + ") has been exceeded";
+                        client.Dispose();
+                    }
+                    else
+                    {
+                        connect_msg = "Connection Accepted Successfully";
+                        client.Start();
+                        _clients.Add(client);
+                    }          
                 }
                 catch (Exception er)
                 {
@@ -154,6 +181,7 @@ namespace TAWKI_TCPServer
             {
                 result = true;
             }
+            message = connect_msg;
             return result;
         }
 

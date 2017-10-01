@@ -14,6 +14,7 @@ namespace TAWKI_TCPServer
         private string _DBConnect;
         private int _portNumber;
         private int _maxConnections;
+        private List<string> _whitelist;
 
         public ConfigReader()
         {
@@ -25,6 +26,7 @@ namespace TAWKI_TCPServer
                 XmlNodeList dbxml = xml.GetElementsByTagName("DBConnect");
                 XmlNodeList portxml = xml.GetElementsByTagName("Port");
                 XmlNodeList maxConnxml = xml.GetElementsByTagName("MaxConnections");
+                XmlNodeList whitelistxml = xml.GetElementsByTagName("WhiteList");
 
                 if (dbxml.Count == 0)
                     throw new Exception("Could not find <DBConnect> in config");
@@ -32,10 +34,13 @@ namespace TAWKI_TCPServer
                     throw new Exception("Could not find <Port> in config");
                 if (maxConnxml.Count == 0)
                     throw new Exception("Could not find <MaxxConnections> in config");
+                if (whitelistxml.Count == 0)
+                    throw new Exception("Could not find <WhiteList> in config");
 
                 _DBConnect = dbxml[0].InnerText;
                 _portNumber = int.Parse(portxml[0].InnerText);
                 _maxConnections = int.Parse(maxConnxml[0].InnerText);
+                _whitelist = new List<String>(whitelistxml[0].InnerText.Split(';'));
             }
             catch (Exception ex)
             {
@@ -59,6 +64,11 @@ namespace TAWKI_TCPServer
         public string DBConnect
         {
             get { return _DBConnect; }
+        }
+
+        public List<string> WhiteList
+        {
+            get { return _whitelist; }
         }
     }
 }

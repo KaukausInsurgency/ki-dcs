@@ -35,9 +35,13 @@ namespace TAWKI_TCPServer
             // serialize a new json string for just the data by itself
             string jdataString = Newtonsoft.Json.JsonConvert.SerializeObject(j["Data"]);
             // now deserialize this string into a list of dictionaries for parsing
-            Dictionary<string, object> dataDictionary = 
-                Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(jdataString);
+            Dictionary<string, object> dataDictionary = null;
 
+            if (((JToken)j["Data"]).Type == JTokenType.Object)
+                dataDictionary = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(jdataString);
+            else
+                dataDictionary = new Dictionary<string, object>();
+            
             ProtocolResponseSingleData result = new ProtocolResponseSingleData();
             result.Action = action;
             result.Error = "";

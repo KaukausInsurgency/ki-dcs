@@ -45,7 +45,7 @@ namespace TAWKI_TCPServer
                 SocketClient.SetHeartBeatResponse("{'type':'alive'}\n");
                 //port = int.Parse(args[0]);
                 //maxConn = int.Parse(args[1]);
-                server = new SocketServer(cr.MaxConnections, cr.PortNumber);
+                server = new SocketServer(cr.MaxConnections, cr.PortNumber, cr.WhiteList);
                 server.Open();
             }
             catch (Exception ex)

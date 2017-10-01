@@ -2,4 +2,5 @@
 	<DBConnect>Server=192.168.1.254; Database=ki; Uid=testuser; Pwd=testuser;</DBConnect>
 	<Port>9983</Port>
 	<MaxConnections>4</MaxConnections>
+	<WhiteList>192.168.1.254;::ffff:127.0.0.1</WhiteList>
 </Config>
