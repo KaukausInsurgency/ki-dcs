@@ -302,7 +302,15 @@ namespace TAWKI_TCPServer
             _buffer = new SockBuffer(nmsg.Length);
             _buffer.Encode(nmsg);
             _buffer.OriginalData = nmsg;
-            _clientsock.BeginSend(_buffer.BufferByte, 0, _buffer.BufferByte.Length, SocketFlags.None, HandleSend, null);
+            try
+            {
+                _clientsock.BeginSend(_buffer.BufferByte, 0, _buffer.BufferByte.Length, SocketFlags.None, HandleSend, null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception encountered while attempting to send data to client - " + ex.Message);
+                signal_close.Set();
+            }
             if (WaitHandle.WaitAny(new WaitHandle[] { signal_write, signal_close }) == 1)
             {
                 _clientsock.Shutdown(SocketShutdown.Both);

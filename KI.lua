@@ -66,6 +66,8 @@ local socket = require("socket")
 
 KI.JSON = JSON
 
+-- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
+KI.Null = -9999   
 
 local path = "C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\"
 
@@ -93,9 +95,15 @@ assert(loadfile(path .. "AICOM.lua"))()
 
 -- Init UDP Sockets
 KI.UDPSendSocket = socket.udp()
+
+KI.UDPReceiveSocketServerSession = socket.udp()
+KI.UDPReceiveSocketServerSession:setsockname("*", KI.Config.SERVER_SESSION_RECEIVE_PORT)
+KI.UDPReceiveSocketServerSession:settimeout(10) --receive timer
+
 KI.UDPReceiveSocket = socket.udp()
 KI.UDPReceiveSocket:setsockname("*", KI.Config.SERVERMOD_RECEIVE_PORT)
 KI.UDPReceiveSocket:settimeout(.0001) --receive timer
+
 KI.SocketDelimiter = "\n"
 
 --================= START OF INIT ================
@@ -133,8 +141,11 @@ timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + AICOM.Config.TurnRate
 
 world.addEventHandler(KI.Hooks.GameEventHandler)
 
-if not KI.Init.RequestNewSession() then
+if not KI.Init.GetServerAndSession() then
+  trigger.action.outText("FAILED TO GET ServerID and SessionID from Database! Check Connection!", 30)
   return false
+else
+  trigger.action.outText("RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")", 30)
 end
 
 return true

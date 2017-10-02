@@ -26,25 +26,36 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   end
   
   local playerName = dcs_event_obj.initiator:getPlayerName() or "AI"
-  local sortieID = KI.Query.FindSortieID_Player(playerName) or nil
-  local airfield = nil
-  local weapon = nil
-  local weaponCategory = nil
-  local target = nil
-  local targetName = nil
-  local targetType = nil
-  local targetCategory = nil
+  local UCID = KI.Null
+  if playerName ~= "AI" then
+    UCID = KI.Query.FindUCID_Player(playerName)
+  end
+  local sortieID = KI.Query.FindSortieID_Player(playerName) or KI.Null
+  local airfield = KI.Null
+  local weapon = KI.Null
+  local weaponCategory = KI.Null
+  local target = KI.Null
+  local targetName = KI.Null
+  local targetType = KI.Null
+  local targetCategory = KI.Null
   local targetIsPlayer = false
-  local targetPlayerName = nil
-  local targetSide = nil
+  local targetPlayerName = KI.Null
+  local targetPlayerUCID = KI.Null
+  local targetSide = KI.Null
   
   if dcs_event_obj.place then
-    airfield = dcs_event_obj.place:getName()
+    airfield = dcs_event_obj.place:getName() or "Ground"
   end
   
   if dcs_event_obj.weapon then
     weapon = dcs_event_obj.weapon:getDesc()["displayName"]
     weaponCategory = KI.Defines.WeaponCategories[dcs_event_obj.weapon:getCategory()]
+  else
+    if dcs_event_obj.id == world.event.S_EVENT_SHOOTING_START or 
+       dcs_event_obj.id == world.event.S_EVENT_SHOOTING_END then
+      weapon = "Cannon"
+      weaponCategory = "CANNON"
+    end
   end
   
   if dcs_event_obj.target then
@@ -52,11 +63,12 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     target = dcs_event_obj.target:getTypeName()
     targetType = KI.Defines.UnitTypes[target]
     targetCategory = KI.Defines.UnitCategories[dcs_event_obj.target:getCategory()]
-    targetPlayerName = dcs_event_obj.target:getPlayerName()
+    targetPlayerName = dcs_event_obj.target:getPlayerName() or KI.Null
     targetSide = dcs_event_obj.target:getCoalition()
     
-    if targetPlayerName then
+    if targetPlayerName ~= KI.Null then
       targetIsPlayer = true
+      targetPlayerUCID = KI.Query.FindUCID_Player(targetPlayerName) or KI.Null
     end
     
   end
@@ -66,7 +78,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["SessionID"] = sessionID,
     ["ServerID"] = serverID,
     ["SortieID"] = sortieID,
-    ["UCID"] = KI.Query.FindUCID_Player(playerName),
+    ["UCID"] = UCID,
     ["Event"] = KI.Defines.EventNames[dcs_event_obj.id],
     ["PlayerName"] = playerName,
     ["PlayerSide"] = dcs_event_obj.initiator:getCoalition(),
@@ -83,7 +95,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["TargetCategory"] = targetCategory,
     ["TargetSide"] = targetSide,
     ["TargetIsPlayer"] = targetIsPlayer,
-    ["TargetPlayerUCID"] = KI.Query.FindUCID_Player(targetPlayerName),
+    ["TargetPlayerUCID"] =  targetPlayerUCID,
     ["TargetPlayerName"] = targetPlayerName
   }
   

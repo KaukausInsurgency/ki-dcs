@@ -26,8 +26,8 @@ KI.Data =
   Sorties = {},                       -- list of current sorties active in format ["UCID"] = { Role, SortieID }
   SpawnID = 0,
   SortieID = 0,
-  SessionID = 0,
-  ServerID = 0
+  SessionID = KI.Null,
+  ServerID = KI.Null
   
 }
 

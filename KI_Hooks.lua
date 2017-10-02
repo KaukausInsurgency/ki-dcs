@@ -344,7 +344,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
 				msg = msg .. "  Land your aircraft on a base to get your life back.\n"
 				msg = msg .. "_______________________________________________________________________________________________________\n"
 				
-				trigger.action.outTextForGroup(ownGroupID,msg,30)
+				trigger.action.outText(msg,30)
         return
       end
     end
@@ -375,6 +375,12 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_PILOT_DEAD or 
          event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
     env.info("KI.Hooks.GameEventHandler - SOMEONE DIED")
+    
+    -- doing something sneaky - modify the event object so that if the unit that died is AI, add a .target property and set it to the AI unit that died - this will capture the category, unit type information and store it in the target columns, rather than the player columns (we'll set those to "AI")
+    if not playerName then
+      event.target = event.initiator
+    end
+    
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
                                            KI.Config.ServerID, 

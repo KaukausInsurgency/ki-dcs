@@ -71,42 +71,27 @@ function KI.Init.SideMissions()
   end
 end
 
--- sends message to database asking for a new session to be generated - SessionID is returned from DB
-function KI.Init.RequestNewSession()
-  env.info("KI.Init.RequestNewSession called")
+-- tries to receive UDP message from serverMod for SessionID and ServerID
+function KI.Init.GetServerAndSession()
+  env.info("KI.Init.GetServerAndSession called")
+  local received = KI.UDPReceiveSocketServerSession:receive()
   
-  if not KI.Socket.IsConnected then
-    if not KI.Socket.Connect() then
-      env.info("KI.Init.RequestNewSession - ERROR - Failed to Connect Socket to Server")
+  if received then
+    local _error = "No Error"
+    local Success, Data = xpcall(function() return KI.JSON:decode(received) end, function(err) _error = err end)
+    
+    env.info("GetServerAndSession - Dump : " .. KI.Toolbox.Dump(Data))
+    if Success and Data and Data.ServerID and Data.SessionID then
+      KI.Data.ServerID = Data.ServerID
+      KI.Data.SessionID = Data.SessionID
+      env.info("KI.Init.GetServerAndSession - Successfully received")
+      return true
+    else
+      env.info("KI.Init.GetServerAndSession - FAILURE TO GET ServerID and SessionID - JSON DECODE FAILED! (Error: " .. _error .. ")")
       return false
     end
-  end
-  
-  local request = KI.Socket.CreateMessage("CreateSession", false, { ServerID = KI.Config.ServerID })
-  local result = false
-  
-  if KI.Socket.SendUntilComplete(request) then
-    local response = KI.Socket.DecodeMessage(KI.Socket.ReceiveUntilComplete())
-    if response and response.Result then
-      KI.Data.SessionID = response.Data[1]
-      result = true
-      trigger.action.outText("Database - New Session ID - " .. tostring(KI.Data.SessionID), 30)
-    elseif response and response.Error then
-      env.info("KI.Init.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
-      result = false
-    else
-      env.info("KI.Init.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
-      result = false
-    end
   else
-    env.info("KI.Init.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
-    result = false
+    env.info("KI.Init.GetServerAndSession - FAILURE TO GET ServerID and SessionID - TIMEOUT REACHED")
+    return false
   end
-  
-  if KI.Socket.IsConnected then
-    KI.Socket.Disconnect()
-    env.info("KI.Init.RequestNewSession - Disconnecting TCP Socket")
-  end
-  
-  return result
 end

@@ -119,17 +119,24 @@ function KI.Scheduled.DataTransmission(args, time)
     
     if Success and Data then
       env.info("KI.Scheduled.DataTransmission - UDP Data received from Server Mod")
-        
+      
+      env.info("KI.Scheduled.DataTransmission - dumping UDP response - " .. KI.Toolbox.Dump(Data))
       -- Update existing OnlinePlayer records
       -- Insert new ones
       for pid, op in pairs(Data) do
-        if KI.Data[pid] then
+        if KI.Data.OnlinePlayers[pid] then
           -- do a partial update - but do not modify UCID, Lives, or SortieID
-          KI.Data[pid].Name = op.Name
-          KI.Data[pid].Role = op.Role
-          KI.Data[pid].Banned = op.Banned
+          KI.Data.OnlinePlayers[pid].Name = op.Name
+          KI.Data.OnlinePlayers[pid].Role = op.Role
+          KI.Data.OnlinePlayers[pid].Banned = op.Banned
+          
+          -- special rule - get the lives from the server MOD only if the value is currently NULL here
+          -- it may be that the DB returned the player record so we have the proper life count value
+          if KI.Data.OnlinePlayers[pid].Lives == KI.Null then
+            KI.Data.OnlinePlayers[pid].Lives = op.Lives
+          end
         else
-          KI.Data[pid] = op
+          KI.Data.OnlinePlayers[pid] = op
         end
       end
       env.info("KI.Scheduled.DataTransmission - Updated OnlinePlayers")
@@ -147,7 +154,7 @@ function KI.Scheduled.DataTransmission(args, time)
   
   
   
-  
+  env.info("KI.Scheduled.DataTransmission - dumping online players : " .. KI.Toolbox.Dump(KI.Data.OnlinePlayers))
   
   -- send to Server Mod
   -- 1) Online Player list, with the current player life counts, sortieIDs

@@ -63,6 +63,7 @@ KI.Config.TCPServerPort = 9983
 
 KI.Config.SERVERMOD_RECEIVE_PORT = 6005
 KI.Config.SERVERMOD_SEND_TO_PORT = 6006
+KI.Config.SERVER_SESSION_RECEIVE_PORT = 6007
 
 -- Your server name (Only really used if supporting multi-tenant game servers)
 KI.Config.ServerName = "Kaukasus Insurgency Server"

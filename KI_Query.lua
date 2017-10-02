@@ -63,12 +63,13 @@ end
 
 -- returns Player UCID from player name, or nil with DCS Unit as parameter
 function KI.Query.FindUCID_Player(name)
-  env.info("KI.Query.FindUCID_Player called")
+  env.info("KI.Query.FindUCID_Player called (name: " .. name .. ")")
   if not name then return nil end
   
   for pid, op in pairs(KI.Data.OnlinePlayers) do
+    env.info("KI.Query.FindUCID_Player - op.Name = '" .. op.Name .. "'")
     if op.Name == name then
-      env.info("KI.Query.FindSortieID_Player - returned " .. tostring(op.UCID))
+      env.info("KI.Query.FindUCID_Player - returned " .. tostring(op.UCID))
       return op.UCID
     end
   end
@@ -78,7 +79,7 @@ end
 
 
 function KI.Query.FindSortieID_Player(name)
-  env.info("KI.Query.FindSortieID_Player called")
+  env.info("KI.Query.FindSortieID_Player called (name: " .. name .. ")")
   if not name then return nil end
   
   for pid, op in pairs(KI.Data.OnlinePlayers) do

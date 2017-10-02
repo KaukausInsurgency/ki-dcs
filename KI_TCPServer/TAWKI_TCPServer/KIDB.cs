@@ -15,6 +15,8 @@ namespace TAWKI_TCPServer
 {
     class KIDB
     {
+        public const int LUANULL = -9999;        // THIS IS IMPORTANT - CHANGING THIS WILL BREAK IF THE LUA NIL PLACEHOLDER IS NOT THE SAME!!!
+        public const string ACTION_GET_SERVERID = "GetOrAddServer";
         public static string DBConnection = "";
 
         public static void Invoke(ISynchronizeInvoke sync, Action action)
@@ -30,7 +32,7 @@ namespace TAWKI_TCPServer
             }
         }
 
-        public static ProtocolResponseSingleData SendToDBSingleData(string log, string action, dynamic j)
+        public static ProtocolResponseSingleData SendToDBSingleData(string log, string action, string ip_address, dynamic j)
         {
             // serialize a new json string for just the data by itself
             string jdataString = Newtonsoft.Json.JsonConvert.SerializeObject(j["Data"]);
@@ -41,6 +43,13 @@ namespace TAWKI_TCPServer
                 dataDictionary = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(jdataString);
             else
                 dataDictionary = new Dictionary<string, object>();
+
+            // special scenario - because we cant get the ip address of the game server from DCS, we'll get it from the socket sender object
+            // and specially insert it as a parameter into the data dictionary
+            if (action == ACTION_GET_SERVERID)
+            {
+                dataDictionary.Add("IP", ip_address);
+            }
             
             ProtocolResponseSingleData result = new ProtocolResponseSingleData();
             result.Action = action;
@@ -59,7 +68,10 @@ namespace TAWKI_TCPServer
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 foreach (var d in dataDictionary)
                 {
-                    cmd.Parameters.AddWithValue(d.Key, d.Value);                 
+                    if (d.Value is int && (int)d.Value == LUANULL)
+                        cmd.Parameters.AddWithValue(d.Key, null);
+                    else
+                        cmd.Parameters.AddWithValue(d.Key, d.Value);                 
                 }
                 rdr = cmd.ExecuteReader();
                 if (rdr.Read())
@@ -121,7 +133,10 @@ namespace TAWKI_TCPServer
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     foreach (var kv in d)
                     {
-                        cmd.Parameters.AddWithValue(kv.Key, kv.Value);
+                        if (kv.Value.GetType() == typeof(Int64) && (Int64)kv.Value == LUANULL)
+                             cmd.Parameters.AddWithValue(kv.Key, null);
+                        else
+                            cmd.Parameters.AddWithValue(kv.Key, kv.Value);
                     }
                     rdr = cmd.ExecuteReader();
                     if (rdr.Read())
@@ -202,7 +217,7 @@ namespace TAWKI_TCPServer
                     }
                     else
                     {
-                        ProtocolResponseSingleData resp = SendToDBSingleData(((SocketClient)(sender)).LogFile, action, j);
+                        ProtocolResponseSingleData resp = SendToDBSingleData(((SocketClient)(sender)).LogFile, action, ((SocketClient)(sender)).Address, j);
                         if (!string.IsNullOrWhiteSpace(resp.Error))
                             resp.Result = false;
                         else
