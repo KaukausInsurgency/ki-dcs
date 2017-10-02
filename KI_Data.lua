@@ -22,7 +22,7 @@ KI.Data =
     "Spawn Outpost Template"
   },
   GameEventQueue = {},                -- data queue of game events
-  ConnectEventQueue = {},             -- data queue of connection events received from server side mod
+  OnlinePlayers = {},
   Sorties = {},                       -- list of current sorties active in format ["UCID"] = { Role, SortieID }
   SpawnID = 0,
   SortieID = 0,

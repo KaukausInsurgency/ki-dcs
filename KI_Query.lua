@@ -68,7 +68,23 @@ function KI.Query.FindUCID_Player(name)
   
   for pid, op in pairs(KI.Data.OnlinePlayers) do
     if op.Name == name then
+      env.info("KI.Query.FindSortieID_Player - returned " .. tostring(op.UCID))
       return op.UCID
+    end
+  end
+  
+  return nil
+end
+
+
+function KI.Query.FindSortieID_Player(name)
+  env.info("KI.Query.FindSortieID_Player called")
+  if not name then return nil end
+  
+  for pid, op in pairs(KI.Data.OnlinePlayers) do
+    if op.Name == name then
+      env.info("KI.Query.FindSortieID_Player - returned " .. tostring(op.SortieID))
+      return op.SortieID
     end
   end
   

@@ -24,7 +24,7 @@ function KI.Socket.Connect()
 	env.info("KI.Socket.Connect called")
 	-- start connection
 	KI.Socket.Object = socket.tcp()
-	KI.Socket.Object:settimeout(.0001)
+	KI.Socket.Object:settimeout(5)
   KI.Socket.IsConnected = false
 	local _r, _err = KI.Socket.Object:connect(KI.Config.TCPServerIP, KI.Config.TCPServerPort)
   
@@ -58,7 +58,7 @@ function KI.Socket.CreateMessage(action_name, is_bulk_query, data)
   local _jsonmsg = JSON:encode(_msg)
   -- sending 6 char header that is size of msg string
   local _m = string.format("%06d", string.len(_jsonmsg)) .. _jsonmsg
-  env.info("KI.Socket.CreateMessage - dumping message")
+  --env.info("KI.Socket.CreateMessage - dumping message")
   env.info(_m)
   return _m
 end
@@ -111,10 +111,10 @@ function KI.Socket.SendUntilComplete(msg)
       end
     end
     env.info("KI.Socket.SendUntilComplete - bytes sent: "..tostring(bytes_sent))
-    env.info("KI.Socket.SendUntilComplete - sent string: '" .. _msgCopy:sub(1, bytes_sent).."'")
+    --env.info("KI.Socket.SendUntilComplete - sent string: '" .. _msgCopy:sub(1, bytes_sent).."'")
     _msgCopy = _msgCopy:sub(bytes_sent + 1) -- shrink the msg down to what has not been sent
-    env.info("KI.Socket.SendUntilComplete - Remaining buffer length: " 
-              .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
+    --env.info("KI.Socket.SendUntilComplete - Remaining buffer length: " 
+    --          .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
   end
   
   return true
@@ -151,7 +151,7 @@ function KI.Socket.ReceiveUntilComplete()
     end
   else
     env.info("KI.Socket.ReceiveUntilComplete - ERROR in receiving header data (reason: " .. _error .. ")")
-    KI.Socket.Disconnect()
+    --KI.Socket.Disconnect()
     return nil
   end
 end

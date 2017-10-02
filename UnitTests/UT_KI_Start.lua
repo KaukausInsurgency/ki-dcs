@@ -68,7 +68,6 @@ assert(loadfile(path .. "SLC.lua"))()
 assert(loadfile(path .. "DWM.lua"))()
 assert(loadfile(path .. "DSMT.lua"))()
 assert(loadfile(path .. "CP.lua"))()
-assert(loadfile(path .. "PlayerInfo.lua"))()
 assert(loadfile(path .. "GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\KI_Config_UT.lua"))()
 assert(loadfile(path .. "KI_Defines.lua"))()
@@ -79,7 +78,6 @@ assert(loadfile(path .. "KI_Init.lua"))()
 assert(loadfile(path .. "KI_Loader.lua"))()
 assert(loadfile(path .. "KI_Scheduled.lua"))()
 assert(loadfile(path .. "KI_Hooks.lua"))()
-assert(loadfile(path .. "KI_MP.lua"))()
 assert(loadfile(path .. "AICOM_Config.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
 
@@ -98,7 +96,6 @@ assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_PlayerInfo.lua"))()
 -- WIP
 
 
@@ -108,7 +105,6 @@ assert(loadfile(path .. "UnitTests\\UT_PlayerInfo.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_MP.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
 
 

@@ -131,7 +131,7 @@ namespace TAWKI_TCPServer
         private void ManageSocket()
         {
                 // Inner loop manages send/response
-            while ((!signal_close.WaitOne(200)) & _connected)
+            while ((!signal_close.WaitOne(50)) & _connected)
             {
                 try
                 {

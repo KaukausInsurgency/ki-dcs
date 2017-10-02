@@ -86,10 +86,11 @@ function KI.Init.RequestNewSession()
   local result = false
   
   if KI.Socket.SendUntilComplete(request) then
-    local response = KI.Socket.ReceiveUntilComplete()
+    local response = KI.Socket.DecodeMessage(KI.Socket.ReceiveUntilComplete())
     if response and response.Result then
-      KI.Data.SessionID = response.Data
+      KI.Data.SessionID = response.Data[1]
       result = true
+      trigger.action.outText("Database - New Session ID - " .. tostring(KI.Data.SessionID), 30)
     elseif response and response.Error then
       env.info("KI.Init.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
       result = false
@@ -102,9 +103,10 @@ function KI.Init.RequestNewSession()
     result = false
   end
   
+  if KI.Socket.IsConnected then
+    KI.Socket.Disconnect()
+    env.info("KI.Init.RequestNewSession - Disconnecting TCP Socket")
+  end
+  
   return result
-end
-
-function KI.Init.OnlinePlayers()
-  KI.Data.OnlinePlayers = PlayerInfoList
 end

@@ -1,7 +1,7 @@
 -- Mock objects for debugging outside of DCS
 
 local JSONPath = "\\Scripts\\JSON.lua"
-local IsMockTest = true
+local IsMockTest = DCS == nil
 
 if IsMockTest then
   net = {}
@@ -52,6 +52,16 @@ if IsMockTest then
         id = 5,
         ipaddr = "127.0.0.4:9999",
         slot = 4
+      }
+    elseif id == 6 then
+      playerObj =
+      {
+        ucid = "EEEEE",
+        name = "New callsign",
+        id = 6,
+        ipaddr = "127.0.0.1:9999",
+        slot = 1
+        
       }
     end
     
@@ -192,6 +202,24 @@ if IsMockTest then
     
   end
   
+  
+  -- runs with main KI mission so we can test out the whole thing
+  function Main2()
+    -- Server start up - Server Player joins
+    DCS.onPlayerConnect(1)
+    DCS.onPlayerConnect(6)
+    
+    local loop_count = 3000
+    while loop_count > 0 do
+      sleep(5)
+      DCS.onSimulationFrame()
+      loop_count = loop_count - 1
+    end
+  
+    DCS.onPlayerDisconnect(1, "Disconnected")
+    DCS.onPlayerDisconnect(6, "Disconnected")
+  end
+  
   JSONPath = "S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua"
 end 
 -- END TEST MOCKUP DATA
@@ -235,6 +263,7 @@ KIServer.Actions = {}
 KIServer.Actions.UpdatePlayer = "UpdatePlayer"                -- updates player table with life count, online_player with role
 KIServer.Actions.GetOrAddPlayer = "GetOrAddPlayer"            -- adds or gets existing player record
 KIServer.Actions.AddConnectEvent = "AddConnectionEvent"       -- adds connect / disconnect events and adds player to online_players table
+KIServer.Actions.AddGameEvent = "AddGameEvent"
 
 KIServer.Data = {}
 KIServer.Data.PendingPlayerInfoQueue = {}   -- array of UCIDs, players that we are still waiting to receive data from DB
@@ -595,7 +624,7 @@ end
 -- DCS SERVER EVENT HOOKS
 KIHooks = {}
 
--- Main Loop for KIServer - tries to receive updated Banned List and Player Life List from Mission Side socket
+-- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
 	if not KIServer.IsRunning() then return end
 	
@@ -613,17 +642,37 @@ KIHooks.onSimulationFrame = function()
       if received then
         net.log("KIServer - UDP Data stream received")
         local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
+        
         if Success and Data then
           net.log("Data received!")
           KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+          
+          if Data.GameEventQueue and #Data.GameEventQueue > 0 then
+            net.log("KIHooks.onSimulationFrame - got GameEvent data from Mission - sending to TCP Server")
+            local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, Data.GameEventQueue)
+    
+            if not KIServer.TCPSocket.IsConnected then
+              if not KIServer.TCPSocket.Connect() then
+                net.log("KIHooks.onSimulationFrame - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+                table.insert(KIServer.Backup.TCPQueue, request)
+              end
+            end
+            
+            if not KIServer.TCPSocket.SendUntilComplete(request) then
+              net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+              table.insert(KIServer.Backup.TCPQueue, request)
+            end
+          end
+          
         end
+        
       end
     end
     
     
     
     --========================================================--
-    -- now send back to Mission Script the updated OnlinePlayer list (of lives remaining) + any new connections we received since last time
+    -- now send back to Mission Script the updated OnlinePlayer list (of lives remaining) + any new players we received since last time
     -- send this info to the TCP Server as well
     if true then
     
@@ -765,7 +814,8 @@ KIHooks.onPlayerConnect = function(playerID)
     Name = player.name, 
     Role = "", 
     Lives = nil,        -- intentially setting this to nil here - will be updated once we get player record back from db
-    Banned = false
+    Banned = false,
+    SortieID = -1
   }
   KIServer.Data.OnlinePlayersUCIDHash[player.ucid] = player.id
   
@@ -930,5 +980,6 @@ net.log("KI Server Tools Initialization Complete")
 
 
 if IsMockTest then
-  Main()
+  Main2()
+  --Main()
 end

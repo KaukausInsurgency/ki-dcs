@@ -88,7 +88,7 @@ namespace TAWKI_TCPServer
             RestartSocket();
             // Restarts listening on socket
             // This outer loop manages connection (whether client connects, or loses connection)
-            while (!signal_close.WaitOne(200))
+            while (!signal_close.WaitOne(100))
             {
                 // Wait for a connection to be made, or for the cancel event to be signaled
                 try

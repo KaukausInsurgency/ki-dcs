@@ -8,7 +8,7 @@ Author: Igneous01
 
 GameEvent = {}
 
-GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_obj, realTime)
+GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTime)
   env.info("GameEvent.CreateGameEvent called (sessionID: " 
            .. tostring(sessionID) .. ", serverID: " 
            .. tostring(serverID) .. ", sortieID: " 
@@ -17,7 +17,6 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
            .. tostring(realTime) .. ")")
   if sessionID == nil or 
     serverID == nil or 
-    sortieID == nil or 
     dcs_event_obj == nil or 
     dcs_event_obj.initiator == nil or
     realTime == nil then
@@ -26,7 +25,8 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
     return nil
   end
   
-  local playerName = dcs_event_obj.initiator:getPlayerName()
+  local playerName = dcs_event_obj.initiator:getPlayerName() or "AI"
+  local sortieID = KI.Query.FindSortieID_Player(playerName) or nil
   local airfield = nil
   local weapon = nil
   local weaponCategory = nil
@@ -35,8 +35,8 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
   local targetType = nil
   local targetCategory = nil
   local targetIsPlayer = false
-  local targetPlayerUCID = nil
   local targetPlayerName = nil
+  local targetSide = nil
   
   if dcs_event_obj.place then
     airfield = dcs_event_obj.place:getName()
@@ -53,10 +53,10 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
     targetType = KI.Defines.UnitTypes[target]
     targetCategory = KI.Defines.UnitCategories[dcs_event_obj.target:getCategory()]
     targetPlayerName = dcs_event_obj.target:getPlayerName()
+    targetSide = dcs_event_obj.target:getCoalition()
     
     if targetPlayerName then
       targetIsPlayer = true
-      targetPlayerUCID = KI.Query.FindUCID_Player(KI.MP.GetPlayerNameFix(targetPlayerName))
     end
     
   end
@@ -66,9 +66,10 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
     ["SessionID"] = sessionID,
     ["ServerID"] = serverID,
     ["SortieID"] = sortieID,
-    ["UCID"] = KI.Query.FindUCID_Player(KI.MP.GetPlayerNameFix(playerName)),
+    ["UCID"] = KI.Query.FindUCID_Player(playerName),
     ["Event"] = KI.Defines.EventNames[dcs_event_obj.id],
     ["PlayerName"] = playerName,
+    ["PlayerSide"] = dcs_event_obj.initiator:getCoalition(),
     ["RealTime"] = realTime,
     ["GameTime"] = dcs_event_obj.time,
     ["Role"] = dcs_event_obj.initiator:getTypeName(),
@@ -80,8 +81,9 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, sortieID, dcs_event_ob
     ["TargetModel"] = target,
     ["TargetType"] = targetType,
     ["TargetCategory"] = targetCategory,
+    ["TargetSide"] = targetSide,
     ["TargetIsPlayer"] = targetIsPlayer,
-    ["TargetPlayerUCID"] = targetPlayerUCID,
+    ["TargetPlayerUCID"] = KI.Query.FindUCID_Player(targetPlayerName),
     ["TargetPlayerName"] = targetPlayerName
   }
   

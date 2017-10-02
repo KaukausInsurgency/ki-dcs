@@ -108,14 +108,59 @@ end
 
 
 function KI.Scheduled.DataTransmission(args, time)
-  if KI.Socket.IsConnected then
-    -- send / receive some data
-  else
-    -- try to reconnect
-    if KI.Socket.Connect() then
-      
+  env.info("KI.Scheduled.DataTransmission called")
+  
+  
+  -- try to receive UDP data from Server MOD
+  local received = KI.UDPReceiveSocket:receive()
+  if received then
+    local _error = ""
+    local Success, Data = xpcall(function() return KI.JSON:decode(received) end, function(err) _error = err end)
+    
+    if Success and Data then
+      env.info("KI.Scheduled.DataTransmission - UDP Data received from Server Mod")
+        
+      -- Update existing OnlinePlayer records
+      -- Insert new ones
+      for pid, op in pairs(Data) do
+        if KI.Data[pid] then
+          -- do a partial update - but do not modify UCID, Lives, or SortieID
+          KI.Data[pid].Name = op.Name
+          KI.Data[pid].Role = op.Role
+          KI.Data[pid].Banned = op.Banned
+        else
+          KI.Data[pid] = op
+        end
+      end
+      env.info("KI.Scheduled.DataTransmission - Updated OnlinePlayers")
+      -- remove entries that are no longer on the server
+      --[[for pid, op in KI.Data do
+        if Data[pid] == nil then
+          KI.Data[pid] = nil
+        end
+      end
+      --]]
+    else
+      env.info("Error decoding UDP JSON Data - " .. _error)
     end
   end
+  
+  
+  
+  
+  
+  -- send to Server Mod
+  -- 1) Online Player list, with the current player life counts, sortieIDs
+  -- 2) The current game event queue
+  socket.try(
+        KI.UDPSendSocket:sendto(
+          KI.JSON:encode({ OnlinePlayers = KI.Data.OnlinePlayers, GameEventQueue = KI.Data.GameEventQueue }) 
+                          .. KI.SocketDelimiter, 
+                          "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+      )
+  env.info("Sent UDP JSON Data to Server MOD")
+      
+  KI.Data.GameEventQueue = {} -- flush the game event queue
   
   return time + KI.Config.DataTransmissionUpdateRate
 end

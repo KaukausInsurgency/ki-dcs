@@ -17,6 +17,9 @@ KI.Config.CrateDespawnTime_Wild = 300
 -- Controls the rate at which data transmissions are sent to the database server
 KI.Config.DataTransmissionUpdateRate = 10
 
+-- Controls the rate at which mission data is saved to file
+KI.Config.SaveMissionRate = 300
+
 -- Controls the rate at which all capture points are updated/managed by KI Engine
 KI.Config.CPUpdateRate = 15
 
@@ -53,13 +56,16 @@ KI.Config.PlayerListFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_P
 KI.Config.PlayerDataFileName = lfs.writedir() .. KI.Config.ParentFolder .. "KI_PlayerData.lua"
 
 -- IP Address of TCP Server
-KI.Config.TCPServerIP = "192.168.1.255"
+KI.Config.TCPServerIP = "127.0.0.1"
 
 -- Port Number of TCP Server
 KI.Config.TCPServerPort = 9983
 
+KI.Config.SERVERMOD_RECEIVE_PORT = 6005
+KI.Config.SERVERMOD_SEND_TO_PORT = 6006
+
 -- Your server name (Only really used if supporting multi-tenant game servers)
-KI.Config.ServerName = "My Kaukasus Insurgency Server"
+KI.Config.ServerName = "Kaukasus Insurgency Server"
 KI.Config.ServerID = 1
 
 -- configures capture points in mission
