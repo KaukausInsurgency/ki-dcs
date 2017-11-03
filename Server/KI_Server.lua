@@ -766,8 +766,10 @@ KIHooks.onSimulationFrame = function()
               "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT
             )
           )
+          net.log("KIServer Init - Send UDP message to Game")
           -- This is a poor mans CriticalSection / Lock to prevent the game from attempting to read from the socket before the server has finished sending it
           KIServer.SetFlagValue(KIServer.Flag, 2) -- notify the Game that the server has sent the data and it can attempt to receive it
+          net.log("KIServer Init - Set Flag to '2'")
         end
       end
     end

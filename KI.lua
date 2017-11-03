@@ -118,18 +118,11 @@ GC.OnDespawn = KI.Hooks.GCOnDespawn
 KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
-
 SLC.InitSLCRadioItemsForUnits()
-
 AICOM.Init()
-
 timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)
 timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + 5)
-
 KI.Loader.LoadData()
-
-KI.Scheduled.DataTransmission({}, 5)
-KI.Scheduled.DataTransmission({}, 5)
 timer.scheduleFunction(KI.Scheduled.DataTransmission, {}, timer.getTime() + KI.Config.DataTransmissionUpdateRate)
 timer.scheduleFunction(function(args, time) 
     KI.Loader.SaveData() 
@@ -137,13 +130,18 @@ timer.scheduleFunction(function(args, time)
   end, {}, timer.getTime() + KI.Config.SaveMissionRate)
 timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + AICOM.Config.TurnRate)
 
+--KI.Scheduled.DataTransmission({}, 5)
+--KI.Scheduled.DataTransmission({}, 5)
 --AICOM.DoTurn({}, 5)
+
 -- GAME IS READY TO RECEIVE DATA FROM SERVERMOD
 trigger.action.setUserFlag("9000", 1)
+env.info("KI - Load Complete - Waiting to receive signal from Server Mod")
 
 -- Wait until the Server Mod has set the flag indicating that data was sent, before we attempt to read
 while (trigger.action.getUserFlag("9000") == 1 then
 end
+env.info("KI - Received Signal from Server Mod - Receiving UDP Message")
 
 if not KI.Init.GetServerAndSession() then
   trigger.action.outText("FAILED TO GET ServerID and SessionID from Database! Check Connection!", 30)
@@ -155,5 +153,5 @@ end
 world.addEventHandler(KI.Hooks.GameEventHandler)
 
 
-
+env.info("KI - Initialization Complete")
 return true
