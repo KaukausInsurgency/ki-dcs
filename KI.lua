@@ -138,8 +138,12 @@ timer.scheduleFunction(function(args, time)
 timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + AICOM.Config.TurnRate)
 
 --AICOM.DoTurn({}, 5)
+-- GAME IS READY TO RECEIVE DATA FROM SERVERMOD
+trigger.action.setUserFlag("9000", 1)
 
-world.addEventHandler(KI.Hooks.GameEventHandler)
+-- Wait until the Server Mod has set the flag indicating that data was sent, before we attempt to read
+while (trigger.action.getUserFlag("9000") == 1 then
+end
 
 if not KI.Init.GetServerAndSession() then
   trigger.action.outText("FAILED TO GET ServerID and SessionID from Database! Check Connection!", 30)
@@ -147,5 +151,9 @@ if not KI.Init.GetServerAndSession() then
 else
   trigger.action.outText("RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")", 30)
 end
+
+world.addEventHandler(KI.Hooks.GameEventHandler)
+
+
 
 return true

@@ -81,6 +81,13 @@ if IsMockTest then
   net.kick = function(pid, msg)
     print("KICKED PLAYERID: " .. tostring(pid) .. " - " .. msg)
   end
+  net.dostring_in = function(who, msg)
+    if string.match(msg, "getUserFlag") then
+      return "1", nil
+    else
+      return true, nil
+    end
+  end
   lfs = {}
   lfs.writedir = function() return "C:\\Users\\Sapphire\\Saved Games\\DCS\\" end
   DCS = {}
@@ -261,6 +268,7 @@ KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
+KIServer.Flag = 9000              -- this flag is set when the GAME is ready to receive SessionID and ServerID
 KIServer.Config = {}
 KIServer.Actions = {}
 KIServer.Actions.UpdatePlayer = "UpdatePlayer"                -- updates player table with life count, online_player with role
@@ -398,6 +406,29 @@ KIServer.ReadFileJSON = function(path)
     return nil, _err
   end
 end
+
+function KIServer.GetFlagValue(_flag)
+  local _status,_error  = net.dostring_in('server', " return trigger.misc.getUserFlag(\"".._flag.."\"); ")
+
+  if not _status and _error then
+    net.log("KIServer.GetFlagValue - error getting flag: ".._error)
+    return nil
+  else
+    return tonumber(_status)
+  end
+end
+
+function KIServer.SetFlagValue(_flag, _number) -- Added by FlightControl
+
+  local _status,_error  = net.dostring_in('server', " return trigger.action.setUserFlag(\"".._flag.."\", " .. _number .. "); ")
+
+  if not _status and _error then
+    net.log("KIServer.SetFlagValue - error setting flag: ".._error)
+    return false
+  end
+  return true
+end
+
 
 local function InitKIServerConfig()
   local UseDefaultConfig = false
@@ -721,19 +752,23 @@ KIHooks.onSimulationFrame = function()
   -- onetime call to get serverID and SessionID from DB
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
   if DCS.getModelTime() > 0 and requires_init then
-    if KIServer.RequestServerID() then
-      if KIServer.RequestNewSession() then
-        net.log("KIServer Init - Successful retreive of ServerID and SessionID from Database")
-        requires_init = false
-        socket.try(
-          KIServer.UDPSendSocket:sendto(
-            KIServer.JSON:encode
-            (
-              { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}
-            ) .. KIServer.SocketDelimiter, 
-            "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT
+    if KIServer.GetFlagValue(KIServer.Flag) == 1 then
+      if KIServer.RequestServerID() then
+        if KIServer.RequestNewSession() then
+          net.log("KIServer Init - Successful retreive of ServerID and SessionID from Database")
+          requires_init = false
+          socket.try(
+            KIServer.UDPSendSocket:sendto(
+              KIServer.JSON:encode
+              (
+                { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}
+              ) .. KIServer.SocketDelimiter, 
+              "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT
+            )
           )
-        )
+          -- This is a poor mans CriticalSection / Lock to prevent the game from attempting to read from the socket before the server has finished sending it
+          KIServer.SetFlagValue(KIServer.Flag, 2) -- notify the Game that the server has sent the data and it can attempt to receive it
+        end
       end
     end
   end
