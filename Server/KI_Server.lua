@@ -2,6 +2,7 @@
 
 local JSONPath = "\\Scripts\\JSON.lua"
 local IsMockTest = DCS == nil
+--net.log("KI_Server - IsMockTest Running: " .. tostring(IsMockTest))
 
 if IsMockTest then
   net = {}
@@ -246,7 +247,7 @@ end
 
 
 
-
+JSONPath = "S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua"
 
 
 
@@ -258,8 +259,17 @@ net.log("KI Server Invoked - Starting KI Server Tools...")
 package.path  = package.path..";.\\LuaSocket\\?.lua;"
 package.cpath = package.cpath..";.\\LuaSocket\\?.dll;"
 
-local JSON = loadfile(JSONPath)()
-local socket = require("socket")
+local _errormsg = ""
+net.log("JSON File Path: " .. JSONPath)
+local _JSONsuccess, JSON = xpcall(function() return loadfile(JSONPath)() end, function(err) _errormsg = err end)
+if _JSONsuccess and JSON then
+  net.log("KI Server Tools - JSON Loaded")
+else
+  net.log("KI Server Tools - ERROR Loading JSON: " .. _errormsg)
+end
+local _socket = require("socket")
+
+net.log("KI Server Tools - Frameworks loaded")
 
 KIServer = {}
 
@@ -463,7 +473,7 @@ local function InitKIServerConfig()
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
     KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\]]
-    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[KIServerLog.log]]
+    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[net.log.log]]
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
     KIServer.Config.SERVER_SESSION_SEND_TO_PORT = 6007
@@ -498,9 +508,8 @@ KIServer.ErrorHandler = function(err)
 end
 
 -- Checks whether the KI Server is running, by checking if the current game session is Multiplayer + Server Side
--- And if the mission name contains 'Kaukasus Insurgency'
+-- And if the mission name contains Config.MissionName
 KIServer.IsRunning = function()
-	net.log("KIServer.IsRunning() called")
 	if not DCS.isServer() and not DCS.isMultiplayer() then
 		return false
 	end
@@ -509,7 +518,6 @@ KIServer.IsRunning = function()
 	if string.match(DCS.getMissionName(), KIServer.Config.MissionName) then
 		return true
 	end
-
 	return false
 end
 
@@ -747,25 +755,29 @@ local requires_init = true
 
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
-	if not KIServer.IsRunning() then return end
+	if not KIServer.IsRunning() then 
+    requires_init = true
+    return 
+  end
+  
+  -- If the DCS model clock is reset to 0, assume that the mission was stopped, so require everything to be initialized again on next mission start
+  --if DCS.getModelTime() <= 0 then
+  --  net.log("KIServer - Detected Mission Stop - Require new initalization")
+  --  requires_init = true
+  --end
+  
   
   -- onetime call to get serverID and SessionID from DB
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
   if DCS.getModelTime() > 0 and requires_init then
     if KIServer.GetFlagValue(KIServer.Flag) == 1 then
+      net.log("KIServer Init - Requesting Session Data")
       if KIServer.RequestServerID() then
         if KIServer.RequestNewSession() then
           net.log("KIServer Init - Successful retreive of ServerID and SessionID from Database")
           requires_init = false
-          socket.try(
-            KIServer.UDPSendSocket:sendto(
-              KIServer.JSON:encode
-              (
-                { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}
-              ) .. KIServer.SocketDelimiter, 
-              "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT
-            )
-          )
+          local msgdata = KIServer.JSON:encode({ ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}) .. KIServer.SocketDelimiter
+          socket.try(KIServer.UDPSendSocket:sendto(msgdata, "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT))
           net.log("KIServer Init - Send UDP message to Game")
           -- This is a poor mans CriticalSection / Lock to prevent the game from attempting to read from the socket before the server has finished sending it
           KIServer.SetFlagValue(KIServer.Flag, 2) -- notify the Game that the server has sent the data and it can attempt to receive it
@@ -784,7 +796,7 @@ KIHooks.onSimulationFrame = function()
     --========================================================--
     -- Try Receive Player Life count from Mission Script
     if true then
-      
+      net.log("KIServer - Try Receive Player Life Count")
       local received = KIServer.UDPReceiveSocket:receive()
       if received then
         net.log("KIServer - UDP Data stream received")
@@ -821,13 +833,10 @@ KIHooks.onSimulationFrame = function()
     -- now send back to Mission Script the updated OnlinePlayer list (of lives remaining) + any new players we received since last time
     -- send this info to the TCP Server as well
     if true then
-    
+      net.log("KIServer - Try Send OnlinePlayers to Mission Script")
       KIServer.Data.OnlinePlayers = KIServer.SanitizeArray(KIServer.Data.OnlinePlayers)
       -- send Online Player list to UI
-      socket.try(
-        KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.Data.OnlinePlayers) .. KIServer.SocketDelimiter, 
-                                      "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT)
-      )
+      socket.try(KIServer.UDPSendSocket:sendto(KIServer.JSON:encode(KIServer.Data.OnlinePlayers) .. KIServer.SocketDelimiter, "127.0.0.1", KIServer.Config.GAMEGUI_SEND_TO_PORT))
       
       net.log("Sent JSON UDP to Mission (OnlinePlayers)")
       
@@ -837,7 +846,7 @@ KIHooks.onSimulationFrame = function()
     --========================================================--
     -- Try Receive TCP DB Data
     if true then
-
+      net.log("KIServer - Try Receive TCP DB Data")
       while( true ) do
         local response_string = KIServer.TCPSocket.ReceiveUntilComplete()
         if not response_string then
