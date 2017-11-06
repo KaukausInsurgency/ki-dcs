@@ -11,8 +11,7 @@ GameEvent = {}
 GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTime)
   env.info("GameEvent.CreateGameEvent called (sessionID: " 
            .. tostring(sessionID) .. ", serverID: " 
-           .. tostring(serverID) .. ", sortieID: " 
-           .. tostring(sortieID) .. ", dcs_event_obj: "
+           .. tostring(serverID) .. ", dcs_event_obj: "
            .. KI.Toolbox.Dump(dcs_event_obj) .. ", realTime: "
            .. tostring(realTime) .. ")")
   if sessionID == nil or 
@@ -98,6 +97,6 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["TargetPlayerUCID"] =  targetPlayerUCID,
     ["TargetPlayerName"] = targetPlayerName
   }
-  
+  env.info("GameEvent.CreateGameEvent - returning (NIL?:" .. tostring(gameevent == nil))
   return gameevent
 end

@@ -546,7 +546,6 @@ KIServer.UpdatePlayerLives = function(data)
   
   -- loop through the data, and only update the number of Lives and the Banned status in the server mod
   -- we dont care about anything else from the Mission Script layer but these 2 fields (everything else is managed by server mod)
-  net.log("KIServer.UpdatePlayerLives data count :" .. tostring(#data))
   
   for _, dop in pairs(data) do
     net.log("KIServer.UpdatePlayerLives iter dop.UCID :" .. tostring(dop.UCID))
@@ -1023,21 +1022,22 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 
 	net.log("KIHooks.onPlayerDisconnect called (playerID = '" .. playerID .. "', reason = '" .. reason .. "')")
 	
-  local player = net.get_player_info(playerID)
+  --local player = net.get_player_info(playerID)    -- apparently we cant get this information once a player disconnects
+  local pinfo = KIServer.Data.OnlinePlayers[tostring(playerID)]
   
-	if player then
-		net.log("disconnecting player '" .. player.name .. "'")
+	if pinfo then
+		net.log("disconnecting player '" .. pinfo.Name .. "'")
     
-    local pinfo = KIServer.Data.OnlinePlayers[tostring(playerID)]
+    
     
 		local ServerEvent = 
 		{
       ServerID = KIServer.Data.ServerID,
 			Type = "DISCONNECTED",
-			Name = player.name,
-			UCID = player.ucid,
-			ID = player.id,
-			IP = player.ipaddr:sub(1, player.ipaddr:find(":")-1),
+			Name = pinfo.Name,
+			UCID = pinfo.UCID,
+			ID = playerID,
+			IP = "",
 			GameTime = DCS.getModelTime(),
 			RealTime = DCS.getRealTime(),
 		}
@@ -1049,8 +1049,8 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
     local UpdatePlayerReq =
     {
       ServerID = KIServer.Data.ServerID,
-      UCID = player.ucid,
-      Name = player.name,
+      UCID = pinfo.UCID,
+      Name = pinfo.Name,
 			Role = "",
       Lives = pinfo.Lives,
       Banned = pinfo.Banned,

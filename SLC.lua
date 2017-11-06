@@ -70,6 +70,8 @@ function SLC.IsCargoValid(cargo)
     return false
   elseif not cargo.Object:isExist() then
     return false
+  elseif StaticObject.getByName(cargo.Object:getName()) == nil then
+    return false
   else
     return true
   end

@@ -102,10 +102,10 @@ assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 -- TO BE IMPLEMENTED
 
 
-assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
+--assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
+--assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
+--assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
+--assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
 
 
 -- End the test

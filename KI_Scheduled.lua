@@ -155,6 +155,7 @@ function KI.Scheduled.DataTransmission(args, time)
   
   
   env.info("KI.Scheduled.DataTransmission - dumping online players : " .. KI.Toolbox.Dump(KI.Data.OnlinePlayers))
+  env.info("KI.Scheduled.DataTransmission - dumping game events : " .. KI.Toolbox.Dump(KI.Data.GameEventQueue))
   
   -- send to Server Mod
   -- 1) Online Player list, with the current player life counts, sortieIDs
