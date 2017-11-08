@@ -305,7 +305,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     env.info("KI.Hooks.GameEventHandler - SHOT / SHOOTING START / SHOOTING END")
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Config.ServerID, 
+                                           KI.Data.ServerID, 
                                            event, 
                                            timer.getTime())
                 )
@@ -315,7 +315,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     env.info("KI.Hooks.GameEventHandler - PLAYER HIT SOMEONE")
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Config.ServerID, 
+                                           KI.Data.ServerID, 
                                            event, 
                                            timer.getTime())
                 )
@@ -330,7 +330,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         
         table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Config.ServerID, 
+                                           KI.Data.ServerID, 
                                            event, 
                                            timer.getTime())
                 )
@@ -359,7 +359,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         
         table.insert(KI.Data.GameEventQueue, 
                    GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                             KI.Config.ServerID, 
+                                             KI.Data.ServerID, 
                                              event, 
                                              timer.getTime())
                   )
@@ -383,7 +383,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Config.ServerID, 
+                                           KI.Data.ServerID, 
                                            event, 
                                            timer.getTime())
                 )
@@ -392,7 +392,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_REFUELING_STOP and playerName then
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
-                                           KI.Config.ServerID, 
+                                           KI.Data.ServerID, 
                                            event, 
                                            timer.getTime()) 
                 )

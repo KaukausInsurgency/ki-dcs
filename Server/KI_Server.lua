@@ -544,7 +544,7 @@ end
 KIServer.UpdatePlayerLives = function(data)
   net.log("KIServer.UpdatePlayerLives called")
   
-  -- loop through the data, and only update the number of Lives and the Banned status in the server mod
+  -- loop through the data, and only update the number of Lives in the server mod
   -- we dont care about anything else from the Mission Script layer but these 2 fields (everything else is managed by server mod)
   
   for _, dop in pairs(data) do
@@ -554,7 +554,12 @@ KIServer.UpdatePlayerLives = function(data)
       net.log("KIServer.UpdatePlayerLives iter pid :" .. tostring(pid))
       if KIServer.Data.OnlinePlayers[tostring(pid)] then
         net.log("Updating pid " .. tostring(pid) .. " Lives (ServerMod Lives - " .. tostring(KIServer.Data.OnlinePlayers[tostring(pid)].Lives) .. ", Mission Lives - " .. tostring(dop.Lives))
-        KIServer.Data.OnlinePlayers[tostring(pid)].Lives = dop.Lives
+        
+        -- there is a chance the mission will still have the null life count while the server just received it from the db
+        -- in this case DO NOT update the life count 
+        if dop.Lives ~= KIServer.Null then
+          KIServer.Data.OnlinePlayers[tostring(pid)].Lives = dop.Lives
+        end
       end
     end
   end
@@ -1028,8 +1033,6 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
 	if pinfo then
 		net.log("disconnecting player '" .. pinfo.Name .. "'")
     
-    
-    
 		local ServerEvent = 
 		{
       ServerID = KIServer.Data.ServerID,
@@ -1096,7 +1099,14 @@ end
 -- 2) Checking if player has enough lives to continue with the swap
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
-  if DCS.isServer() and DCS.isMultiplayer() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
+  if KI.IsRunning() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
+    
+    -- ignore when the server is changing slots
+    if playerID == KIServer.Config.ServerPlayerID then
+      net.log("KIHooks.onPlayerTryChangeSlot() - ignoring - the server is changing slots")
+      return true
+    end
+    
     local player = net.get_player_info(playerID)
     local _playerName = player.name
     if _playerName == nil then return true end

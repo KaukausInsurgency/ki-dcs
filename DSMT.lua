@@ -121,6 +121,7 @@ end
 function DSMT:Start()
   env.info("DSMT:Start called")
   if self:_initMission() then
+    self.Life = 0 -- reset the lifetime of this mission back to 0
     -- invoke the manager
     DSMT._invoke(DSMT._manage, self.CheckRate, self)
   end

@@ -67,7 +67,6 @@ KI.Config.SERVER_SESSION_RECEIVE_PORT = 6007
 
 -- Your server name (Only really used if supporting multi-tenant game servers)
 KI.Config.ServerName = "Kaukasus Insurgency Server"
-KI.Config.ServerID = 1
 
 -- configures capture points in mission
 KI.Config.CP =

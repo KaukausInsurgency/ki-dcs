@@ -43,7 +43,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   local targetSide = KI.Null
   
   if dcs_event_obj.place then
-    airfield = dcs_event_obj.place:getName() or "Ground"
+    airfield = dcs_event_obj.place:getCallsign() or "Ground"
   end
   
   if dcs_event_obj.weapon then
