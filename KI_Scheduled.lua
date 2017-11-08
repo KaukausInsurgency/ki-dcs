@@ -95,7 +95,7 @@ function KI.Scheduled.CheckSideMissions(args, time)
   -- check if we can generate a new side mission
   if #KI.Data.ActiveMissions < KI.Config.SideMissionsMax then
     env.info("KI.Scheduled.CheckSideMissions - num active missions less than maximum - creating mission")
-    local sidemission = KI.Data.SideMissions[math.random(#KI.Data.SideMissions)]
+    local sidemission = KI.Toolbox.DeepCopy(KI.Data.SideMissions[math.random(#KI.Data.SideMissions)])
     if sidemission then
       env.info("KI.Scheduled.CheckSideMissions - chosen side mission - starting ...")
       sidemission:Start()
@@ -112,7 +112,18 @@ function KI.Scheduled.DataTransmission(args, time)
   
   
   -- try to receive UDP data from Server MOD
-  local received = KI.UDPReceiveSocket:receive()
+  -- loop the UDP receive to get the last sent information
+  -- this addresses the issue where the mission may send multiples of these udp messages
+  -- and we are behind trying to process old ones with old data in them
+  local received = nil
+  while true do
+    local rec = KI.UDPReceiveSocket:receive()
+    if not rec then
+      break
+    else
+      received = rec
+    end
+  end
   if received then
     local _error = ""
     local Success, Data = xpcall(function() return KI.JSON:decode(received) end, function(err) _error = err end)

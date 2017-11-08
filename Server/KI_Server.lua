@@ -106,7 +106,7 @@ if IsMockTest then
       return "observer"
     end
   end
-  DCS.getMissionName = function() return "Kaukasus Insurgency" end
+  DCS.getMissionName = function() return "KaukasusInsurgency" end
   DCS.setUserCallbacks = function(obj) 
     DCS.onSimulationFrame = obj.onSimulationFrame
     DCS.onPlayerTryConnect = obj.onPlayerTryConnect
@@ -755,12 +755,12 @@ end
 
 -- DCS SERVER EVENT HOOKS
 KIHooks = {}
-local requires_init = true
+KIHooks.Initialized = false
 
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
 	if not KIServer.IsRunning() then 
-    requires_init = true
+    KIHooks.Initialized = false
     return 
   end
   
@@ -773,13 +773,13 @@ KIHooks.onSimulationFrame = function()
   
   -- onetime call to get serverID and SessionID from DB
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
-  if DCS.getModelTime() > 0 and requires_init then
+  if DCS.getModelTime() > 0 and not KIHooks.Initialized then
     if KIServer.GetFlagValue(KIServer.Flag) == 1 then
       net.log("KIServer Init - Requesting Session Data")
       if KIServer.RequestServerID() then
         if KIServer.RequestNewSession() then
           net.log("KIServer Init - Successful retreive of ServerID and SessionID from Database")
-          requires_init = false
+          KIHooks.Initialized = true
           local msgdata = KIServer.JSON:encode({ ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}) .. KIServer.SocketDelimiter
           socket.try(KIServer.UDPSendSocket:sendto(msgdata, "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT))
           net.log("KIServer Init - Send UDP message to Game")
@@ -793,42 +793,48 @@ KIHooks.onSimulationFrame = function()
 	
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
     
-  if ElapsedTime >= KIServer.Config.DataRefreshRate and not requires_init then
+  if ElapsedTime >= KIServer.Config.DataRefreshRate and KIHooks.Initialized then
     KIServer.LastOnFrameTime = DCS.getModelTime()
     
     
     --========================================================--
     -- Try Receive Player Life count from Mission Script
     if true then
-      net.log("KIServer - Try Receive Player Life Count")
-      local received = KIServer.UDPReceiveSocket:receive()
-      if received then
-        net.log("KIServer - UDP Data stream received")
-        local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
-        
-        if Success and Data then
-          KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+      net.log("KIServer - Try Receive Player Life Count / GameEvents")
+      -- loop the UDP receive messages and process all of them
+      while true do
+        local received = KIServer.UDPReceiveSocket:receive()
+        if received then
+          net.log("KIServer - UDP Data stream received")
+          local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
           
-          if Data.GameEventQueue and #Data.GameEventQueue > 0 then
-            net.log("KIHooks.onSimulationFrame - got GameEvent data from Mission - sending to TCP Server")
-            local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, Data.GameEventQueue)
-    
-            if not KIServer.TCPSocket.IsConnected then
-              if not KIServer.TCPSocket.Connect() then
-                net.log("KIHooks.onSimulationFrame - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+          if Success and Data then
+            KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+            
+            if Data.GameEventQueue and #Data.GameEventQueue > 0 then
+              net.log("KIHooks.onSimulationFrame - got GameEvent data from Mission - sending to TCP Server")
+              local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, Data.GameEventQueue)
+      
+              if not KIServer.TCPSocket.IsConnected then
+                if not KIServer.TCPSocket.Connect() then
+                  net.log("KIHooks.onSimulationFrame - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+                  table.insert(KIServer.Backup.TCPQueue, request)
+                end
+              end
+              
+              if not KIServer.TCPSocket.SendUntilComplete(request) then
+                net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
                 table.insert(KIServer.Backup.TCPQueue, request)
               end
             end
             
-            if not KIServer.TCPSocket.SendUntilComplete(request) then
-              net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
-              table.insert(KIServer.Backup.TCPQueue, request)
-            end
           end
-          
+        else
+          net.log("KIHooks.onSimulationFrame - Breaking from UDP Receive Loop")
+          break
         end
-        
       end
+      
     end
     
     
@@ -903,6 +909,28 @@ end
 
 
 
+-- This handler is here to block players from joining the server, before the server has finished loading (and receiving session data from the database)
+KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID) --> true | false, "disconnect reason"
+	-- do not block if KI is not running
+  if not KIServer.IsRunning() then return true end
+  
+  -- if KI has not finished initializing (waiting for session and server from DB)
+  -- and the playerID is not the server player itself
+  -- block the connection with the message that the mission is still loading
+  if not KIHooks.Initialized and playerID ~= KIServer.Config.ServerPlayerID then 
+    net.log("KIHooks.onPlayerTryConnect - a player attempted to connect to the server before data was received from the database - dropping connection")
+    return false, "The mission has not finished loading" 
+  end
+  
+  -- if there has not been enough time passed in the simulation to complete some loading
+  -- block the connection with the message
+  if not DCS.getModelTime() or DCS.getModelTime() < 20 then
+		net.log("KIHooks.onPlayerTryConnect - a player attempted to connect to the server before the mission has finished loading - dropping connection")
+		return false, "The mission has not finished loading"
+	end 
+end
+
+
 
 
 -- This handler is responsible for 5 things
@@ -914,7 +942,7 @@ end
 KIHooks.onPlayerConnect = function(playerID)
 	-- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
 	-- the server may be hosting
-	if not KIServer.IsRunning() then return end
+	if not KIServer.IsRunning() or not KIHooks.Initialized then return end
 	net.log("KIHooks.onPlayerConnect() called")
   
   
@@ -1022,7 +1050,7 @@ end
 function KIHooks.onPlayerDisconnect(playerID, reason)
 	-- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
   -- the server may be hosting
-	if not KIServer.IsRunning() then return true end
+	if not KIServer.IsRunning() or not KIHooks.Initialized then return true end
   if playerID == KIServer.Config.ServerPlayerID then return end -- if the server is disconnecting there is no action required
 
 	net.log("KIHooks.onPlayerDisconnect called (playerID = '" .. playerID .. "', reason = '" .. reason .. "')")
@@ -1099,7 +1127,7 @@ end
 -- 2) Checking if player has enough lives to continue with the swap
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
-  if KIServer.IsRunning() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
+  if (KIServer.IsRunning() and KIHooks.Initialized) and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
     
     -- ignore when the server is changing slots
     if playerID == KIServer.Config.ServerPlayerID then
