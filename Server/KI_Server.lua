@@ -349,7 +349,7 @@ function KIServer.RequestNewSession()
     end
   end
   
-  KIServer.TCPSocket.Object:settimeout(10)  -- need to modify the timeout here as we need to wait for this result
+  KIServer.TCPSocket.Object:settimeout(30)  -- need to modify the timeout here as we need to wait for this result
   
   local request = KIServer.TCPSocket.CreateMessage("CreateSession", false, { ServerID = KIServer.Data.ServerID })
   local result = false
@@ -358,6 +358,42 @@ function KIServer.RequestNewSession()
     local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete())
     if response and response.Result then
       KIServer.Data.SessionID = response.Data[1]
+      result = true
+    elseif response and response.Error then
+      net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
+      result = false
+    else
+      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      result = false
+    end
+  else
+    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    result = false
+  end
+  
+  KIServer.TCPSocket.Object:settimeout(.0001) -- turn it back to the the original time out (non-blocking)
+  return result
+end
+
+
+function KIServer.RequestEndSession()
+  net.log("KIServer.RequestEndSession called")
+  
+  if not KIServer.TCPSocket.IsConnected then
+    if not KIServer.TCPSocket.Connect() then
+      net.log("KIServer.RequestEndSession - ERROR - Failed to Connect Socket to Server")
+      return false
+    end
+  end
+  
+  KIServer.TCPSocket.Object:settimeout(30)  -- need to modify the timeout here as we need to wait for this result
+  
+  local request = KIServer.TCPSocket.CreateMessage("EndSession", false, { ServerID = KIServer.Data.ServerID })
+  local result = false
+  
+  if KIServer.TCPSocket.SendUntilComplete(request) then
+    local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete())
+    if response and response.Result then
       result = true
     elseif response and response.Error then
       net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
@@ -760,6 +796,10 @@ KIHooks.Initialized = false
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
 	if not KIServer.IsRunning() then 
+    -- if the server was initialized at somepoint, but the game is no longer running, send a TCP request to end the current session
+    if KIHooks.Initialized then
+      KIServer.RequestEndSession()
+    end
     KIHooks.Initialized = false
     return 
   end
