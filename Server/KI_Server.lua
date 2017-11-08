@@ -1099,7 +1099,7 @@ end
 -- 2) Checking if player has enough lives to continue with the swap
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
-  if KI.IsRunning() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
+  if KIServer.IsRunning() and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
     
     -- ignore when the server is changing slots
     if playerID == KIServer.Config.ServerPlayerID then
