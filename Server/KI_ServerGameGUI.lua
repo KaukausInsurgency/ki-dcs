@@ -285,7 +285,9 @@ KIServer.Actions.UpdatePlayer = "UpdatePlayer"                -- updates player 
 KIServer.Actions.GetOrAddPlayer = "GetOrAddPlayer"            -- adds or gets existing player record
 KIServer.Actions.AddConnectEvent = "AddConnectionEvent"       -- adds connect / disconnect events and adds player to online_players table
 KIServer.Actions.AddGameEvent = "AddGameEvent"
+KIServer.Actions.AddOrUpdateCapturePoint = "AddOrUpdateCapturePoint"
 KIServer.Actions.RequestSession = "CreateSession"
+KIServer.Actions.EndSession = "EndSession"
 KIServer.Actions.RequestServer = "GetOrAddServer"
 
 KIServer.Data = {}
@@ -298,8 +300,7 @@ KIServer.Data.OnlinePlayersUCIDHash = {} -- hash that holds references to Online
 KIServer.Backup = {}
 KIServer.Backup.TCPQueue = {}  -- list of failed TCP Requests that failed to send - will write to file and try to resend when possible
 
-KIServer.Config.BanListRefreshRate = 60   -- retrieve a new banlist every 60 seconds
-KIServer.Config.TCPCheckReceiveRate = 60  -- check the TCP buffer every 60 seconds and attempt to read
+KIServer.Config.TCPCheckReceiveRate = 5  -- check the TCP buffer every 60 seconds and attempt to read
            
 function KIServer.RequestServerID()
   net.log("KIServer.RequestServerID called")
@@ -314,7 +315,7 @@ function KIServer.RequestServerID()
   
   KIServer.TCPSocket.Object:settimeout(10)  -- need to modify the timeout to 10 seconds as it's important we receive this right away
   
-  local request = KIServer.TCPSocket.CreateMessage("GetOrAddServer", false, { ServerName = KIServer.Config.ServerName })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestServer, false, { ServerName = KIServer.Config.ServerName })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request) then
@@ -351,7 +352,7 @@ function KIServer.RequestNewSession()
   
   KIServer.TCPSocket.Object:settimeout(30)  -- need to modify the timeout here as we need to wait for this result
   
-  local request = KIServer.TCPSocket.CreateMessage("CreateSession", false, { ServerID = KIServer.Data.ServerID })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request) then
@@ -388,7 +389,7 @@ function KIServer.RequestEndSession()
   
   KIServer.TCPSocket.Object:settimeout(30)  -- need to modify the timeout here as we need to wait for this result
   
-  local request = KIServer.TCPSocket.CreateMessage("EndSession", false, { ServerID = KIServer.Data.ServerID })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request) then
@@ -396,14 +397,14 @@ function KIServer.RequestEndSession()
     if response and response.Result then
       result = true
     elseif response and response.Error then
-      net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
+      net.log("KIServer.RequestEndSession - TRANSACTION ERROR - " .. response.Error)
       result = false
     else
-      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      net.log("KIServer.RequestEndSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
       result = false
     end
   else
-    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    net.log("KIServer.RequestEndSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
     result = false
   end
   
@@ -505,7 +506,7 @@ local function InitKIServerConfig()
   if UseDefaultConfig then
     net.log("InitKIServerConfig() - There was a problem reading from an existing config - using default settings")
     KIServer.Config.MissionName = "Kaukasus Insurgency"
-    KIServer.Config.DataRefreshRate = 30   -- how often should the server check the UDP Socket to update its data in memory
+    KIServer.Config.DataRefreshRate = 5   -- how often should the server check the UDP Socket to update its data in memory
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
     KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\]]
@@ -840,7 +841,7 @@ KIHooks.onSimulationFrame = function()
     --========================================================--
     -- Try Receive Player Life count from Mission Script
     if true then
-      net.log("KIServer - Try Receive Player Life Count / GameEvents")
+      net.log("KIServer - Try Receive Player Life Count / GameEvents / Capture Points")
       -- loop the UDP receive messages and process all of them
       while true do
         local received = KIServer.UDPReceiveSocket:receive()
@@ -854,6 +855,23 @@ KIHooks.onSimulationFrame = function()
             if Data.GameEventQueue and #Data.GameEventQueue > 0 then
               net.log("KIHooks.onSimulationFrame - got GameEvent data from Mission - sending to TCP Server")
               local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, Data.GameEventQueue)
+      
+              if not KIServer.TCPSocket.IsConnected then
+                if not KIServer.TCPSocket.Connect() then
+                  net.log("KIHooks.onSimulationFrame - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+                  table.insert(KIServer.Backup.TCPQueue, request)
+                end
+              end
+              
+              if not KIServer.TCPSocket.SendUntilComplete(request) then
+                net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+                table.insert(KIServer.Backup.TCPQueue, request)
+              end
+            end
+            
+            if Data.CapturePoints then
+              net.log("KIHooks.onSimulationFrame - got CapturePoints data from Mission - sending to TCP Server")
+              local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, true, Data.CapturePoints)
       
               if not KIServer.TCPSocket.IsConnected then
                 if not KIServer.TCPSocket.Connect() then
@@ -932,9 +950,6 @@ KIHooks.onSimulationFrame = function()
             KIServer.Data.PendingPlayerInfoQueue[ucid] = nil
             
             net.log("KIServer - Successfully received and processed GetOrAddPlayer")
-            
-          elseif response.Action == KIServer.Actions.AddConnectEvent then
-            net.log("KIServer - Successfully received and processed AddConnectEvent")
           else
             net.log("KIServer - Successfully received and processed " .. response.Action)
           end
@@ -1117,35 +1132,37 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
     -- this should prevent any blocking on our end and keep the server from lagging out
     local request1 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
     
-    local UpdatePlayerReq =
-    {
-      ServerID = KIServer.Data.ServerID,
-      UCID = pinfo.UCID,
-      Name = pinfo.Name,
-			Role = "",
-      Lives = pinfo.Lives,
-      Banned = pinfo.Banned,
-      Side = 0
-    }
-    local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
-    
-    if not KIServer.TCPSocket.IsConnected then
-      if not KIServer.TCPSocket.Connect() then
-        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
-        table.insert(KIServer.Backup.TCPQueue, request1)
-        table.insert(KIServer.Backup.TCPQueue, request2)
-      end
-    else
-      if not KIServer.TCPSocket.SendUntilComplete(request1) then
-        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
-        table.insert(KIServer.Backup.TCPQueue, request1)
-      end
-      if not KIServer.TCPSocket.SendUntilComplete(request2) then
-        net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
-        table.insert(KIServer.Backup.TCPQueue, request2)
+    -- do not update the player lives if they are NULL, we do not want to cause an invalid state in the database
+    if pinfo.Lives ~= KIServer.Null then
+      local UpdatePlayerReq =
+      {
+        ServerID = KIServer.Data.ServerID,
+        UCID = pinfo.UCID,
+        Name = pinfo.Name,
+        Role = "",
+        Lives = pinfo.Lives,
+        Banned = pinfo.Banned,
+        Side = 0
+      }
+      local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
+      
+      if not KIServer.TCPSocket.IsConnected then
+        if not KIServer.TCPSocket.Connect() then
+          net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+          table.insert(KIServer.Backup.TCPQueue, request1)
+          table.insert(KIServer.Backup.TCPQueue, request2)
+        end
+      else
+        if not KIServer.TCPSocket.SendUntilComplete(request1) then
+          net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+          table.insert(KIServer.Backup.TCPQueue, request1)
+        end
+        if not KIServer.TCPSocket.SendUntilComplete(request2) then
+          net.log("KIHooks.onPlayerConnect() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+          table.insert(KIServer.Backup.TCPQueue, request2)
+        end
       end
     end
-    
     
 
 

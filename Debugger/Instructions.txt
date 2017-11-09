@@ -1,0 +1,6 @@
+Requires using LDT IDE for LUA
+1) move debugger.lua to parent folder of DCS install
+2) copy your scripts folder into the DCS World\Scripts folder (the entire folder and contents) and setup dynamic linking (see previous moose video)
+3) Modify MissionScripting.lua, and comment out the sanitize ('os') line
+4) Setup a mission with a .miz file, and save it to a path with NO SPACES (and NO SPACEs in file name)
+5) Do a loadfile mission start trigger to load your main script

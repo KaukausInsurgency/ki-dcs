@@ -14,8 +14,8 @@ KI.Config.CrateDespawnTime_Depot = 120
 -- Controls the maximum lifetime of a crate/troops sitting idle in the wild until it is despawned
 KI.Config.CrateDespawnTime_Wild = 300
 
--- Controls the rate at which data transmissions are sent to the database server
-KI.Config.DataTransmissionUpdateRate = 10
+-- Controls the rate at which data transmissions are sent to the server mod
+KI.Config.DataTransmissionUpdateRate = 5
 
 -- Controls the rate at which mission data is saved to file
 KI.Config.SaveMissionRate = 300

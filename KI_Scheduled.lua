@@ -164,16 +164,35 @@ function KI.Scheduled.DataTransmission(args, time)
   end
   
   
+  env.info("KI.Scheduled.DataTransmission - Preparing CapturePoints Data")
+  local CapturePointDBData = {}
+  for i = 1, #KI.Data.CapturePoints do
+    local data = 
+    { 
+      ServerID = KI.Data.ServerID, 
+      Name = KI.Data.CapturePoints[i].Name,
+      Status = KI.Data.CapturePoints[i]:GetOwnership(),
+      BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
+      RedUnits = KI.Data.CapturePoints[i].RedUnits
+    }
+    table.insert(CapturePointDBData, data)
+  end
+  
   
   env.info("KI.Scheduled.DataTransmission - dumping online players : " .. KI.Toolbox.Dump(KI.Data.OnlinePlayers))
   env.info("KI.Scheduled.DataTransmission - dumping game events : " .. KI.Toolbox.Dump(KI.Data.GameEventQueue))
+  env.info("KI.Scheduled.DataTransmission - dumping capture points : " .. KI.Toolbox.Dump(CapturePointDBData))
   
   -- send to Server Mod
   -- 1) Online Player list, with the current player life counts, sortieIDs
   -- 2) The current game event queue
   socket.try(
         KI.UDPSendSocket:sendto(
-          KI.JSON:encode({ OnlinePlayers = KI.Data.OnlinePlayers, GameEventQueue = KI.Data.GameEventQueue }) 
+          KI.JSON:encode({ 
+                            OnlinePlayers = KI.Data.OnlinePlayers, 
+                            GameEventQueue = KI.Data.GameEventQueue,
+                            CapturePoints = CapturePointDBData
+                          }) 
                           .. KI.SocketDelimiter, 
                           "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
       )
