@@ -73,6 +73,9 @@ package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
 local JSON = loadfile("Scripts\\JSON.lua")()
 local socket = require("socket")
 
+local initconnection = require("debugger")
+initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
+
 -- do a partial load of KI because we need access to certain data
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
