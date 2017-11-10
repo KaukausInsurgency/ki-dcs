@@ -5,6 +5,8 @@ DWM =
   Name = "",            -- name of the depot in mission editor
   Object = nil,         -- the static object found from the name
   Zone = nil,           -- Mission Editor Trigger Zone
+  LatLong = "",
+  MGRS = "",
   SupplyCheckRate = 0,  -- the rate at which supplies are checked and whether the depot should call for a convoy
   Capacity = 0,         -- the maximum capacity the warehouse can hold
   CurrentCapacity = 0,
@@ -28,6 +30,11 @@ function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   end
   
   self.Zone = ZONE:New(zone)
+  local coordinates = self.Zone:GetCoordinate()
+  self.LatLong = coordinates:ToStringLLDDM()
+  self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
+  self.MGRS = coordinates:ToStringMGRS()
+  self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
   
   if not capacity then
     capacity = 100

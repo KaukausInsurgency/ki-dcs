@@ -11,6 +11,8 @@ CP =
   Zone = nil,           -- Mission Editor Trigger Zone
   BlueUnits = 0,
   RedUnits = 0,
+  LatLong = "",
+  MGRS = "",
   Owner = "",
   SpawnZone = nil       -- zone where units ai units are spawned for attacking
 }
@@ -27,6 +29,13 @@ function CP:New(name, zone, spawnZone)
   self.Name = name
   self.Zone = ZONE:New(zone)
   self.SpawnZone = ZONE:New(spawnZone)
+  local coordinates = self.Zone:GetCoordinate()
+  self.LatLong = coordinates:ToStringLLDDM()
+  self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
+  self.MGRS = coordinates:ToStringMGRS()
+  self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
+  
+  env.info("CP:New - MGRS(" ..self.MGRS .. ") LatLong(" .. self.LatLong .. ")")
   return self
 end
 

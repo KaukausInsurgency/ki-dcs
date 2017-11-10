@@ -400,9 +400,12 @@ function KI.Hooks.GameEventHandler:onEvent(event)
   elseif event.id == world.event.S_EVENT_MISSION_START then
     
   elseif event.id == world.event.S_EVENT_MISSION_END then
-    
-  -- Initialize any radio menu items for the player
+    -- Save all mission data to file
+    KI.Loader.SaveData() 
+    -- Finish receive/send of data between server mod
+    KI.Scheduled.DataTransmission({}, 0)
   elseif event.id == world.event.S_EVENT_BIRTH and playerName then
+    -- Initialize any radio menu items for the player
     SLC.InitSLCForUnit(event.initiator:getName())
     return
     

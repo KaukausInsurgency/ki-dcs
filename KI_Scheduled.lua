@@ -173,15 +173,36 @@ function KI.Scheduled.DataTransmission(args, time)
       Name = KI.Data.CapturePoints[i].Name,
       Status = KI.Data.CapturePoints[i]:GetOwnership(),
       BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
-      RedUnits = KI.Data.CapturePoints[i].RedUnits
+      RedUnits = KI.Data.CapturePoints[i].RedUnits,
+      LatLong = KI.Data.CapturePoints[i].LatLong,
+      MGRS = KI.Data.CapturePoints[i].MGRS
     }
     table.insert(CapturePointDBData, data)
+  end
+  
+  
+  env.info("KI.Scheduled.DataTransmission - Preparing Depot Data")
+  local DepotDBData = {}
+  for i = 1, #KI.Data.Depots do
+    local data = 
+    { 
+      ServerID = KI.Data.ServerID, 
+      Name = KI.Data.Depots[i].Name,
+      Status = "Online",
+      ResourceString = KI.Data.Depots[i]:ViewResources(),
+      CurrentCapacity = KI.Data.Depots[i].CurrentCapacity,
+      Capacity = KI.Data.Depots[i].Capacity,
+      LatLong = KI.Data.Depots[i].LatLong,
+      MGRS = KI.Data.Depots[i].MGRS
+    }
+    table.insert(DepotDBData, data)
   end
   
   
   env.info("KI.Scheduled.DataTransmission - dumping online players : " .. KI.Toolbox.Dump(KI.Data.OnlinePlayers))
   env.info("KI.Scheduled.DataTransmission - dumping game events : " .. KI.Toolbox.Dump(KI.Data.GameEventQueue))
   env.info("KI.Scheduled.DataTransmission - dumping capture points : " .. KI.Toolbox.Dump(CapturePointDBData))
+  env.info("KI.Scheduled.DataTransmission - dumping depots : " .. KI.Toolbox.Dump(DepotDBData))
   
   -- send to Server Mod
   -- 1) Online Player list, with the current player life counts, sortieIDs
@@ -191,7 +212,8 @@ function KI.Scheduled.DataTransmission(args, time)
           KI.JSON:encode({ 
                             OnlinePlayers = KI.Data.OnlinePlayers, 
                             GameEventQueue = KI.Data.GameEventQueue,
-                            CapturePoints = CapturePointDBData
+                            CapturePoints = CapturePointDBData,
+                            Depots = DepotDBData
                           }) 
                           .. KI.SocketDelimiter, 
                           "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
