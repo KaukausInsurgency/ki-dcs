@@ -1,3 +1,26 @@
+function DefineFunctions(obj, objFunction)
+  print("CustomEventCaster.CastToAirbase() called")
+  obj.getCallsign = function(o)
+    return objFunction(o)
+  end
+  obj.getName = function(o)
+    return objFunction(o)
+  end
+  
+  return obj
+end
+local _cp = { Name = "Test CP" }
+local _place = {}
+if not _cp then
+  _p = {}
+  _place = DefineFunctions(_p, function(o) return "Ground" end)
+else
+  _place = DefineFunctions(_cp, function(o) return o.Name end)
+end
+
+print(_place:getCallsign())
+print(_place:getName())
+
 --print(string.format("%-25s|%-5s|%-5s", "Defense", "Count", "limit") .. "\n")
 --print(string.format("%-25s|%-5d|%-5d", "T-90", 15, 30) .. "\n")
 

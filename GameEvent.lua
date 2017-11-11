@@ -26,10 +26,11 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   
   local playerName = dcs_event_obj.initiator:getPlayerName() or "AI"
   local UCID = KI.Null
+  local sortieID = KI.Null
   if playerName ~= "AI" then
     UCID = KI.Query.FindUCID_Player(playerName)
+    sortieID = KI.Query.FindSortieID_Player(playerName) or KI.Null
   end
-  local sortieID = KI.Query.FindSortieID_Player(playerName) or KI.Null
   local airfield = KI.Null
   local weapon = KI.Null
   local weaponCategory = KI.Null
@@ -41,6 +42,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   local targetPlayerName = KI.Null
   local targetPlayerUCID = KI.Null
   local targetSide = KI.Null
+  local numUnitsUnloaded = dcs_event_obj.unloaded or KI.Null
   
   if dcs_event_obj.place then
     airfield = dcs_event_obj.place:getCallsign() or "Ground"
@@ -71,6 +73,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     end
     
   end
+
   
   local gameevent =
   {
@@ -95,7 +98,9 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["TargetSide"] = targetSide,
     ["TargetIsPlayer"] = targetIsPlayer,
     ["TargetPlayerUCID"] =  targetPlayerUCID,
-    ["TargetPlayerName"] = targetPlayerName
+    ["TargetPlayerName"] = targetPlayerName,
+    ["TransportUnloadedCount"] = numUnitsUnloaded
   }
+  env.info("GameEvent.CreateGameEvent() returning table")
   return gameevent
 end

@@ -424,10 +424,19 @@ function()
     UT.TestCompare(function() return SLC.UnloadTroops(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
     UT.TestCompare(function() return SLC.UnloadTroops(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
 
+    -- testing LoadUnload - we just unloaded a squad so we should receive a "MOUNT" with Result = true
+    local a = SLC.LoadUnload(UT.TestData.PlayerGroup, "SLCPilot1") 
+    UT.TestCompare(function() return a.Action == "MOUNT" end)
+    UT.TestCompare(function() return a.Result == true end)
+    
+    -- now calling LoadUnload should unload and spawn a new group
+   
+    local b = SLC.LoadUnload(UT.TestData.PlayerGroup, "SLCPilot1")
+    UT.TestCompare(function() return b.Action == "DISMOUNT" end)
+    UT.TestCompare(function() return b.Result ~= nil end)
+    UT.TestData.UnloadedSquad = b.Result  -- the spawned group is returned in the Result property - reassign it back to this TestData member so that it gets destroyed at the end of the test cleanly
   end
   
-  -- SLC.LoadUnload(g, pilot)
-
 end,
 function()
   UT.TestData.MANPADSquad:Destroy()

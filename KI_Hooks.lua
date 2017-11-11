@@ -144,10 +144,40 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
     else
       env.info("SLC.Config.PostOnRadioAction - troop instance was not found - doing nothing")
     end
-  
+  elseif parentAction == "Deploy Management" then
+    env.info("SLC.Config.PostOnRadioAction - creating event")
+    -- create the dismount event and raise it
+    -- get the location - since you can only unload troops at a capture point, look for capture point
+    local _p = KI.Query.FindCP_Group(transportGroup) or KI.Query.FindDepot_Group(transportGroup)
+    
+    local _place = {}
+    
+    -- need to spoof the location into a DCS Airbase object, 
+    -- this is done so that our DCS Event Handler can process it like a normal event.place object
+    -- both CP and DWM have a .Name property, so lets use that
+    if not _p then
+      _p = {}
+      _place = CustomEventCaster.CastToAirbase(_p, function(o) return "Ground" end)
+    else
+      _place = CustomEventCaster.CastToAirbase(_p, function(o) return o.Name end)
+    end
+    
+    if actionResult.Action == "MOUNT" and actionResult.Result then
+      env.info("SLC.Config.PostOnRadioAction - creating KI_EVENT_TRANSPORT_MOUNT event")
+      local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_TRANSPORT_MOUNT, transportGroup:GetDCSUnit(1), _place)
+      KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
+    elseif actionResult.Action == "DISMOUNT" and actionResult.Result then
+      env.info("SLC.Config.PostOnRadioAction - creating KI_EVENT_TRANSPORT_DISMOUNT event")
+      local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_TRANSPORT_DISMOUNT, transportGroup:GetDCSUnit(1), _place)
+      _e.unloaded = actionResult.Result:GetInitialSize() -- actionResult.Result is MOOSE GROUP when Action is DISMOUNT
+      KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
+    else
+      env.info("SLC.Config.PostOnRadioAction - INVALID ACTION - doing nothing")
+    end
+    
   else
     env.info("SLC.PostOnRadioAction - doing nothing")
-  end -- end if depot management
+  end
 end
 
 
@@ -380,7 +410,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
          event.id == world.event.S_EVENT_EJECTION or 
          event.id == world.event.S_EVENT_PILOT_DEAD or 
          event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
-    env.info("KI.Hooks.GameEventHandler - SOMEONE DIED")
+    env.info("KI.Hooks.GameEventHandler - DEATH EVENT")
     
     -- doing something sneaky - modify the event object so that if the unit that died is AI, add a .target property and set it to the AI unit that died - this will capture the category, unit type information and store it in the target columns, rather than the player columns (we'll set those to "AI")
     if not playerName then
@@ -394,8 +424,9 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            timer.getTime())
                 )
     return       
-  elseif event.id == world.event.S_EVENT_REFUELING or
-         event.id == world.event.S_EVENT_REFUELING_STOP and playerName then
+  elseif (event.id == world.event.S_EVENT_REFUELING or
+         event.id == world.event.S_EVENT_REFUELING_STOP) and playerName then
+    env.info("KI.Hooks.GameEventHandler - Refueling Event raised")
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
                                            KI.Data.ServerID, 
@@ -406,6 +437,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
   elseif event.id == world.event.S_EVENT_MISSION_START then
     
   elseif event.id == world.event.S_EVENT_MISSION_END then
+    env.info("KI.Hooks.GameEventHandler - Mission End Event raised")
     -- Save all mission data to file
     KI.Loader.SaveData() 
     -- Finish receive/send of data between server mod
@@ -416,6 +448,15 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     return
     
   --elseif event.id == world.event.S_EVENT_PLAYER_COMMENT  then
+  elseif (event.id == KI.Defines.Event.KI_EVENT_TRANSPORT_DISMOUNT or 
+          event.id == KI.Defines.Event.KI_EVENT_TRANSPORT_MOUNT) and playerName then
+    env.info("KI.Hooks.GameEventHandler - Transport Event raised")
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           event, 
+                                           timer.getTime()) 
+                )
   else
     return
 	end

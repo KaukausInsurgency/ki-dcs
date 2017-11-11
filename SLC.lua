@@ -416,11 +416,11 @@ end
 function SLC.LoadUnload(g, pilot)
   if SLC.TransportInstances[pilot] then
     env.info("SLC.LoadUnload - " .. pilot .. " already has troop cargo")
-    return SLC.UnloadTroops(g, pilot)
+    return { Action = "DISMOUNT", Result = SLC.UnloadTroops(g, pilot) }
   else
     env.info("SLC.LoadUnload - " .. pilot .. " has no troop cargo")
-    SLC.LoadTroops(g, pilot)
-    return nil
+    local _result = SLC.LoadTroops(g, pilot)
+    return { Action = "MOUNT", Result = _result }
   end
 end
 

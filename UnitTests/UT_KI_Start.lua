@@ -69,6 +69,7 @@ assert(loadfile(path .. "DWM.lua"))()
 assert(loadfile(path .. "DSMT.lua"))()
 assert(loadfile(path .. "CP.lua"))()
 assert(loadfile(path .. "GameEvent.lua"))()
+assert(loadfile(path .. "CustomEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\KI_Config_UT.lua"))()
 assert(loadfile(path .. "KI_Defines.lua"))()
 assert(loadfile(path .. "KI_Data.lua"))()
@@ -96,6 +97,7 @@ assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
 -- WIP
 
 

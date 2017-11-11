@@ -98,6 +98,7 @@ local function StartKI()
   assert(loadfile(path .. "DSMT.lua"))()
   assert(loadfile(path .. "CP.lua"))()
   assert(loadfile(path .. "GameEvent.lua"))()
+  assert(loadfile(path .. "CustomEvent.lua"))()
   
   assert(loadfile(path .. "KI_Data.lua"))()
   assert(loadfile(path .. "KI_Defines.lua"))()
