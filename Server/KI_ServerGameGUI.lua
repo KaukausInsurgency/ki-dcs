@@ -1026,6 +1026,8 @@ KIHooks.onSimulationFrame = function()
       KIServer.TCPSocket.Disconnect()
     end
     KIHooks.Initialized = false
+    KIServer.LastOnFrameTime = 0
+    KIServer.LastOnFrameTimeBanCheck = 0
     return 
   end
   
@@ -1380,6 +1382,48 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   end
 end
 
+
+
+--DOC
+-- onGameEvent(eventName,arg1,arg2,arg3,arg4)
+--"friendly_fire", playerID, weaponName, victimPlayerID
+--"mission_end", winner, msg
+--"kill", killerPlayerID, killerUnitType, killerSide, victimPlayerID, victimUnitType, victimSide, weaponName
+--"self_kill", playerID
+--"change_slot", playerID, slotID, prevSide
+--"connect", id, name
+--"disconnect", ID_, name, playerSide
+--"crash", playerID, unit_missionID
+--"eject", playerID, unit_missionID
+--"takeoff", playerID, unit_missionID, airdromeName
+--"landing", playerID, unit_missionID, airdromeName
+--"pilot_death", playerID, unit_missionID
+--
+-- this handler is responsible for returning player to spectators when they die
+KIHooks.onGameEvent = function(eventName,playerID,arg2,arg3,arg4) 
+  if (KIServer.IsRunning() and KIHooks.Initialized) then
+    net.log("KIHooks.onGameEvent() called")
+    
+    if eventName == "self_kill"
+    or eventName == "crash"
+    or eventName == "eject"
+    or eventName == "pilot_death" then
+      -- is player still in a valid slot
+      local _playerDetails = net.get_player_info(playerID)
+
+      if _playerDetails ~= nil and 
+         _playerDetails.side ~= 0 and 
+         _playerDetails.slot ~= "" and 
+         _playerDetails.slot ~= nil then
+        net.log("Player died - returning them to spectators")
+        net.force_player_slot(playerID, 0, '')		-- force return to spectators
+      end
+      
+    end
+    
+  end
+  
+end
 
 DCS.setUserCallbacks(KIHooks)
 net.log("KI Server Tools Initialization Complete")

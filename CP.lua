@@ -75,9 +75,9 @@ end
   
 function CP:ViewResources()
   local msg = "CP - " .. self.Name .. "\n"
-  msg = msg .. "Defense:\tCount\tLimit\n"
+  msg = msg .. string.format("%-25s|%-5s|%-5s", "Defense", "Count", "limit") .. "\n"
   for res, val in pairs(self.Defenses) do
-    msg = msg .. res .. ":\t" .. val.qty .. "\t" .. val.cap .. "\n"
+    msg = msg .. string.format("%-25s|%-5d|%-5d", res, val.qty, val.cap) .. "\n"
   end
   return msg
 end

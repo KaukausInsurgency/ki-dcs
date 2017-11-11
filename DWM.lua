@@ -117,9 +117,9 @@ end
 function DWM:ViewResources()
   local msg = "DWM - " .. self.Name .. "\n"
   msg = msg .. "Depot Capacity: " .. self.CurrentCapacity .. " / " .. self.Capacity .. "\n"
-  msg = msg .. "Resource:\tCount\n"
+  msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
   for res, val in pairs(self.Resources) do
-    msg = msg .. res .. ":\t" .. val.qty .. "\n"
+    msg = msg .. string.format("%-25s|%-5d", res, val.qty) .. "\n"
   end
   return msg
 end

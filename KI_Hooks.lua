@@ -13,9 +13,15 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
   
   -- check if this is a depot call
   if parentAction == "Depot Management" or parentAction == "Troop Management" then
+    -- immediately return if the player is trying to view the depot contents
+    if actionName == "View Depot Contents" then
+      return true
+    end
+      
     local _depot = KI.Query.FindDepot_Group(transGroup)
     if _depot then
       env.info("SLC.Config.PreOnRadioAction - Group " .. transGroup.GroupName .. " inside zone " .. _depot.Zone.ZoneName)
+      
       -- if in zone, check DWM contents
       if actionName == "Fuel Truck Crate" then
         return _depot:Take("Fuel Truck", 1)

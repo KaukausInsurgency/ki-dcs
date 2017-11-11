@@ -208,6 +208,17 @@ function SLC.GetAssemblers(crates)
 end
 
 
+function SLC.ShowDepotContents(g, pilotName)
+  env.info("SLC.ShowDepotContents Called")
+  local _depot = KI.Query.FindDepot_Group(g)
+  if _depot then
+    trigger.action.outText(_depot:ViewResources(), 30)
+    return true
+  else
+    trigger.action.outText("You must be near a Depot to view its contents!", 30)
+    return false
+  end
+end
 
 
 -- SpawnGroup
@@ -457,6 +468,12 @@ function SLC.AddSLCRadioItems(g, pilotname)
   
   -- Depot Management Sub Menu
   local m_depot = MENU_GROUP:New(g, "Depot Management", m_main)
+  
+  -- Inject view depot contents menu item
+  MENU_GROUP_COMMAND:New(g, "View Depot Contents", m_depot,
+                           SLC.PerformAction,
+                           SLC.ShowDepotContents, "View Depot Contents", "Depot Management", g, pilotname, nil)
+                         
   local submenus = {}
   -- generate menu items based on component types config (components are radio items that can be spawned in for pickup)
   env.info("SLC.AddSLCRadioItems ComponentTypes count: " .. tostring(#SLC.Config.ComponentTypes))

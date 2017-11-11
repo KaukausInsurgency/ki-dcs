@@ -90,13 +90,13 @@ function KI.Toolbox.SerializeTable(t, i)
 	end
 	for k,v in pairs(t) do
 		if type(k) == "string" and type(v) ~= "function" then
-			text = text .. tab .. "['" .. k .. "']" .. " = "
+			text = text .. tab .. "[\"" .. k .. "\"]" .. " = "
 			if type(v) == "string" then
-				text = text .. "'" .. v .. "',\n"
+				text = text .. "\"" .. v .. "\",\n"
 			elseif type(v) == "number" then
 				text = text .. v .. ",\n"
       elseif k == "__index" then
-        text = text .. "'table',\n"
+        text = text .. "\"table\",\n"
 			elseif type(v) == "table" then
 				text = text .. KI.Toolbox.SerializeTable(v, i + 1)
 			elseif type(v) == "boolean" then
@@ -105,7 +105,7 @@ function KI.Toolbox.SerializeTable(t, i)
 		elseif type(k) == "number" and type(v) ~= "function" then
 			text = text .. tab .. "[" .. k .. "] = "
 			if type(v) == "string" then
-				text = text .. "'" .. v .. "',\n"
+				text = text .. "\"" .. v .. "\",\n"
 			elseif type(v) == "number" then
 				text = text .. v .. ",\n"
 			elseif type(v) == "table" then
