@@ -107,14 +107,15 @@ function KI.Scheduled.CheckSideMissions(args, time)
 end
 
 
-function KI.Scheduled.DataTransmission(args, time)
-  env.info("KI.Scheduled.DataTransmission called")
+function KI.Scheduled.DataTransmissionPlayers(args, time)
+  env.info("KI.Scheduled.DataTransmissionPlayers called")
   
   
   -- try to receive UDP data from Server MOD
   -- loop the UDP receive to get the last sent information
   -- this addresses the issue where the mission may send multiples of these udp messages
   -- and we are behind trying to process old ones with old data in them
+  -- we also dont care about previous messages - we only care about the latest one that arrived
   local received = nil
   while true do
     local rec = KI.UDPReceiveSocket:receive()
@@ -152,77 +153,131 @@ function KI.Scheduled.DataTransmission(args, time)
       end
       env.info("KI.Scheduled.DataTransmission - Updated OnlinePlayers")
       -- remove entries that are no longer on the server
-      --[[for pid, op in KI.Data do
+      for pid, op in pairs(KI.Data.OnlinePlayers) do
         if Data[pid] == nil then
-          KI.Data[pid] = nil
+          KI.Data.OnlinePlayers[pid] = nil
         end
       end
-      --]]
     else
       env.info("Error decoding UDP JSON Data - " .. _error)
     end
   end
   
-  
-  env.info("KI.Scheduled.DataTransmission - Preparing CapturePoints Data")
-  local CapturePointDBData = {}
-  for i = 1, #KI.Data.CapturePoints do
-    local data = 
-    { 
-      ServerID = KI.Data.ServerID, 
-      Name = KI.Data.CapturePoints[i].Name,
-      Status = KI.Data.CapturePoints[i]:GetOwnership(),
-      BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
-      RedUnits = KI.Data.CapturePoints[i].RedUnits,
-      LatLong = KI.Data.CapturePoints[i].LatLong,
-      MGRS = KI.Data.CapturePoints[i].MGRS
-    }
-    table.insert(CapturePointDBData, data)
-  end
-  
-  
-  env.info("KI.Scheduled.DataTransmission - Preparing Depot Data")
-  local DepotDBData = {}
-  for i = 1, #KI.Data.Depots do
-    local data = 
-    { 
-      ServerID = KI.Data.ServerID, 
-      Name = KI.Data.Depots[i].Name,
-      Status = "Online",
-      ResourceString = KI.Data.Depots[i]:ViewResources(),
-      CurrentCapacity = KI.Data.Depots[i].CurrentCapacity,
-      Capacity = KI.Data.Depots[i].Capacity,
-      LatLong = KI.Data.Depots[i].LatLong,
-      MGRS = KI.Data.Depots[i].MGRS
-    }
-    table.insert(DepotDBData, data)
-  end
-  
-  
   env.info("KI.Scheduled.DataTransmission - dumping online players : " .. KI.Toolbox.Dump(KI.Data.OnlinePlayers))
-  env.info("KI.Scheduled.DataTransmission - dumping game events : " .. KI.Toolbox.Dump(KI.Data.GameEventQueue))
-  env.info("KI.Scheduled.DataTransmission - dumping capture points : " .. KI.Toolbox.Dump(CapturePointDBData))
-  env.info("KI.Scheduled.DataTransmission - dumping depots : " .. KI.Toolbox.Dump(DepotDBData))
   
   -- send to Server Mod
   -- 1) Online Player list, with the current player life counts, sortieIDs
-  -- 2) The current game event queue
   socket.try(
-        KI.UDPSendSocket:sendto(
-          KI.JSON:encode({ 
-                            OnlinePlayers = KI.Data.OnlinePlayers, 
-                            GameEventQueue = KI.Data.GameEventQueue,
-                            CapturePoints = CapturePointDBData,
-                            Depots = DepotDBData
-                          }) 
-                          .. KI.SocketDelimiter, 
-                          "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+        KI.UDPSendSocket:sendto(KI.JSON:encode({OnlinePlayers = KI.Data.OnlinePlayers}) .. KI.SocketDelimiter, 
+                                "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
       )
-  env.info("Sent UDP JSON Data to Server MOD")
-      
-  KI.Data.GameEventQueue = {} -- flush the game event queue
+  env.info("KI.Scheduled.DataTransmission - sent JSON OnlinePlayers to Server MOD")
   
-  return time + KI.Config.DataTransmissionUpdateRate
+  return time + KI.Config.DataTransmissionPlayerUpdateRate
+end
+
+
+
+
+function KI.Scheduled.DataTransmissionGeneral(args, time)
+  env.info("KI.Scheduled.DataTransmissionGeneral called")
+  
+  -- because of the limits on UDP maximum receive size (which is limited to 8192 bytes according to LuaSocket implementation
+  -- we segment this data into chunks so that we can send all of it without fear of dropping packets or losing data
+  
+  env.info("KI.Scheduled.DataTransmissionGeneral - Preparing CapturePoints Data")
+  local CapturePointSegments = { }
+  table.insert(CapturePointSegments, {})  -- create an inner array
+  if true then
+    local index = 1
+    for i = 1, #KI.Data.CapturePoints do
+      -- segment capture points every 6 elements
+      if i % 6 == 0 then
+        index = index + 1
+        table.insert(CapturePointSegments, {})
+      end
+        
+      local data = 
+      { 
+        ServerID = KI.Data.ServerID, 
+        Name = KI.Data.CapturePoints[i].Name,
+        Status = KI.Data.CapturePoints[i]:GetOwnership(),
+        BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
+        RedUnits = KI.Data.CapturePoints[i].RedUnits,
+        LatLong = KI.Data.CapturePoints[i].LatLong,
+        MGRS = KI.Data.CapturePoints[i].MGRS
+      }
+      table.insert(CapturePointSegments[index], data)
+    end
+  end
+  
+  env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Depot Data")
+  local DepotSegments = {}
+  table.insert(DepotSegments, {})  -- create an inner array
+  if true then
+    local index = 1
+    for i = 1, #KI.Data.Depots do
+      -- segment depots every 6 elements
+        if i % 6 == 0 then
+          index = index + 1
+          table.insert(DepotSegments, {})
+        end
+        
+      local data = 
+      { 
+        ServerID = KI.Data.ServerID, 
+        Name = KI.Data.Depots[i].Name,
+        Status = "Online",
+        ResourceString = KI.Data.Depots[i]:ViewResources(),
+        CurrentCapacity = KI.Data.Depots[i].CurrentCapacity,
+        Capacity = KI.Data.Depots[i].Capacity,
+        LatLong = KI.Data.Depots[i].LatLong,
+        MGRS = KI.Data.Depots[i].MGRS
+      }
+      table.insert(DepotSegments[index], data)
+    end
+  end
+
+  env.info("KI.Scheduled.DataTransmissionGeneral - dumping capture points : " .. KI.Toolbox.Dump(CapturePointSegments))
+  env.info("KI.Scheduled.DataTransmissionGeneral - dumping depots : " .. KI.Toolbox.Dump(DepotSegments))
+
+  -- 3) Depot Segments
+  for i = 1, #DepotSegments do
+    socket.try(
+        KI.UDPSendSocket:sendto(KI.JSON:encode({Depots = DepotSegments[i]}) .. KI.SocketDelimiter, 
+                                "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+      )
+  end
+  env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Depots to Server MOD")
+  
+  -- 4) Capture Point Segments
+  for i = 1, #CapturePointSegments do
+    socket.try(
+        KI.UDPSendSocket:sendto(KI.JSON:encode({CapturePoints = CapturePointSegments[i]}) .. KI.SocketDelimiter, 
+                                "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+      )
+  end
+  env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Capture Points to Server MOD")
+  
+  return time + KI.Config.DataTransmissionGeneralUpdateRate
+end
+
+
+
+function KI.Scheduled.DataTransmissionGameEvents(args, time)
+  env.info("DataTransmissionGameEvents called")
+  if KI.Data.GameEventQueue and #KI.Data.GameEventQueue > 0 then
+    local FilePath = KI.Config.PathGameEvents .. "\\GE_" .. KI.IncrementGameEventFileID() .. ".lua"
+    env.info("DataTransmissionGameEvents - Generated File Path : " .. FilePath)
+    
+    if KI.Toolbox.WriteFile(KI.Data.GameEventQueue, FilePath) then
+      env.info("KI.Scheduled.DataTransmissionGameEvents - data written to file")
+      KI.Data.GameEventQueue = {} -- flush the game event queue
+    else
+      env.info("KI.Scheduled.DataTransmissionGameEvents - ERROR - failed to write to file")
+    end
+  end
+  return time + KI.Config.DataTransmissionGameEventsUpdateRate
 end
 
 

@@ -278,6 +278,7 @@ KIServer.JSON = JSON
 KIServer.LastOnFrameTime = 0
 KIServer.LastOnFrameTimeBanCheck = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
+KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\GameEvents"
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
 KIServer.Flag = 9000              -- this flag is set when the GAME is ready to receive SessionID and ServerID
 KIServer.Config = {}
@@ -536,7 +537,7 @@ local function InitKIServerConfig()
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
     KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\\Kaukasus Insurgency\\Server\\]]
-    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[net.log.log]]
+    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[net.log]]
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
     KIServer.Config.SERVER_SESSION_SEND_TO_PORT = 6007
@@ -706,30 +707,15 @@ function KIServer.TryProcessMissionData()
   while true do
     local received = KIServer.UDPReceiveSocket:receive()
     if received then
-      net.log("KIServer.TryProcessMissionData() - UDP Data stream received")
+      net.log("KIServer.TryProcessMissionData() - UDP Data received")
       local Success, Data = xpcall(function() return KIServer.JSON:decode(received) end, KIServer.ErrorHandler)
       
       if Success and Data then
-        KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+        net.log("KIServer.TryProcessMissionData() UDP Data decoded")
         
-        if Data.GameEventQueue and #Data.GameEventQueue > 0 then
-          net.log("KIServer.TryProcessMissionData() - got GameEvent data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, Data.GameEventQueue)
-  
-          if not KIServer.TCPSocket.IsConnected then
-            if not KIServer.TCPSocket.Connect() then
-              net.log("KIServer.TryProcessMissionData() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
-              table.insert(KIServer.Backup.TCPQueue, request)
-            end
-          end
-          
-          if not KIServer.TCPSocket.SendUntilComplete(request) then
-            net.log("KIServer.TryProcessMissionData() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
-            table.insert(KIServer.Backup.TCPQueue, request)
-          end
-        end
-        
-        if Data.CapturePoints then
+        if Data.OnlinePlayers then
+          KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+        elseif Data.CapturePoints then
           net.log("KIServer.TryProcessMissionData() - got CapturePoints data from Mission - sending to TCP Server")
           local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, true, Data.CapturePoints)
   
@@ -744,9 +730,7 @@ function KIServer.TryProcessMissionData()
             net.log("KIServer.TryProcessMissionData() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
             table.insert(KIServer.Backup.TCPQueue, request)
           end
-        end
-        
-        if Data.Depots then
+        elseif Data.Depots then
           net.log("KIServer.TryProcessMissionData() - got Depots data from Mission - sending to TCP Server")
           local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, true, Data.Depots)
   
@@ -762,11 +746,55 @@ function KIServer.TryProcessMissionData()
             table.insert(KIServer.Backup.TCPQueue, request)
           end
         end
+        -- if we fail to decode the JSON of the packet, continue on
       end
     else
       net.log("KIServer.TryProcessMissionData() - Breaking from UDP Receive Loop")
       break
-    end
+    end -- end UDP Socket receive
+  end -- end while loop
+end
+
+
+function KIServer.TryProcessGameEvents()
+  net.log("KIServer.TryProcessGameEvents() called")
+  local FilesToDelete = {}
+  for file in lfs.dir(KIServer.GameEventsDirectory) do
+    net.log("KIServer.TryProcessGameEvents() - file : " .. file)
+    if string.match(file, ".lua") then 
+      net.log("KIServer.TryProcessGameEvents - unprocessed file found (File: " .. file .. ")")
+      local filePath = KIServer.GameEventsDirectory .. "\\" .. file
+      net.log("KIServer.TryProcessGameEvents - full file path : " .. filePath)
+      local _data, _err = loadfile(filePath)
+
+      if _data then
+        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, _data())
+  
+        if not KIServer.TCPSocket.IsConnected then
+          if not KIServer.TCPSocket.Connect() then
+            net.log("KIServer.TryProcessGameEvents() - FATAL ERROR - Failed to connect to TCP Server - Backing up request")
+            table.insert(KIServer.Backup.TCPQueue, request)
+          end
+        end
+        
+        if not KIServer.TCPSocket.SendUntilComplete(request) then
+          net.log("KIServer.TryProcessGameEvents() - FATAL ERROR - Failed to send to TCP Server - Backing up request")
+          table.insert(KIServer.Backup.TCPQueue, request)
+        else
+          net.log("KIServer.TryProcessGameEvents() - Successfully sent GameEvents to TCP Server")
+        end
+      else
+        net.log("KIServer.TryProcessGameEvents ERROR opening file (" .. filePath .. ") error: " .. _err)
+      end -- end data read
+      
+      table.insert(FilesToDelete, filePath)
+    end -- end string match .lua
+  end -- end for file iteration
+  
+  net.log("KIServer.TryProcessGameEvents - deleting files")
+  for i = 1, #FilesToDelete do
+    -- delete the file
+    os.remove(FilesToDelete[i])
   end
 end
 
@@ -884,6 +912,7 @@ function KIServer.TCPSocket.SendUntilComplete(msg)
     net.log("KIServer.TCPSocket.SendUntilComplete - ERROR - Socket is not connected to DB server")
     return false
   end
+  KIServer.TCPSocket.Object:settimeout(3) -- set the timeout to 3 seconds (used to handle particularly large messages)
   local bytes_sent = 0
   local msg_size = string.len(msg)
   -- copy the original msg parameter as we want to manipulate the copy without changing the original (but if strings are not by ref - why bother?)
@@ -902,6 +931,7 @@ function KIServer.TCPSocket.SendUntilComplete(msg)
       else
         -- complete failure - log
         net.log("KIServer.TCPSocket.SendUntilComplete - ERROR in sending data (reason: " .. _error .. ")")
+        KIServer.TCPSocket.Object:settimeout(0.0001)
         KIServer.TCPSocket.Disconnect()
         return false
       end
@@ -912,7 +942,7 @@ function KIServer.TCPSocket.SendUntilComplete(msg)
     net.log("KIServer.TCPSocket.SendUntilComplete - Remaining buffer length: " 
               .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
   end
-  
+   KIServer.TCPSocket.Object:settimeout(0.0001)
   return true
 end
 
@@ -1065,6 +1095,7 @@ KIHooks.onSimulationFrame = function()
     KIServer.LastOnFrameTime = DCS.getModelTime()
     -- Try Receive Mission Side Data via UDP queue
     KIServer.TryProcessMissionData()
+    KIServer.TryProcessGameEvents()
     
     -- now send back to Mission Script the updated OnlinePlayer list (of lives remaining) 
     -- + any new players we received since last time
@@ -1375,6 +1406,9 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         return true
       end
     end
+  elseif KIServer.IsRunning() and not KIHooks.Initialized then
+    net.send_chat_to("You cannot slot in yet - the mission has not finished initializing", playerID)
+    return false
   else
     
     -- do nothing, KI not running

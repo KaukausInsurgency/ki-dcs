@@ -143,18 +143,23 @@ local function StartKI()
   KI.Init.SideMissions()
   SLC.InitSLCRadioItemsForUnits()
   AICOM.Init()
+  KI.Loader.LoadData()
+  env.info("KI - Data Loaded")
+  
   timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)
   timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + 5)
-  KI.Loader.LoadData()
-  timer.scheduleFunction(KI.Scheduled.DataTransmission, {}, timer.getTime() + KI.Config.DataTransmissionUpdateRate)
+  timer.scheduleFunction(KI.Scheduled.DataTransmissionPlayers, {}, timer.getTime() + KI.Config.DataTransmissionPlayerUpdateRate)
+  timer.scheduleFunction(KI.Scheduled.DataTransmissionGameEvents, {}, timer.getTime() + KI.Config.DataTransmissionGameEventsUpdateRate)
+  timer.scheduleFunction(KI.Scheduled.DataTransmissionGeneral, {}, timer.getTime() + KI.Config.DataTransmissionGeneralUpdateRate)
   timer.scheduleFunction(function(args, time) 
       KI.Loader.SaveData() 
       return time + KI.Config.SaveMissionRate
     end, {}, timer.getTime() + KI.Config.SaveMissionRate)
   timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + AICOM.Config.TurnRate)
-  env.info("KI - Data Loaded")
-  
+  env.info("KI - Scheduled functions created")
+
   world.addEventHandler(KI.Hooks.GameEventHandler)
+  env.info("KI - World Event Handlers registered")
 end
 
 -- creating instances of this socket as we need to have this ready before the server Mod can send data
@@ -168,8 +173,13 @@ env.info("KI - Waiting to receive signal from Server Mod")
 
 timer.scheduleFunction(function(timer, args)
     if trigger.misc.getUserFlag("9000") ~= 1 then
-      StartKI()
-      env.info("KI - Initialization Complete")
+      local _error = ""
+      local ki_start_result = xpcall(function() return StartKI() end, function(err) _error = err end)
+      if not ki_start_result or _error ~= "" then
+        env.info("KI Initialization FATAL ERROR : " .. _error)
+      else
+        env.info("KI - Initialization Complete")
+      end
       return nil
     end
     return timer + 1

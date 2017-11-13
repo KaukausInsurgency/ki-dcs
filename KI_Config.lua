@@ -15,7 +15,9 @@ KI.Config.CrateDespawnTime_Depot = 120
 KI.Config.CrateDespawnTime_Wild = 300
 
 -- Controls the rate at which data transmissions are sent to the server mod
-KI.Config.DataTransmissionUpdateRate = 5
+KI.Config.DataTransmissionPlayerUpdateRate = 5        -- things like player data
+KI.Config.DataTransmissionGameEventsUpdateRate = 10   -- game events
+KI.Config.DataTransmissionGeneralUpdateRate = 20      -- things like depot, and capture point data
 
 -- Controls the rate at which mission data is saved to file
 KI.Config.SaveMissionRate = 300
@@ -44,8 +46,8 @@ KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
 -- path to saved game file
 KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
 
--- path to saved scores file
-KI.Config.PathScores = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Scores.lua"
+-- path to gameevents file
+KI.Config.PathGameEvents = lfs.writedir() .. KI.Config.ParentFolder .. "GameEvents"
 
 -- taken from KO - need to understand what these do
 KI.Config.PathScoreID = lfs.writedir() .. KI.Config.ParentFolder .. "KI_ScoreID.lua"

@@ -27,8 +27,8 @@ KI.Data =
   SpawnID = 0,
   SortieID = 0,
   SessionID = KI.Null,
-  ServerID = KI.Null
-  
+  ServerID = KI.Null,
+  GameEventFileID = 0
 }
 
 
@@ -48,4 +48,11 @@ function KI.IncrementSortieID()
   KI.Data.SortieID = KI.Data.SortieID + 1
   env.info("KI.IncrementSortieID - New ID: " .. tostring(KI.Data.SortieID))
   return KI.Data.SortieID
+end
+
+function KI.IncrementGameEventFileID()
+  env.info("KI.IncrementGameEventFileID called")
+  KI.Data.GameEventFileID = KI.Data.GameEventFileID + 1
+  env.info("KI.IncrementGameEventFileID - New ID: " .. tostring(KI.Data.GameEventFileID))
+  return KI.Data.GameEventFileID
 end
