@@ -63,7 +63,7 @@ end
 
 
 
-local path = "C:\\Program Files (x86)\\ZeroBraneStudio\\myprograms\\DCS\\KI\\"
+local path = "C:\\Users\\david\\Documents\\GitHub\\DCS\\KI"
 local require = require
 local loadfile = loadfile
 
