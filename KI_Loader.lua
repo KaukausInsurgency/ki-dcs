@@ -457,8 +457,6 @@ function KI.Loader.LoadData()
       KI.Data.SortieID = _dataTable["SortieID"] -- load the current SortieID saved in memory
     end
     
-    -- Generate a new Session ID as this load function is only invoked once (at time of mission start)
-    KI.Data.SessionID = _dataTable["SessionID"] + 1
     
     return true
   else

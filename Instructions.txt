@@ -23,7 +23,7 @@ comment out the following lines:
     end
 
     do
-      sanitizeModule('os')
+      --sanitizeModule('os')	-- comment this out (required to delete game event files)
       --sanitizeModule('io')    -- comment this out
       --sanitizeModule('lfs')   -- comment this out
       --require = nil           -- comment this out
