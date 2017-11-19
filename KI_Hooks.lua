@@ -145,7 +145,7 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
       env.info("SLC.Config.PostOnRadioAction - troop instance was not found - doing nothing")
     end
   elseif parentAction == "Deploy Management" then
-    env.info("SLC.Config.PostOnRadioAction - creating event")
+    env.info("SLC.Config.PostOnRadioAction - creating transport event")
     -- create the dismount event and raise it
     -- get the location - since you can only unload troops at a capture point, look for capture point
     local _p = KI.Query.FindCP_Group(transportGroup) or KI.Query.FindDepot_Group(transportGroup)
@@ -162,6 +162,8 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
       _place = CustomEventCaster.CastToAirbase(_p, function(o) return o.Name end)
     end
     
+    -- the reason we have the actionResult return the action name, is because mount/unmount is the same action menu item in game
+    -- So we need to verify what actual action was performed when that menu item was selected
     if actionResult.Action == "MOUNT" and actionResult.Result then
       env.info("SLC.Config.PostOnRadioAction - creating KI_EVENT_TRANSPORT_MOUNT event")
       local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_TRANSPORT_MOUNT, transportGroup:GetDCSUnit(1), _place)
@@ -175,6 +177,36 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
       env.info("SLC.Config.PostOnRadioAction - INVALID ACTION - doing nothing")
     end
     
+  elseif parentAction == "Crate Management" then
+    env.info("SLC.Config.PostOnRadioAction - creating crate event")
+    -- create the crate event and raise it
+    -- get the location - since you can only unpack/pack at a capture point, look for capture point
+    local _p = KI.Query.FindCP_Group(transportGroup)
+    
+    local _place = {}
+    
+    -- need to spoof the location into a DCS Airbase object, 
+    -- this is done so that our DCS Event Handler can process it like a normal event.place object
+    -- both CP and DWM have a .Name property, so lets use that
+    if not _p then
+      _p = {}
+      _place = CustomEventCaster.CastToAirbase(_p, function(o) return "Ground" end)
+    else
+      _place = CustomEventCaster.CastToAirbase(_p, function(o) return o.Name end)
+    end
+    
+    if actionName == "Pack Nearest" and actionResult.Result then
+      env.info("SLC.Config.PostOnRadioAction - creating KI_EVENT_CARGO_PACKED event")
+      local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_CARGO_PACKED, transportGroup:GetDCSUnit(1), _place)
+      KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
+    elseif actionName == "Unpack Nearest" and actionResult.Result then
+      env.info("SLC.Config.PostOnRadioAction - creating KI_EVENT_CARGO_UNPACKED event")
+      local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_CARGO_UNPACKED, transportGroup:GetDCSUnit(1), _place)
+      _e.cargo = actionResult.Assembler     -- actionResult.Assembler is the assembly name as string
+      KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
+    else
+      env.info("SLC.Config.PostOnRadioAction - INVALID ACTION - doing nothing")
+    end
   else
     env.info("SLC.PostOnRadioAction - doing nothing")
   end
@@ -451,6 +483,15 @@ function KI.Hooks.GameEventHandler:onEvent(event)
   elseif (event.id == KI.Defines.Event.KI_EVENT_TRANSPORT_DISMOUNT or 
           event.id == KI.Defines.Event.KI_EVENT_TRANSPORT_MOUNT) and playerName then
     env.info("KI.Hooks.GameEventHandler - Transport Event raised")
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           event, 
+                                           timer.getTime()) 
+                )
+  elseif (event.id == KI.Defines.Event.KI_EVENT_CARGO_UNPACKED or 
+          event.id == KI.Defines.Event.KI_EVENT_CARGO_PACKED) and playerName then
+    env.info("KI.Hooks.GameEventHandler - Cargo Event raised")
     table.insert(KI.Data.GameEventQueue, 
                  GameEvent.CreateGameEvent(KI.Data.SessionID, 
                                            KI.Data.ServerID, 

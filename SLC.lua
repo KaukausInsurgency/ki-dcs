@@ -332,7 +332,7 @@ function SLC.Unpack(transportGroup, pilotname)
       env.info("SLC.Unpack destroying crate")
     end
     trigger.action.outText("SLC - Successfully Unpacked Unit!", 10)
-    return NewGroup
+    return { Result = NewGroup, Assembler = assembly.assembler.SpawnName }
   else
     trigger.action.outText("SLC - Cannot Unpack Crate(s) - Missing Components!", 10)
     env.info("SLC.Unpack - no valid assemblies found")

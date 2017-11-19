@@ -24,13 +24,23 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     return nil
   end
   
-  local playerName = dcs_event_obj.initiator:getPlayerName() or "AI"
+  local playerName = KI.Null
   local UCID = KI.Null
   local sortieID = KI.Null
-  if playerName ~= "AI" then
-    UCID = KI.Query.FindUCID_Player(playerName)
-    sortieID = KI.Query.FindSortieID_Player(playerName) or KI.Null
+  -- crate and static objects may be returned which do not have this function
+  if dcs_event_obj.initiator.getPlayerName then
+    playerName = dcs_event_obj.initiator:getPlayerName()  -- Its possible a player could be named "AI" which would blow this up
+    if playerName then
+      UCID = KI.Query.FindUCID_Player(playerName)
+      sortieID = KI.Query.FindSortieID_Player(playerName) or KI.Null
+    else
+      playerName = "AI"
+    end
+  else
+    playerName = "STATIC OBJECT"
   end
+  
+  
   local airfield = KI.Null
   local weapon = KI.Null
   local weaponCategory = KI.Null
@@ -43,6 +53,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   local targetPlayerUCID = KI.Null
   local targetSide = KI.Null
   local numUnitsUnloaded = dcs_event_obj.unloaded or KI.Null
+  local cargo = dcs_event_obj.cargo or KI.Null
   
   if dcs_event_obj.place then
     airfield = dcs_event_obj.place:getCallsign() or "Ground"
@@ -99,7 +110,8 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["TargetIsPlayer"] = targetIsPlayer,
     ["TargetPlayerUCID"] =  targetPlayerUCID,
     ["TargetPlayerName"] = targetPlayerName,
-    ["TransportUnloadedCount"] = numUnitsUnloaded
+    ["TransportUnloadedCount"] = numUnitsUnloaded,
+    ["Cargo"] = cargo
   }
   env.info("GameEvent.CreateGameEvent() returning table")
   return gameevent
