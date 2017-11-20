@@ -361,7 +361,7 @@ function KIServer.RequestNewSession()
     end
   end
     
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID, RealTimeStart = DCS.getRealTime() })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 30) then
@@ -395,7 +395,7 @@ function KIServer.RequestEndSession()
     end
   end
     
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID, RealTimeEnd = DCS.getRealTime() })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 30) then
@@ -1052,6 +1052,7 @@ KIHooks.onSimulationFrame = function()
         end
         
       end
+      KIHooks.onPlayerDisconnect(1, 5)
       
       KIServer.RequestEndSession()
       KIServer.TCPSocket.Disconnect()
@@ -1294,7 +1295,7 @@ end
 function KIHooks.onPlayerDisconnect(playerID, reason)
   -- ignore this handler if KI is not the mission being run, we dont want to interfere with other missions
   -- the server may be hosting
-  if not KIServer.IsRunning() or not KIHooks.Initialized then return true end
+  if (not KIServer.IsRunning() or not KIHooks.Initialized) and playerID ~= 1 then return true end
   --if playerID == KIServer.Config.ServerPlayerID then return end -- if the server is disconnecting there is no action required
 
   net.log("KIHooks.onPlayerDisconnect called (playerID = '" .. playerID .. "', reason = '" .. reason .. "')")

@@ -130,7 +130,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -166,7 +166,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=712 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=800 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -196,10 +196,26 @@ CREATE TABLE `session` (
   `server_id` int(11) NOT NULL,
   `start` datetime NOT NULL,
   `end` datetime DEFAULT NULL,
+  `real_time_start` bigint(32) DEFAULT NULL,
+  `real_time_end` bigint(32) DEFAULT NULL,
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=369 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=373 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sproc_log`
+--
+
+DROP TABLE IF EXISTS `sproc_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sproc_log` (
+  `sproc` varchar(128) DEFAULT NULL,
+  `text` varchar(5000) DEFAULT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,6 +225,44 @@ CREATE TABLE `session` (
 --
 -- Dumping routines for database 'ki'
 --
+/*!50003 DROP FUNCTION IF EXISTS `fnc_HoursToSeconds` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_HoursToSeconds`(hours INT) RETURNS int(11)
+BEGIN
+	RETURN hours * POW(60, 2);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fnc_SESSION_LENGTH` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_SESSION_LENGTH`() RETURNS int(11)
+BEGIN
+	RETURN fnc_HoursToSeconds(4);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `AddConnectionEvent` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -416,12 +470,13 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateSession`(
-		ServerID INT
+		ServerID INT,
+        RealTimeStart BIGINT
     )
 BEGIN
 	DELETE FROM online_players WHERE server_id = ServerID;
-	INSERT INTO session (server_id, start)
-    VALUES (ServerID, NOW());
+	INSERT INTO session (server_id, start, real_time_start)
+    VALUES (ServerID, NOW(), RealTimeStart);
     SELECT LAST_INSERT_ID() AS SessionID;
 END ;;
 DELIMITER ;
@@ -441,11 +496,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `EndSession`(
 		ServerID INT,
-        SessionID INT
+        SessionID INT,
+        RealTimeEnd BIGINT
     )
 BEGIN
 	DELETE FROM online_players WHERE server_id = ServerID;
-    UPDATE session SET end = NOW() WHERE server_id = ServerID AND session_id = SessionID;
+    UPDATE session SET end = NOW(), real_time_end = RealTimeEnd WHERE server_id = ServerID AND session_id = SessionID;
     SELECT 1;
 END ;;
 DELIMITER ;
@@ -532,6 +588,111 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `log` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `log`(sproc VARCHAR(128), text VARCHAR(5000))
+BEGIN
+	INSERT INTO ki.sproc_log (sproc_log.sproc, sproc_log.text)
+    VALUES (sproc, text);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `rpt_PlayerOnlineTime` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rpt_PlayerOnlineTime`(IN ucid VARCHAR(128), INOUT totaltime INT)
+BEGIN
+	DECLARE v_finished INTEGER DEFAULT 0;
+	
+    DECLARE v_event varchar(20) DEFAULT "";
+    DECLARE v_time BIGINT DEFAULT 0;
+    DECLARE v_server_id INT DEFAULT 0;
+    DECLARE v_session_id INT DEFAULT 0;
+    
+    DECLARE v_start BIGINT DEFAULT 0;
+    DECLARE v_end BIGINT;
+    
+    
+	DEClARE con_cursor CURSOR FOR 
+	SELECT type, real_time, server_id, session_id FROM ki.raw_connection_log WHERE player_ucid = ucid;
+
+	-- declare NOT FOUND handler
+	DECLARE CONTINUE HANDLER 
+		FOR NOT FOUND SET v_finished = 1;
+
+	CALL ki.log("rpt_PlayerOnlineTime", CONCAT("totaltime: ", totaltime));
+    
+	OPEN con_cursor;
+
+	online_time: LOOP
+		CALL ki.log("rpt_PlayerOnlineTime", "In Loop");
+        
+		FETCH con_cursor INTO v_event, v_time, v_server_id, v_session_id;
+
+		IF v_finished = 1 THEN 
+			CALL ki.log("rpt_PlayerOnlineTime", "Finished Loop");
+			LEAVE online_time;
+		END IF;
+        
+        IF v_event = "CONNECTED" THEN
+			
+            
+			IF v_start != 0 then
+				CALL ki.log("rpt_PlayerOnlineTime", "CONNECTED EVENT TWICE IN A ROW");
+                CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_server_id", v_server_id));
+                CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_session_id", v_session_id));
+				-- If the next event is not a disconnect event, assume that the player or server crashed, and get the time from the session
+				SELECT session.real_time_end INTO v_end FROM ki.session WHERE server_id = v_server_id AND session_id = v_session_id;
+                IF v_end != NULL THEN
+					CALL ki.log("rpt_PlayerOnlineTime", "SETTING v_end TO SESSION END TIME");
+					SET totaltime = totaltime + (v_end - v_start);
+				ELSE
+					SELECT session.real_time_start INTO v_end FROM ki.session WHERE session.server_id = v_server_id AND session.session_id = v_session_id;
+					CALL ki.log("rpt_PlayerOnlineTime", "SETTING v_end To the SESSION START + 4 Hours");
+                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("fnc_SESSION_LENGTH : ", fnc_SESSION_LENGTH()));
+                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("totaltime : ", totaltime));
+                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_start : ", v_start));
+                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_end : ", v_end));
+                    SET totaltime = totaltime + ((v_end + fnc_SESSION_LENGTH()) - v_start);
+                END IF;
+            END IF;
+			SET v_start = v_time;
+		ELSEIF v_event = "DISCONNECTED" THEN
+			CALL ki.log("rpt_PlayerOnlineTime", "DISCONNECTED EVENT - CALCULATING END TIME");
+            SET totaltime = totaltime + (v_time - v_start);
+            SET v_start = 0;
+		END IF;
+		
+        CALL ki.log("rpt_PlayerOnlineTime", CONCAT("IN LOOP: Total Time: ", totaltime));
+	END LOOP online_time;
+
+	CLOSE con_cursor;
+	
+    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("Total Time: ", totaltime));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `UnbanPlayer` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -598,4 +759,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-19 16:32:40
+-- Dump completed on 2017-11-20  0:04:04
