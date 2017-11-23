@@ -200,7 +200,7 @@ function KI.Loader.ImportCoalitionGroups(data)
   for i = 1, #data["GroundGroups"] do
     local _g = data["GroundGroups"][i]
     -- check if the group has size > 0 and ignore if it does
-    if _g["Size"] > 0 then
+    if _g["Size"] > 0 and #_g["Units"] > 0 then
       if not string.match(_g["Name"], "Template") then
         local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g))
         if _newg ~= nil then

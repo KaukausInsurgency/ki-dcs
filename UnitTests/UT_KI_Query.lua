@@ -9,6 +9,8 @@ function()
   UT.ValidateSetup(function() return GROUP:FindByName("TestGroupOutsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestStaticInsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestStaticOutsideDepotZone") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("TestQueryCargo") ~= nil end)
+  UT.ValidateSetup(function() return Unit.getByName("SLCPilot1") ~= nil end)
   UT.ValidateSetup(function() 
       -- this depot must exist for this test case to run
       for i = 1, #KI.Data.Depots do
@@ -35,11 +37,12 @@ function()
   UT.TestData.testGroupOutZone = GROUP:FindByName("TestGroupOutsideDepotZone")
   UT.TestData.testStaticInZone = StaticObject.getByName("TestStaticInsideDepotZone")
   UT.TestData.testStaticOutZone = StaticObject.getByName("TestStaticOutsideDepotZone")
+  UT.TestData.testCargo = StaticObject.getByName("TestQueryCargo")
   UT.TestData.DepotName = "TestDepotKIQuery"
   UT.TestData.CPName = "TestCPKIQuery"
   KI.Data.OnlinePlayers = 
   {
-    ["1"] = { UCID = "AAAA", Name = "DemoPlayer", Role = "A10C" }
+    ["1"] = { UCID = "AAAA", Name = "DemoPlayer", Role = "A10C", Unit = Unit.getByName("SLCPilot1") }
     
   }
 end,
@@ -95,6 +98,12 @@ function()
   if true then
     UT.TestCompare(function() return KI.Query.FindUCID_Player("DemoPlayer") == "AAAA" end)
     UT.TestCompare(function() return KI.Query.FindUCID_Player("NOPLAYER") == nil end)
+  end
+  
+  
+  if true then
+    UT.TestCompare(function() return KI.Query.FindNearestPlayer_Static(UT.TestData.testStaticInZone) ~= nil end)
+    UT.TestCompare(function() return KI.Query.FindNearestPlayer_Static(UT.TestData.testStaticInZone):getPlayerName() == Unit.getByName("SLCPilot1"):getPlayerName() end)
   end
   
 end,

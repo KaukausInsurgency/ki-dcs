@@ -172,7 +172,9 @@ trigger.action.setUserFlag("9000", 1) -- Notify Server Mod
 env.info("KI - Waiting to receive signal from Server Mod")
 
 timer.scheduleFunction(function(timer, args)
+    env.info("KI - scheduledfunction (wait for Init Flag) called...")
     if trigger.misc.getUserFlag("9000") ~= 1 then
+      env.info("KI - Received Signal from SERVER MOD - Initializing KI Mission")
       local _error = ""
       local ki_start_result = xpcall(function() return StartKI() end, function(err) _error = err end)
       if not ki_start_result or _error ~= "" then

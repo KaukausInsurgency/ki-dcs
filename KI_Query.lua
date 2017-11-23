@@ -91,3 +91,32 @@ function KI.Query.FindSortieID_Player(name)
   
   return nil
 end
+
+function KI.Query.FindNearestPlayer_Static(cargo)
+  env.info("KI.Query.FindNearestPlayer_Static called")
+  
+  if not cargo then 
+    env.info("KI.Query.FindNearestPlayer_Static - static is nil - exiting")
+    return nil 
+  end
+  local punit = nil
+  local pdistance = nil
+  for pid, op in pairs(KI.Data.OnlinePlayers) do
+    if op.Unit then
+    
+      local d = Spatial.Distance(op.Unit:getPoint(), cargo:getPoint()) 
+      if pdistance and d < pdistance then
+        env.info("KI.Query.FindNearestPlayer_Static - setting new closest distance")
+        pdistance = d
+        punit = op.Unit
+      elseif not pdistance then
+        env.info("KI.Query.FindNearestPlayer_Static - setting first distance")
+        pdistance = d
+        punit = op.Unit
+      end
+    else
+      env.info("KI.Query.FindNearestPlayer_Static - OnlinePlayer object has no Unit - skipping")
+    end
+  end
+  return punit
+end

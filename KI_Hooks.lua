@@ -117,7 +117,7 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
                                 return obj:destroy()
                               end,
                               KI.Hooks.GCOnLifeExpiredCrate,
-                              { LastPosition = actionResult:getPoint(), Depot = nil, Object = actionResult, DepotIdleTime = 0 },
+                              { LastPosition = actionResult:getPoint(), Depot = nil, Object = actionResult, DepotIdleTime = 0, WasMoved = false, PlayerUnit = transportGroup:GetDCSUnit(1) },
                               KI.Hooks.GC_Crate_IsIdle, KI.Hooks.GC_Crate_DepotExpired, KI.Config.CrateDespawnTime_Wild)
     
     GC.Add(gc_item)
@@ -226,7 +226,21 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
   if _args.Depot then
     env.info("GC.OnLifeExpired - crate is in depot and is being despawned")
     local _depot = _args.Depot
-    KI.Toolbox.MessageRedCoalition("Crate " .. n .. " has been despawned and contents put back into depot!")
+    if _args.WasMoved then
+      KI.Toolbox.MessageRedCoalition(_depot.Name .. " was resupplied with cargo (" .. n .. ") by " .. _args.PlayerUnit:getPlayerName())
+      local _place = {}
+    
+      -- need to spoof the location into a DCS Airbase object, 
+      -- this is done so that our DCS Event Handler can process it like a normal event.place object
+      -- both CP and DWM have a .Name property, so lets use that
+      _place = CustomEventCaster.CastToAirbase(_depot, function(o) return o.Name end)
+      local _e = CustomEvent:New(KI.Defines.Event.KI_EVENT_DEPOT_RESUPPLY, _args.PlayerUnit, _place)
+      _e.cargo = n
+      KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
+    else
+      KI.Toolbox.MessageRedCoalition("Crate " .. n .. " has been despawned and contents put back into depot!")
+    end
+    
     if string.match(n, "SLC FuelTruckCrate") then
       _depot:Give("Fuel Truck", 1)
     elseif string.match(n, "SLC CommandTruckCrate") then
@@ -317,6 +331,12 @@ function KI.Hooks.GC_Crate_IsIdle(args)
   else
     env.info("KI.Hooks.GC_Crate_Predicate - crate position has changed, resetting")
     args.LastPosition = _newPos
+    args.WasMoved = true
+    local _punit = KI.Query.FindNearestPlayer_Static(args.Object)
+    if _punit then
+      env.info("KI.Hooks.GC_Crate_Predicate - closest player found that changed crate")
+      args.PlayerUnit = _punit -- assume that the closest player to the cargo is the one that is slingloading it / should get credit for resupply
+    end
     return false
   end
 end
@@ -466,6 +486,14 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            timer.getTime()) 
                 )
     return
+  elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
+    -- we track the unit the player is in for things like depot resupply scoring and zone capture
+    env.info("KI.Hooks.GameEventHandler - Player Enter Unit Raised")
+    for pid, op in pairs(KI.Data.OnlinePlayers) do
+      if op.Name == playerName then
+        op.Unit = event.initiator
+      end
+    end
   elseif event.id == world.event.S_EVENT_MISSION_START then
     
   elseif event.id == world.event.S_EVENT_MISSION_END then
@@ -498,6 +526,15 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            event, 
                                            timer.getTime()) 
                 )
+  elseif event.id == KI.Defines.Event.KI_EVENT_DEPOT_RESUPPLY and playerName then
+    env.info("KI.Hooks.GameEventHandler - Depot Resupply Event raised")
+    table.insert(KI.Data.GameEventQueue, 
+                 GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                           KI.Data.ServerID, 
+                                           event, 
+                                           timer.getTime()) 
+                )
+  
   else
     return
 	end

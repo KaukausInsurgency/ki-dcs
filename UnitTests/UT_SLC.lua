@@ -292,11 +292,11 @@ function()
     
     -- groups should have this part in their name
     UT.TestCompare(function() return
-                            string.match(UT.TestData.SpawnedGroupA.GroupName, "SLC OutPost") or 
-                            string.match(UT.TestData.SpawnedGroupA.GroupName, "SLC FuelTruck") end)
+                            string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC OutPost") or 
+                            string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC FuelTruck") end)
     UT.TestCompare(function() return
-                            string.match(UT.TestData.SpawnedGroupB.GroupName, "SLC OutPost") or 
-                            string.match(UT.TestData.SpawnedGroupB.GroupName, "SLC FuelTruck") end)
+                            string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC OutPost") or 
+                            string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC FuelTruck") end)
       
     -- crates should be destroyed
     UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)
