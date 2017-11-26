@@ -170,7 +170,7 @@ C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\ko\Sys
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\ru\System.Spatial.resources.dll
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\zh-Hans\System.Spatial.resources.dll
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\zh-Hant\System.Spatial.resources.dll
-C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.csprojResolveAssemblyReference.cache
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.csproj.CoreCompileInputs.cache
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.dll
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.pdb
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.csprojResolveAssemblyReference.cache

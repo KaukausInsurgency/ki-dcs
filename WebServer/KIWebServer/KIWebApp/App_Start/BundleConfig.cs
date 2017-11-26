@@ -20,11 +20,8 @@ namespace KIWebApp
             bundles.Add(new ScriptBundle("~/bundles/ajaxlogin").Include(
                 "~/Scripts/app/ajaxlogin.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/todo").Include(
-                "~/Scripts/app/todo.bindings.js",
-                "~/Scripts/app/todo.datacontext.js",
-                "~/Scripts/app/todo.model.js",
-                "~/Scripts/app/todo.viewmodel.js"));
+            bundles.Add(new ScriptBundle("~/bundles/app").Include(
+                "~/Scripts/app/Servers.js"));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
@@ -46,7 +43,7 @@ namespace KIWebApp
                         "~/Content/themes/base/jquery.ui.theme.css"));
 
             bundles.Add(new StyleBundle("~/Content/bootstrap").Include(
-                        "~/Content/bootstrap.min.css",
+                        "~/Content/bootstrap.css",
                         "~/Content/bootstrap-theme.css"));
         }
     }
