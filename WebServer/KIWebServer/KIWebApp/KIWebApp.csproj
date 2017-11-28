@@ -283,7 +283,14 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="Images\Beslan_Sample-800x427.png" />
     <Content Include="Images\Beslan_Sample.png" />
+    <Content Include="Images\caucasus-map.jpg" />
+    <Content Include="Images\depot-512x512.png" />
+    <Content Include="Images\flag-512x512.png" />
+    <Content Include="Images\helipad-200x200png.png" />
+    <Content Include="Images\map-control.png" />
+    <Content Include="Scripts\app\gamemap.js" />
     <Content Include="Scripts\app\Servers.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -321,6 +328,8 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\knockout-2.2.0.debug.js" />
     <Content Include="Scripts\knockout-2.2.0.js" />
+    <Content Include="Scripts\mapbox\jquery.mapbox.js" />
+    <Content Include="Scripts\mapbox\jquery.mousewheel.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\popper-utils.js" />
     <Content Include="Scripts\popper-utils.min.js" />

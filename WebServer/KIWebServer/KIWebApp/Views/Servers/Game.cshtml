@@ -1,11 +1,118 @@
 ﻿@{
     ViewBag.Title = "Game";
 }
+<script>
+    var MapImg = '@Url.Content("~/Images/Beslan_Sample.png")'
+    var DepotImg = '@Url.Content("~/Images/depot-512x512.png")'
+</script>
+
+<style>
+    .mapwrapper {
+        margin: 20px auto;
+        width: 800px;
+    }
+
+    #viewport {
+        width: 800px;
+        height: 427px;
+        cursor: move;
+        overflow: hidden;
+    }
+
+    .mapwrapper {
+        position: relative;
+    }
+
+    .map-control {
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        background: url(@Url.Content("~/Images/map-control.png")) no-repeat;
+        height: 63px;
+        width: 100px;
+    }
+
+    .map-control a {
+        height: 18px;
+        width: 18px;
+        display: block;
+        text-indent: -999em;
+        position: absolute;
+        outline: none;
+    }
+
+    .map-control a:hover {
+        background: #535353;
+        opacity: .4;
+        filter: alpha(opacity=40);
+    }
+
+    .map-control a.left {
+        left: 39px;
+        top: 22px;
+    }
+
+    .map-control a.right {
+        left: 79px;
+        top: 22px;
+    }
+
+    .map-control a.up {
+        left: 59px;
+        top: 2px;
+    }
+
+    .map-control a.down {
+        left: 59px;
+        top: 42px;
+    }
+
+    .map-control a.zoom {
+        left: 2px;
+        top: 8px;
+        height: 21px;
+        width: 21px;
+    }
+
+    .map-control a.back {
+        left: 2px;
+        top: 31px;
+        height: 21px;
+        width: 21px;
+    }
+</style>
+
 
 <h2>Game</h2>
 
-<img src="~/Images/Beslan_Sample.png" alt="KI Map" height="697" width="1307" class="rounded"/>
-
+<div id="GameMap" style="position:relative">
+    <div class="mapwrapper">
+        <div id="viewport">
+            <div style="background: url(@Url.Content("~/Images/Beslan_Sample-800x427.png")) no-repeat; width: 800px; height: 427px;" class='map-layer'>
+                <!--top level map content goes here-->
+                <div class="mapcontent">
+                    <!--map content goes here-->
+                </div>
+            </div>
+            <div style="height: 697px; width: 1307px;" class='map-layer'>
+                <img src="@Url.Content("~/Images/Beslan_Sample.png")" alt="" />
+                <div class="mapcontent">
+                    <!--map content goes here-->
+                </div>
+            </div>
+        </div>
+        <div class="map-control">
+            <a href="#left" class="left">Left</a>
+            <a href="#right" class="right">Right</a>
+            <a href="#up" class="up">Up</a>
+            <a href="#down" class="down">Down</a>
+            <a href="#zoom" class="zoom">Zoom</a>
+            <a href="#zoom_out" class="back">Back</a>
+        </div>
+    </div>
+</div>
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
+    @Scripts.Render("~/bundles/gamemap")
+
 }
