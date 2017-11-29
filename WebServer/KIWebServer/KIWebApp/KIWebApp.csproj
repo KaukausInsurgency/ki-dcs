@@ -206,6 +206,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\GameModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -287,6 +288,9 @@
     <Content Include="Images\Beslan_Sample.png" />
     <Content Include="Images\caucasus-map.jpg" />
     <Content Include="Images\depot-512x512.png" />
+    <Content Include="Images\depot-blue-256x256.png" />
+    <Content Include="Images\depot-contested-256x256.png" />
+    <Content Include="Images\depot-red-256x256.png" />
     <Content Include="Images\flag-512x512.png" />
     <Content Include="Images\helipad-200x200png.png" />
     <Content Include="Images\map-control.png" />
@@ -335,6 +339,21 @@
     <Content Include="Scripts\popper-utils.min.js" />
     <Content Include="Scripts\popper.js" />
     <Content Include="Scripts\popper.min.js" />
+    <Content Include="Content\tooltipster\plugins\tooltipster\sideTip\themes\tooltipster-sideTip-borderless.min.css" />
+    <Content Include="Content\tooltipster\plugins\tooltipster\sideTip\themes\tooltipster-sideTip-light.min.css" />
+    <Content Include="Content\tooltipster\plugins\tooltipster\sideTip\themes\tooltipster-sideTip-noir.min.css" />
+    <Content Include="Content\tooltipster\plugins\tooltipster\sideTip\themes\tooltipster-sideTip-punk.min.css" />
+    <Content Include="Content\tooltipster\plugins\tooltipster\sideTip\themes\tooltipster-sideTip-shadow.min.css" />
+    <Content Include="Content\tooltipster\tooltipster.bundle.css" />
+    <Content Include="Content\tooltipster\tooltipster.bundle.min.css" />
+    <Content Include="Content\tooltipster\tooltipster.main.css" />
+    <Content Include="Content\tooltipster\tooltipster.main.min.css" />
+    <Content Include="Scripts\tooltipster\plugins\tooltipster\SVG\tooltipster-SVG.js" />
+    <Content Include="Scripts\tooltipster\plugins\tooltipster\SVG\tooltipster-SVG.min.js" />
+    <Content Include="Scripts\tooltipster\tooltipster.bundle.js" />
+    <Content Include="Scripts\tooltipster\tooltipster.bundle.min.js" />
+    <Content Include="Scripts\tooltipster\tooltipster.main.js" />
+    <Content Include="Scripts\tooltipster\tooltipster.main.min.js" />
     <Content Include="Scripts\umd\popper-utils.js" />
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />

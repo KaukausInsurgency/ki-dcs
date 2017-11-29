@@ -20,8 +20,9 @@ namespace KIWebApp.Controllers
 
         public ActionResult Game(int serverID)
         {
-
-            return View();
+            
+            GameModel game = GameData.GetGame();
+            return View(game);
         }
 
     }

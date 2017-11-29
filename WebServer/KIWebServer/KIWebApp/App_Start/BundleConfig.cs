@@ -17,12 +17,14 @@ namespace KIWebApp
             bundles.Add(new ScriptBundle("~/bundles/knockout").Include(
                         "~/Scripts/knockout-{version}.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/ajaxlogin").Include(
-                "~/Scripts/app/ajaxlogin.js"));
+            // Tooltips bundle
+            bundles.Add(new ScriptBundle("~/bundles/tooltipster").Include(
+                "~/Scripts/tooltipster/tooltipster.bundle.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/app").Include(
                 "~/Scripts/app/Servers.js"));
 
+            // Game Map bundle
             bundles.Add(new ScriptBundle("~/bundles/gamemap").Include(
                 "~/Scripts/mapbox/jquery.mapbox.js",
                 "~/Scripts/mapbox/jquery.mousewheel.js",
@@ -32,6 +34,10 @@ namespace KIWebApp
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
+
+
+
+
 
             bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
                         "~/Content/themes/base/jquery.ui.core.css",
@@ -50,6 +56,9 @@ namespace KIWebApp
             bundles.Add(new StyleBundle("~/Content/bootstrap").Include(
                         "~/Content/bootstrap.css",
                         "~/Content/bootstrap-theme.css"));
+
+            bundles.Add(new StyleBundle("~/Content/tooltipster").Include(
+                        "~/Content/tooltipster/tooltipster.bundle.min.css"));
         }
     }
 }

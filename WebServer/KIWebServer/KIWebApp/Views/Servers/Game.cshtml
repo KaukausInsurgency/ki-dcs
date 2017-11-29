@@ -2,8 +2,8 @@
     ViewBag.Title = "Game";
 }
 <script>
-    var MapImg = '@Url.Content("~/Images/Beslan_Sample.png")'
-    var DepotImg = '@Url.Content("~/Images/depot-512x512.png")'
+    var ROOT = '@Url.Content("~")';
+    var MapImg = '@Url.Content("~/Images/Beslan_Sample.png")';
 </script>
 
 <style>
@@ -82,8 +82,7 @@
     }
 </style>
 
-
-<h2>Game</h2>
+<div id="Heading" style="text-align: center;"></div>
 
 <div id="GameMap" style="position:relative">
     <div class="mapwrapper">
@@ -114,5 +113,8 @@
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
     @Scripts.Render("~/bundles/gamemap")
-
+    @Scripts.Render("~/bundles/tooltipster")
+    <script type="text/javascript">
+        var model = @Html.Raw(Json.Encode(Model));
+    </script>
 }

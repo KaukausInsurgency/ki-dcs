@@ -25,6 +25,7 @@
 
         // Extending defaults options (see bottom of file).
         options = $.extend({}, $.fn.mapbox.options, options);
+        this.mapbox.options = options
 
         $(this).css({
             overflow: "hidden",
@@ -103,7 +104,7 @@
             }).addClass("current-map-layer");
 
             if (typeof options.afterZoom === "function") {
-                options.afterZoom(eq, layers.eq(eq)[0], this.xPos, this.yPos, xPercent, yPercent, this);
+                options.afterZoom(eq, layers.eq(eq)[0], this.xPos, this.yPos, totalWidth, totalHeight, this);
             }
 
             if (newLayer[0] !== current[0]) {

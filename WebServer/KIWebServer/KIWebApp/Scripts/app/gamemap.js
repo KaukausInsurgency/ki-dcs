@@ -1,27 +1,35 @@
 ﻿$(document).ready(function () {
-    /*
-    $('#GameMap').prepend($('<img>',
-        {
-            id: 'GameMapImg',
-            src: MapImg,
-            height: "697",
-            width: "1307",
-            class: "rounded"
-        }))
-    */
-    var coords = [[504, 84]];
 
-    $(coords).each(function (i) {
-        var pos = this;
-        var dot = $('<img class="mrk" src="' + DepotImg + '" width="32" height="32" originleft="' + pos[0] + '" origintop="' + pos[1] + '"/>');
+    var headingcontent = $("<h2>Server: " + model.ServerName + "</h2></br><h>Restarts In: " + model.RestartTime + "</h>");
+    $("#Heading").append(headingcontent);
+
+    $(model.Depots).each(function (i) {
+        var x = this.MapX;
+        var y = this.MapY;
+        var Img = ROOT + this.Image;
+        var tooltipid = "tip_content_id_" + i;
+        var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + x +
+            '" origintop="' + y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
         dot.css({
             position: 'absolute',
-            left: pos[0] + "px",
-            top: pos[1] + "px"
+            left: x + "px",
+            top: y + "px"
         });
         $(".mapcontent").append(dot);
+
+        var content = "<strong>" + this.Name + "</strong><br/>"
+        content += "Status: " + this.Status + "<br/>"
+        content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
+        content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+        content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+
+        var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
+        $(".mapcontent").append(tooltipspan);
     });
 
+    $('.mrk').tooltipster({
+        theme: 'tooltipster-noir'
+    });
 });
 
 
@@ -29,19 +37,26 @@ $(document).ready(function () {
     $("#viewport").mapbox(
         {
             mousewheel: true,
-            afterZoom: function (level, layer, xcoord, ycoord, xscale, yscale, viewport)
+            afterZoom: function (level, layer, xcoord, ycoord, totalWidth, totalHeight, viewport)
             {
                 // xcoord and ycoord are the new left/top coordinates of the current image
                 $(".mrk").each(function (i)
                 {
-                    var scaleX = xcoord / viewport.offsetWidth 
-                    var scaleY = ycoord / viewport.offsetHeight
-                    var width = parseInt($(this).attr("width").replace("px", ""))
-                    var height = parseInt($(this).attr("height").replace("px", ""))
-                    var offx = parseInt($(this).attr("originleft")) - xcoord * scaleX
-                    var offy = parseInt($(this).attr("origintop")) - ycoord * scaleY
-                    var x = offx - width / 2
-                    var y = offy - height / 2
+                    var x = 0
+                    var y = 0
+                    if (totalHeight === null || totalHeight === undefined)
+                    {
+                        x = parseInt($(this).attr("originleft"))
+                        y = parseInt($(this).attr("origintop"))
+                    }
+                    else
+                    {
+                        var ratio = totalHeight / viewport.offsetHeight
+                        x = parseInt($(this).attr("originleft")) * ratio
+                        y = parseInt($(this).attr("origintop")) * ratio
+                    }
+                    
+
                     //var x = parseInt($(this).css("left").replace("px", ""))
                     //var y = parseInt($(this).css("top").replace("px", ""))
                     

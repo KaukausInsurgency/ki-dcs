@@ -6,10 +6,18 @@
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width" />
     
+@if (Context.IsDebuggingEnabled)
+{
+    <link href="~/Content/tooltipster/tooltipster.bundle.min.css" rel="stylesheet" type="text/css" />
+}
+else
+{
+    @Styles.Render("~/Content/tooltipster")
+}
+    
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryui")
-    @Scripts.Render("~/bundles/ajaxlogin")
     @RenderSection("scripts", required: true)
 
     <!-- Latest compiled and minified JavaScript -->
