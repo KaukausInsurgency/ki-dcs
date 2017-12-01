@@ -3,7 +3,6 @@
 }
 <script>
     var ROOT = '@Url.Content("~")';
-    var MapImg = '@Url.Content("~/Images/Beslan_Sample.png")';
 </script>
 
 <style>
@@ -13,8 +12,8 @@
     }
 
     #viewport {
-        width: 800px;
-        height: 427px;
+        width: @(Model.Map.Resolution.X)px;
+        height: @(Model.Map.Resolution.Y)px;
         cursor: move;
         overflow: hidden;
     }
@@ -87,18 +86,24 @@
 <div id="GameMap" style="position:relative">
     <div class="mapwrapper">
         <div id="viewport">
-            <div style="background: url(@Url.Content("~/Images/Beslan_Sample-800x427.png")) no-repeat; width: 800px; height: 427px;" class='map-layer'>
+            <div style="background: url(@Url.Content("~/" + Model.Map.ImagePath)) no-repeat; width: @(Model.Map.Resolution.X)px; height: @(Model.Map.Resolution.Y)px;" class='map-layer'>
                 <!--top level map content goes here-->
                 <div class="mapcontent">
                     <!--map content goes here-->
                 </div>
             </div>
-            <div style="height: 697px; width: 1307px;" class='map-layer'>
-                <img src="@Url.Content("~/Images/Beslan_Sample.png")" alt="" />
-                <div class="mapcontent">
-                    <!--map content goes here-->
+            @foreach (var item in @Model.Map.Layers)
+            {
+                string h = item.Resolution.Y + "px";
+                string w = item.Resolution.X + "px";
+                string p = "~/" + item.ImagePath;
+                <div style="height: @h; width: @w;" class='map-layer'>
+                    <img src="@Url.Content(@p)" alt="" />
+                    <div class="mapcontent">
+                        <!--map content goes here-->
+                    </div>
                 </div>
-            </div>
+            }
         </div>
         <div class="map-control">
             <a href="#left" class="left">Left</a>
@@ -110,6 +115,35 @@
         </div>
     </div>
 </div>
+
+<div id="OnlinePlayersTable">
+    <table class="table table-striped table-hover" style="border: 1px solid black; width: 60%;"  align="center">
+        <caption style="text-align:center">Online Players</caption>
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Player Name</th>
+                <th>Side</th>
+                <th>Ping</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in @Model.OnlinePlayers)
+            {
+               string ImagePath = "~/" + item.RoleImage;
+
+                <tr class="clickable-row" playerUCID="@item.UCID">
+                    <td><img src="@Url.Content(ImagePath)"/>  @item.Role</td>
+                    <td>@item.Name</td>
+                    <td>@item.Side</td>
+                    <td>@item.Ping</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
     @Scripts.Render("~/bundles/gamemap")

@@ -40,71 +40,102 @@
 
         table += tr + "</table>";
         return table;
+    };
+
+    function DCSPosToMapPos(point, originpoint, ratio)
+    {
+        var xSignHandle = originpoint.X < 0 ? -1 : 1;
+        var ySignHandle = originpoint.Y < 0 ? -1 : 1;
+        var normalizedX = point.X - originpoint.X;
+        var normalizedY = point.Y - originpoint.Y;
+        var imagepoint = {}
+        imagepoint.x = (normalizedX * xSignHandle) / ratio;
+        imagepoint.y = (normalizedY * ySignHandle) / ratio;
+        return imagepoint;
     }
 
-    var headingcontent = $("<h2>Server: " + model.ServerName + "</h2></br><h>Restarts In: " + model.RestartTime + "</h>");
-    $("#Heading").append(headingcontent);
+    function RenderDepotsFirstTime(modelObj, rootImgPath)
+    {
+        $(modelObj.Depots).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPoint, modelObj.Map.Ratio);
+            var Img = rootImgPath + this.Image;
+            var tooltipid = "tip_depot_content_id_" + i;
+            var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+            dot.css({
+                position: 'absolute',
+                left: ImagePoint.x + "px",
+                top: ImagePoint.y + "px"
+            });
+            $(".mapcontent").append(dot);
 
-    $(model.Depots).each(function (i) {
-        var x = this.MapX;
-        var y = this.MapY;
-        var Img = ROOT + this.Image;
-        var tooltipid = "tip_depot_content_id_" + i;
-        var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + x +
-            '" origintop="' + y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
-        dot.css({
-            position: 'absolute',
-            left: x + "px",
-            top: y + "px"
+            // Render the tooltip contents
+            var content = "<strong>" + this.Name + "</strong><br/>"
+            content += "Status: " + this.Status + "<br/>"
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+
+            var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
+            res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
+
+            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
+            var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
+            content += capacity;
+            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the capacity from the string
+            var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
+            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
+            //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
+            $(".mapcontent").append(tooltipspan);
+
         });
-        $(".mapcontent").append(dot);
+    };
 
-        var content = "<strong>" + this.Name + "</strong><br/>"
-        content += "Status: " + this.Status + "<br/>"
-        content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
-        content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+    function RenderCapturePointsFirstTime(modelObj, rootImgPath)
+    {
+        $(model.CapturePoints).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPoint, modelObj.Map.Ratio);
+            var Img = rootImgPath + this.Image;
+            var tooltipid = "tip_cp_content_id_" + i;
+            var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+            dot.css({
+                position: 'absolute',
+                left: ImagePoint.x + "px",
+                top: ImagePoint.y + "px"
+            });
+            $(".mapcontent").append(dot);
 
-        var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-        res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
-
-        res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
-        var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
-        content += capacity;
-        res = res.substring(res.indexOf("|") + 1, res.length);  // remove the capacity from the string
-        var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
-        content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
-        //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
-        var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')      
-        $(".mapcontent").append(tooltipspan);  
-    });
-
-    $(model.CapturePoints).each(function (i) {
-        var x = this.MapX;
-        var y = this.MapY;
-        var Img = ROOT + this.Image;
-        var tooltipid = "tip_cp_content_id_" + i;
-        var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + x +
-            '" origintop="' + y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
-        dot.css({
-            position: 'absolute',
-            left: x + "px",
-            top: y + "px"
+            var content = "<strong>" + this.Name + "</strong><br/>"
+            content += "Status: " + this.Status + "<br/>"
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+            content += "Blue: " + this.BlueUnits + "<br/>";
+            content += "Red: " + this.RedUnits + "<br/>";
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
+            $(".mapcontent").append(tooltipspan);
         });
-        $(".mapcontent").append(dot);
+    };
 
-        var content = "<strong>" + this.Name + "</strong><br/>"
-        content += "Status: " + this.Status + "<br/>"
-        content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
-        content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
-        content += "Blue: " + this.BlueUnits + "<br/>";
-        content += "Red: " + this.RedUnits + "<br/>";
-        var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
-        $(".mapcontent").append(tooltipspan);
-    });
+    function RenderMapFirstTime(modelObj, rootImgPath)
+    {
+        var headingcontent = $("<h2>Server: " + modelObj.ServerName + "</h2></br><h><b>Status: " + modelObj.Status + "</b></h></br><h><b>Restarts In: " + modelObj.RestartTime + "</b></h>");
+        $("#Heading").append(headingcontent);
 
-    $('.mrk').tooltipster({
-        theme: 'tooltipster-noir'
-    });
+        RenderDepotsFirstTime(modelObj, rootImgPath);
+        RenderCapturePointsFirstTime(modelObj, rootImgPath);
+
+        $('.mrk').tooltipster({
+            theme: 'tooltipster-noir'
+        });
+    };
+    
+
+    RenderMapFirstTime(model, ROOT);
+
+    
+
+    
 });
 
 

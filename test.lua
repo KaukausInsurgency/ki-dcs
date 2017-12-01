@@ -1,3 +1,20 @@
+local bd = StaticObject.getByName("Beslan Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+bd = StaticObject.getByName("Beslan Backup Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+bd = StaticObject.getByName("Kirovo Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+bd = StaticObject.getByName("Vladikavkaz Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+bd = StaticObject.getByName("Alagir Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+bd = StaticObject.getByName("Buron Depot"):getPoint()
+env.info(bd.z .. "," .. bd.x)
+
+if 1 == 1 then
+  return
+end
+
 require("lfs")
 for file in lfs.dir ([[C:\Users\Sapphire\Saved Games\DCS\Missions\Kaukasus Insurgency\GameEvents]]) do
   if string.match(file, ".lua") then 
@@ -460,10 +477,6 @@ package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
 local socket = require("socket")
 
 UDPSendSocket = socket.udp()
-local test, err = socket.protect(socket.try
-(
-  UDPSendSocket:sendto(JSON:encode(Data.GameEventQueue), "127.0.0.1", 8764)
-))
 
 
 

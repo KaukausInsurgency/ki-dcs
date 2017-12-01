@@ -1,0 +1,34 @@
+TOP LEFT: -122282.4375,1036.9050292969,733650.9375
+TOP RIGHT: -122209.4609375,0.00014901164104231,924559.875
+BOTTOM LEFT: -228104.53125,0.00014901164104231,924617.5
+
+DCS z coordinate is the x coordinate
+DCS y coordinate is the y coordinate
+
+x = 924559.875 - 733650.9375 	= 190908.9375 (Width)
+y = -122209.4609375 - -228104.53125 = 105895.0703125 (Height)
+
+
+190908.9375 / 800 = 238.636171875 (Ratio)
+105895.0703125 / 443 = 239.04079077313769751693002257336
+
+443 x 238.636 = 105715.824140625
+
+
+(0,0) in image is (733650.9375, -122282.4375) in DCS
+Ratio of DCS Coordinate to Image Coordinate is 238.636171875 : 1
+
+Algorithm:
+
+Take DCS X,Y coordinates (ie 822333, -180000) and subtract from them the base coordinates:
+
+Ratio = 238.636171875
+NormalizedX = 822333 - 733650 			= 88682.0625
+NormalizedY = -180000 - -122282.4375	= -57717.5625
+
+Now divide them by the ratio to get the image pixel coordinates
+
+ImageX = NormalizedX / ratio	(88682.0625 / 238.636171875		= 371.62037005208307756675875900257)
+ImageY = NormalizedY / ratio	((-57717.5625 * -1) / 238.636171875	= 241.86426578378500482723602188609)
+
+

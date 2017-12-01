@@ -297,7 +297,13 @@
     <Content Include="Images\flag-neutral-256x256.png" />
     <Content Include="Images\flag-red-256x256.png" />
     <Content Include="Images\helipad-200x200png.png" />
+    <Content Include="Images\map-1880x1041.png" />
+    <Content Include="Images\map-2685x1487.png" />
+    <Content Include="Images\map-800x443.png" />
     <Content Include="Images\map-control.png" />
+    <Content Include="Images\role-a10c-256x256.png" />
+    <Content Include="Images\role-ka50-256x256.png" />
+    <Content Include="Images\role-mi8-256x256.png" />
     <Content Include="Scripts\app\gamemap.js" />
     <Content Include="Scripts\app\Servers.js" />
     <Content Include="Scripts\bootstrap.js" />
