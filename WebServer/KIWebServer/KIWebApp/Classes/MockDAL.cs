@@ -42,7 +42,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 10,
                 Pos = new Position(751123.5, -125446.28125),
-                Image = "Images/flag-red-256x256.png"
+                Image = "Images/markers/flag-red-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -55,7 +55,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 9,
                 RedUnits = 0,
                 Pos = new Position(801123.5, -150446.28125),
-                Image = "Images/flag-blue-256x256.png"
+                Image = "Images/markers/flag-blue-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -68,7 +68,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 9,
                 RedUnits = 5,
                 Pos = new Position(767123.5, -140426.28125),
-                Image = "Images/flag-contested-256x256.png"
+                Image = "Images/markers/flag-contested-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -81,7 +81,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(807123.5, -220426.28125),
-                Image = "Images/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -94,7 +94,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(823123.5, -140426.28125),
-                Image = "Images/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -107,7 +107,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(817123.5, -190426.28125),
-                Image = "Images/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -120,7 +120,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(857123.5, -220426.28125),
-                Image = "Images/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png"
             });
 
             cps.Add(new CapturePointModel()
@@ -133,7 +133,7 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(774123.5, -220426.28125),
-                Image = "Images/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png"
             });
 
             return cps;
@@ -169,7 +169,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(840106.5625, -150906.578125),
-                Image = "Images/depot-red-256x256.png"
+                Image = "Images/markers/depot-red-256x256.png"
             });
 
             depots.Add(new DepotModel()
@@ -199,7 +199,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(829208, -153602),
-                Image = "Images/depot-blue-256x256.png"
+                Image = "Images/markers/depot-blue-256x256.png"
             });
 
             depots.Add(new DepotModel()
@@ -229,7 +229,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(841868, -150358.28125),
-                Image = "Images/depot-red-256x256.png"
+                Image = "Images/markers/depot-red-256x256.png"
             });
 
             depots.Add(new DepotModel()
@@ -259,7 +259,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(814918.625, -169069.359375),
-                Image = "Images/depot-red-256x256.png"
+                Image = "Images/markers/depot-red-256x256.png"
             });
 
             depots.Add(new DepotModel()
@@ -289,7 +289,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(850409.1875, -168602.5625),
-                Image = "Images/depot-contested-256x256.png"
+                Image = "Images/markers/depot-contested-256x256.png"
             });
 
             depots.Add(new DepotModel()
@@ -319,7 +319,7 @@ Ammo Truck               |4
 APC                      |8    
 ",
                 Pos = new Position(801123.5, -200446.28125),
-                Image = "Images/depot-blue-256x256.png"
+                Image = "Images/markers/depot-blue-256x256.png"
             });
 
             return depots;
@@ -331,7 +331,7 @@ APC                      |8
             {
                 DCSOriginPosition = new Position(734650, -123282),
                 Resolution = new Resolution(800, 443),
-                ImagePath = "Images/map-800x443.png",
+                ImagePath = "Images/map/map-800x443.png",
                 Ratio = 238.636171875,
                 Layers = this.GetLayers(1)
             };
@@ -351,7 +351,7 @@ APC                      |8
                 UCID = "AAA",
                 Name = "Igneous01",
                 Role = "KA-50",
-                RoleImage = "Images/role-ka50-256x256.png",
+                RoleImage = "Images/role/role-ka50-30x30.png",
                 Side = "Red",
                 Ping = "50ms"
             });
@@ -359,8 +359,8 @@ APC                      |8
             {
                 UCID = "BBB",
                 Name = "HolyCrapBatman",
-                Role = "AV-8B",
-                RoleImage = "Images/role-av8b-256x256.png",
+                Role = "F-15C",
+                RoleImage = "Images/role/role-f15-30x30.png",
                 Side = "Red",
                 Ping = "121ms"
             });
@@ -369,7 +369,7 @@ APC                      |8
                 UCID = "CCC",
                 Name = "JakeTheSnake",
                 Role = "A10-C",
-                RoleImage = "Images/role-a10c-256x256.png",
+                RoleImage = "Images/role/role-a10c-30x30.png",
                 Side = "Red",
                 Ping = "150ms"
             });
@@ -378,7 +378,7 @@ APC                      |8
                 UCID = "DDD",
                 Name = "MarvinStarvin",
                 Role = "MI-8",
-                RoleImage = "Images/role-mi8-256x256.png",
+                RoleImage = "Images/role/role-mi8-30x30.png",
                 Side = "Red",
                 Ping = "132ms"
             });
@@ -387,9 +387,36 @@ APC                      |8
                 UCID = "EEE",
                 Name = "PardonMeLads",
                 Role = "A10-C",
-                RoleImage = "Images/role-a10c-256x256.png",
+                RoleImage = "Images/role/role-a10c-30x30.png",
                 Side = "Red",
                 Ping = "84ms"
+            });
+            players.Add(new OnlinePlayerModel()
+            {
+                UCID = "FFF",
+                Name = "LoneStar",
+                Role = "GCI",
+                RoleImage = "Images/role/role-gci-30x30.png",
+                Side = "Red",
+                Ping = "94ms"
+            });
+            players.Add(new OnlinePlayerModel()
+            {
+                UCID = "GGG",
+                Name = "CarryMyPackBack",
+                Role = "SU-25T",
+                RoleImage = "Images/role/role-su25-30x30.png",
+                Side = "Red",
+                Ping = "92ms"
+            });
+            players.Add(new OnlinePlayerModel()
+            {
+                UCID = "HHH",
+                Name = "TotalBiscuitEaten",
+                Role = "UH-1H",
+                RoleImage = "Images/role/role-uh1h-30x30.png",
+                Side = "Red",
+                Ping = "35ms"
             });
             return players;
         }
@@ -430,8 +457,8 @@ APC                      |8
         private List<MapLayerModel> GetLayers(int mapID)
         {
             List<MapLayerModel> layers = new List<MapLayerModel>();
-            layers.Add(new MapLayerModel(new Resolution(1880, 1041), "Images/map-1880x1041.png"));
-            layers.Add(new MapLayerModel(new Resolution(2685, 1487), "Images/map-2685x1487.png"));
+            layers.Add(new MapLayerModel(new Resolution(1880, 1041), "Images/map/map-1880x1041.png"));
+            layers.Add(new MapLayerModel(new Resolution(2685, 1487), "Images/map/map-2685x1487.png"));
             return layers;
         }
 
@@ -448,7 +475,7 @@ APC                      |8
                     Status = "Online",
                     Type = "AIRPORT",
                     Pos = new Position(803123.5, -170446.28125),
-                    Image = "Images/airport-red-200x200.png"
+                    Image = "Images/markers/airport-red-200x200.png"
                 },
 
                 new AirportModel()
@@ -460,7 +487,7 @@ APC                      |8
                     Status = "Online",
                     Type = "FARP",
                     Pos = new Position(853123.5, -170446.28125),
-                    Image = "Images/farp-red-200x200.png"
+                    Image = "Images/markers/farp-red-200x200.png"
                 },
 
                 new AirportModel()
@@ -472,7 +499,7 @@ APC                      |8
                     Status = "Online",
                     Type = "FARP",
                     Pos = new Position(873123.5, -160446.28125),
-                    Image = "Images/farp-blue-200x200.png"
+                    Image = "Images/markers/farp-blue-200x200.png"
                 },
 
                 new AirportModel()
@@ -484,7 +511,7 @@ APC                      |8
                     Status = "Online",
                     Type = "AIRPORT",
                     Pos = new Position(893123.5, -140446.28125),
-                    Image = "Images/airport-blue-200x200.png"
+                    Image = "Images/markers/airport-blue-200x200.png"
                 }
             };
 
