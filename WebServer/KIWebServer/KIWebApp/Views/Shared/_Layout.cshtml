@@ -9,10 +9,12 @@
 @if (Context.IsDebuggingEnabled)
 {
     <link href="~/Content/tooltipster/tooltipster.bundle.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/dynatable/jquery.dynatable.css" rel="stylesheet" type="text/css" />
 }
 else
 {
     @Styles.Render("~/Content/tooltipster")
+    @Styles.Render("~/Content/dynatable")
 }
     
     @Scripts.Render("~/bundles/modernizr")

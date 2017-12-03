@@ -44,6 +44,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="MySql.Data, Version=6.10.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity" />
@@ -201,12 +205,22 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Classes\DAL.cs" />
+    <Compile Include="Classes\MockDAL.cs" />
+    <Compile Include="Classes\Position.cs" />
+    <Compile Include="Classes\Resolution.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ServersController.cs" />
+    <Compile Include="Classes\IDAL.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AirportModel.cs" />
+    <Compile Include="Models\CapturePointModel.cs" />
+    <Compile Include="Models\DepotModel.cs" />
     <Compile Include="Models\GameModel.cs" />
+    <Compile Include="Models\MapModels.cs" />
+    <Compile Include="Models\OnlinePlayerModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -216,6 +230,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\dynatable\jquery.dynatable.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -284,13 +299,16 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="Images\airport-blue-200x200.png" />
+    <Content Include="Images\airport-red-200x200.png" />
     <Content Include="Images\Beslan_Sample-800x427.png" />
     <Content Include="Images\Beslan_Sample.png" />
-    <Content Include="Images\caucasus-map.jpg" />
     <Content Include="Images\depot-512x512.png" />
     <Content Include="Images\depot-blue-256x256.png" />
     <Content Include="Images\depot-contested-256x256.png" />
     <Content Include="Images\depot-red-256x256.png" />
+    <Content Include="Images\farp-blue-200x200.png" />
+    <Content Include="Images\farp-red-200x200.png" />
     <Content Include="Images\flag-512x512.png" />
     <Content Include="Images\flag-blue-256x256.png" />
     <Content Include="Images\flag-contested-256x256.png" />
@@ -304,10 +322,14 @@
     <Content Include="Images\role-a10c-256x256.png" />
     <Content Include="Images\role-ka50-256x256.png" />
     <Content Include="Images\role-mi8-256x256.png" />
+    <Content Include="Images\status-green-128x128.png" />
+    <Content Include="Images\status-red-128x128.png" />
+    <Content Include="Images\status-yellow-128x128.png" />
     <Content Include="Scripts\app\gamemap.js" />
     <Content Include="Scripts\app\Servers.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\dynatable\jquery.dynatable.js" />
     <Content Include="Scripts\esm\popper-utils.js" />
     <Content Include="Scripts\esm\popper-utils.min.js" />
     <Content Include="Scripts\esm\popper.js" />

@@ -1,7 +1,7 @@
 ﻿$(document).ready(function () {
 
     function IsStringEmptyOrWhitespace(str) {
-        return (str.length === 0 || !str.trim());
+        return str.length === 0 || !str.trim();
     };
     // splits a string and converts it into a json object
     function SplitStringIntoJSON(str, separator)
@@ -14,7 +14,7 @@
             if (IsStringEmptyOrWhitespace(strings[s]))
                 continue;
 
-            if (s % 2 == 0)
+            if (s % 2 === 0)
             {
                 jsonobj[strings[s]] = "";
                 key = strings[s];
@@ -33,12 +33,20 @@
     {
         var table = '<table>';
         var tr = "";
-        
+        var i = 0
         jQuery.each(keypair, function (name, value) {
-            tr += '<tr><td>' + name + '</td><td>' + value + '</td></tr>';
+            if (i === 0)
+            {
+                tr += '<thead><tr><td>' + name + '</td><td>' + value + '</td></tr></thead><tbody>';
+            }
+            else
+            {
+                tr += '<tr><td>' + name + '</td><td>' + value + '</td></tr>';
+            }
+            i += 1;
         });
 
-        table += tr + "</table>";
+        table += tr + "</tbody></table>";
         return table;
     };
 
@@ -54,13 +62,13 @@
         return imagepoint;
     }
 
-    function RenderDepotsFirstTime(modelObj, rootImgPath)
-    {
-        $(modelObj.Depots).each(function (i) {
-            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPoint, modelObj.Map.Ratio);
+    function RenderAirportsFirstTime(modelObj, rootImgPath) {
+        $(modelObj.Airports).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
             var Img = rootImgPath + this.Image;
-            var tooltipid = "tip_depot_content_id_" + i;
-            var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+            var tooltipid = "tip_airport_content_id_" + this.ID;
+            var id_attribute = 'data-airportID="' + this.ID + '"';
+            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
                 '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
             dot.css({
                 position: 'absolute',
@@ -70,10 +78,39 @@
             $(".mapcontent").append(dot);
 
             // Render the tooltip contents
-            var content = "<strong>" + this.Name + "</strong><br/>"
-            content += "Status: " + this.Status + "<br/>"
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Type: " + this.Type + "<br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
+            $(".mapcontent").append(tooltipspan);
+
+        });
+    };
+
+    function RenderDepotsFirstTime(modelObj, rootImgPath)
+    {
+        $(modelObj.Depots).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
+            var Img = rootImgPath + this.Image;
+            var tooltipid = "tip_depot_content_id_" + this.ID;
+            var id_attribute = 'data-depotID="' + this.ID + '"';
+            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+            dot.css({
+                position: 'absolute',
+                left: ImagePoint.x + "px",
+                top: ImagePoint.y + "px"
+            });
+            $(".mapcontent").append(dot);
+
+            // Render the tooltip contents
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
 
             var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
             res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
@@ -85,7 +122,7 @@
             var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
             content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
             //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
-            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").append(tooltipspan);
 
         });
@@ -94,10 +131,11 @@
     function RenderCapturePointsFirstTime(modelObj, rootImgPath)
     {
         $(model.CapturePoints).each(function (i) {
-            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPoint, modelObj.Map.Ratio);
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
             var Img = rootImgPath + this.Image;
-            var tooltipid = "tip_cp_content_id_" + i;
-            var dot = $('<img class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+            var tooltipid = "tip_cp_content_id_" + this.ID;
+            var id_attribute = 'data-capturepointID="' + this.ID + '"';
+            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
                 '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
             dot.css({
                 position: 'absolute',
@@ -106,13 +144,13 @@
             });
             $(".mapcontent").append(dot);
 
-            var content = "<strong>" + this.Name + "</strong><br/>"
-            content += "Status: " + this.Status + "<br/>"
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>"
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>"
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
             content += "Red: " + this.RedUnits + "<br/>";
-            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>')
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").append(tooltipspan);
         });
     };
@@ -122,6 +160,7 @@
         var headingcontent = $("<h2>Server: " + modelObj.ServerName + "</h2></br><h><b>Status: " + modelObj.Status + "</b></h></br><h><b>Restarts In: " + modelObj.RestartTime + "</b></h>");
         $("#Heading").append(headingcontent);
 
+        RenderAirportsFirstTime(modelObj, rootImgPath);
         RenderDepotsFirstTime(modelObj, rootImgPath);
         RenderCapturePointsFirstTime(modelObj, rootImgPath);
 
@@ -180,7 +219,7 @@ $(document).ready(function () {
     $(".map-control a").click(function () { //control panel 
         var viewport = $("#viewport");
         // this.className is same as method to be called 
-        if (this.className == "zoom" || this.className == "back") {
+        if (this.className === "zoom" || this.className === "back") {
             viewport.mapbox(this.className, 2);//step twice 
         }
         else {

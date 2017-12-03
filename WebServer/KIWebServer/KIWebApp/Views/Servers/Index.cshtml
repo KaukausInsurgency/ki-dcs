@@ -1,21 +1,47 @@
 ﻿<script type="text/javascript">
     $(document).ready(function () {
-        $('.clickable-row').click(function () {
-            var id = parseInt($(this).attr("serverID"));
-            var url = '@Url.Action("Game", "Servers")' + "?serverID=" + id;
-            window.location.href = url; 
-            /*
-                $.ajax({
-                url: 'Url.Action("Game", "Servers")',
-                type: 'GET',
-                data: { serverID: id }
-                });
-            */
-        })
+        function RegisterHandlers() {
+            $('.clickable-row').click(function () {
+                var serverIDDiv = $(this).closest('tr').find('.ServerID')
+                var id = parseInt(serverIDDiv.text());
+                var url = '@Url.Action("Game", "Servers")' + "?serverID=" + id;
+                window.location.href = url;
+            })
 
-        $('.clickable-row').hover(function () {
-            $(this).css('cursor', 'pointer');
-        })
+
+            $('.clickable-row').hover(function () {
+                $(this).css('cursor', 'pointer');
+                $(this).css('background-color', '#A5A5A5')
+            }, function () {
+                $(this).css('background-color', '')
+            });
+        };
+
+        $('#servers-table').dynatable({
+            writers: {
+                _rowWriter: myRowWriter
+            }
+        }).bind('dynatable:afterUpdate', processingComplete);
+
+        function processingComplete(a) {
+            RegisterHandlers()
+        };
+
+        function myRowWriter(rowIndex, record, columns, cellWriter) {
+            var tr = '';
+
+            // grab the record's attribute for each column
+            for (var i = 0, len = columns.length; i < len; i++) {
+                tr += cellWriter(columns[i], record);
+            }
+
+            return '<tr class="clickable-row">' + tr + '</tr>';
+        };
+
+        RegisterHandlers();
+
+
+
     })
 </script>
 
@@ -24,9 +50,9 @@
     <div class="container">
         <h2>Game Servers</h2>
         <p>This lists the status of all KI Game Servers</p>
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
+        <table id="servers-table" class="table table-bordered" >
+            <thead >
+                <tr style="background-color: #111010">
                     <th>Server Name</th>
                     <th>IP Address</th>
                     <th>Status</th>
@@ -37,10 +63,12 @@
             <tbody>
                 @foreach (var item in @Model)
                 {
-                    <tr class="clickable-row" serverID="@item.ServerID">
-                        <td>@item.ServerName</td>
+                    string imgurl = "~/" + item.StatusImage;
+
+                    <tr class="clickable-row">
+                        <td><div class="ServerID" style="display:none;">@item.ServerID</div><b>@item.ServerName</b></td>
                         <td>@item.IPAddress</td>
-                        <td>@item.Status</td>
+                        <td><img src="@Url.Content(imgurl)" width="16" height="16" /> @item.Status</td>
                         <td>@item.RestartTime</td>
                         <td>@item.OnlinePlayers</td>
                     </tr>
@@ -54,4 +82,5 @@
 
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
+    @Scripts.Render("~/bundles/dynatable")
 }

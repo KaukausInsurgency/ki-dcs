@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using KIWebApp.Models;
+using KIWebApp.Classes;
 
 namespace KIWebApp.Controllers
 {
@@ -14,15 +15,23 @@ namespace KIWebApp.Controllers
 
         public ActionResult Index()
         {
-            List<ServerModel> servers = ServerModelList.GetServers();
-            return View(servers);
+            IDAL dal;
+            if (true)
+            {
+                dal = new DAL();
+            }
+            else
+            {
+                dal = new MockDAL();
+            }
+            return View(dal.GetServers());
         }
 
         public ActionResult Game(int serverID)
         {
-            
-            GameModel game = GameData.GetGame();
-            return View(game);
+
+            IDAL dal = new MockDAL();
+            return View(dal.GetGame(serverID));
         }
 
     }

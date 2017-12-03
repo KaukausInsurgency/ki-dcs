@@ -21,6 +21,9 @@ namespace KIWebApp
             bundles.Add(new ScriptBundle("~/bundles/tooltipster").Include(
                 "~/Scripts/tooltipster/tooltipster.bundle.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/dynatable").Include(
+                "~/Scripts/dynatable/jquery.dynatable.js"));
+
             bundles.Add(new ScriptBundle("~/bundles/app").Include(
                 "~/Scripts/app/Servers.js"));
 
@@ -59,6 +62,9 @@ namespace KIWebApp
 
             bundles.Add(new StyleBundle("~/Content/tooltipster").Include(
                         "~/Content/tooltipster/tooltipster.bundle.min.css"));
+
+            bundles.Add(new StyleBundle("~/Content/dynatable").Include(
+                "~/Content/dynatable/jquery.dynatable.css"));
         }
     }
 }

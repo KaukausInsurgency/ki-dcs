@@ -67,3 +67,4 @@ C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\Debug\KIWebApp.Tests.csproj.CoreCompileInputs.cache
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\Debug\KIWebApp.Tests.dll
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\Debug\KIWebApp.Tests.pdb
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\MySql.Data.dll
