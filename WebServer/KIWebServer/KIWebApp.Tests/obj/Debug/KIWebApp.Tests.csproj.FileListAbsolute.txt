@@ -68,3 +68,10 @@ C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\Debug\KIWebApp.Tests.dll
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\obj\Debug\KIWebApp.Tests.pdb
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\MySql.Data.dll
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.Owin.dll
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.AspNet.SignalR.Core.dll
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Owin.dll
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.Owin.Security.dll
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.Owin.xml
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.AspNet.SignalR.Core.xml
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp.Tests\bin\Debug\Microsoft.Owin.Security.xml

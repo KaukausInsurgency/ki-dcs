@@ -21,8 +21,12 @@ namespace KIWebApp
             bundles.Add(new ScriptBundle("~/bundles/tooltipster").Include(
                 "~/Scripts/tooltipster/tooltipster.bundle.js"));
 
+            // dynatable bundle
             bundles.Add(new ScriptBundle("~/bundles/dynatable").Include(
                 "~/Scripts/dynatable/jquery.dynatable.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/signalr").Include(
+                "~/Scripts/jquery.signalR-2.2.2.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/app").Include(
                 "~/Scripts/app/Servers.js"));

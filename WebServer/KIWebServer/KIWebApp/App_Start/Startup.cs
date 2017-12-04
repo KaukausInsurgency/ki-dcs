@@ -5,7 +5,7 @@ using System.Web;
 using Microsoft.Owin;
 using Owin;
 
-[assembly: OwinStartup("EnableSignalR", typeof(KIWebApp.App_Start.Startup))]
+[assembly: OwinStartup(typeof(KIWebApp.App_Start.Startup))]
 
 namespace KIWebApp.App_Start
 {

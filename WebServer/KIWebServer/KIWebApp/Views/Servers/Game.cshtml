@@ -146,9 +146,12 @@
 </div>
 
 @section scripts {
+    @Scripts.Render("~/bundles/signalr")
+    <script src="~/signalr/hubs"></script>
     @Scripts.Render("~/bundles/knockout")
-    @Scripts.Render("~/bundles/gamemap")
     @Scripts.Render("~/bundles/tooltipster")
+    @Scripts.Render("~/bundles/gamemap")
+    
     <script type="text/javascript">
         var model = @Html.Raw(Json.Encode(Model));
     </script>

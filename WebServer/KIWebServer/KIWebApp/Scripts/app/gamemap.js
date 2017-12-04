@@ -166,13 +166,60 @@
 
         $('.mrk').tooltipster({
             theme: 'tooltipster-noir'
-        });
+        });      
     };
+
+        
     
 
     RenderMapFirstTime(model, ROOT);
 
+
+    // setup signalR
+    $.connection.hub.logging = true;
+
+    var GameHubProxy = $.connection.gameHub;    // apparently first letter is lowercase (signalr converts this)
+
+    GameHubProxy.client.UpdateMarkers = function (modelObj) {
+        $(modelObj.Depots).each(function (i) {
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+
+            var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
+            res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
+
+            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
+            var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
+            content += capacity;
+            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the capacity from the string
+            var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
+            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
+
+            // locate the html content
+            var img = $('[data-depotID=' + this.ID + ']');
+            var tipspan = $('#tip_depot_content_id_' + this.ID);
+            img.attr('src', ROOT + this.Image);
+            tipspan.html(content);
+        });
+    };
+
+    $.connection.hub.start().done(function ()
+    {
+
+        $(window).bind('beforeunload', function () {
+            var GHubProxy = $.connection.gameHub;
+            GHubProxy.server.unsubscribe(model.ServerID);
+        });
+
+        var GHubProxy = $.connection.gameHub;
+        GHubProxy.server.subscribe(model.ServerID);
+    });
     
+    
+    
+        
 
     
 });

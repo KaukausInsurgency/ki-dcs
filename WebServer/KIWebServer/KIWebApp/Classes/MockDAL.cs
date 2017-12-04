@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using KIWebApp.Models;
+using MySql.Data.MySqlClient;
 
 namespace KIWebApp.Classes
 {
@@ -516,6 +517,63 @@ APC                      |8
             };
 
             return airports;
+        }
+
+        MarkerViewModel IDAL.GetMarkers(int serverID)
+        {
+            MarkerViewModel mm = new MarkerViewModel()
+            {
+                Depots = ((IDAL)this).GetDepots(serverID),
+                CapturePoints = ((IDAL)this).GetCapturePoints(serverID),
+                Airports = ((IDAL)this).GetAirports(serverID)
+            };
+
+            return mm;
+        }
+
+        List<ServerModel> IDAL.GetServers(ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetServers();
+        }
+
+        List<DepotModel> IDAL.GetDepots(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetDepots(serverID);
+        }
+
+        List<CapturePointModel> IDAL.GetCapturePoints(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetCapturePoints(serverID);
+        }
+
+        List<MapLayerModel> IDAL.GetMapLayers(int mapID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetMapLayers(mapID);
+        }
+
+        List<OnlinePlayerModel> IDAL.GetOnlinePlayers(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetOnlinePlayers(serverID);
+        }
+
+        GameMapModel IDAL.GetGameMap(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetGameMap(serverID);
+        }
+
+        GameModel IDAL.GetGame(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetGame(serverID);
+        }
+
+        List<AirportModel> IDAL.GetAirports(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetAirports(serverID);
+        }
+
+        MarkerViewModel IDAL.GetMarkers(int serverID, ref MySqlConnection conn)
+        {
+            return ((IDAL)this).GetMarkers(serverID);
         }
     }
 }
