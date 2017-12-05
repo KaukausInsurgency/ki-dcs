@@ -185,3 +185,4 @@ C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\Micros
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\Microsoft.Owin.xml
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\Microsoft.Owin.Host.SystemWeb.xml
 C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\bin\Microsoft.Owin.Security.xml
+C:\Users\david\Documents\GitHub\DCS\KI\WebServer\KIWebServer\KIWebApp\obj\Debug\KIWebApp.csprojResolveAssemblyReference.cache
