@@ -2,7 +2,7 @@
 
     function IsStringEmptyOrWhitespace(str) {
         return str.length === 0 || !str.trim();
-    };
+    }
     // splits a string and converts it into a json object
     function SplitStringIntoJSON(str, separator)
     {
@@ -27,13 +27,13 @@
 
         return jsonobj;
 
-    };
+    }
 
     function GenerateTableHTMLString(keypair)
     {
         var table = '<table>';
         var tr = "";
-        var i = 0
+        var i = 0;
         jQuery.each(keypair, function (name, value) {
             if (i === 0)
             {
@@ -48,7 +48,7 @@
 
         table += tr + "</tbody></table>";
         return table;
-    };
+    }
 
     function DCSPosToMapPos(point, originpoint, ratio)
     {
@@ -56,7 +56,7 @@
         var ySignHandle = originpoint.Y < 0 ? -1 : 1;
         var normalizedX = point.X - originpoint.X;
         var normalizedY = point.Y - originpoint.Y;
-        var imagepoint = {}
+        var imagepoint = {};
         imagepoint.x = (normalizedX * xSignHandle) / ratio;
         imagepoint.y = (normalizedY * ySignHandle) / ratio;
         return imagepoint;
@@ -88,7 +88,7 @@
             $(".mapcontent").append(tooltipspan);
 
         });
-    };
+    }
 
     function RenderDepotsFirstTime(modelObj, rootImgPath)
     {
@@ -113,7 +113,7 @@
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
 
             var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-            res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
+            res = res.replace(/(?: {2})/g, '');   // clean up the double spaces in the string
 
             res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
             var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
@@ -126,7 +126,7 @@
             $(".mapcontent").append(tooltipspan);
 
         });
-    };
+    }
 
     function RenderCapturePointsFirstTime(modelObj, rootImgPath)
     {
@@ -153,7 +153,7 @@
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").append(tooltipspan);
         });
-    };
+    }
 
     function RenderMapFirstTime(modelObj, rootImgPath)
     {
@@ -167,7 +167,7 @@
         $('.mrk').tooltipster({
             theme: 'tooltipster-noir'
         });      
-    };
+    }
 
         
     
@@ -188,7 +188,7 @@
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
 
             var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-            res = res.replace(/(?:  )/g, '');   // clean up the double spaces in the string
+            res = res.replace(/(?: {2})/g, '');   // clean up the double spaces in the string
 
             res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
             var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
@@ -232,33 +232,30 @@ $(document).ready(function () {
             afterZoom: function (level, layer, xcoord, ycoord, totalWidth, totalHeight, viewport)
             {
                 // xcoord and ycoord are the new left/top coordinates of the current image
-                $(".mrk").each(function (i)
-                {
-                    var x = 0
-                    var y = 0
-                    if (totalHeight === null || totalHeight === undefined)
-                    {
-                        x = parseInt($(this).attr("originleft"))
-                        y = parseInt($(this).attr("origintop"))
+                $(".mrk").each(function (i) {
+                    var x = 0;
+                    var y = 0;
+                    if (totalHeight === null || totalHeight === undefined) {
+                        x = parseInt($(this).attr("originleft"));
+                        y = parseInt($(this).attr("origintop"));
                     }
-                    else
-                    {
-                        var ratio = totalHeight / viewport.offsetHeight
-                        x = parseInt($(this).attr("originleft")) * ratio
-                        y = parseInt($(this).attr("origintop")) * ratio
+                    else {
+                        var ratio = totalHeight / viewport.offsetHeight;
+                        x = parseInt($(this).attr("originleft")) * ratio;
+                        y = parseInt($(this).attr("origintop")) * ratio;
                     }
-                    
+
 
                     //var x = parseInt($(this).css("left").replace("px", ""))
                     //var y = parseInt($(this).css("top").replace("px", ""))
-                    
+
                     $(this).css({
                         position: 'absolute',
                         left: x + "px",
                         top: y + "px"
-                    })
-                    
-                })
+                    });
+
+                });
                 
 
             }

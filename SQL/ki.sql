@@ -31,10 +31,14 @@ CREATE TABLE `airport` (
   `latlong` varchar(30) NOT NULL,
   `mgrs` varchar(20) NOT NULL,
   `status` varchar(45) NOT NULL,
+  `type` varchar(7) NOT NULL,
+  `x` double NOT NULL DEFAULT '0',
+  `y` double NOT NULL DEFAULT '0',
+  `image` varchar(132) NOT NULL,
   PRIMARY KEY (`airport_id`),
   KEY `fk_server_airport_idx` (`server_id`),
   CONSTRAINT `fk_server_airport` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,8 +55,13 @@ CREATE TABLE `capture_point` (
   `status` varchar(15) NOT NULL,
   `blue_units` int(11) NOT NULL,
   `red_units` int(11) NOT NULL,
-  `mgrs` varchar(20) NOT NULL,
   `latlong` varchar(30) NOT NULL,
+  `mgrs` varchar(20) NOT NULL,
+  `current_capacity` int(11) NOT NULL DEFAULT '0',
+  `capacity` int(11) NOT NULL DEFAULT '0',
+  `x` double NOT NULL DEFAULT '0',
+  `y` double NOT NULL DEFAULT '0',
+  `image` varchar(132) NOT NULL,
   PRIMARY KEY (`capture_point_id`),
   KEY `FK_CP_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_CP_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
@@ -76,6 +85,9 @@ CREATE TABLE `depot` (
   `capacity` int(11) NOT NULL,
   `resources` varchar(900) NOT NULL,
   `status` varchar(45) NOT NULL,
+  `x` double NOT NULL DEFAULT '0',
+  `y` double NOT NULL DEFAULT '0',
+  `image` varchar(132) NOT NULL,
   PRIMARY KEY (`depot_id`),
   KEY `FK_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
@@ -132,8 +144,15 @@ DROP TABLE IF EXISTS `objectives`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `objectives` (
   `objective_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_name` varchar(90) NOT NULL,
+  `task_desc` varchar(150) NOT NULL,
   `type` varchar(10) NOT NULL,
   `status` varchar(20) NOT NULL,
+  `latlong` varchar(30) NOT NULL,
+  `mgrs` varchar(20) NOT NULL,
+  `x` double NOT NULL DEFAULT '0',
+  `y` double NOT NULL DEFAULT '0',
+  `image` varchar(90) NOT NULL,
   PRIMARY KEY (`objective_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -242,7 +261,7 @@ CREATE TABLE `role_image` (
   `image` varchar(132) NOT NULL,
   `role` varchar(45) NOT NULL,
   PRIMARY KEY (`role_image_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -303,6 +322,112 @@ CREATE TABLE `sproc_log` (
 --
 -- Dumping routines for database 'ki'
 --
+/*!50003 DROP FUNCTION IF EXISTS `fnc_GetAirportImage` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetAirportImage`(Type VARCHAR(7), Status VARCHAR(45)) RETURNS varchar(132) CHARSET utf8
+BEGIN
+	IF (Status = "Red" AND Type = "AIRPORT") THEN
+		RETURN "Images/markers/airport-red-200x200.png";
+	ELSEIF (Status = "Blue" AND Type = "AIRPORT") THEN
+		RETURN "Images/markers/airport-blue-200x200.png";
+	ELSEIF (Status = "Red" AND Type = "FARP") THEN
+		RETURN "Images/markers/farp-red-200x200.png";
+	ELSEIF (Status = "Blue" AND Type = "FARP") THEN
+		RETURN "Images/markers/farp-blue-200x200.png";
+	ELSE
+		RETURN "";
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fnc_GetCapturePointImage` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetCapturePointImage`(BlueUnits INT, RedUnits INT) RETURNS varchar(132) CHARSET utf8
+BEGIN
+	IF (BlueUnits = 0 AND RedUnits = 0) THEN
+		RETURN "Images/markers/flag-neutral-256x256.png";
+	ELSEIF (BlueUnits > 0 AND RedUnits > 0) THEN
+		RETURN "Images/markers/flag-contested-256x256.png";
+	ELSEIF (BlueUnits > 0) THEN
+		RETURN "Images/markers/flag-blue-256x256.png";
+	ELSEIF (RedUnits > 0) THEN
+		RETURN "Images/markers/flag-red-256x256.png";
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fnc_GetDepotImage` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetDepotImage`(Status VARCHAR(45)) RETURNS varchar(132) CHARSET utf8
+BEGIN
+	IF (Status = "Online") THEN
+		RETURN "Images/markers/depot-red-256x256.png";
+	ELSEIF (Status = "Captured") THEN
+		RETURN "Images/markers/depot-blue-256x256.png";
+	ELSEIF (Status = "Contested") THEN
+		RETURN "Images/markers/depot-contested-256x256.png";
+	ELSE
+		RETURN "";
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fnc_GetRoleImage` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetRoleImage`(role VARCHAR(45)) RETURNS varchar(132) CHARSET utf8
+BEGIN
+	DECLARE RoleImage VARCHAR(132);
+    SELECT COALESCE(ri.image, "Images/role/role-none-30x30.png") INTO RoleImage 
+    FROM role_image ri WHERE ri.role = role;
+    
+	RETURN RoleImage;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP FUNCTION IF EXISTS `fnc_HoursToSeconds` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -431,6 +556,54 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `AddOrUpdateAirport` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateAirport`(
+		IN ServerID INT, 
+		IN Name VARCHAR(128), 
+        IN LatLong VARCHAR(30),
+        IN MGRS VARCHAR(20),
+        IN Status VARCHAR(45),
+        IN Type VARCHAR(7),
+        IN X DOUBLE,
+        IN Y DOUBLE
+	)
+BEGIN
+	IF ((SELECT EXISTS (SELECT 1 FROM airport WHERE airport.name = Name AND airport.server_id = ServerID)) = 1) THEN
+		UPDATE airport
+        SET airport.name = Name,
+			airport.latlong = LatLong,
+            airport.mgrs = MGRS,
+			airport.status = Status,
+            airport.type = Type,
+            airport.x = X,
+            airport.y = Y,
+            airport.image = fnc_GetAirportImage(Type, Status)
+		WHERE airport.name = Name AND airport.server_id = ServerID;
+	ELSE
+		INSERT INTO airport 
+        (airport.server_id, airport.name, airport.latlong, airport.mgrs, 
+         airport.status, airport.type, airport.x, airport.y,
+         airport.image)
+        VALUES (ServerID, Name, LatLong, MGRS, 
+                Status, Type, X, Y,
+                fnc_GetAirportImage(Type, Status));
+    END IF;
+    SELECT 1;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `AddOrUpdateCapturePoint` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -451,19 +624,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateCapturePoint`(
         IN MGRS VARCHAR(20)
 	)
 BEGIN
-	IF ((SELECT EXISTS (SELECT 1 FROM capture_point WHERE capture_point.name = Name)) = 1) THEN
+	IF ((SELECT EXISTS (SELECT 1 FROM capture_point WHERE capture_point.name = Name AND capture_point.server_id = ServerID)) = 1) THEN
 		UPDATE capture_point
         SET capture_point.name = Name,
 			capture_point.status = Status,
+            capture_point.blue_units = BlueUnits,
+            capture_point.red_units = RedUnits,
             capture_point.latlong = LatLong,
             capture_point.mgrs = MGRS,
-            capture_point.blue_units = BlueUnits,
-            capture_point.red_units = RedUnits
+            capture_point.current_capacity = 0,
+            capture_point.capacity = 4,
+            capture_point.x = 0,
+            capture_point.y = 0,
+            capture_point.image = fnc_GetCapturePointImage(BlueUnits, RedUnits)
 		WHERE capture_point.name = Name AND capture_point.server_id = ServerID;
 	ELSE
 		INSERT INTO capture_point 
-        (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, capture_point.status, capture_point.blue_units, capture_point.red_units)
-        VALUES (ServerID, Name, LatLong, MGRS, Status, BlueUnits, RedUnits);
+        (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, 
+         capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.capacity, 
+         capture_point.current_capacity, capture_point.x, capture_point.y, capture_point.image)
+        VALUES (ServerID, Name, LatLong, MGRS, 
+				Status, BlueUnits, RedUnits, 4,
+				0, 0, 0, fnc_GetCapturePointImage(BlueUnits, RedUnits));
     END IF;
     SELECT 1;
 END ;;
@@ -493,7 +675,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateDepot`(
         IN Status VARCHAR(45)
 	)
 BEGIN
-	IF ((SELECT EXISTS (SELECT 1 FROM depot WHERE depot.name = Name)) = 1) THEN
+	IF ((SELECT EXISTS (SELECT 1 FROM depot WHERE depot.name = Name AND depot.server_id = ServerID)) = 1) THEN
 		UPDATE depot
         SET depot.name = Name,
 			depot.latlong = LatLong,
@@ -501,12 +683,19 @@ BEGIN
             depot.current_capacity = CurrentCapacity,
             depot.capacity = Capacity,
             depot.resources = ResourceString,
-			depot.status = Status
+			depot.status = Status,
+            depot.x = 0,
+            depot.y = 0,
+            depot.image = fnc_GetDepotImage(Status)
 		WHERE depot.name = Name AND depot.server_id = ServerID;
 	ELSE
 		INSERT INTO depot 
-        (depot.server_id, depot.name, depot.latlong, depot.mgrs, depot.current_capacity, depot.capacity, depot.resources, depot.status)
-        VALUES (ServerID, Name, LatLong, MGRS, CurrentCapacity, Capacity, ResourceString, Status);
+        (depot.server_id, depot.name, depot.latlong, depot.mgrs, 
+         depot.current_capacity, depot.capacity, depot.resources, depot.status,
+         depot.x, depot.y, depot.image)
+        VALUES (ServerID, Name, LatLong, MGRS, 
+                CurrentCapacity, Capacity, ResourceString, Status,
+                0, 0, fnc_GetDepotImage(Status));
     END IF;
     SELECT 1;
 END ;;
@@ -842,7 +1031,7 @@ BEGIN
 	SELECT  op.ucid as UCID,
 			op.name as Name,
             op.role as Role,
-            COALESCE(ri.image, "") as RoleImage,
+            COALESCE(ri.image, "Images/role/role-none-30x30.png") as RoleImage,
             op.side as Side,
             op.ping as Ping
 	FROM online_players op
@@ -893,4 +1082,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-03  2:59:58
+-- Dump completed on 2017-12-04 23:46:19

@@ -2,18 +2,18 @@
     $(document).ready(function () {
         function RegisterHandlers() {
             $('.clickable-row').click(function () {
-                var serverIDDiv = $(this).closest('tr').find('.ServerID')
+                var serverIDDiv = $(this).closest('tr').find('.ServerID');
                 var id = parseInt(serverIDDiv.text());
                 var url = '@Url.Action("Game", "Servers")' + "?serverID=" + id;
                 window.location.href = url;
-            })
+            });
 
 
             $('.clickable-row').hover(function () {
                 $(this).css('cursor', 'pointer');
-                $(this).css('background-color', '#A5A5A5')
+                $(this).css('background-color', '#A5A5A5');
             }, function () {
-                $(this).css('background-color', '')
+                $(this).css('background-color', '');
             });
         };
 
@@ -24,7 +24,7 @@
         }).bind('dynatable:afterUpdate', processingComplete);
 
         function processingComplete(a) {
-            RegisterHandlers()
+            RegisterHandlers();
         };
 
         function myRowWriter(rowIndex, record, columns, cellWriter) {
@@ -42,7 +42,7 @@
 
 
 
-    })
+    });
 </script>
 
 <div id="main-content">
