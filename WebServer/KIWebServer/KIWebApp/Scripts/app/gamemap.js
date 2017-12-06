@@ -85,7 +85,7 @@
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
 
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").append(tooltipspan);
+            $(".mapcontent").first().append(tooltipspan);
 
         });
     }
@@ -123,7 +123,7 @@
             content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
             //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").append(tooltipspan);
+            $(".mapcontent").first().append(tooltipspan);
 
         });
     }
@@ -149,9 +149,9 @@
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/>";
+            content += "Red: " + this.RedUnits + "<br/>";       
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").append(tooltipspan);
+            $(".mapcontent").first().append(tooltipspan);
         });
     }
 
@@ -182,6 +182,7 @@
 
     GameHubProxy.client.UpdateMarkers = function (modelObj) {
         $(modelObj.Depots).each(function (i) {
+            var tooltipid = "tip_depot_content_id_" + this.ID;
             var content = "<strong>" + this.Name + "</strong><br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
@@ -198,12 +199,14 @@
 
             // locate the html content
             var img = $('[data-depotID=' + this.ID + ']');
-            var tipspan = $('#tip_depot_content_id_' + this.ID);
-            img.attr('src', ROOT + this.Image);
-            tipspan.html(content);
+            img.attr('src', ROOT + this.Image);   
+            $('#' + tooltipid).html(content);
+            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
+            //img.tooltipster('content', content);
         });
 
         $(modelObj.CapturePoints).each(function (i) {
+            var tooltipid = "tip_cp_content_id_" + this.ID;
             var content = "<strong>" + this.Name + "</strong><br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
@@ -212,12 +215,15 @@
             content += "Red: " + this.RedUnits + "<br/>";
 
             var img = $('[data-capturepointID=' + this.ID + ']');
-            var tipspan = $('#tip_cp_content_id_' + this.ID);
             img.attr('src', ROOT + this.Image);
-            tipspan.html(content);
+            $('#' + tooltipid).html(content);
+            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
+            //img.append(tooltipspan);
+            //img.tooltipster('content', content);
         });
 
         $(modelObj.Airports).each(function (i) {
+            var tooltipid = "tip_airport_content_id_" + this.ID;
             var content = "<strong>" + this.Name + "</strong><br/>";
             content += "Type: " + this.Type + "<br/>";
             content += "Status: " + this.Status + "<br/>";
@@ -225,14 +231,12 @@
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
 
             var img = $('[data-airportID=' + this.ID + ']');
-            var tipspan = $('#tip_airport_content_id_' + this.ID);
-            img.attr('src', ROOT + this.Image);
-            tipspan.html(content);
-        });
-
-        $('.mrk').tooltipster({
-            theme: 'tooltipster-noir'
-        });    
+            img.attr('src', ROOT + this.Image);    
+            $('#' + tooltipid).html(content);
+            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
+            //img.append(tooltipspan);
+            //img.tooltipster('content', content);
+        });  
     };
 
     GameHubProxy.client.UpdateOnlinePlayers = function (modelObj) {
