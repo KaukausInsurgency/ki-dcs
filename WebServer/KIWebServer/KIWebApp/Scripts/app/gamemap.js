@@ -189,7 +189,6 @@
 
             var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
             res = res.replace(/(?: {2})/g, '');   // clean up the double spaces in the string
-
             res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
             var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
             content += capacity;
@@ -202,6 +201,51 @@
             var tipspan = $('#tip_depot_content_id_' + this.ID);
             img.attr('src', ROOT + this.Image);
             tipspan.html(content);
+        });
+
+        $(modelObj.CapturePoints).each(function (i) {
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+            content += "Blue: " + this.BlueUnits + "<br/>";
+            content += "Red: " + this.RedUnits + "<br/>";
+
+            var img = $('[data-capturepointID=' + this.ID + ']');
+            var tipspan = $('#tip_cp_content_id_' + this.ID);
+            img.attr('src', ROOT + this.Image);
+            tipspan.html(content);
+        });
+
+        $(modelObj.Airports).each(function (i) {
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Type: " + this.Type + "<br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+
+            var img = $('[data-airportID=' + this.ID + ']');
+            var tipspan = $('#tip_airport_content_id_' + this.ID);
+            img.attr('src', ROOT + this.Image);
+            tipspan.html(content);
+        });
+
+        $('.mrk').tooltipster({
+            theme: 'tooltipster-noir'
+        });    
+    };
+
+    GameHubProxy.client.UpdateOnlinePlayers = function (modelObj) {
+        $('.clickable-row').remove();    // clear out the table
+        $(modelObj).each(function (i) {
+            var row = $('<tr class="clickable-row" playerUCID="' + this.UCID + '">\
+                <td><img src="' + ROOT + this.RoleImage + '" />  ' + this.Role + '</td>\
+                <td>' + this.Name + '</td>\
+                <td>' + this.Side + '</td>\
+                <td>' + this.Ping + '</td>\
+                </tr>');
+
+            $('.table > tbody:last-child').append(row); // add row to table
         });
     };
 

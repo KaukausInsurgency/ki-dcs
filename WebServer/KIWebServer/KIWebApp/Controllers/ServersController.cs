@@ -12,33 +12,25 @@ namespace KIWebApp.Controllers
 {
     public class ServersController : Controller
     {
-        private List<GameThreadWorker> _schedulers;
+        private IDAL dal;
 
         public ServersController()
         {
-            _schedulers = new List<GameThreadWorker>();
+            dal = new DAL();
+        }
+
+        public ServersController(IDAL dal)
+        {
+            this.dal = dal;
         }
 
         public ActionResult Index()
         {
-            if (_schedulers != null && _schedulers.Count > 0)
-                _schedulers.Clear();
-
-            IDAL dal;
-            if (true)
-            {
-                dal = new DAL();
-            }
-            else
-            {
-                dal = new MockDAL();
-            }
             return View(dal.GetServers());
         }
 
         public ActionResult Game(int serverID)
         {
-            IDAL dal = new MockDAL();
             return View(dal.GetGame(serverID));
         }
 

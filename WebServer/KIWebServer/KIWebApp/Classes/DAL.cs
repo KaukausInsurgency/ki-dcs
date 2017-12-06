@@ -106,7 +106,7 @@ namespace KIWebApp.Classes
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
-                    Capacity = dr.Field<string>("CurrentCapacity") + " / " + dr.Field<string>("Capacity"),
+                    Capacity = dr.Field<int>("CurrentCapacity") + " / " + dr.Field<int>("Capacity"),
                     Status = dr.Field<string>("Status"),
                     BlueUnits = dr.Field<int>("BlueUnits"),
                     RedUnits = dr.Field<int>("RedUnits"),
@@ -155,7 +155,7 @@ namespace KIWebApp.Classes
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
-                    Capacity = dr.Field<string>("CurrentCapacity") + " / " + dr.Field<string>("Capacity"),
+                    Capacity = dr.Field<int>("CurrentCapacity") + " / " + dr.Field<int>("Capacity"),
                     Status = dr.Field<string>("Status"),
                     Resources = dr.Field<string>("Resources"),
                     Pos = new Position(dr.Field<double>("X"), dr.Field<double>("Y")),
@@ -198,12 +198,26 @@ namespace KIWebApp.Classes
 
             foreach (DataRow dr in dt.Rows)
             {
+                TimeSpan rt;
+                if (dr["RestartTime"] == DBNull.Value || dr["RestartTime"] == null)
+                {
+                    rt = new TimeSpan(0, 0, 0);
+                }
+                else
+                {
+                    rt = new TimeSpan(TimeSpan.TicksPerSecond * dr.Field<int>("RestartTime"));
+                }
+
+                string status = "Offline";
+                if (dr["Status"] != DBNull.Value && dr["Status"] != null)
+                    status = dr.Field<string>("Status");
+
                 g.ServerID = serverID;
                 g.ServerName = dr.Field<string>("ServerName");
                 g.IPAddress = dr.Field<string>("IPAddress");
-                g.OnlinePlayersCount = dr.Field<int>("OnlinePlayerCount");
-                g.RestartTime = new TimeSpan(dr.Field<int>("RestartTime") * TimeSpan.TicksPerSecond).ToString();
-                g.Status = dr.Field<string>("Status");
+                g.OnlinePlayersCount = Convert.ToInt32(dr.Field<long>("OnlinePlayerCount"));
+                g.RestartTime = rt.ToString();
+                g.Status = status;
                 g.Depots = ((IDAL)this).GetDepots(serverID, ref conn);
                 g.CapturePoints = ((IDAL)this).GetCapturePoints(serverID, ref conn);
                 g.OnlinePlayers = ((IDAL)this).GetOnlinePlayers(serverID, ref conn);

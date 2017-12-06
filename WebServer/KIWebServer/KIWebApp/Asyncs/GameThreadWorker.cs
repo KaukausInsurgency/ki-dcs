@@ -27,10 +27,10 @@ namespace KIWebApp.Asyncs
             conn = new MySqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DBMySqlConnect"].ConnectionString);
             conn.Open();
             hub = GlobalHost.ConnectionManager.GetHubContext<KIWebApp.Hubs.GameHub>();
-            dal = new MockDAL();
+            dal = new DAL();
             this.ServerID = serverID;
             timer_update_markers = new System.Threading.Timer(this.UpdateMarkers, null, 0, UPDATE_MARKERS_PERIOD);
-            timer_update_players = new System.Threading.Timer(this.UpdateMarkers, null, 0, UPDATE_PLAYERS_PERIOD);
+            timer_update_players = new System.Threading.Timer(this.UpdatePlayers, null, 0, UPDATE_PLAYERS_PERIOD);
         }
 
         public void Pause()
