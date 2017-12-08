@@ -90,7 +90,8 @@ if IsMockTest then
     end
   end
   lfs = {}
-  lfs.writedir = function() return "C:\\Users\\Sapphire\\Saved Games\\DCS\\" end
+  lfs.writedir = function() return "C:\\Users\\david\\Saved Games\\DCS\\" end
+  lfs.dir = function(path) return function() return nil end end
   DCS = {}
   DCS.Clock = 20
   DCS.getUnitType = function(slotID)
@@ -222,9 +223,13 @@ if IsMockTest then
     
     local loop_count = 3000
     while loop_count > 0 do
-      sleep(5)
+      sleep(0.25)
       DCS.onSimulationFrame()
       loop_count = loop_count - 1
+      if loop_count < 2900 then
+        DCS.getModelTime = function() return nil end
+        DCS.getMissionName = function() return "Randomstuff" end
+      end
     end
   
     DCS.onPlayerDisconnect(1, "Disconnected")
@@ -569,6 +574,16 @@ end
 -- And if the mission name contains Config.MissionName
 KIServer.IsRunning = function()
   if not DCS.isServer() and not DCS.isMultiplayer() then
+    return false
+  end
+  
+  -- Recent BUG in DCS
+  -- Apparently DCS.isServer and DCS.isMultiplayer still return true long after the game has ended
+  -- this happens when starting up a MP Server, shutting it down, then starting up another one
+  -- the isServer and isMultiplayer still return true once it's been shutdown
+  -- this fix here addresses this
+  local modeltime = DCS.getModelTime()
+  if (not modeltime or modeltime <= 0) then
     return false
   end
   
