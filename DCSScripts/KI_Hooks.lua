@@ -379,6 +379,21 @@ KI.Hooks.GameEventHandler = {}
 
 function KI.Hooks.GameEventHandler:onEvent(event)
   env.info("KI.Hooks.GameEventHandler:onEvent(event) called")
+  
+  if event.id == world.event.S_EVENT_MISSION_END then
+      env.info("KI.Hooks.GameEventHandler - Mission End Event raised")
+      -- this has no function, but it is here so that we can unit test this behaviour
+      KI.UT_MISSION_END_CALLED = true
+      
+      -- Save all mission data to file
+      KI.Loader.SaveData() 
+      -- Finish receive/send of data between server mod
+      KI.Scheduled.DataTransmissionPlayers({}, 0)
+      KI.Scheduled.DataTransmissionGeneral({}, 0)
+      KI.Scheduled.DataTransmissionGameEvents({}, 0)
+      return
+  end
+    
   if not event.initiator then return end
   local playerName = nil
   if event.initiator.getPlayerName then
@@ -495,13 +510,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
       end
     end
   elseif event.id == world.event.S_EVENT_MISSION_START then
-    
-  elseif event.id == world.event.S_EVENT_MISSION_END then
-    env.info("KI.Hooks.GameEventHandler - Mission End Event raised")
-    -- Save all mission data to file
-    KI.Loader.SaveData() 
-    -- Finish receive/send of data between server mod
-    KI.Scheduled.DataTransmission({}, 0)
+  
   elseif event.id == world.event.S_EVENT_BIRTH and playerName then
     -- Initialize any radio menu items for the player
     SLC.InitSLCForUnit(event.initiator:getName())

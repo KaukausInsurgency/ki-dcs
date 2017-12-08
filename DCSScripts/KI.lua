@@ -171,8 +171,9 @@ KI.UDPReceiveSocketServerSession:settimeout(10) --receive timer
 trigger.action.setUserFlag("9000", 1) -- Notify Server Mod
 env.info("KI - Waiting to receive signal from Server Mod")
 
-timer.scheduleFunction(function(timer, args)
-    env.info("KI - scheduledfunction (wait for Init Flag) called...")
+timer.scheduleFunction(function(args, t)
+    env.info("KI - scheduledfunction (wait for Init Flag) called...")    
+    
     if trigger.misc.getUserFlag("9000") ~= 1 then
       env.info("KI - Received Signal from SERVER MOD - Initializing KI Mission")
       local _error = ""
@@ -184,7 +185,8 @@ timer.scheduleFunction(function(timer, args)
       end
       return nil
     end
-    return timer + 1
+    return t + 1  
+
 end, {}, timer.getTime() + 5)
 
 

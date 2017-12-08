@@ -98,6 +98,7 @@ assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()
 -- WIP
 
 
