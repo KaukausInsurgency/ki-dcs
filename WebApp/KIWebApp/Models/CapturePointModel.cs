@@ -13,7 +13,7 @@ namespace KIWebApp.Models
         public string LatLong { get; set; }
         public string MGRS { get; set; }
         public string Status { get; set; }
-        public string Capacity { get; set; }
+        public string Resources { get; set; }
         public int BlueUnits { get; set; }
         public int RedUnits { get; set; }
         public Position Pos { get; set; }

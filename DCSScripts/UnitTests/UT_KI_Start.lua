@@ -57,7 +57,7 @@ if not ValidateKIStart() then
 end
 
 
-local path = "C:\\Users\\david\\Documents\\GitHub\\DCS\\KI\\"
+local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 
 env.info("KI - Loading Files")
 assert(loadfile(path .. "Spatial.lua"))()

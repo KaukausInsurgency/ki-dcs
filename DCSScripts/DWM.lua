@@ -11,7 +11,9 @@ DWM =
   Capacity = 0,         -- the maximum capacity the warehouse can hold
   CurrentCapacity = 0,
   IsSupplier = false,   -- whether this depot can resupply other depots
-  Suppliers = {}        -- list of suppliers
+  Suppliers = {},       -- list of suppliers
+  X = 0,                -- DCS pos.z coordinate
+  Y = 0                 -- DCS pos.x coordinate
 }
 
 function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
@@ -35,7 +37,9 @@ function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
   self.MGRS = coordinates:ToStringMGRS()
   self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
-  
+  local vec3 = coordinates:GetVec3()
+  self.X = vec3.z
+  self.Y = vec3.x
   if not capacity then
     capacity = 100
   end
@@ -120,6 +124,14 @@ function DWM:ViewResources()
   msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
   for res, val in pairs(self.Resources) do
     msg = msg .. string.format("%-25s|%-5d", res, val.qty) .. "\n"
+  end
+  return msg
+end
+
+function DWM:GetResourceEncoded()
+  local msg = "Resource|Count\n"
+  for res, val in pairs(self.Resources) do
+    msg = msg .. res .. "|" .. val.qty .. "\n"
   end
   return msg
 end

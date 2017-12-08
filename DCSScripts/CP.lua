@@ -14,7 +14,9 @@ CP =
   LatLong = "",
   MGRS = "",
   Owner = "",
-  SpawnZone = nil       -- zone where units ai units are spawned for attacking
+  SpawnZone = nil,      -- zone where units ai units are spawned for attacking
+  X = 0,                -- DCS pos.z coordinate
+  Y = 0                 -- DCS pos.x coordinate
 }
 
 function CP:New(name, zone, spawnZone)
@@ -34,7 +36,9 @@ function CP:New(name, zone, spawnZone)
   self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
   self.MGRS = coordinates:ToStringMGRS()
   self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
-  
+  local vec3 = coordinates:GetVec3()
+  self.X = vec3.z
+  self.Y = vec3.x
   env.info("CP:New - MGRS(" ..self.MGRS .. ") LatLong(" .. self.LatLong .. ")")
   return self
 end
@@ -78,6 +82,14 @@ function CP:ViewResources()
   msg = msg .. string.format("%-25s|%-5s|%-5s", "Defense", "Count", "limit") .. "\n"
   for res, val in pairs(self.Defenses) do
     msg = msg .. string.format("%-25s|%-5d|%-5d", res, val.qty, val.cap) .. "\n"
+  end
+  return msg
+end
+
+function CP:GetResourceEncoded()
+  local msg = "Type|Fortified|Limit\n"
+  for res, val in pairs(self.Defenses) do
+    msg = msg .. res .. "|" .. val.qty .. "|" .. val.cap .. "\n"
   end
   return msg
 end

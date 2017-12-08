@@ -10,6 +10,9 @@ UT.TestCase("CP", nil, nil,
         return _c
       end
       
+      local _z = ZONE:New("TestCPZone")
+      local _zvec3 = _z:GetVec3(0)
+      
       -- testing constructor
       UT.TestCompare(function() return CP:New("Test CP", "TestCPZone", "TestCPZone") ~= nil end)
       local _cp = CP:New("Test CP", "TestCPZone", "TestCPZone")
@@ -19,6 +22,8 @@ UT.TestCase("CP", nil, nil,
       UT.TestCompare(function() return _cp.SpawnZone.ZoneName == "TestCPZone" end)
       UT.TestCompare(function() return _cp.Defenses ~= nil end)
       UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
+      UT.TestCompare(function() return _cp.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
+      UT.TestCompare(function() return _cp.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
       
       -- testing SetDefenseUnit method
       UT.TestFunction(CP.SetDefenseUnit, _cp, "TestKey", 5)
@@ -37,6 +42,7 @@ UT.TestCase("CP", nil, nil,
       
       -- testing ViewResources method
       UT.TestFunction(CP.ViewResources, _cp)
+      UT.TestFunction(CP.GetResourceEncoded, _cp)
       
       -- testing GetOwnership method
       _cp.BlueUnits = 1
@@ -54,8 +60,12 @@ UT.TestCase("CP", nil, nil,
       
       -- testing SetCoalitionCounts method
       UT.TestFunction(CP.SetCoalitionCounts, _cp, 0, 0)
+      UT.TestCompare(function() return _cp:GetOwnership() == "Neutral" end)
       UT.TestFunction(CP.SetCoalitionCounts, _cp, 1, 0)
+      UT.TestCompare(function() return _cp:GetOwnership() == "Red" end)
       UT.TestFunction(CP.SetCoalitionCounts, _cp, 0, 1)
+      UT.TestCompare(function() return _cp:GetOwnership() == "Blue" end)
       UT.TestFunction(CP.SetCoalitionCounts, _cp, 1, 1)
+      UT.TestCompare(function() return _cp:GetOwnership() == "Contested" end)
     end)
   

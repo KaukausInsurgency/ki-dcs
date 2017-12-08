@@ -57,8 +57,7 @@ CREATE TABLE `capture_point` (
   `red_units` int(11) NOT NULL,
   `latlong` varchar(30) NOT NULL,
   `mgrs` varchar(20) NOT NULL,
-  `current_capacity` int(11) NOT NULL DEFAULT '0',
-  `capacity` int(11) NOT NULL DEFAULT '0',
+  `resources` varchar(900) NOT NULL,
   `x` double NOT NULL DEFAULT '0',
   `y` double NOT NULL DEFAULT '0',
   `image` varchar(132) NOT NULL,
@@ -621,7 +620,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateCapturePoint`(
         IN BlueUnits INT, 
         IN RedUnits INT,
         IN LatLong VARCHAR(30),
-        IN MGRS VARCHAR(20)
+        IN MGRS VARCHAR(20),
+        IN ResourceString VARCHAR(900),
+        IN X DOUBLE,
+        IN Y DOUBLE
 	)
 BEGIN
 	IF ((SELECT EXISTS (SELECT 1 FROM capture_point WHERE capture_point.name = Name AND capture_point.server_id = ServerID)) = 1) THEN
@@ -632,20 +634,19 @@ BEGIN
             capture_point.red_units = RedUnits,
             capture_point.latlong = LatLong,
             capture_point.mgrs = MGRS,
-            capture_point.current_capacity = 0,
-            capture_point.capacity = 4,
-            capture_point.x = 0,
-            capture_point.y = 0,
+            capture_point.resources = ResourceString,
+            capture_point.x = X,
+            capture_point.y = Y,
             capture_point.image = fnc_GetCapturePointImage(BlueUnits, RedUnits)
 		WHERE capture_point.name = Name AND capture_point.server_id = ServerID;
 	ELSE
 		INSERT INTO capture_point 
         (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, 
-         capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.capacity, 
-         capture_point.current_capacity, capture_point.x, capture_point.y, capture_point.image)
+         capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.resources,
+         capture_point.x, capture_point.y, capture_point.image)
         VALUES (ServerID, Name, LatLong, MGRS, 
-				Status, BlueUnits, RedUnits, 4,
-				0, 0, 0, fnc_GetCapturePointImage(BlueUnits, RedUnits));
+				Status, BlueUnits, RedUnits, ResourceString,
+				X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits));
     END IF;
     SELECT 1;
 END ;;
@@ -667,12 +668,15 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateDepot`(
 		IN ServerID INT, 
 		IN Name VARCHAR(128), 
-        IN LatLong VARCHAR(30),
-        IN MGRS VARCHAR(20),
+        IN Status VARCHAR(45),
+        IN ResourceString VARCHAR(900),
         IN CurrentCapacity INT,
         IN Capacity INT,
-        IN ResourceString VARCHAR(900),
-        IN Status VARCHAR(45)
+        IN LatLong VARCHAR(30),
+        IN MGRS VARCHAR(20),
+        IN X DOUBLE,
+        IN Y DOUBLE
+        
 	)
 BEGIN
 	IF ((SELECT EXISTS (SELECT 1 FROM depot WHERE depot.name = Name AND depot.server_id = ServerID)) = 1) THEN
@@ -684,8 +688,8 @@ BEGIN
             depot.capacity = Capacity,
             depot.resources = ResourceString,
 			depot.status = Status,
-            depot.x = 0,
-            depot.y = 0,
+            depot.x = X,
+            depot.y = Y,
             depot.image = fnc_GetDepotImage(Status)
 		WHERE depot.name = Name AND depot.server_id = ServerID;
 	ELSE
@@ -695,7 +699,7 @@ BEGIN
          depot.x, depot.y, depot.image)
         VALUES (ServerID, Name, LatLong, MGRS, 
                 CurrentCapacity, Capacity, ResourceString, Status,
-                0, 0, fnc_GetDepotImage(Status));
+                X, Y, fnc_GetDepotImage(Status));
     END IF;
     SELECT 1;
 END ;;
@@ -1061,8 +1065,7 @@ BEGIN
 			c.name as Name,
             c.latlong as LatLong,
             c.mgrs as MGRS,
-            c.current_capacity as CurrentCapacity,
-            c.capacity as Capacity,
+            c.resources as Resources,
             c.status as Status,
             c.blue_units as BlueUnits,
             c.red_units as RedUnits,
@@ -1255,4 +1258,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-05 23:13:55
+-- Dump completed on 2017-12-07 20:34:41

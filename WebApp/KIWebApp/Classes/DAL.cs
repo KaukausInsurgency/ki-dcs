@@ -106,7 +106,7 @@ namespace KIWebApp.Classes
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
-                    Capacity = dr.Field<int>("CurrentCapacity") + " / " + dr.Field<int>("Capacity"),
+                    Resources = dr.Field<string>("Resources"),
                     Status = dr.Field<string>("Status"),
                     BlueUnits = dr.Field<int>("BlueUnits"),
                     RedUnits = dr.Field<int>("RedUnits"),

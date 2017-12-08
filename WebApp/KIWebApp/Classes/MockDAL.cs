@@ -43,7 +43,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 10,
                 Pos = new Position(751123.5, -125446.28125),
-                Image = "Images/markers/flag-red-256x256.png"
+                Image = "Images/markers/flag-red-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -56,7 +57,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 9,
                 RedUnits = 0,
                 Pos = new Position(801123.5, -150446.28125),
-                Image = "Images/markers/flag-blue-256x256.png"
+                Image = "Images/markers/flag-blue-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -69,7 +71,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 9,
                 RedUnits = 5,
                 Pos = new Position(767123.5, -140426.28125),
-                Image = "Images/markers/flag-contested-256x256.png"
+                Image = "Images/markers/flag-contested-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -82,7 +85,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(807123.5, -220426.28125),
-                Image = "Images/markers/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -95,7 +99,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(823123.5, -140426.28125),
-                Image = "Images/markers/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -108,7 +113,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(817123.5, -190426.28125),
-                Image = "Images/markers/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -121,7 +127,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(857123.5, -220426.28125),
-                Image = "Images/markers/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             cps.Add(new CapturePointModel()
@@ -134,7 +141,8 @@ namespace KIWebApp.Classes
                 BlueUnits = 0,
                 RedUnits = 0,
                 Pos = new Position(774123.5, -220426.28125),
-                Image = "Images/markers/flag-neutral-256x256.png"
+                Image = "Images/markers/flag-neutral-256x256.png",
+                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
             });
 
             return cps;
@@ -151,23 +159,22 @@ namespace KIWebApp.Classes
                 MGRS = "38T MN 64175 82063",
                 Capacity = "79 / 150",
                 Status = "Online",
-                Resources = @"DWM - Beslan Depot
-Depot Capacity: 79 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(840106.5625, -150906.578125),
                 Image = "Images/markers/depot-red-256x256.png"
@@ -181,23 +188,22 @@ APC                      |8
                 MGRS = "38T MN 53104 80881",
                 Capacity = "148 / 150",
                 Status = "Online",
-                Resources = @"DWM - Kirovo Depot
-Depot Capacity: 148 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(829208, -153602),
                 Image = "Images/markers/depot-blue-256x256.png"
@@ -211,23 +217,22 @@ APC                      |8
                 MGRS = "38T MN 65962 82253",
                 Capacity = "148 / 150",
                 Status = "Online",
-                Resources = @"DWM - Beslan Backup Depot
-Depot Capacity: 148 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(841868, -150358.28125),
                 Image = "Images/markers/depot-red-256x256.png"
@@ -241,23 +246,22 @@ APC                      |8
                 MGRS = "38T MN 65962 82253",
                 Capacity = "148 / 150",
                 Status = "Online",
-                Resources = @"DWM - Alagir Depot
-Depot Capacity: 148 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(814918.625, -169069.359375),
                 Image = "Images/markers/depot-red-256x256.png"
@@ -271,23 +275,22 @@ APC                      |8
                 MGRS = "38T MN 65962 82253",
                 Capacity = "148 / 150",
                 Status = "Offline",
-                Resources = @"DWM - Vladikavkaz Depot
-Depot Capacity: 148 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(850409.1875, -168602.5625),
                 Image = "Images/markers/depot-contested-256x256.png"
@@ -301,23 +304,22 @@ APC                      |8
                 MGRS = "38T MN 65962 82253",
                 Capacity = "148 / 150",
                 Status = "Online",
-                Resources = @"DWM - Buron Depot
-Depot Capacity: 148 / 150
-Resource                 |Count
-Infantry                 |40   
-Watchtower Wood          |4    
-Fuel Tanks               |8    
-Outpost Wood             |4    
-Outpost Pipes            |4    
-Power Truck              |4    
-Fuel Truck               |4    
-Cargo Crates             |8    
-Watchtower Supplies      |4    
-Command Truck            |4    
-Tank                     |8    
-Outpost Supplies         |4    
-Ammo Truck               |4    
-APC                      |8    
+                Resources = @"
+Resource|Count
+Infantry|40   
+Watchtower Wood|4    
+Fuel Tanks|8    
+Outpost Wood|4    
+Outpost Pipes|4    
+Power Truck|4    
+Fuel Truck|4    
+Cargo Crates|8    
+Watchtower Supplies|4    
+Command Truck|4    
+Tank|8    
+Outpost Supplies|4    
+Ammo Truck|4    
+APC|8    
 ",
                 Pos = new Position(801123.5, -200446.28125),
                 Image = "Images/markers/depot-blue-256x256.png"

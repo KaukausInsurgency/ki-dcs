@@ -111,14 +111,8 @@
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-
+            content += 'Capacity: ' + this.CurrentCapacity + ' / ' + this.Capacity + '<br/>';   // get the overall capacity
             var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-            res = res.replace(/(?: {2})/g, '');   // clean up the double spaces in the string
-
-            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
-            var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
-            content += capacity;
-            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the capacity from the string
             var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
             content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
             //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
