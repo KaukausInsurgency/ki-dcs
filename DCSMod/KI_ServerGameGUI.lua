@@ -1073,8 +1073,10 @@ KIHooks.onSimulationFrame = function()
       KIServer.TCPSocket.Disconnect()
     end
     KIHooks.Initialized = false
+    KIHooks.FirstTimeInit = true
     KIServer.LastOnFrameTime = 0
     KIServer.LastOnFrameTimeBanCheck = 0
+    KIServer.LastOnFrameTimeInitCheck = 0
     return 
   end
   
