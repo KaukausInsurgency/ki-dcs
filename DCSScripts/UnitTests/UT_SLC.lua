@@ -312,6 +312,7 @@ function()
     UT.TestData.OutpostSupplyCrateObject2 = SLC.SpawnCrate(UT.TestData.PlayerGroup, 
                                               "SLCPilot1", SLC.Config.ComponentTypes.OutpostSupplyCrate)
     
+    -- this should be nil, as it should not be possible to unpack anything
     UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
   end
   
