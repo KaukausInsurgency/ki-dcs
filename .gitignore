@@ -260,3 +260,11 @@ paket-files/
 __pycache__/
 *.pyc
 *.cache
+WebApp/KIWebApp/obj/Debug/KIWebApp.pdb
+WebApp/KIWebApp/obj/Debug/KIWebApp.dll
+WebApp/KIWebApp/obj/Debug/KIWebApp.csproj.FileListAbsolute.txt
+WebApp/KIWebApp/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+WebApp/KIWebApp/bin/KIWebApp.pdb
+WebApp/KIWebApp/bin/KIWebApp.dll
+WebApp/KIWebApp.Tests/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+WebApp/.vs/KIWebServer/v15/Server/sqlite3/storage.ide-wal
