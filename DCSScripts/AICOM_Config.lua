@@ -18,6 +18,7 @@ AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make
 AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
 AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
 AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
+AICOM.Config.AmbushPoints = {}
 
 AICOM.Config.Forces =
 {

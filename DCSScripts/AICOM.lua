@@ -133,6 +133,48 @@ function AICOM.AnalyzePay(action)
 end
 --
 
+-- Segments the analysis array into a logical grouping that the DoTurn can understand and work with
+-- indexes of { 1, {2, (length-1) / 2}, {((length-1) / 2) + 1, length}}
+-- assuming an array of moves of size 11, and a config of 3 moves per turn for the AI
+-- the first move the AI does will always be the highest ranking action to take (index 1)
+-- the second move the AI makes, should be randomly chosen from the middle range (2-5) for example
+-- the third move the AI makes, should be randomly chosen from the high range (6-11) for example
+function AICOM.SegmentAnalysis(movelist, segments)
+  env.info("AICOM.SegmentAnalysis called")
+  if not movelist or not segments then return nil end
+  if #movelist == 0 or segments == 0 then return nil end
+  local length = #movelist
+  
+  -- if the length is less than the number of segments, return nil as this is an invalid call
+  if length < segments then
+    env.info("AICOM.SegmentAnalysis - WARNING - Invalid parameters provided (movelist length is less than segments)")
+    return nil
+  end
+  
+  
+  local segment_range = math.floor((length - 1) / (segments - 1))
+  local remainder = (length - 1) % (segments - 1)
+  local MoveSegments = {}
+  table.insert(MoveSegments, 1)   -- first item in list will always be first index
+  local segment_start_index = 2
+  
+  -- start our loop at 2, since we already have processed index 1
+  for i = 2, segments do
+    local maxindex = 0
+    if remainder == 0 then
+      maxindex = segment_start_index + segment_range - 1
+    else
+      maxindex = segment_start_index + segment_range
+    end
+    if maxindex > length then
+      maxindex = length
+    end
+    table.insert(MoveSegments, { Min = segment_start_index, Max = maxindex})
+    segment_start_index = maxindex + 1
+  end 
+  
+  return MoveSegments
+end
 
 -- attempt to buy AA units with the budget passed in as parameter
 function AICOM.TryBuyAA(budget)
@@ -318,33 +360,34 @@ function AICOM.DoTurn(args, time)
   local _keys = {}
   for k in pairs(_cpAnalysis) do table.insert(_keys, k) end
   table.sort(_keys, function(a, b) return _cpAnalysis[a].Cost < _cpAnalysis[b].Cost end)
-
+  local _moves = AICOM.SegmentAnalysis(_keys, AICOM.Config.InitMoves)
+  
+  if _moves == nil then
+    env.info("AICOM.DoTurn - ERROR - SegmentAnalysis returned nil, cannot process moves for AI - check parameters!")
+    return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
+  end
+  
   -- this loop actually decides and performs the AI Moves
-  for t = 1, AICOM.Config.InitMoves do
+  for t = 1, #_moves do
     local _action = 0
     local _cost = 0
     local _cp = {}
+    local _keyIndex = _moves[t]
+    local _ambushWasDone = false
     
     if t == 1 then
     -- for the first turn, always perform the action that is cheapest from the list
-      _action = _cpAnalysis[_keys[1]].Action
-      _cost = _cpAnalysis[_keys[1]].Cost
-      _cp = _cpAnalysis[_keys[1]].CapturePoint
-    
-    elseif t == 2 then
-    -- for the second turn, pick a random point from the 2nd to 5th cheapest actions in the list
-      local _index = AICOM.Config.Random(2, 5)
-      _action = _cpAnalysis[_keys[_index]].Action
-      _cost = _cpAnalysis[_keys[_index]].Cost
-      _cp = _cpAnalysis[_keys[_index]].CapturePoint
-    elseif t == 3 then
-    -- for the third turn, create a 10% chance it will be an ambush action, otherwise pick an item from the bottom of the Capture List
-      if AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability then 
+      _action = _cpAnalysis[_keys[_keyIndex]].Action
+      _cost = _cpAnalysis[_keys[_keyIndex]].Cost
+      _cp = _cpAnalysis[_keys[_keyIndex]].CapturePoint
+    else
+      if not _ambushWasDone and (AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability) then 
         _cp = AICOM.Config.AmbushPoints[AICOM.Config.Random(#AICOM.Config.AmbushPoints)]
         _cost = 10
         _action = AICOM.Enum.Actions.Ambush
+        _ambushWasDone = true
       else 
-        local _index = AICOM.Config.Random(6, 10)
+        local _index = AICOM.Config.Random(_keyIndex.Min, _keyIndex.Max)
         _action = _cpAnalysis[_keys[_index]].Action
         _cost = _cpAnalysis[_keys[_index]].Cost
         _cp = _cpAnalysis[_keys[_index]].CapturePoint

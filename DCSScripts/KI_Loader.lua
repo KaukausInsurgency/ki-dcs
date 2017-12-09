@@ -138,7 +138,7 @@ function KI.Loader.ExtractStaticData()
     env.info("KI.Loader.ExtractStaticData - Extracting DSMT Static Objects") 
     for i = 1, #KI.Data.ActiveMissions do
       if not KI.Data.ActiveMissions[i].Done and KI.Data.ActiveMissions[i].Resource and KI.Data.ActiveMissions[i].Resource.Statics then
-        env.info("KI.Loader.ExtractStatcData - found active side mission with static object resources")
+        env.info("KI.Loader.ExtractStaticData - found active side mission with static object resources")
         for k = 1, #KI.Data.ActiveMissions[i].Resource.Statics do
           local _staticTable = KI.Loader.GenerateStaticTable(KI.Data.ActiveMissions[i].Resource.Statics[k][1], 
                                                              KI.Data.ActiveMissions[i].Resource.Statics[k][2], "DSMT", false)

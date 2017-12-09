@@ -46,7 +46,7 @@ UT.TestCase("AICOM", nil, nil,
       AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
       AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
       AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
-      AICOM.Config.Random = RandomMockUp
+      AICOM.Config.Random = RandomMockUp  -- inject the random mockup 
       
       AICOM.CurrentMoney = AICOM.Config.InitResource
       AICOM.MovesRemaining = AICOM.Config.InitMoves
@@ -411,8 +411,7 @@ UT.TestCase("AICOM", nil, nil,
       
       
       
-      -- Test 6 - SPAWN
-      
+      -- Test 6 - SPAWN  
       if true then
         -- Spawn some forces to the neutralCP point
 
@@ -453,22 +452,111 @@ UT.TestCase("AICOM", nil, nil,
                 TestMockUpCapturePoints[1]:SetCoalitionCounts(_rcnt, _bcnt)
         -- END SCAN CODE
       
-        env.info("UT_AICOM : Blue Count is " .. tostring(_bcnt))
-        
         UT.TestCompare(function() return moneySpent == 70 end)
         UT.TestCompare(function() return _rcnt == 0 end)
         UT.TestCompare(function() return _bcnt == 11 end) -- TestForceA(1) x 2 + TestForceB(2) + TestForceC(3) + TestForceD(2) + TestForceE(2)
         UT.TestCompare(function() return TestMockUpCapturePoints[1]:GetOwnership() == "Blue" end)
       end
       
-      -- Test 7 - PerformAction
+      -- Test 7 - PerformAction  
+      if true then
+        -- Scenario 1 - Test Attack Action on ContestedCP with 90 Current Money
+        AICOM.CurrentMoney = 90
+        AICOM.MovesRemaining = 1
+        AICOM.PerformAction(AICOM.Enum.Actions.Attack, 0, TestMockUpCapturePoints[4])
+        UT.TestCompare(function() return AICOM.MovesRemaining == 0 end)
+        UT.TestCompare(function() return AICOM.CurrentMoney == -5 end)  -- 35 AA + 65 GND budget - about 95 points are spent
+      end    
       
-      -- Scenario 1 - Test Attack Action on ContestedCP with 90 Current Money
-      AICOM.CurrentMoney = 90
-      AICOM.MovesRemaining = 1
-      AICOM.PerformAction(AICOM.Enum.Actions.Attack, 0, TestMockUpCapturePoints[4])
-      UT.TestCompare(function() return AICOM.MovesRemaining == 0 end)
-      UT.TestCompare(function() return AICOM.CurrentMoney == -5 end)  -- 35 AA + 65 GND budget - about 95 points are spent
+      if true then   
+        -- SegmentAnalysis tests
+        -- Invalid parameters
+        UT.TestCompare(function() return AICOM.SegmentAnalysis(nil, nil) == nil end)        -- parameters nil
+        UT.TestCompare(function() return AICOM.SegmentAnalysis({}, nil) == nil end)
+        UT.TestCompare(function() return AICOM.SegmentAnalysis({}, 1) == nil end)           -- movelist is empty
+        UT.TestCompare(function() return AICOM.SegmentAnalysis({ 1, 2, 3 }, 0) == nil end)  -- segments is 0
+        UT.TestCompare(function() return AICOM.SegmentAnalysis({ 1, 2, 3 }, 4) == nil end)  -- length is less than segments
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1}, 1)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 1 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2}, 1)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 1 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3}, 1)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 1 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3}, 2)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 2 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+          UT.TestCompare(function() return res[2].Min == 2 end)
+          UT.TestCompare(function() return res[2].Max == 3 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, 3)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 3 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+          UT.TestCompare(function() return res[2].Min == 2 end)
+          UT.TestCompare(function() return res[2].Max == 6 end)
+          UT.TestCompare(function() return res[3].Min == 7 end)
+          UT.TestCompare(function() return res[3].Max == 11 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3, 4, 5, 6}, 6)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 6 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+          UT.TestCompare(function() return res[2].Min == 2 end)
+          UT.TestCompare(function() return res[2].Max == 2 end)
+          UT.TestCompare(function() return res[3].Min == 3 end)
+          UT.TestCompare(function() return res[3].Max == 3 end)
+          UT.TestCompare(function() return res[4].Min == 4 end)
+          UT.TestCompare(function() return res[4].Max == 4 end)
+          UT.TestCompare(function() return res[5].Min == 5 end)
+          UT.TestCompare(function() return res[5].Max == 5 end)
+          UT.TestCompare(function() return res[6].Min == 6 end)
+          UT.TestCompare(function() return res[6].Max == 6 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3, 4, 5, 6}, 3)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 3 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+          UT.TestCompare(function() return res[2].Min == 2 end)
+          UT.TestCompare(function() return res[2].Max == 4 end)
+          UT.TestCompare(function() return res[3].Min == 5 end)
+          UT.TestCompare(function() return res[3].Max == 6 end)
+        end
+        
+        if true then
+          local res = AICOM.SegmentAnalysis({1, 2, 3, 4, 5, 6, 7, 8}, 3)
+          UT.TestCompare(function() return res ~= nil end)
+          UT.TestCompare(function() return #res == 3 end)
+          UT.TestCompare(function() return res[1] == 1 end)
+          UT.TestCompare(function() return res[2].Min == 2 end)
+          UT.TestCompare(function() return res[2].Max == 5 end)
+          UT.TestCompare(function() return res[3].Min == 6 end)
+          UT.TestCompare(function() return res[3].Max == 8 end)
+        end
+      end
       
     end)
   
