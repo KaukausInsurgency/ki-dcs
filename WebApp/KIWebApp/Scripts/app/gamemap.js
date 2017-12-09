@@ -25,7 +25,7 @@
             var cellwidth = Math.floor(100 / arraytable[i].length); 
             if (i === 0)
             {
-                tr += '<thead><tr>'
+                tr += '<thead><tr>';
                 for (var j = 0; j < arraytable[i].length; j++) {
                     tr += '<td style="width:' + cellwidth + '%">' + arraytable[i][j] + '</td>';
                 }
@@ -33,13 +33,13 @@
             }
             else
             {
-                tr += '<tr>'
+                tr += '<tr>';
                 for (var j = 0; j < arraytable[i].length; j++) {
                     tr += '<td style="width:' + cellwidth + '%">' + arraytable[i][j] + '</td>';
                 }
                 tr += '</tr>';
             }
-        };
+        }
 
         table += tr + "</tbody></table>";
         return table;

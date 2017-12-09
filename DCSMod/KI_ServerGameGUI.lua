@@ -823,7 +823,7 @@ function KIServer.SendUpdatePlayer(pid)
     Name = pinfo.Name,
     Role = pinfo.Role,
     Lives = pinfo.Lives,
-    Side = 0
+    Side = pinfo.Side or 0
   }
   local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
   
@@ -1431,6 +1431,7 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         or _unitRole == "observer"
     then
       KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
       KIServer.SendUpdatePlayer(player.id)
       return true   -- ignore attempts to slot into non airframe roles
     else
@@ -1439,10 +1440,12 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has no lives, or still waiting to get record from TCP Server")
         net.send_chat_to(PlayerMsg, playerID)
         KIServer.Data.OnlinePlayers[tostring(player.id)].Role = ""
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
         KIServer.SendUpdatePlayer(player.id)
         return false
       else
         KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
         KIServer.SendUpdatePlayer(player.id)
         return true
       end

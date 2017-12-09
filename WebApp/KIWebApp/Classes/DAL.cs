@@ -200,13 +200,9 @@ namespace KIWebApp.Classes
             {
                 TimeSpan rt;
                 if (dr["RestartTime"] == DBNull.Value || dr["RestartTime"] == null)
-                {
                     rt = new TimeSpan(0, 0, 0);
-                }
                 else
-                {
                     rt = new TimeSpan(TimeSpan.TicksPerSecond * dr.Field<int>("RestartTime"));
-                }
 
                 string status = "Offline";
                 if (dr["Status"] != DBNull.Value && dr["Status"] != null)
@@ -365,13 +361,19 @@ namespace KIWebApp.Classes
 
             foreach (DataRow dr in dt.Rows)
             {
+                string Side = "Neutral";
+                if (dr.Field<int>("Side") == 1)
+                    Side = "Red";
+                else if (dr.Field<int>("Side") == 2)
+                    Side = "Blue";
+
                 OnlinePlayerModel player = new OnlinePlayerModel
                 {
                     UCID = dr.Field<string>("UCID"),
                     Name = dr.Field<string>("Name"),
                     Role = dr.Field<string>("Role"),
                     RoleImage = dr.Field<string>("RoleImage"),
-                    Side = dr.Field<int>("Side") == 1 ? "Red" : "Blue",
+                    Side = Side,
                     Ping = dr.Field<string>("Ping")
                 };
                 players.Add(player);
