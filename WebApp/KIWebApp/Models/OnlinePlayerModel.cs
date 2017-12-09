@@ -13,5 +13,6 @@ namespace KIWebApp.Models
         public string RoleImage { get; set; }
         public string Side { get; set; }
         public string Ping { get; set; }
+        public string Lives { get; set; }
     }
 }

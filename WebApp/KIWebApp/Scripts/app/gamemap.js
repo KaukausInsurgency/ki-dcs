@@ -224,6 +224,7 @@
                 <td><img src="' + ROOT + this.RoleImage + '" />  ' + this.Role + '</td>\
                 <td>' + this.Name + '</td>\
                 <td>' + this.Side + '</td>\
+                <td>' + this.Lives + '</td>\
                 <td>' + this.Ping + '</td>\
                 </tr>');
 

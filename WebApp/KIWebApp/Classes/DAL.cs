@@ -367,6 +367,12 @@ namespace KIWebApp.Classes
                 else if (dr.Field<int>("Side") == 2)
                     Side = "Blue";
 
+                string Lives = "";
+                if (dr["Lives"] != DBNull.Value && dr["Lives"] != null)
+                {
+                    Lives = dr.Field<int>("Lives").ToString();
+                }
+
                 OnlinePlayerModel player = new OnlinePlayerModel
                 {
                     UCID = dr.Field<string>("UCID"),
@@ -374,7 +380,8 @@ namespace KIWebApp.Classes
                     Role = dr.Field<string>("Role"),
                     RoleImage = dr.Field<string>("RoleImage"),
                     Side = Side,
-                    Ping = dr.Field<string>("Ping")
+                    Ping = dr.Field<string>("Ping"),
+                    Lives = Lives
                 };
                 players.Add(player);
             }
