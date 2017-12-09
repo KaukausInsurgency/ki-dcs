@@ -103,6 +103,99 @@ function()
   UT.TestData.unitExtract = UT.TestData.groupExtract.Units[1]
   UT.TestData.staticObj = StaticObject.getByName("TestStaticKILoader")
   UT.TestData.cargoObj = StaticObject.getByName("TestCargoKILoader")
+  UT.TestData.depotExtract = 
+  {
+    ['Depots'] = {
+      [1] = {
+        ['Zone'] = {
+          ['Zone'] = {
+            ['point'] = {
+              ['y'] = 0,
+              ['x'] = -150813.71875,
+              ['z'] = 840108.3125,
+            },
+            ['radius'] = 300,
+          },
+          ['ClassName'] = 'ZONE',
+        },
+        ['__index'] = 'table',
+        ['CurrentCapacity'] = 133,
+        ['SupplyCheckRate'] = 7200,
+        ['Object'] = {
+          ['id_'] = 8000995,
+        },
+        ['Capacity'] = 150,
+        ['Resources'] = {
+          ['Infantry'] = {
+            ['cap'] = 1,
+            ['qty'] = 30,
+          },
+          ['Watchtower Wood'] = {
+            ['cap'] = 2,
+            ['qty'] = 3,
+          },
+          ['Fuel Tanks'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Outpost Wood'] = {
+            ['cap'] = 2,
+            ['qty'] = 4,
+          },
+          ['Outpost Pipes'] = {
+            ['cap'] = 3,
+            ['qty'] = 4,
+          },
+          ['Power Truck'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Fuel Truck'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Cargo Crates'] = {
+            ['cap'] = 1,
+            ['qty'] = 8,
+          },
+          ['Watchtower Supplies'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Command Truck'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Tank'] = {
+            ['cap'] = 3,
+            ['qty'] = 8,
+          },
+          ['Outpost Supplies'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['Ammo Truck'] = {
+            ['cap'] = 1,
+            ['qty'] = 4,
+          },
+          ['APC'] = {
+            ['cap'] = 2,
+            ['qty'] = 8,
+          },
+        },
+        ['Suppliers'] = {
+        },
+        ['Y'] = -150813.71875,
+        ['X'] = 840108.3125,
+        ['Name'] = 'Test Depot',
+        ['IsSupplier'] = true,
+        ['MGRS'] = '38T MN 64175 82063',
+        ['LatLong'] = '43 11.430\'N   44 33.547\'E',
+      }
+    }
+  }
+  UT.TestData.Depot = DWM:New("Test Depot", "Test Depot Zone")
+  table.insert(KI.Data.Depots, UT.TestData.Depot)
 end,
 function()
     -- GenerateUnitsTable tests
@@ -179,4 +272,20 @@ function()
     UT.TestCompare(function() return cargoTable["x"] == UT.TestData.cargoObj:getPosition().p.x end)
     UT.TestCompare(function() return cargoTable["Component"] == "SLC" end)
     UT.TestCompare(function() return cargoTable["mass"] == UT.TestData.cargoObj:getCargoWeight() end)
+    
+    
+    -- test DWM Import
+    if true then     
+      KI.Loader.ImportDWM(UT.TestData.depotExtract)
+      UT.TestCompare(function() return UT.TestData.Depot.CurrentCapacity == 133 end)
+      UT.TestCompare(function() return UT.TestData.Depot.Resources["Infantry"].qty == 30 end)
+      UT.TestCompare(function() return UT.TestData.Depot.Resources["Watchtower Wood"].qty == 3 end)
+      UT.TestCompare(function() return UT.TestData.Depot.Resources["Fuel Tanks"].qty == 4 end)
+      UT.TestCompare(function() return UT.TestData.Depot.Resources["Outpost Wood"].qty == 4 end)
+      UT.TestCompare(function() return UT.TestData.Depot.Resources["Outpost Pipes"].qty == 4 end)    
+    end
+    
+end,
+function()
+  KI.Data.Depots = {}
 end)

@@ -308,6 +308,7 @@ function KI.Loader.ImportDWM(data)
       if _depotdata["Name"] == depot.Name then
         env.info("KI.Loader.ImportDWM - updating Depot " .. depot.Name)
         depot.CurrentCapacity = _depotdata["CurrentCapacity"]
+        depot.Resources = _depotdata["Resources"] -- overwrite the existing resources of the depot
       end
     end
   end
@@ -450,11 +451,18 @@ function KI.Loader.LoadData()
       KI.Data.SortieID = _dataTable["SortieID"]
     end
     
-    if not _dataTable["SortieID"] then
-      env.info("KI.Loader.LoadData ERROR - SortieID could not be found in file")
+    if not _dataTable["SpawnID"] then
+      env.info("KI.Loader.LoadData ERROR - SpawnID could not be found in file")
       return false
     else
-      KI.Data.SortieID = _dataTable["SortieID"] -- load the current SortieID saved in memory
+      KI.Data.SpawnID = _dataTable["SpawnID"] -- load the current SortieID saved in memory
+    end
+    
+    if not _dataTable["GameEventFileID"] then
+      env.info("KI.Loader.LoadData ERROR - GameEventFileID could not be found in file")
+      return false
+    else
+      KI.Data.GameEventFileID = _dataTable["GameEventFileID"] -- load the current SortieID saved in memory
     end
     
     
