@@ -4,47 +4,42 @@
         return str.length === 0 || !str.trim();
     }
     // splits a string and converts it into a json object
-    function SplitStringIntoJSON(str, separator)
+    function SplitStringIntoArrayTable(str, separator)
     {
-        var jsonobj = {};
-        var strings = str.split(separator);
-        var key = "";
-        for (var s in strings)
+        var tablearray = [];
+        var rows = str.split("\n");
+        for (var i = 0; i < rows.length; i++)
         {
-            if (IsStringEmptyOrWhitespace(strings[s]))
-                continue;
-
-            if (s % 2 === 0)
-            {
-                jsonobj[strings[s]] = "";
-                key = strings[s];
-            }
-            else
-            {
-                jsonobj[key] = strings[s];
-            }
+            tablearray.push(rows[i].split(separator));
         }
-
-        return jsonobj;
-
+        
+        return tablearray;
     }
 
-    function GenerateTableHTMLString(keypair)
+    function GenerateTableHTMLString(arraytable)
     {
-        var table = '<table>';
+        var table = '<table style="table-layout: fixed; width: 200px;">';
         var tr = "";
-        var i = 0;
-        jQuery.each(keypair, function (name, value) {
+        for (var i = 0; i < arraytable.length; i++)
+        {
+            var cellwidth = Math.floor(100 / arraytable[i].length); 
             if (i === 0)
             {
-                tr += '<thead><tr><td>' + name + '</td><td>' + value + '</td></tr></thead><tbody>';
+                tr += '<thead><tr>'
+                for (var j = 0; j < arraytable[i].length; j++) {
+                    tr += '<td style="width:' + cellwidth + '%">' + arraytable[i][j] + '</td>';
+                }
+                tr += '</tr></thead><tbody>';
             }
             else
             {
-                tr += '<tr><td>' + name + '</td><td>' + value + '</td></tr>';
+                tr += '<tr>'
+                for (var j = 0; j < arraytable[i].length; j++) {
+                    tr += '<td style="width:' + cellwidth + '%">' + arraytable[i][j] + '</td>';
+                }
+                tr += '</tr>';
             }
-            i += 1;
-        });
+        };
 
         table += tr + "</tbody></table>";
         return table;
@@ -111,14 +106,11 @@
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-            content += 'Capacity: ' + this.CurrentCapacity + ' / ' + this.Capacity + '<br/>';   // get the overall capacity
-            var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-            var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
-            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
-            //content += this.Resources.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+            content += 'Capacity: ' + this.Capacity + '<br/>';   // get the overall capacity
+            var arraytable = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
+            content += GenerateTableHTMLString(arraytable);                      // generate the html table from the json object
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").first().append(tooltipspan);
-
         });
     }
 
@@ -141,9 +133,11 @@
             var content = "<strong>" + this.Name + "</strong><br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/>";       
+            content += "Red: " + this.RedUnits + "<br/><br/>";       
+            var arraytable = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
+            content += GenerateTableHTMLString(arraytable);                      // generate the html table from the json object
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").first().append(tooltipspan);
         });
@@ -163,15 +157,10 @@
         });      
     }
 
-        
-    
-
     RenderMapFirstTime(model, ROOT);
-
 
     // setup signalR
     $.connection.hub.logging = true;
-
     var GameHubProxy = $.connection.gameHub;    // apparently first letter is lowercase (signalr converts this)
 
     GameHubProxy.client.UpdateMarkers = function (modelObj) {
@@ -181,15 +170,9 @@
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-
-            var res = this.Resources.replace(/(?:\r\n|\r|\n)/g, '|');
-            res = res.replace(/(?: {2})/g, '');   // clean up the double spaces in the string
-            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the first part from the string (We dont need to show 'DWM - Depot')
-            var capacity = res.substring(0, res.indexOf("|")) + '<br/>';   // get the overall capacity
-            content += capacity;
-            res = res.substring(res.indexOf("|") + 1, res.length);  // remove the capacity from the string
-            var json_resources = SplitStringIntoJSON(res, "|");     // now we convert this string into a json object    
-            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
+            content += 'Capacity: ' + this.Capacity + '<br/>';   // get the overall capacity
+            var json_resources = SplitStringIntoArrayTable(this.Resources, "|");       // now we convert this string into a json object    
+            content += GenerateTableHTMLString(json_resources);                         // generate the html table from the json object
 
             // locate the html content
             var img = $('[data-depotID=' + this.ID + ']');
@@ -204,10 +187,11 @@
             var content = "<strong>" + this.Name + "</strong><br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/>";
-
+            content += "Red: " + this.RedUnits + "<br/><br/>";
+            var json_resources = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
+            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
             var img = $('[data-capturepointID=' + this.ID + ']');
             img.attr('src', ROOT + this.Image);
             $('#' + tooltipid).html(content);
