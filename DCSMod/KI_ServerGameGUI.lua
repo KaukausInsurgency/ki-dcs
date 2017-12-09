@@ -823,7 +823,8 @@ function KIServer.SendUpdatePlayer(pid)
     Name = pinfo.Name,
     Role = pinfo.Role,
     Lives = pinfo.Lives,
-    Side = pinfo.Side or 0
+    Side = pinfo.Side or 0,
+    Ping = pinfo.Ping or 0
   }
   local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
   
@@ -1282,7 +1283,8 @@ KIHooks.onPlayerConnect = function(playerID)
     Role = "", 
     Lives = KIServer.Null,        -- intentially setting this to nil here - will be updated once we get player record back from db
     Banned = false,
-    SortieID = KIServer.Null
+    SortieID = KIServer.Null,
+    Ping = player.ping or 0
   }
   KIServer.Data.OnlinePlayersUCIDHash[player.ucid] = player.id
   
@@ -1432,6 +1434,7 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
     then
       KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
       KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Ping = player.ping or 0
       KIServer.SendUpdatePlayer(player.id)
       return true   -- ignore attempts to slot into non airframe roles
     else
@@ -1441,11 +1444,13 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
         net.send_chat_to(PlayerMsg, playerID)
         KIServer.Data.OnlinePlayers[tostring(player.id)].Role = ""
         KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Ping = player.ping or 0
         KIServer.SendUpdatePlayer(player.id)
         return false
       else
         KIServer.Data.OnlinePlayers[tostring(player.id)].Role = _unitRole
         KIServer.Data.OnlinePlayers[tostring(player.id)].Side = side
+        KIServer.Data.OnlinePlayers[tostring(player.id)].Ping = player.ping or 0
         KIServer.SendUpdatePlayer(player.id)
         return true
       end
