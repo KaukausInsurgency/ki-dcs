@@ -285,7 +285,7 @@ KIServer.LastOnFrameTime = 0
 KIServer.LastOnFrameTimeBanCheck = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
 KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\GameEvents"
-KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
+KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the TCP Server call will fail
 KIServer.Flag = 9000              -- this flag is set when the GAME is ready to receive SessionID and ServerID
 KIServer.Config = {}
 
@@ -335,8 +335,8 @@ function KIServer.RequestServerID()
   local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestServer, false, { ServerName = KIServer.Config.ServerName })
   local result = false
   
-  if KIServer.TCPSocket.SendUntilComplete(request, 3) then
-    local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(30))
+  if KIServer.TCPSocket.SendUntilComplete(request, 10) then
+    local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(10))
     if response and response.Result then
       KIServer.Data.ServerID = response.Data[1]
       result = true
@@ -344,18 +344,18 @@ function KIServer.RequestServerID()
       net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
       result = false
     else
-      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM TCP Server")
       result = false
     end
   else
-    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO TCP Server")
     result = false
   end
 
   return result
 end
 
--- sends message to database asking for a new session to be generated - SessionID is returned from DB
+-- sends message to TCP Server asking for a new session to be generated - SessionID is returned from DB
 function KIServer.RequestNewSession()
   net.log("KIServer.RequestNewSession called")
   
@@ -369,8 +369,8 @@ function KIServer.RequestNewSession()
   local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID, RealTimeStart = DCS.getRealTime() })
   local result = false
   
-  if KIServer.TCPSocket.SendUntilComplete(request, 30) then
-    local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(30))
+  if KIServer.TCPSocket.SendUntilComplete(request, 10) then
+    local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(10))
     if response and response.Result then
       KIServer.Data.SessionID = response.Data[1]
       result = true
@@ -378,11 +378,11 @@ function KIServer.RequestNewSession()
       net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
       result = false
     else
-      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      net.log("KIServer.RequestNewSession - FATAL ERROR - NO RESPONSE RECEIVED FROM TCP Server")
       result = false
     end
   else
-    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    net.log("KIServer.RequestNewSession - FATAL ERROR - FAILED TO SEND REQUEST TO TCP Server")
     result = false
   end
   
@@ -421,11 +421,11 @@ function KIServer.RequestEndSession()
       net.log("KIServer.RequestEndSession - TRANSACTION ERROR - " .. response.Error)
       result = false
     else
-      net.log("KIServer.RequestEndSession - FATAL ERROR - NO RESPONSE RECEIVED FROM DATABASE")
+      net.log("KIServer.RequestEndSession - FATAL ERROR - NO RESPONSE RECEIVED FROM TCP Server")
       result = false
     end
   else
-    net.log("KIServer.RequestEndSession - FATAL ERROR - FAILED TO SEND REQUEST TO DATABASE")
+    net.log("KIServer.RequestEndSession - FATAL ERROR - FAILED TO SEND REQUEST TO TCP Server")
     result = false
   end
   
@@ -531,7 +531,7 @@ local function InitKIServerConfig()
     KIServer.Config.MissionName = "Kaukasus Insurgency"
     KIServer.Config.DataRefreshRate = 5   -- how often should the server check the UDP Socket to update its data in memory
     KIServer.Config.BanCheckRate = 300 -- how often should the server send request for banlist from TCP Server
-    KIServer.Config.InitCheckRate = 5  -- how often should the server try to contact the database for session if it failed first time
+    KIServer.Config.InitCheckRate = 5  -- how often should the server try to contact the TCP Server for session if it failed first time
     KIServer.Config.TCPCheckReceiveRate = 5 -- how often the server should try to receive data from TCP Server
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
@@ -959,6 +959,7 @@ end
 
 
 function KIServer.TCPSocket.ReceiveUntilComplete(timeout)
+  net.log("KIServer.TCPSocket.ReceiveUntilComplete called")
   if timeout then
     KIServer.TCPSocket.Object:settimeout(timeout)
   else
@@ -1024,6 +1025,7 @@ end
 KIHooks = {}
 KIHooks.Initialized = false
 KIHooks.FirstTimeInit = true
+KIHooks.RetryDBConnectionAttempts = 3
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
   if not KIServer.IsRunning() then 
@@ -1074,6 +1076,7 @@ KIHooks.onSimulationFrame = function()
     end
     KIHooks.Initialized = false
     KIHooks.FirstTimeInit = true
+    KIHooks.RetryDBConnectionAttempts = 3
     KIServer.LastOnFrameTime = 0
     KIServer.LastOnFrameTimeBanCheck = 0
     KIServer.LastOnFrameTimeInitCheck = 0
@@ -1092,15 +1095,22 @@ KIHooks.onSimulationFrame = function()
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
   -- if the first call to initialize fails - we'll wait every few seconds before attempting it again
   if DCS.getModelTime() > 0 and not KIHooks.Initialized and 
-     (KIHooks.FirstTimeInit or ElapsedTimeInit >= KIServer.Config.InitCheckRate) then
+     (KIHooks.FirstTimeInit or ElapsedTimeInit >= KIServer.Config.InitCheckRate)
+     and KIHooks.RetryDBConnectionAttempts > 0 then
     KIServer.LastOnFrameTimeInitCheck = DCS.getModelTime()
     
+    -- If the mission has sent the signal, continue processing
     if KIServer.GetFlagValue(KIServer.Flag) == 1 then
       KIHooks.FirstTimeInit = false
       net.log("KIServer Init - Requesting Session Data")
-      if KIServer.RequestServerID() then
+      
+      if KIServer.Data.ServerID == KIServer.Null then
+        if not KIServer.RequestServerID() then
+          KIHooks.RetryDBConnectionAttempts = KIHooks.RetryDBConnectionAttempts - 1
+        end
+      else
         if KIServer.RequestNewSession() then
-          net.log("KIServer Init - Successful retreive of ServerID and SessionID from Database")
+          net.log("KIServer Init - Successful retreive of ServerID and SessionID from TCP Server")
           KIHooks.Initialized = true
           local msgdata = KIServer.JSON:encode({ ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID}) .. KIServer.SocketDelimiter
           socket.try(KIServer.UDPSendSocket:sendto(msgdata, "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT))
@@ -1109,7 +1119,13 @@ KIHooks.onSimulationFrame = function()
           KIServer.SetFlagValue(KIServer.Flag, 2) -- notify the Game that the server has sent the data and it can attempt to receive it
           net.log("KIServer Init - Set Flag to '2'")
           KIHooks.onPlayerConnect(1)  -- raise this event to force the server player connection to happen
+        else
+          KIHooks.RetryDBConnectionAttempts = KIHooks.RetryDBConnectionAttempts - 1
         end
+      end
+      
+      if KIHooks.RetryDBConnectionAttempts == 0 then
+        net.log("KIServer FATAL ERROR - COULD NOT CONNECT TO TCP Server - KIServer will now terminate")
       end
     end
   end
@@ -1168,7 +1184,7 @@ end
 
 
 
--- This handler is here to block players from joining the server, before the server has finished loading (and receiving session data from the database)
+-- This handler is here to block players from joining the server, before the server has finished loading (and receiving session data from the TCP Server)
 KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID) --> true | false, "disconnect reason"
   -- do not block if KI is not running
   if not KIServer.IsRunning() then return true end
@@ -1177,7 +1193,7 @@ KIHooks.onPlayerTryConnect = function(addr, name, ucid, playerID) --> true | fal
   -- and the playerID is not the server player itself
   -- block the connection with the message that the mission is still loading
   if not KIHooks.Initialized and playerID ~= KIServer.Config.ServerPlayerID then 
-    net.log("KIHooks.onPlayerTryConnect - a player attempted to connect to the server before data was received from the database - dropping connection")
+    net.log("KIHooks.onPlayerTryConnect - a player attempted to connect to the server before data was received from the TCP Server - dropping connection")
     return false, "The mission has not finished loading" 
   end
   
@@ -1221,7 +1237,7 @@ KIHooks.onPlayerConnect = function(playerID)
   net.log("KIHooks.onPlayerConnect(player: " .. player.name .. ", id: " .. playerID .. ")")
   
   
-  -- Try to send the connection event to the Database, or backup the request if it fails
+  -- Try to send the connection event to the TCP Server, or backup the request if it fails
   if true then
     local ServerEvent = 
     {
@@ -1236,7 +1252,7 @@ KIHooks.onPlayerConnect = function(playerID)
       RealTime = DCS.getRealTime()
     }
     
-    -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+    -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
     -- this should prevent any blocking on our end and keep the server from lagging out
     local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
     
@@ -1258,7 +1274,7 @@ KIHooks.onPlayerConnect = function(playerID)
   
   
   -- add an entry into OnlinePlayers 
-  -- since we're not sure how many lives this player has, we will set the value to -1 to indicate we are waiting to fetch data from database
+  -- since we're not sure how many lives this player has, we will set the value to -1 to indicate we are waiting to fetch data from TCP Server
   KIServer.Data.OnlinePlayers[tostring(player.id)] = 
   { 
     UCID = player.ucid, 
@@ -1273,7 +1289,7 @@ KIHooks.onPlayerConnect = function(playerID)
   -- add this player into the pending player list so that we can obtain the results from DB later
   KIServer.Data.PendingPlayerInfoQueue[player.ucid] = player.id
   
-  -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+  -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
   -- this should prevent any blocking on our end and keep the server from lagging out
   if true then
     local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.GetOrAddPlayer, false, { UCID = player.ucid, Name = player.name })
@@ -1336,11 +1352,11 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
       RealTime = DCS.getRealTime(),
     }
     
-    -- Lets pre-emptively invoke a TCP Send request to the database now, and pick up the results later in the main loop
+    -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
     -- this should prevent any blocking on our end and keep the server from lagging out
     local request1 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
     
-    -- do not update the player lives if they are NULL, we do not want to cause an invalid state in the database
+    -- do not update the player lives if they are NULL, we do not want to cause an invalid state in the TCP Server
     if pinfo.Lives ~= KIServer.Null then
       local UpdatePlayerReq =
       {
@@ -1420,7 +1436,7 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
     else
       local IsNoLives, PlayerMsg = KIServer.IsPlayerOutOfLives(player.ucid)
       if IsNoLives then
-        net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has no lives, or still waiting to get record from database")
+        net.log("KIHooks.onPlayerTryChangeSlot - Player '" .. _playerName .. "' has no lives, or still waiting to get record from TCP Server")
         net.send_chat_to(PlayerMsg, playerID)
         KIServer.Data.OnlinePlayers[tostring(player.id)].Role = ""
         KIServer.SendUpdatePlayer(player.id)
