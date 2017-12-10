@@ -90,6 +90,7 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
       end
     else
       env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
+      _cp:Unfortify("Infantry", 1)
       return true
     end
   else

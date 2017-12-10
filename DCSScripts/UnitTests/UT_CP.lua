@@ -40,6 +40,23 @@ UT.TestCase("CP", nil, nil,
       UT.TestFunction(CP.Fortify, _cp, "TestKey", 22)
       UT.TestCompareOnce(function() return _cp:Fortify("TestKey", 22) == false end)
       
+      -- testing Unfortify method
+      if true then
+        UT.TestFunction(CP.SetDefenseUnit, _cp, "MockKey", 5)
+        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 25)   -- this should just set qty to 0
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 0 end)      
+        UT.TestFunction(CP.Fortify, _cp, "MockKey", 5)
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 5 end)  -- checking to ensure no side effects to Unfortify
+        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 1)
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 4 end)
+        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 1)
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 3 end)
+        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 2)
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 1 end)
+        UT.TestFunction(CP.Unfortify, _cp, "MockKey", -1)                       -- checking that negative numbers dont cause any wierd issues
+        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 1 end)
+      end
+      
       -- testing ViewResources method
       UT.TestFunction(CP.ViewResources, _cp)
       UT.TestFunction(CP.GetResourceEncoded, _cp)

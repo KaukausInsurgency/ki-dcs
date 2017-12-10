@@ -76,6 +76,30 @@ function CP:Fortify(resource, count)
   trigger.action.outText(msg, 10)
   return result
 end
+
+function CP:Unfortify(resource, count)
+  env.info("CP.Unfortify called")
+  if count < 1 then 
+    return false
+  end
+  local msg = ""
+  local result = false
+  if self.Defenses[resource] then
+    local _dqty = self.Defenses[resource].qty
+    local _cap = self.Defenses[resource].cap
+    -- if the capture point has enough capacity to reinforce, allow it
+    _dqty = _dqty - count
+    if _dqty < 0 then
+      _dqty = 0
+    end
+    self.Defenses[resource] = { qty = _dqty, cap = _cap } 
+    msg = resource .. " was removed from " .. self.Name .. "! (Capacity: " .. tostring(_dqty) .. " / " .. tostring(_cap) .. ")"
+  else
+    msg = "Capture Point cannot be unfortified with this type of unit!"
+  end
+  trigger.action.outText(msg, 10)
+  return result
+end
   
 function CP:ViewResources()
   local msg = "CP - " .. self.Name .. "\n"

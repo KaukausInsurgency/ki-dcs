@@ -143,7 +143,7 @@ local function StartKI()
   KI.Init.SideMissions()
   SLC.InitSLCRadioItemsForUnits()
   AICOM.Init()
-  KI.Loader.LoadData()
+  KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
   env.info("KI - Data Loaded")
   
   timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)
