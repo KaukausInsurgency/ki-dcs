@@ -1,3 +1,38 @@
+
+if true then
+function DebugDump(o)
+  if type(o) == 'table' then
+    local s = '{ '
+    for k,v in pairs(o) do  
+      if k == "__index" then 
+        s = s .. '"' .. k .. '" = "table"'
+      else
+        if type(k) ~= 'number' then k = '"'..k..'"' end
+        s = s .. '['..k..'] = ' .. DebugDump(v) .. ','
+      end
+    end
+    return s .. '} '
+  else
+    return tostring(o)
+  end
+end
+
+  local grp = GROUP:FindByName("WPGrp")
+  --grp:TaskRouteToZone(ZONE:New("Beslan Depot Zone"), true, 20, "Column")
+  local rte = grp:GetTaskRoute()
+  local wps = grp:GetWayPoints()
+  env.info("DUMPING CONTROLLABLE TABLE RESULTS")
+  env.info(DebugDump(rte))
+  env.info(DebugDump(wps))
+end
+
+
+
+if 1 == 1 then
+  return
+end
+
+
 local bd = StaticObject.getByName("Beslan Depot"):getPoint()
 env.info(bd.z .. "," .. bd.x)
 bd = StaticObject.getByName("Beslan Backup Depot"):getPoint()
