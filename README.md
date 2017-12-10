@@ -9,9 +9,9 @@ Tools Needed:
 
 Exploring the Code
 
-/DCSMissions : Contains the .miz files that are used inside DCS (*.miz)
-/DCSMod      : Server Side Mod that manages player accounts, connections, and TCP Traffic (*.lua)
-/DCSScripts  : Core lua scripts that make the KI mission possible inside DCS (*.lua)
-/SQL         : Contains the Schema of the database + mock data (*.sql)
-/TCPServer   : Visual Studio Solution for TCP Server (*.cs)
-/WebApp      : ASP.NET MVC Web Site (*.cs, *.js)
+1. /DCSMissions : Contains the .miz files that are used inside DCS (*.miz)
+2. /DCSMod      : Server Side Mod that manages player accounts, connections, and TCP Traffic (*.lua)
+3. /DCSScripts  : Core lua scripts that make the KI mission possible inside DCS (*.lua)
+4. /SQL         : Contains the Schema of the database + mock data (*.sql)
+5. /TCPServer   : Visual Studio Solution for TCP Server (*.cs)
+6. /WebApp      : ASP.NET MVC Web Site (*.cs, *.js)
