@@ -76,6 +76,7 @@ end
 
 -- extracts key information about the coalitions groups and packs it into a simple table for serialization and file write
 function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
+  env.info("KI.Loader.ExtractCoalitionGroupData called")
   for i, gp in pairs(coalition.getGroups(side, category)) do
     if gp:isExist() then
       local _group = 
@@ -269,6 +270,7 @@ function KI.Loader.ImportCapturePoints(data)
         _cp.RedUnits = _s["RedUnits"]
         _cp.BlueUnits = _s["BlueUnits"]
         _cp.Owner = _s["Owner"]
+        _cp.Defenses = _s["Defenses"]
         break
       end
       

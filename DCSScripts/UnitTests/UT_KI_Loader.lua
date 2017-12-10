@@ -195,7 +195,24 @@ function()
     }
   }
   UT.TestData.Depot = DWM:New("Test Depot", "Test Depot Zone")
+  UT.TestData.CapturePoint = CP:New("Test CP", "TestCPZone", "TestCPZone")
   table.insert(KI.Data.Depots, UT.TestData.Depot)
+  table.insert(KI.Data.CapturePoints, UT.TestData.CapturePoint)
+  UT.TestData.cpExtract =
+  {
+    ['CapturePoints'] = {
+      [1] = {
+        ['Name'] = 'Test CP',
+        ['Defenses'] = {
+          ['Infantry'] = { ['cap'] = 10, ['qty'] = 1},
+          ['Vehicles'] = { ['cap'] = 4, ['qty'] = 2}
+        },
+        ['RedUnits'] = 10,
+        ['BlueUnits'] = 0,
+        ['Owner'] = "Red"
+      }
+    }
+  }
 end,
 function()
     -- GenerateUnitsTable tests
@@ -283,6 +300,19 @@ function()
       UT.TestCompare(function() return UT.TestData.Depot.Resources["Fuel Tanks"].qty == 4 end)
       UT.TestCompare(function() return UT.TestData.Depot.Resources["Outpost Wood"].qty == 4 end)
       UT.TestCompare(function() return UT.TestData.Depot.Resources["Outpost Pipes"].qty == 4 end)    
+    end
+    
+    
+    -- test CP Import
+    if true then
+      KI.Loader.ImportCapturePoints(UT.TestData.cpExtract)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.RedUnits == 10 end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.BlueUnits == 0 end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.Owner == "Red" end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Infantry"].qty == 1 end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Infantry"].cap == 10 end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Vehicles"].qty == 2 end)
+      UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Vehicles"].cap == 4 end)    
     end
     
 end,

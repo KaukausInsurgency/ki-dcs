@@ -39,7 +39,7 @@ KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(5)
 KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
 
 -- path to saved game file
-KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
+KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_UT_Entities.lua"
 
 -- path to saved scores file
 KI.Config.PathScores = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Scores.lua"
