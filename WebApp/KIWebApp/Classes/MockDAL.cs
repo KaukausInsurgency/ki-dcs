@@ -23,7 +23,6 @@ namespace KIWebApp.Classes
                 Depots = ((IDAL)this).GetDepots(serverID),
                 CapturePoints = ((IDAL)this).GetCapturePoints(serverID),
                 OnlinePlayers = ((IDAL)this).GetOnlinePlayers(serverID),
-                Airports = ((IDAL)this).GetAirports(serverID),
                 Map = ((IDAL)this).GetGameMap(serverID)
             };
             return g;
@@ -465,69 +464,12 @@ APC|8
             return layers;
         }
 
-        List<AirportModel> IDAL.GetAirports(int serverID)
-        {
-            List<AirportModel> airports = new List<AirportModel>
-            {
-                new AirportModel()
-                {
-                    ID = 1,
-                    Name = "Beslan Airport",
-                    LatLong = "43 11.537'N   44 34.866'E",
-                    MGRS = "38T MN 65962 82253",
-                    Status = "Online",
-                    Type = "AIRPORT",
-                    Pos = new Position(803123.5, -170446.28125),
-                    Image = "Images/markers/airport-red-200x200.png"
-                },
-
-                new AirportModel()
-                {
-                    ID = 2,
-                    Name = "FARP Elburs",
-                    LatLong = "43 11.537'N   44 34.866'E",
-                    MGRS = "38T MN 65962 82253",
-                    Status = "Online",
-                    Type = "FARP",
-                    Pos = new Position(853123.5, -170446.28125),
-                    Image = "Images/markers/farp-red-200x200.png"
-                },
-
-                new AirportModel()
-                {
-                    ID = 3,
-                    Name = "FARP Timoor",
-                    LatLong = "43 11.537'N   44 34.866'E",
-                    MGRS = "38T MN 65962 82253",
-                    Status = "Online",
-                    Type = "FARP",
-                    Pos = new Position(873123.5, -160446.28125),
-                    Image = "Images/markers/farp-blue-200x200.png"
-                },
-
-                new AirportModel()
-                {
-                    ID = 4,
-                    Name = "FARP Timoor",
-                    LatLong = "43 11.537'N   44 34.866'E",
-                    MGRS = "38T MN 65962 82253",
-                    Status = "Online",
-                    Type = "AIRPORT",
-                    Pos = new Position(893123.5, -140446.28125),
-                    Image = "Images/markers/airport-blue-200x200.png"
-                }
-            };
-
-            return airports;
-        }
-
         MarkerViewModel IDAL.GetMarkers(int serverID)
         {
             MarkerViewModel mm = new MarkerViewModel()
             {
                 Depots = ((IDAL)this).GetDepots(serverID),
-                CapturePoints = ((IDAL)this).GetCapturePoints(serverID),
-                Airports = ((IDAL)this).GetAirports(serverID)
+                CapturePoints = ((IDAL)this).GetCapturePoints(serverID)
             };
 
             return mm;
@@ -566,11 +508,6 @@ APC|8
         GameModel IDAL.GetGame(int serverID, ref MySqlConnection conn)
         {
             return ((IDAL)this).GetGame(serverID);
-        }
-
-        List<AirportModel> IDAL.GetAirports(int serverID, ref MySqlConnection conn)
-        {
-            return ((IDAL)this).GetAirports(serverID);
         }
 
         MarkerViewModel IDAL.GetMarkers(int serverID, ref MySqlConnection conn)

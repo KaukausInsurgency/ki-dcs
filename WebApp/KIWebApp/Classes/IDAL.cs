@@ -22,8 +22,6 @@ namespace KIWebApp.Classes
         GameMapModel GetGameMap(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         GameModel GetGame(int serverID);
         GameModel GetGame(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
-        List<AirportModel> GetAirports(int serverID);
-        List<AirportModel> GetAirports(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         MarkerViewModel GetMarkers(int serverID);
         MarkerViewModel GetMarkers(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
     }

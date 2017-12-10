@@ -57,34 +57,6 @@
         return imagepoint;
     }
 
-    function RenderAirportsFirstTime(modelObj, rootImgPath) {
-        $(modelObj.Airports).each(function (i) {
-            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
-            var Img = rootImgPath + this.Image;
-            var tooltipid = "tip_airport_content_id_" + this.ID;
-            var id_attribute = 'data-airportID="' + this.ID + '"';
-            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
-                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
-            dot.css({
-                position: 'absolute',
-                left: ImagePoint.x + "px",
-                top: ImagePoint.y + "px"
-            });
-            $(".mapcontent").append(dot);
-
-            // Render the tooltip contents
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Type: " + this.Type + "<br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-
-            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").first().append(tooltipspan);
-
-        });
-    }
-
     function RenderDepotsFirstTime(modelObj, rootImgPath)
     {
         $(modelObj.Depots).each(function (i) {
@@ -131,6 +103,7 @@
             $(".mapcontent").append(dot);
 
             var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Type: " + this.Type + "<br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
@@ -148,7 +121,6 @@
         var headingcontent = $("<h2>Server: " + modelObj.ServerName + "</h2></br><h><b>Status: " + modelObj.Status + "</b></h></br><h><b>Restarts In: " + modelObj.RestartTime + "</b></h>");
         $("#Heading").append(headingcontent);
 
-        RenderAirportsFirstTime(modelObj, rootImgPath);
         RenderDepotsFirstTime(modelObj, rootImgPath);
         RenderCapturePointsFirstTime(modelObj, rootImgPath);
 
@@ -185,6 +157,7 @@
         $(modelObj.CapturePoints).each(function (i) {
             var tooltipid = "tip_cp_content_id_" + this.ID;
             var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Type: " + this.Type + "<br/>";
             content += "Status: " + this.Status + "<br/>";
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
@@ -199,22 +172,6 @@
             //img.append(tooltipspan);
             //img.tooltipster('content', content);
         });
-
-        $(modelObj.Airports).each(function (i) {
-            var tooltipid = "tip_airport_content_id_" + this.ID;
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Type: " + this.Type + "<br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-
-            var img = $('[data-airportID=' + this.ID + ']');
-            img.attr('src', ROOT + this.Image);    
-            $('#' + tooltipid).html(content);
-            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
-            //img.append(tooltipspan);
-            //img.tooltipster('content', content);
-        });  
     };
 
     GameHubProxy.client.UpdateOnlinePlayers = function (modelObj) {

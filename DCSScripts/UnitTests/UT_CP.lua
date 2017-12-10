@@ -1,6 +1,9 @@
 -- Unit Tests for Capture Point Class
 
-UT.TestCase("CP", nil, nil,
+UT.TestCase("CP", 
+  function()
+    UT.ValidateSetup(function() return ZONE:New("TestCPZone") ~= nil end)  -- zone must exist in ME
+  end, nil,
     function()
       local function count_hash(hash)
         local _c = 0
@@ -20,10 +23,11 @@ UT.TestCase("CP", nil, nil,
       UT.TestCompare(function() return _cp.Name == "Test CP" end)
       UT.TestCompare(function() return _cp.Zone.ZoneName == "TestCPZone" end)
       UT.TestCompare(function() return _cp.SpawnZone.ZoneName == "TestCPZone" end)
+      UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
       UT.TestCompare(function() return _cp.Defenses ~= nil end)
       UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
-      UT.TestCompare(function() return _cp.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-      UT.TestCompare(function() return _cp.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
+      UT.TestCompare(function() return _cp.Position.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
+      UT.TestCompare(function() return _cp.Position.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
       
       -- testing SetDefenseUnit method
       UT.TestFunction(CP.SetDefenseUnit, _cp, "TestKey", 5)

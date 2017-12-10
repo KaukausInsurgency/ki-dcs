@@ -6,20 +6,19 @@ Author: Igneous01
 ]]--
 CP = 
 {
+  Enum = { CAPTUREPOINT = "CAPTUREPOINT", AIRPORT = "AIRPORT", FARP = "FARP"},
   Defenses = {},        -- map based on key["DefenseType"] = [qty, cap]
+  Type = "",             -- the type of capture point
   Name = "",            -- name of the capture zone in mission editor
   Zone = nil,           -- Mission Editor Trigger Zone
   BlueUnits = 0,
   RedUnits = 0,
-  LatLong = "",
-  MGRS = "",
   Owner = "",
   SpawnZone = nil,      -- zone where units ai units are spawned for attacking
-  X = 0,                -- DCS pos.z coordinate
-  Y = 0                 -- DCS pos.x coordinate
+  Position = {}
 }
 
-function CP:New(name, zone, spawnZone)
+function CP:New(name, zone, spawnZone, type)
   env.info("CP:New called")
   local self = KI.Toolbox.DeepCopy(CP)
 
@@ -31,15 +30,8 @@ function CP:New(name, zone, spawnZone)
   self.Name = name
   self.Zone = ZONE:New(zone)
   self.SpawnZone = ZONE:New(spawnZone)
-  local coordinates = self.Zone:GetCoordinate()
-  self.LatLong = coordinates:ToStringLLDDM()
-  self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
-  self.MGRS = coordinates:ToStringMGRS()
-  self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
-  local vec3 = coordinates:GetVec3()
-  self.X = vec3.z
-  self.Y = vec3.x
-  env.info("CP:New - MGRS(" ..self.MGRS .. ") LatLong(" .. self.LatLong .. ")")
+  self.Type = type or CP.Enum.CAPTUREPOINT
+  self.Position = LOCPOS:NewFromZone(self.Zone)
   return self
 end
 

@@ -26,8 +26,8 @@ UT.TestCase("DWM", nil, nil,
       UT.TestCompare(function() return _d.CurrentCapacity == 0 end)
       UT.TestCompare(function() return _d.IsSupplier == false end)
       UT.TestCompare(function() return _d.SupplyCheckRate == 600 end)
-      UT.TestCompare(function() return _d.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-      UT.TestCompare(function() return _d.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
+      UT.TestCompare(function() return _d.Position.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
+      UT.TestCompare(function() return _d.Position.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
       
       -- testing SetResource method
       UT.TestFunction(DWM.SetResource, _d, "Infantry", 30, 1)

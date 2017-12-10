@@ -15,7 +15,6 @@ namespace KIWebApp.Models
         public int OnlinePlayersCount { get; set; }
         public List<DepotModel> Depots { get; set; }
         public List<CapturePointModel> CapturePoints { get; set; }
-        public List<AirportModel> Airports { get; set; }
         public List<OnlinePlayerModel> OnlinePlayers { get; set; }
         public GameMapModel Map { get; set; }
 

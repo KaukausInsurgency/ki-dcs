@@ -9,6 +9,5 @@ namespace KIWebApp.Models
     {
         public List<DepotModel> Depots { get; set; }
         public List<CapturePointModel> CapturePoints { get; set; }
-        public List<AirportModel> Airports { get; set; }
     }
 }

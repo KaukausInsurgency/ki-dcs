@@ -62,6 +62,7 @@ local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 env.info("KI - Loading Files")
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
+assert(loadfile(path .. "LOCPOS.lua"))()
 assert(loadfile(path .. "GC.lua"))()
 assert(loadfile(path .. "UnitTests\\SLC_Config_UT.lua"))()
 assert(loadfile(path .. "SLC.lua"))()
@@ -87,6 +88,7 @@ env.info("KI - Loading Tests")
 assert(loadfile(path .. "UnitTests\\UT.lua"))()
 
 -- IMPLEMENTED UNIT TESTS
+assert(loadfile(path .. "UnitTests\\UT_LOCPOS.lua"))
 assert(loadfile(path .. "UnitTests\\UT_CP.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DSMT.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DWM.lua"))()
@@ -99,16 +101,14 @@ assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()
--- WIP
+assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
 
 
 -- TO BE IMPLEMENTED
-
-
 --assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
---assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
---assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
---assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
+
 
 
 -- End the test

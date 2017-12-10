@@ -9,6 +9,7 @@ namespace KIWebApp.Models
     public class CapturePointModel
     {
         public int ID { get; set; }
+        public string Type { get; set; }
         public string Name { get; set; }
         public string LatLong { get; set; }
         public string MGRS { get; set; }

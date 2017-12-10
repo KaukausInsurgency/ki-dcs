@@ -15,7 +15,6 @@ namespace KIWebApp.Classes
         private const string SP_GET_ONLINEPLAYERS = "websp_GetOnlinePlayers";
         private const string SP_GET_GAMEMAP = "websp_GetGameMap";
         private const string SP_GET_LAYERS = "websp_GetGameMapLayers";
-        private const string SP_GET_AIRPORTS = "websp_GetAirports";
         private const string SP_GET_DEPOTS= "websp_GetDepots";
         private const string SP_GET_CAPTUREPOINTS = "websp_GetCapturePoints";
         private const string SP_GET_GAME = "websp_GetGame";
@@ -24,51 +23,6 @@ namespace KIWebApp.Classes
         public DAL()
         {
             _DBConnection = System.Configuration.ConfigurationManager.ConnectionStrings["DBMySqlConnect"].ConnectionString;
-        }
-
-        List<AirportModel> IDAL.GetAirports(int serverID)
-        {
-            MySqlConnection conn = new MySqlConnection(_DBConnection);
-            try
-            {
-                conn.Open();
-                return ((IDAL)this).GetAirports(serverID, ref conn);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
-
-        List<AirportModel> IDAL.GetAirports(int serverID, ref MySqlConnection conn)
-        {
-            if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
-                conn.Open();
-            List<AirportModel> airports = new List<AirportModel>();
-            MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_GET_AIRPORTS);
-            cmd.Connection = conn;
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(new MySqlParameter("ServerID", serverID));
-            MySqlDataReader rdr = cmd.ExecuteReader();
-            DataTable dt = new DataTable();
-            dt.Load(rdr);
-
-            foreach (DataRow dr in dt.Rows)
-            {
-                AirportModel port = new AirportModel
-                {
-                    ID = dr.Field<int>("AirportID"),
-                    Name = dr.Field<string>("Name"),
-                    LatLong = dr.Field<string>("LatLong"),
-                    MGRS = dr.Field<string>("MGRS"),           
-                    Status = dr.Field<string>("Status"),
-                    Type = dr.Field<string>("Type"),
-                    Pos = new Position(dr.Field<double>("X"), dr.Field<double>("Y")),
-                    Image = dr.Field<string>("ImagePath")
-                };
-                airports.Add(port);
-            }
-            return airports;
         }
 
         List<CapturePointModel> IDAL.GetCapturePoints(int serverID)
@@ -103,6 +57,7 @@ namespace KIWebApp.Classes
                 CapturePointModel capturepoint = new CapturePointModel
                 {
                     ID = dr.Field<int>("CapturePointID"),
+                    Type = dr.Field<string>("Type"),
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
@@ -217,7 +172,6 @@ namespace KIWebApp.Classes
                 g.Depots = ((IDAL)this).GetDepots(serverID, ref conn);
                 g.CapturePoints = ((IDAL)this).GetCapturePoints(serverID, ref conn);
                 g.OnlinePlayers = ((IDAL)this).GetOnlinePlayers(serverID, ref conn);
-                g.Airports = ((IDAL)this).GetAirports(serverID, ref conn);
                 g.Map = ((IDAL)this).GetGameMap(serverID, ref conn);
                 break;
             }
@@ -323,7 +277,6 @@ namespace KIWebApp.Classes
             {
                 Depots = ((IDAL)this).GetDepots(serverID, ref conn),
                 CapturePoints = ((IDAL)this).GetCapturePoints(serverID, ref conn),
-                Airports = ((IDAL)this).GetAirports(serverID, ref conn)
             };
 
             return mm;

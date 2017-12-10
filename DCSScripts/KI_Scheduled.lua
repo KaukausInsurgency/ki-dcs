@@ -201,14 +201,15 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       { 
         ServerID = KI.Data.ServerID, 
         Name = KI.Data.CapturePoints[i].Name,
+        Type = KI.Data.CapturePoints[i].Type,
         Status = KI.Data.CapturePoints[i]:GetOwnership(),
         BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
-        RedUnits = KI.Data.CapturePoints[i].RedUnits,
-        LatLong = KI.Data.CapturePoints[i].LatLong,
-        MGRS = KI.Data.CapturePoints[i].MGRS,
+        RedUnits = KI.Data.CapturePoints[i].RedUnits,    
         ResourceString = KI.Data.CapturePoints[i]:GetResourceEncoded(),
-        X = KI.Data.CapturePoints[i].X,
-        Y = KI.Data.CapturePoints[i].Y
+        LatLong = KI.Data.CapturePoints[i].Position.LatLong,
+        MGRS = KI.Data.CapturePoints[i].Position.MGRS,
+        X = KI.Data.CapturePoints[i].Position.X,
+        Y = KI.Data.CapturePoints[i].Position.Y
       }
       table.insert(CapturePointSegments[index], data)
     end
@@ -234,10 +235,10 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         ResourceString = KI.Data.Depots[i]:GetResourceEncoded(),
         CurrentCapacity = KI.Data.Depots[i].CurrentCapacity,
         Capacity = KI.Data.Depots[i].Capacity,
-        LatLong = KI.Data.Depots[i].LatLong,
-        MGRS = KI.Data.Depots[i].MGRS,
-        X = KI.Data.Depots[i].X,
-        Y = KI.Data.Depots[i].Y
+        LatLong = KI.Data.Depots[i].Position.LatLong,
+        MGRS = KI.Data.Depots[i].Position.MGRS,
+        X = KI.Data.Depots[i].Position.X,
+        Y = KI.Data.Depots[i].Position.Y
       }
       table.insert(DepotSegments[index], data)
     end

@@ -236,7 +236,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Hubs\GameHub.cs" />
-    <Compile Include="Models\AirportModel.cs" />
     <Compile Include="Models\CapturePointModel.cs" />
     <Compile Include="Models\DepotModel.cs" />
     <Compile Include="Models\GameModel.cs" />
