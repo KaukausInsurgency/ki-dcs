@@ -1409,7 +1409,7 @@ end
 -- 2) Checking if player has enough lives to continue with the swap
 KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
   net.log("KIHooks.onPlayerTryChangeSlot() called")
-  if (KIServer.IsRunning() and KIHooks.Initialized) and (side ~= 0 and slotID ~= '' and slotID ~= nil) then
+  if (KIServer.IsRunning() and KIHooks.Initialized) and slotID ~= nil then
     
     -- ignore when the server is changing slots
     --if playerID == KIServer.Config.ServerPlayerID then
@@ -1423,6 +1423,14 @@ KIHooks.onPlayerTryChangeSlot = function(playerID, side, slotID)
 
     net.log("KIHooks.onPlayerTryChangeSlot - Player Selected slot - player: " 
             .. _playerName .. " side:" .. side .. " slot: " .. slotID .. " ucid: " .. player.ucid)
+    
+    if slotID == '' or slotID == nil then
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Role = "Spectator"
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Side = 0
+      KIServer.Data.OnlinePlayers[tostring(player.id)].Ping = player.ping or 0
+      KIServer.SendUpdatePlayer(player.id)
+      return true
+    end
 
     local _unitRole = DCS.getUnitType(slotID)
     if _unitRole == nil then return true end
