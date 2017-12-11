@@ -284,7 +284,13 @@ function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
                           :OnSpawnGroup(function( spawngrp, atkzone ) 
                             env.info("AICOM.Spawn - OnSpawnGroup called (AA)")
-                            spawngrp:TaskRouteToZone(atkzone, true, 40, "Off Road" )
+                            local vec2 = atkzone:GetRandomVec2()
+                            env.info("AICOM.Spawn vec2: Group " .. spawngrp.GroupName .. " {x = " .. vec2.x .. ", y = " .. vec2.y .. "}")
+                            spawngrp:TaskRouteToVec2(vec2, 20, "Off Road")
+                            if AICOM.Config.OnSpawnGroup then
+                              env.info("AICOM.Spawn - callback found")
+                              AICOM.Config.OnSpawnGroup(spawngrp, vec2)
+                            end
                           end, CPObj.Zone)
       local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then
@@ -306,7 +312,13 @@ function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
       local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
                           :OnSpawnGroup(function( spawngrp, atkzone ) 
                             env.info("AICOM.Spawn - OnSpawnGroup called (GND)")
-                            spawngrp:TaskRouteToZone(atkzone, true, 40, "Off Road" )
+                            local vec2 = atkzone:GetRandomVec2()
+                            env.info("AICOM.Spawn vec2: Group " .. spawngrp.GroupName .. " {x = " .. vec2.x .. ", y = " .. vec2.y .. "}")
+                            spawngrp:TaskRouteToVec2(vec2, 20, "Off Road")
+                            if AICOM.Config.OnSpawnGroup then
+                              env.info("AICOM.Spawn - callback found")
+                              AICOM.Config.OnSpawnGroup(spawngrp, vec2)
+                            end
                           end, CPObj.Zone)
       local NewGroup = SpawnObj:SpawnInZone(CPObj.SpawnZone, true)
       if NewGroup ~= nil then

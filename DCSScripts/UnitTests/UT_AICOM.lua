@@ -558,5 +558,38 @@ UT.TestCase("AICOM", nil, nil,
         end
       end
       
+      
+      
+      -- This code cannot be tested
+      -- the MOOSE:SPAWN:OnSpawnGroup handler is deferred execution
+      -- This handler will be invoked after the unit tests have finished running, making it impossible to check here
+      -- testing Custom Call back
+      --[[
+      if true then
+        WAS_CALLBACK_CALLED = false
+      
+        AICOM.Config.OnSpawnGroup = function(moosegrp, vec3)
+          env.info("UNIT TEST AICOM.Config.OnSpawnGroup called...")
+          WAS_CALLBACK_CALLED = true
+          UT.TestData.CallBackGroup = moosegrp
+          
+          UT.TestCompare(function() return moosegrp ~= nil end)
+          UT.TestCompare(function() return moosegrp.GroupName ~= nil end)
+          UT.TestCompare(function() return vec3 ~= nil end)
+          UT.TestCompare(function() return vec3.x ~= nil end)
+          UT.TestCompare(function() return vec3.y ~= nil end)
+          UT.TestCompare(function() return vec3.z ~= nil end)      
+        end
+        
+        local moneySpent = AICOM.Spawn({AICOM.Config.Forces[1]}, {}, TestMockUpCapturePoints[1])     
+        UT.TestCompare(function() return WAS_CALLBACK_CALLED end)
+      end   
+      --]]
+    end,
+    function()
+      WAS_CALLBACK_CALLED = nil
+      if UT.TestData.CallBackGroup then
+        UT.TestData.CallBackGroup:Destroy()    
+      end
     end)
   

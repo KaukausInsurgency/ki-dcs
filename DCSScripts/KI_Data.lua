@@ -1,9 +1,7 @@
 KI.Data = 
 {
   CapturePoints = {},
-  FARPZones = {},
   Depots = {},
-  FOBZones = {},
   SideMissions = {},
   ActiveMissions = {},
   Templates = 
@@ -28,7 +26,8 @@ KI.Data =
   SortieID = 0,
   SessionID = KI.Null,
   ServerID = KI.Null,
-  GameEventFileID = 0
+  GameEventFileID = 0,
+  Waypoints = {}
 }
 
 

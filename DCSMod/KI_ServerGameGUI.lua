@@ -366,7 +366,11 @@ function KIServer.RequestNewSession()
     end
   end
   
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID, RealTimeStart = DCS.getRealTime() })
+  if KIServer.Config.RefreshMissionData then
+    net.log("KIServer.RequestNewSession - WARNING - RefreshMissionData is enabled - please turn this off in KIServerConfig.lua when running a live server")
+  end
+  
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID, RealTimeStart = DCS.getRealTime(), RefreshMissionData = KIServer.Config.RefreshMissionData })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 10) then
@@ -504,6 +508,7 @@ local function InitKIServerConfig()
   local _config, _error = KIServer.ReadFileJSON(KIServer.ConfigFileDirectory)
   if _config then
     net.log("InitKIServerConfig() - Reading From Config File")
+    KIServer.Config.RefreshMissionData = _config["RefreshMissionData"]
     KIServer.Config.MissionName = _config["MissionName"]
     KIServer.Config.DataRefreshRate = _config["DataRefreshRate"]
     KIServer.Config.BanCheckRate = _config["BanCheckRate"]
@@ -528,6 +533,12 @@ local function InitKIServerConfig()
   
   if UseDefaultConfig then
     net.log("InitKIServerConfig() - There was a problem reading from an existing config - using default settings")
+    -- RefreshMissionData - this setting determines whether the database should delete all 
+    -- [capture_point, depot] records and reload new ones each time a session is created 
+    -- this will cause issues with SignalR temporarily and will involve refreshing the game page so that the new IDs are referenced on the page
+    -- Do this only when you are testing adding new locations on the map and testing the results of that work
+    -- This setting should be turned OFF in live environment
+    KIServer.Config.RefreshMissionData = false        
     KIServer.Config.MissionName = "Kaukasus Insurgency"
     KIServer.Config.DataRefreshRate = 5   -- how often should the server check the UDP Socket to update its data in memory
     KIServer.Config.BanCheckRate = 300 -- how often should the server send request for banlist from TCP Server

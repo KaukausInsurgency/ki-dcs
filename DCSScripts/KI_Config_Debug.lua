@@ -44,7 +44,7 @@ KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(5)
 KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
 
 -- path to saved game file
-KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
+KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities_DEBUG.lua"
 
 -- path to gameevents file
 KI.Config.PathGameEvents = lfs.writedir() .. KI.Config.ParentFolder .. "GameEvents"
@@ -86,26 +86,9 @@ KI.Config.Templates =
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone = "Beslan Airport Spawn Zone", type = "AIRPORT" },
-  { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone = "Spawn Zone B", type = "AIRPORT" },
-  
-  { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone = "Vladikavkaz City Spawn Zone", type = "FARP" },
-  { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone = "Spawn Zone C", type = "FARP" },
-  
-  { name = "Zamankul City", zone = "Zamankul Zone", spawnzone = "Zamankul Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Chikola City", zone = "Chikola City Zone", spawnzone = "Chikola City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Tskhinvali City", zone = "Tskhinvali City Zone", spawnzone = "Tskhinvali City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Java Village", zone = "Java Zone", spawnzone = "Java Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Mizur Village", zone = "Mizur Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Buron Village", zone = "Buron Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Alagir City", zone = "Alagir City Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Vladikavkaz City", zone = "Vladikavkaz City Zone", spawnzone = "Vladikavkaz City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Beslan City", zone = "Beslan City Zone", spawnzone = "Beslan City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Digora City", zone = "Digora City Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Kirovo City", zone = "Kirovo City Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Kazbegi Village", zone = "Kazbegi Zone", spawnzone = "Spawn Zone A", type = "CAPTUREPOINT" },
-  { name = "Garbani Village", zone = "Garbani Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Zhemtala Village", zone = "Zhemtala Zone", spawnzone = "Spawn Zone B", type = "CAPTUREPOINT" }
+  { name = "Beslan Airport", zone = "BeslanAirportZone", spawnzone = "BeslanAirportSpawnZone", type = "AIRPORT" },  
+  { name = "Beslan City", zone = "BeslanCityZone", spawnzone = "BeslanCitySpawnZone", type = "CAPTUREPOINT" },
+  { name = "Kirovo City", zone = "KirovoCityZone", spawnzone = "KirovoCitySpawnZone", type = "CAPTUREPOINT" },
 }
 
 -- configures side missions and their properties

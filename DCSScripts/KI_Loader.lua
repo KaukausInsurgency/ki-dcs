@@ -202,13 +202,37 @@ function KI.Loader.ImportCoalitionGroups(data)
     local _g = data["GroundGroups"][i]
     -- check if the group has size > 0 and ignore if it does
     if _g["Size"] > 0 and #_g["Units"] > 0 then
+      -- if the name does not match a template name, continue processing
       if not string.match(_g["Name"], "Template") then
         local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g))
+        
+        -- if the group is spawned successfully
         if _newg ~= nil then
           env.info("KI.Loader.ImportCoalitionGroups Newly Spawned Group created -- " .. _newg:getName())
+          local vec2 = KI.Data.Waypoints[_newg:getName()]
+          if vec2 then
+            env.info("KI.Loader.ImportCoalitionGroups - found waypoints for group " .. _newg:getName())   
+            local moosegrp = GROUP:Find(_newg)
+            local grpvec2 = moosegrp:GetVec2()
+            env.info("AICOM.Spawn vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", y = " .. grpvec2.y .. "}")
+            env.info("AICOM.Spawn vec2: Waypoint {x = " .. vec2.x .. ", y = " .. vec2.y .. "}")
+            local distance = Spatial.Distance(vec2, grpvec2)
+            env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " distance to waypoint - " .. tostring(distance))
+            if distance > 100 then
+              env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " is still enroute to this waypoint - tasking")
+              moosegrp:TaskRouteToVec2(vec2, 40, "Off Road")
+            else
+              env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " has completed this waypoint - ignoring")
+              KI.Data.Waypoints[_newg:getName()] = nil  -- remove the group from the hash
+            end
+          else
+            env.info("KI.Loader.ImportCoalitionGroups - no waypoints found for group " .. _newg:getName())
+          end
+          
         else
           env.info("KI.Loader.ImportCoalitionGroups ERROR failed to spawn group")
         end
+        
       else
         env.info("KI.Loader.ImportCoalitionGroups - Template group found, ignoring")
       end
@@ -413,6 +437,13 @@ function KI.Loader.LoadData()
   if _data then
     env.info("KI.Loader.LoadData - file load successful")
     local _dataTable = _data()
+    
+    if not _dataTable["Waypoints"] then
+      env.info("KI.Loader.LoadData ERROR - Data.Waypoints is nil")
+      return false
+    else
+      KI.Data.Waypoints = _dataTable["Waypoints"]
+    end
     
     -- spawn in ground units
     if not KI.Loader.ImportCoalitionGroups(_dataTable) then

@@ -1,5 +1,5 @@
 if not KI then
-  KI = {}
+  KI = { UTDATA = {} }
 end
 
 local function ValidateKIStart()
@@ -137,6 +137,7 @@ local function StartKI()
   --================= START OF INIT ================
   SLC.Config.PreOnRadioAction = KI.Hooks.SLCPreOnRadioAction
   SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
+  AICOM.Config.OnSpawnGroup = KI.Hooks.AICOMOnSpawnGroup
   --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
   GC.OnDespawn = KI.Hooks.GCOnDespawn
   KI.Init.Depots()

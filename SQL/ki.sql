@@ -18,30 +18,6 @@ USE `ki`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `airport`
---
-
-DROP TABLE IF EXISTS `airport`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `airport` (
-  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
-  `server_id` int(11) NOT NULL,
-  `name` varchar(125) NOT NULL,
-  `latlong` varchar(30) NOT NULL,
-  `mgrs` varchar(20) NOT NULL,
-  `status` varchar(45) NOT NULL,
-  `type` varchar(7) NOT NULL,
-  `x` double NOT NULL DEFAULT '0',
-  `y` double NOT NULL DEFAULT '0',
-  `image` varchar(132) NOT NULL,
-  PRIMARY KEY (`airport_id`),
-  KEY `fk_server_airport_idx` (`server_id`),
-  CONSTRAINT `fk_server_airport` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `capture_point`
 --
 
@@ -51,6 +27,7 @@ DROP TABLE IF EXISTS `capture_point`;
 CREATE TABLE `capture_point` (
   `capture_point_id` int(11) NOT NULL AUTO_INCREMENT,
   `server_id` int(11) NOT NULL,
+  `type` varchar(12) NOT NULL DEFAULT 'CAPTUREPOINT',
   `name` varchar(128) NOT NULL,
   `status` varchar(15) NOT NULL,
   `blue_units` int(11) NOT NULL,
@@ -64,7 +41,7 @@ CREATE TABLE `capture_point` (
   PRIMARY KEY (`capture_point_id`),
   KEY `FK_CP_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_CP_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,7 +67,7 @@ CREATE TABLE `depot` (
   PRIMARY KEY (`depot_id`),
   KEY `FK_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,7 +186,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -245,7 +222,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=826 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=959 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -297,7 +274,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=387 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=447 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,17 +337,40 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetCapturePointImage`(BlueUnits INT, RedUnits INT) RETURNS varchar(132) CHARSET utf8
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetCapturePointImage`(BlueUnits INT, RedUnits INT, Type VARCHAR(12)) RETURNS varchar(132) CHARSET utf8
 BEGIN
+	DECLARE ImgPath VARCHAR(15);
+    DECLARE ImgType VARCHAR(7);
+    DECLARE ImgRes VARCHAR(7);
+	DECLARE ImgStatus VARCHAR(9);
+    
+    SET ImgPath = "Images/markers/";
+   
+	IF (Type = "CAPTUREPOINT") THEN
+		SET ImgType = "flag";
+        SET ImgRes = "256x256";
+	ELSEIF (Type = "AIRPORT") THEN
+		SET ImgType = "airport";
+        SET ImgRes = "200x200";
+	ELSEIF (Type = "FARP") THEN
+		SET ImgType = "farp";
+        SET ImgRes = "200x200";
+	ELSE 
+		SET ImgType = "flag";
+        SET ImgRes = "256x256";
+	END IF;
+    
 	IF (BlueUnits = 0 AND RedUnits = 0) THEN
-		RETURN "Images/markers/flag-neutral-256x256.png";
+		SET ImgStatus = "neutral";
 	ELSEIF (BlueUnits > 0 AND RedUnits > 0) THEN
-		RETURN "Images/markers/flag-contested-256x256.png";
+		SET ImgStatus = "contested";
 	ELSEIF (BlueUnits > 0) THEN
-		RETURN "Images/markers/flag-blue-256x256.png";
+		SET ImgStatus = "blue";
 	ELSEIF (RedUnits > 0) THEN
-		RETURN "Images/markers/flag-red-256x256.png";
+		SET ImgStatus = "red";
     END IF;
+    
+    RETURN CONCAT(ImgPath, ImgType, "-", ImgStatus, "-", ImgRes, ".png");
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -555,54 +555,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `AddOrUpdateAirport` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateAirport`(
-		IN ServerID INT, 
-		IN Name VARCHAR(128), 
-        IN LatLong VARCHAR(30),
-        IN MGRS VARCHAR(20),
-        IN Status VARCHAR(45),
-        IN Type VARCHAR(7),
-        IN X DOUBLE,
-        IN Y DOUBLE
-	)
-BEGIN
-	IF ((SELECT EXISTS (SELECT 1 FROM airport WHERE airport.name = Name AND airport.server_id = ServerID)) = 1) THEN
-		UPDATE airport
-        SET airport.name = Name,
-			airport.latlong = LatLong,
-            airport.mgrs = MGRS,
-			airport.status = Status,
-            airport.type = Type,
-            airport.x = X,
-            airport.y = Y,
-            airport.image = fnc_GetAirportImage(Type, Status)
-		WHERE airport.name = Name AND airport.server_id = ServerID;
-	ELSE
-		INSERT INTO airport 
-        (airport.server_id, airport.name, airport.latlong, airport.mgrs, 
-         airport.status, airport.type, airport.x, airport.y,
-         airport.image)
-        VALUES (ServerID, Name, LatLong, MGRS, 
-                Status, Type, X, Y,
-                fnc_GetAirportImage(Type, Status));
-    END IF;
-    SELECT 1;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `AddOrUpdateCapturePoint` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -616,6 +568,7 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateCapturePoint`(
 		IN ServerID INT, 
 		IN Name VARCHAR(128), 
+        IN Type VARCHAR(12),
         IN Status VARCHAR(15), 
         IN BlueUnits INT, 
         IN RedUnits INT,
@@ -629,6 +582,7 @@ BEGIN
 	IF ((SELECT EXISTS (SELECT 1 FROM capture_point WHERE capture_point.name = Name AND capture_point.server_id = ServerID)) = 1) THEN
 		UPDATE capture_point
         SET capture_point.name = Name,
+			capture_point.type = Type,
 			capture_point.status = Status,
             capture_point.blue_units = BlueUnits,
             capture_point.red_units = RedUnits,
@@ -637,16 +591,16 @@ BEGIN
             capture_point.resources = ResourceString,
             capture_point.x = X,
             capture_point.y = Y,
-            capture_point.image = fnc_GetCapturePointImage(BlueUnits, RedUnits)
+            capture_point.image = fnc_GetCapturePointImage(BlueUnits, RedUnits, Type)
 		WHERE capture_point.name = Name AND capture_point.server_id = ServerID;
 	ELSE
 		INSERT INTO capture_point 
         (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, 
          capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.resources,
-         capture_point.x, capture_point.y, capture_point.image)
+         capture_point.x, capture_point.y, capture_point.image, capture_point.type)
         VALUES (ServerID, Name, LatLong, MGRS, 
 				Status, BlueUnits, RedUnits, ResourceString,
-				X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits));
+				X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits, Type), Type);
     END IF;
     SELECT 1;
 END ;;
@@ -742,9 +696,14 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateSession`(
 		ServerID INT,
-        RealTimeStart BIGINT
+        RealTimeStart BIGINT,
+        RefreshMissionData BOOL
     )
 BEGIN
+	IF RefreshMissionData THEN
+		DELETE FROM capture_point WHERE server_id = ServerID;
+        DELETE FROM depot WHERE server_id = ServerID;
+	END IF;
 	DELETE FROM online_players WHERE server_id = ServerID;
 	INSERT INTO session (server_id, start, real_time_start)
     VALUES (ServerID, NOW(), RealTimeStart);
@@ -1002,7 +961,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdatePlayer`(
     Name VARCHAR(128),
     Role VARCHAR(45),
     Lives INT,
-    Side INT
+    Side INT,
+    Ping INT
 )
 BEGIN
 	UPDATE player
@@ -1010,39 +970,10 @@ BEGIN
     WHERE player.ucid = UCID;
     
     UPDATE online_players
-    SET online_players.role = Role, online_players.side = Side
+    SET online_players.role = Role, online_players.side = Side, online_players.ping = Ping
     WHERE online_players.server_id = ServerID AND online_players.ucid = UCID;
     
     SELECT UCID;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `websp_GetAirports` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `websp_GetAirports`(ServerID INT)
-BEGIN
-	SELECT  a.airport_id as AirportID,
-			a.name as Name,
-            a.latlong as LatLong,
-            a.mgrs as MGRS,
-            a.status as Status,
-            a.type as Type,
-            a.x as X,
-            a.y as Y,
-			a.image as ImagePath
-	FROM airport a
-    WHERE a.server_id = ServerID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1062,6 +993,7 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `websp_GetCapturePoints`(ServerID INT)
 BEGIN
 	SELECT  c.capture_point_id as CapturePointID,
+			c.type As Type,
 			c.name as Name,
             c.latlong as LatLong,
             c.mgrs as MGRS,
@@ -1208,8 +1140,11 @@ BEGIN
             op.role as Role,
             COALESCE(ri.image, "Images/role/role-none-30x30.png") as RoleImage,
             op.side as Side,
-            op.ping as Ping
+            op.ping as Ping,
+            p.lives as Lives
 	FROM online_players op
+    INNER JOIN player p 
+		ON op.ucid = p.ucid
     LEFT JOIN role_image ri
 		ON op.role = ri.role
 	WHERE op.server_id = ServerID
@@ -1258,4 +1193,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-07 20:34:41
+-- Dump completed on 2017-12-11  2:41:10

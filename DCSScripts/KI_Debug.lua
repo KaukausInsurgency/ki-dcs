@@ -1,11 +1,8 @@
--- UNIT TEST SUITE FOR KI
--- LOADS ALL KI MODULES AND TESTS
--- LOGS RESULTS TO BOTH DCS LOG AND FILE
-
-env.info("KI - KAUKASUS INSURGENCY - STARTING UNIT TEST")
+if not KI then
+  KI = { UTDATA = {} }
+end
 
 local function ValidateKIStart()
-  env.info("KI.ValidateKIStart() called")
   local requiredModules =
   {
     ["lfs"] = lfs,
@@ -50,30 +47,59 @@ local function ValidateKIStart()
     env.info("KI - STARTUP VALIDATION COMPLETE")
     return true
   end
+  
+  return isValid
 end
 
 if not ValidateKIStart() then
+  trigger.action.outText("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 30)
   return false
 end
 
 
-local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 
-env.info("KI - Loading Files")
+
+
+
+
+
+local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
+local require = require
+local loadfile = loadfile
+
+package.path = package.path..";.\\LuaSocket\\?.lua"
+package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
+
+local JSON = loadfile("Scripts\\JSON.lua")()
+local socket = require("socket")
+
+--local initconnection = require("debugger")
+--initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
+
+-- do a partial load of KI because we need access to certain data
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
-assert(loadfile(path .. "LOCPOS.lua"))()
+assert(loadfile(path .. "KI_Config_Debug.lua"))()
+
+env.info("KI - INITIALIZING")
+KI.JSON = JSON
+-- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
+KI.Null = -9999   
+
+env.info("KI - Loading Scripts")
+
 assert(loadfile(path .. "GC.lua"))()
-assert(loadfile(path .. "UnitTests\\SLC_Config_UT.lua"))()
+assert(loadfile(path .. "SLC_Config.lua"))()
 assert(loadfile(path .. "SLC.lua"))()
+assert(loadfile(path .. "LOCPOS.lua"))()
 assert(loadfile(path .. "DWM.lua"))()
 assert(loadfile(path .. "DSMT.lua"))()
 assert(loadfile(path .. "CP.lua"))()
 assert(loadfile(path .. "GameEvent.lua"))()
 assert(loadfile(path .. "CustomEvent.lua"))()
-assert(loadfile(path .. "UnitTests\\KI_Config_UT.lua"))()
-assert(loadfile(path .. "KI_Defines.lua"))()
+
 assert(loadfile(path .. "KI_Data.lua"))()
+assert(loadfile(path .. "KI_Defines.lua"))()
 assert(loadfile(path .. "KI_Socket.lua"))()
 assert(loadfile(path .. "KI_Query.lua"))()
 assert(loadfile(path .. "KI_Init.lua"))()
@@ -82,48 +108,23 @@ assert(loadfile(path .. "KI_Scheduled.lua"))()
 assert(loadfile(path .. "KI_Hooks.lua"))()
 assert(loadfile(path .. "AICOM_Config.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
-
-KI.UTDATA = {}
-
-env.info("KI - Loading Tests")
-
-assert(loadfile(path .. "UnitTests\\UT.lua"))()
-
--- IMPLEMENTED UNIT TESTS
-assert(loadfile(path .. "UnitTests\\UT_LOCPOS.lua"))
-assert(loadfile(path .. "UnitTests\\UT_CP.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_DSMT.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_DWM.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_GC.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_AICOM.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Query.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
+env.info("KI - Scripts Loaded")
 
 
--- TO BE IMPLEMENTED
---assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
+env.info("KI - Initializing Data")
+--================= START OF INIT ================
+SLC.Config.PreOnRadioAction = KI.Hooks.SLCPreOnRadioAction
+SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
+AICOM.Config.OnSpawnGroup = KI.Hooks.AICOMOnSpawnGroup
+--GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
+GC.OnDespawn = KI.Hooks.GCOnDespawn
+KI.Init.Depots()
+KI.Init.CapturePoints()
+KI.Init.SideMissions()
+SLC.InitSLCRadioItemsForUnits()
+AICOM.Init()
+--KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
+env.info("KI - Data Loaded")
 
 
-
--- End the test
-UT.EndTest()
-
-
-
-
---local staticObj = StaticObject.getByName("TestCargoSLC")
---env.info("TestCargoSLC Alive (Should be true): " .. tostring(staticObj:isExist()))
---env.info("TestCargoSLC GetLife (Should be true): " .. tostring(staticObj:getLife()))
---staticObj:destroy()
---env.info("TestCargoSLC Alive (Should be false): " .. tostring(staticObj:isExist()))
---env.info("TestCargoSLC GetLife (Should be false): " .. tostring(staticObj:getLife()))
-env.info("KI - Tests Complete")
 return true

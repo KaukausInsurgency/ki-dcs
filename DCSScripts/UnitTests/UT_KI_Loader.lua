@@ -213,6 +213,97 @@ function()
       }
     }
   }
+  UT.TestData.coalitionExtract =
+  {
+    ['GroundGroups'] =
+    {
+      [1] = {
+        ['Coalition'] = 1,
+        ['Name'] = 'New Vehicle Group #002',
+        ['Category'] = 2,
+        ['ID'] = 49,
+        ['Units'] = {
+        },
+        ['Size'] = 0,
+      },
+      [2] = {
+        ['Coalition'] = 1,
+        ['Name'] = 'WP_Group_Far',
+        ['Category'] = 2,
+        ['ID'] = 48,
+        ['Country'] = 0,
+        ['Units'] = {
+          [1] = {
+            ['Type'] = 'BTR-80',
+            ['Name'] = 'Unit #067',
+            ['Position'] = {
+              ['y'] = {
+                ['y'] = 1,
+                ['x'] = 0,
+                ['z'] = 0,
+              },
+              ['x'] = {
+                ['y'] = 0,
+                ['x'] = -0.28104224801064,
+                ['z'] = 0.95969539880753,
+              },
+              ['p'] = {
+                ['y'] = 430,
+                ['x'] = -124175.84375,
+                ['z'] = 759919.5625,
+              },
+              ['z'] = {
+                ['y'] = 0,
+                ['x'] = -0.95969539880753,
+                ['z'] = -0.28104224801064,
+              },
+            },
+            ['ID'] = '137',
+            ['Heading'] = 1.8556762826387,
+          },
+        },
+        ['Size'] = 1,
+      },
+      [3] = {
+        ['Coalition'] = 1,
+        ['Name'] = 'WP_Group_Close',
+        ['Category'] = 2,
+        ['ID'] = 48,
+        ['Country'] = 0,
+        ['Units'] = {
+          [1] = {
+            ['Type'] = 'BTR-80',
+            ['Name'] = 'Unit #067',
+            ['Position'] = {
+              ['y'] = {
+                ['y'] = 1,
+                ['x'] = 0,
+                ['z'] = 0,
+              },
+              ['x'] = {
+                ['y'] = 0,
+                ['x'] = -0.28104224801064,
+                ['z'] = 0.95969539880753,
+              },
+              ['p'] = {
+                ['y'] = 430,
+                ['x'] = -124175.84375,
+                ['z'] = 759919.5625,
+              },
+              ['z'] = {
+                ['y'] = 0,
+                ['x'] = -0.95969539880753,
+                ['z'] = -0.28104224801064,
+              },
+            },
+            ['ID'] = '137',
+            ['Heading'] = 1.8556762826387,
+          },
+        },
+        ['Size'] = 1,
+      },
+    }
+  }
 end,
 function()
     -- GenerateUnitsTable tests
@@ -313,6 +404,16 @@ function()
       UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Infantry"].cap == 10 end)
       UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Vehicles"].qty == 2 end)
       UT.TestCompare(function() return UT.TestData.CapturePoint.Defenses["Vehicles"].cap == 4 end)    
+    end
+    
+    -- test KI.Loader.ImportCoalitionGroups
+    if true then
+      local v3 = ZONE:New("TestCPZone"):GetVec3(0)
+      KI.Data.Waypoints["WP_Group_Far"] = { x = v3.x, y = v3.y, z = v3.z}
+      KI.Data.Waypoints["WP_Group_Close"] = {x = -124175.84375, y = 430, z = 759919.5625}  -- setting this to be the same position that the unit is in
+      UT.TestFunction(KI.Loader.ImportCoalitionGroups, UT.TestData.coalitionExtract)
+      UT.TestCompare(function() return KI.Data.Waypoints["WP_Group_Close"] == nil end)  -- The function should remove this group from the hash
+      UT.TestCompare(function() return KI.Data.Waypoints["WP_Group_Far"] ~= nil end)  -- This group should still be in the hash
     end
     
 end,

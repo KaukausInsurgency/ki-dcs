@@ -7,6 +7,12 @@ end
 
 KI.Hooks = {}
 
+function KI.Hooks.AICOMOnSpawnGroup(moosegrp, v2)
+  env.info("KI.Hooks.AICOMOnSpawnGroup called")
+  KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y }      -- save the group name and waypoint information
+  KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true     -- this has no function in game, but is used in Unit Tests
+end
+
 -- KI Hooks into SLC and integration with DWM Depots
 function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilotname, comp)
   env.info("SLC.Config.PreOnRadioAction called")
@@ -384,7 +390,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
   if event.id == world.event.S_EVENT_MISSION_END then
       env.info("KI.Hooks.GameEventHandler - Mission End Event raised")
       -- this has no function, but it is here so that we can unit test this behaviour
-      KI.UT_MISSION_END_CALLED = true
+      KI.UTDATA.UT_MISSION_END_CALLED = true
       
       -- Save all mission data to file
       KI.Loader.SaveData() 
