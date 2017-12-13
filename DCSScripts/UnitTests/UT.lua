@@ -173,7 +173,7 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   end
   
   local _caseSuccess, _result  = xpcall (fnc, UT.ErrorHandler)
-  
+  local _failed = false
   if _caseSuccess then   
     UT.Log("============================================================")
     UT.Log("UT Results for Test Case " .. casename)
@@ -183,11 +183,13 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     UT.Log("============================================================")
     if UT.Fail > 0 then
       table.insert(UT.FailedTestCases, casename)
+      _failed = true
     end
   else
     UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. UT.GetCaughtError() .. " - TraceBack - " .. debug.traceback())
     UT.Log("UT - Test Case FAILED - Error in Test Case!")
     table.insert(UT.FailedTestCases, casename)
+    _failed = true
     UT.WriteToFile()
     UT.Reset()
     return false
@@ -199,7 +201,9 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     local _TearDownResult, _result = xpcall(teardownFnc, UT.ErrorHandler)
     if (not _TearDownResult) then
       UT.Log("Tear Down FAILED - ERROR - " .. UT.GetCaughtError())
-      table.insert(UT.FailedTestCases, casename)
+      if not _failed then
+        table.insert(UT.FailedTestCases, casename)
+      end
     end
   end
   

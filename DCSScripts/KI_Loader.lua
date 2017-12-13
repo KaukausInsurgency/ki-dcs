@@ -213,13 +213,14 @@ function KI.Loader.ImportCoalitionGroups(data)
           if vec2 then
             env.info("KI.Loader.ImportCoalitionGroups - found waypoints for group " .. _newg:getName())   
             local moosegrp = GROUP:Find(_newg)
-            local grpvec2 = moosegrp:GetVec2()
-            env.info("AICOM.Spawn vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", y = " .. grpvec2.y .. "}")
-            env.info("AICOM.Spawn vec2: Waypoint {x = " .. vec2.x .. ", y = " .. vec2.y .. "}")
+            local grpvec2 = moosegrp:GetVec3()
+            env.info("AICOM.Spawn vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", z = " .. grpvec2.z .. "}")
+            env.info("AICOM.Spawn vec2: Waypoint {x = " .. vec2.x .. ", z = " .. vec2.z .. "}")
             local distance = Spatial.Distance(vec2, grpvec2)
             env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " distance to waypoint - " .. tostring(distance))
             if distance > 100 then
               env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " is still enroute to this waypoint - tasking")
+              vec2.y = vec2.z -- translate vec3 back into vec2
               moosegrp:TaskRouteToVec2(vec2, 40, "Off Road")
             else
               env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " has completed this waypoint - ignoring")

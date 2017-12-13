@@ -80,8 +80,7 @@ function DWM:Take(resource, count)
   else
     msg = "Depot does not carry this type of resource!"
   end
-  trigger.action.outText(msg, 10)
-  return result
+  return result, msg
 end
 
 function DWM:Give(resource, count)
@@ -104,8 +103,7 @@ function DWM:Give(resource, count)
   else
     msg = "Depot does not accept this type of resource!"
   end
-  trigger.action.outText(msg, 10)
-  return result
+  return result, msg
 end
   
 function DWM:ViewResources()

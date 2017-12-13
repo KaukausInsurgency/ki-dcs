@@ -1065,6 +1065,11 @@ KIHooks.onSimulationFrame = function()
     KIServer.LastOnFrameTime = 0
     KIServer.LastOnFrameTimeBanCheck = 0
     KIServer.LastOnFrameTimeInitCheck = 0
+    KIServer.Data.ServerID = KIServer.Null 
+    KIServer.Data.SessionID = KIServer.Null 
+    KIServer.Data.PendingPlayerInfoQueue = {}   
+    KIServer.Data.OnlinePlayers = {} 
+    KIServer.Data.OnlinePlayersUCIDHash = {} 
     return 
   end
   

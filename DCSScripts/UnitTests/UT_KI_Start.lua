@@ -90,6 +90,8 @@ env.info("KI - Loading Tests")
 assert(loadfile(path .. "UnitTests\\UT.lua"))()
 
 -- IMPLEMENTED UNIT TESTS
+assert(loadfile(path .. "UnitTests\\UT_DCS.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_LOCPOS.lua"))
 assert(loadfile(path .. "UnitTests\\UT_CP.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DSMT.lua"))()
@@ -107,9 +109,8 @@ assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
 
-
 -- TO BE IMPLEMENTED
---assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
+
 
 
 

@@ -1,4 +1,4 @@
-UT.TestCase("KI_Hooks_EH", 
+UT.TestCase("KI_Hooks_BugFixes", 
 function()
   UT.ValidateSetup(function() return ZONE:New("TestCPZone") ~= nil end)  -- zone must exist in ME
 end, 

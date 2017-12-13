@@ -9,7 +9,7 @@ KI.Hooks = {}
 
 function KI.Hooks.AICOMOnSpawnGroup(moosegrp, v2)
   env.info("KI.Hooks.AICOMOnSpawnGroup called")
-  KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y }      -- save the group name and waypoint information
+  KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y, z = v2.z }      -- save the group name and waypoint information
   KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true     -- this has no function in game, but is used in Unit Tests
 end
 
@@ -17,6 +17,8 @@ end
 function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilotname, comp)
   env.info("SLC.Config.PreOnRadioAction called")
   
+  local _groupID = transGroup:GetDCSObject():getID()
+  env.info("SLC.Config.PreOnRadioAction - got group ID")
   -- check if this is a depot call
   if parentAction == "Depot Management" or parentAction == "Troop Management" then
     -- immediately return if the player is trying to view the depot contents
@@ -27,77 +29,85 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
     local _depot = KI.Query.FindDepot_Group(transGroup)
     if _depot then
       env.info("SLC.Config.PreOnRadioAction - Group " .. transGroup.GroupName .. " inside zone " .. _depot.Zone.ZoneName)
-      
+      local result = false
+      local msg = ""
       -- if in zone, check DWM contents
       if actionName == "Fuel Truck Crate" then
-        return _depot:Take("Fuel Truck", 1)
+        result, msg = _depot:Take("Fuel Truck", 1)
       elseif actionName == "Command Truck Crate" then
-        return _depot:Take("Command Truck", 1)
+        result, msg = _depot:Take("Command Truck", 1)
       elseif actionName == "Ammo Truck Crate" then
-        return _depot:Take("Ammo Truck", 1)
+        result, msg = _depot:Take("Ammo Truck", 1)
       elseif actionName == "Power Truck Crate" then
-        return _depot:Take("Power Truck", 1)
+        result, msg = _depot:Take("Power Truck", 1)
       elseif actionName == "BTR 80 Crate" then
-        return _depot:Take("APC", 1)
+        result, msg = _depot:Take("APC", 1)
       elseif actionName == "T-72 Crate" then
-        return _depot:Take("Tank", 1)
+        result, msg = _depot:Take("Tank", 1)
       elseif actionName == "Watch Tower Wood" then
-        return _depot:Take("Watchtower Wood", 1)
+        result, msg = _depot:Take("Watchtower Wood", 1)
       elseif actionName == "Watch Tower Supply Crate" then
-        return _depot:Take("Watchtower Supplies", 1)
+        result, msg = _depot:Take("Watchtower Supplies", 1)
       elseif actionName == "Outpost Pipes" then
-        return _depot:Take("Outpost Pipes", 1)
+        result, msg = _depot:Take("Outpost Pipes", 1)
       elseif actionName == "Outpost Supply Crate" then
-        return _depot:Take("Outpost Supplies", 1)
+        result, msg = _depot:Take("Outpost Supplies", 1)
       elseif actionName == "Outpost Wood" then
-        return _depot:Take("Outpost Wood", 1)
+        result, msg = _depot:Take("Outpost Wood", 1)
       elseif actionName == "Infantry Squad" then
-        return _depot:Take("Infantry", comp.Size)
+        result, msg = _depot:Take("Infantry", comp.Size)
       elseif actionName == "Anti Tank Squad" then
-        return _depot:Take("Infantry", comp.Size)
+        result, msg = _depot:Take("Infantry", comp.Size)
       elseif actionName == "MANPADS Squad" then
-        return _depot:Take("Infantry", comp.Size) 
+        result, msg = _depot:Take("Infantry", comp.Size) 
       else
         env.info("SLC.Config.PreOnRadioAction - attempt to take an unknown resource from a depot")
         return false
       end
+      
+      if not result then
+        trigger.action.outTextForGroup(_groupID, msg, 15, false)
+      end
+      return result
     else
       env.info("SLC.Config.OnRadioAction - Group " .. transGroup.GroupName .. " is not inside a zone")
-      trigger.action.outText("SLC - This action is only available when near a depot!", 10)
+      trigger.action.outTextForGroup(_groupID, "SLC - This action is only available when near a depot!", 15, false)
       return false
     end
   elseif parentAction == "Crate Management" then
     local _cp = KI.Query.FindCP_Group(transGroup)
     if not _cp then
       env.info("SLC.Config.PreOnRadioAction - Crate Unpacking cannot be called outside of a capture zone")
-      trigger.action.outText("SLC - You cannot unpack crates in the wild or at depots! Unpack this crate in a capture zone!", 10)
+      trigger.action.outTextForGroup(_groupID, "SLC - You cannot unpack crates in the wild or at depots! Unpack this crate in a capture zone!", 15, false)
       return false
     else
-      if _cp:Fortify("Vehicle", 1) then
-        return true
-      else
-        return false
+      local result, msg = _cp:Fortify("Vehicle", 1)
+      if not result then
+        trigger.action.outTextForGroup(_groupID, msg, 15, false)
       end
-      return true
+      return result
     end
   elseif parentAction == "Deploy Management" then
     local _cp = KI.Query.FindCP_Group(transGroup)
     -- if the pilot has troops already loaded and not in capture point, disallow 
     if not _cp and SLC.TransportInstances[pilotname] then
       env.info("SLC.Config.PreOnRadioAction - Troop Deployment cannot be called outside of a capture zone")
-      trigger.action.outText("SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 10)
+      trigger.action.outTextForGroup(_groupID, "SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 15, false)
       return false
     elseif _cp and SLC.TransportInstances[pilotname] then
       env.info("SLC.Config.PreOnRadioAction - Troop Deployment is valid and inside a capture zone")
-      if _cp:Fortify("Infantry", 1) then
-        return true
-      else
-        return false
+      local result, msg = _cp:Fortify("Infantry", 1)
+      if not result then
+        trigger.action.outTextForGroup(_groupID, msg, 15, false)
       end
+      return result
     else
       env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
-      _cp:Unfortify("Infantry", 1)
-      return true
+      local result, msg = _cp:Unfortify("Infantry", 1)
+      if not result then
+        trigger.action.outTextForGroup(_groupID, msg, 15, false)
+      end
+      return result
     end
   else
     return true
@@ -291,19 +301,26 @@ function KI.Hooks.GCOnLifeExpiredTroops(gc_item)
   if _args.Depot then
     env.info("GC.GCOnLifeExpiredTroops - troop is in depot and is being despawned")
     local _depot = _args.Depot
-    trigger.action.outText("Infantry " .. n .. " has been despawned and contents put back into depot!", 10)
+    KI.Toolbox.MessageRedCoalition("Infantry " .. n .. " has been despawned!")
+    
+    local result = false
+    local msg = ""
     if string.match(n, "SLC Infantry") then
-      _depot:Give("Infantry", 10)
+      result, msg = _depot:Give("Infantry", 10)
     elseif string.match(n, "SLC ATInfantry") then
-      _depot:Give("Infantry", 6)
+      result, msg = _depot:Give("Infantry", 6)
     elseif string.match(n, "SLC MANPADS") then
-      _depot:Give("Infantry", 3)
+      result, msg = _depot:Give("Infantry", 3)
     else
       env.info("GC.GCOnLifeExpiredTroops - attempt to give an unknown resource to a depot (Entity: " .. n ..")")
     end
+    
+    if not result then
+      KI.Toolbox.MessageRedCoalition(msg)
+    end
   else
     env.info("GC.GCOnLifeExpiredTroops - troops is in wild and is being despawned")
-    trigger.action.outText("Infantry " .. n .. " in the wild has been despawned!", 10)
+    KI.Toolbox.MessageRedCoalition("Infantry " .. n .. " in the wild has been despawned!")
   end  
 end
 
@@ -445,16 +462,22 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                            timer.getTime())
                 )
                 
+        
         local placeName = event.place:getName() or "Ground"
-        local ownGroupID = 1    -- needs to be changed later so we can find out what group ID a player is part of
-        local msg = "_______________________________________________________________________________________________________\n\n"
-				msg = msg .. "  Have a good flight "..playerName.."\n\n"
-				msg = msg .. "  You took off from "..placeName..".\n\n"
-				msg = msg .. "  Lives - "..op.Lives.."/".."5".."\n"
-				msg = msg .. "  Land your aircraft on a base to get your life back.\n"
-				msg = msg .. "_______________________________________________________________________________________________________\n"
-				
-				trigger.action.outText(msg,30)
+        
+        local _groupID = 1
+        local _group = event.initiator:getGroup()
+        if _group then
+          _groupID = _group:getID()
+          local msg = "_______________________________________________________________________________________________________\n\n"
+          msg = msg .. "  Have a good flight "..playerName.."\n\n"
+          msg = msg .. "  You took off from "..placeName..".\n\n"
+          msg = msg .. "  Lives - "..op.Lives.."/".."5".."\n"
+          msg = msg .. "  Land your aircraft on a base to get your life back.\n"
+          msg = msg .. "_______________________________________________________________________________________________________\n"
+          
+          trigger.action.outTextForGroup(_groupID, msg, 30, false)
+        end   
         return
       end
     end

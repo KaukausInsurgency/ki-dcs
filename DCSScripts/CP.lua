@@ -65,8 +65,8 @@ function CP:Fortify(resource, count)
   else
     msg = "Capture Point cannot be fortified with this type of unit!"
   end
-  trigger.action.outText(msg, 10)
-  return result
+
+  return result, msg
 end
 
 function CP:Unfortify(resource, count)
@@ -89,8 +89,7 @@ function CP:Unfortify(resource, count)
   else
     msg = "Capture Point cannot be unfortified with this type of unit!"
   end
-  trigger.action.outText(msg, 10)
-  return result
+  return result, msg
 end
   
 function CP:ViewResources()

@@ -211,11 +211,12 @@ end
 function SLC.ShowDepotContents(g, pilotName)
   env.info("SLC.ShowDepotContents Called")
   local _depot = KI.Query.FindDepot_Group(g)
+  local _groupID = g:GetDCSObject():getID()
   if _depot then
-    trigger.action.outText(_depot:ViewResources(), 30)
+    trigger.action.outTextForGroup(_groupID, _depot:ViewResources(), 30, false)
     return true
   else
-    trigger.action.outText("You must be near a Depot to view its contents!", 30)
+    trigger.action.outTextForGroup(_groupID, "You must be near a Depot to view its contents!", 30, false)
     return false
   end
 end
@@ -234,8 +235,8 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   -- add to map of infantry instances
   SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName)
   env.info("SLC.Infantry Spawned as Group " .. NewGroup.GroupName)
-  --return NewGroup
-  trigger.action.outText("SLC - Infantry has been spawned at your 12 O'clock position", 10)
+  local _groupID = g:GetDCSObject():getID()
+  trigger.action.outTextForGroup(_groupID, "SLC - Infantry has been spawned at your 12 O'clock position", 10, false)
   return NewGroup
 end
 
@@ -254,8 +255,8 @@ function SLC.SpawnCrate(g, pilotName, comp)
   
   local p = Spatial.PositionAt12Oclock(g, SLC.Config.ObjectSpawnDistance)
   local obj = SLC.SpawnSlingLoadableCargo(raw_cargo.Name, comp, p)
-  
-  trigger.action.outText("SLC - Crate has been spawned at your 12 O'clock position", 10) 
+  local _groupID = g:GetDCSObject():getID()
+  trigger.action.outTextForGroup(_groupID, "SLC - Crate has been spawned at your 12 O'clock position", 10, false) 
   return obj
 end
 
@@ -292,9 +293,10 @@ end
 function SLC.Unpack(transportGroup, pilotname)
   env.info("SLC.Unpack called")
   local crates = SLC.GetNearbyCargo(transportGroup)
+  local _groupID = transportGroup:GetDCSObject():getID()
   if #crates == 0 then
     env.info("SLC.Unpack No Nearby Crates Found")
-    trigger.action.outText("SLC - No Crates Found To Unpack!")
+    trigger.action.outTextForGroup(_groupID, "SLC - No Crates Found To Unpack!", 10, false)
     return nil
   end
   local assemblers = SLC.GetAssemblers(crates)
@@ -331,10 +333,10 @@ function SLC.Unpack(transportGroup, pilotname)
       crate.Object:destroy()
       env.info("SLC.Unpack destroying crate")
     end
-    trigger.action.outText("SLC - Successfully Unpacked Unit!", 10)
+    trigger.action.outTextForGroup(_groupID, "SLC - Successfully Unpacked Unit!", 10, false)
     return { Result = NewGroup, Assembler = assembly.assembler.SpawnName }
   else
-    trigger.action.outText("SLC - Cannot Unpack Crate(s) - Missing Components!", 10)
+    trigger.action.outTextForGroup(_groupID, "SLC - Cannot Unpack Crate(s) - Missing Components!", 10, false)
     env.info("SLC.Unpack - no valid assemblies found")
     return nil
   end
@@ -360,7 +362,8 @@ function SLC.UnloadTroops(g, p)
   SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName)
   env.info("SLC.UnloadTroops - removing TransportInstance for " .. p)
   SLC.TransportInstances[p] = nil
-  trigger.action.outText("SLC - Troops deployed", 10)
+  local _groupID = g:GetDCSObject():getID()
+  trigger.action.outTextForGroup(_groupID, "SLC - Troops deployed", 10, false)
   return NewGroup
 end
 
@@ -376,6 +379,7 @@ function SLC.LoadTroops(g, p)
   end
   -- check if g is in zone
   -- get infantry groups inside zone
+  local _groupID = g:GetDCSObject():getID()
   local infantryGroups = SLC.GetNearbyInfantryGroups(g)
   
   if #infantryGroups > 0 then
@@ -398,10 +402,10 @@ function SLC.LoadTroops(g, p)
     env.info("SLC.LoadTroops - found closest group - destroying and saving info")
     SLC.TransportInstances[p] = closestGroup
     closestGroup.Group:Destroy()
-    trigger.action.outText("SLC - Infantry has been loaded", 10)
+    trigger.action.outTextForGroup(_groupID, "SLC - Infantry has been loaded", 10, false)
     return true
   else
-    trigger.action.outText("SLC - No nearby troops to load!", 10)
+    trigger.action.outTextForGroup(_groupID, "SLC - No nearby troops to load!", 10, false)
     env.info("SLC.LoadTroops - no infantry groups found")
     return false
   end
@@ -434,7 +438,8 @@ function SLC.PerformAction(action, actionName, parentAction, transportGroup, pil
   -- verify that pilot is on ground
   local u = transportGroup:GetDCSUnit(1)
   if SLC.InAir(u) then
-    trigger.action.outText("SLC - You must be landed in order to perform an action", 10)
+    local _groupID = transportGroup:GetDCSObject():getID()
+    trigger.action.outTextForGroup(_groupID, "SLC - You must be landed in order to perform an action", 10, false)
   else
     -- If there is a PreOnRadioAction handler, call it and if the result is true, call action normally
     if SLC.Config.PreOnRadioAction then

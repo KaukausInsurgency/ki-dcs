@@ -52,7 +52,7 @@ local function ValidateKIStart()
 end
 
 if not ValidateKIStart() then
-  trigger.action.outText("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 30)
+  KI.Toolbox.MessageRedCoalition("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG")
   return false
 end
 
@@ -126,10 +126,10 @@ local function StartKI()
   
   env.info("KI - Getting Data From Server...")
   if not KI.Init.GetServerAndSession() then
-    trigger.action.outText("FAILED TO GET ServerID and SessionID from Database! Check Connection!", 30)
+    KI.Toolbox.MessageRedCoalition("FAILED TO GET ServerID and SessionID from Database! Check Connection!")
     return false
   else
-    trigger.action.outText("RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")", 30)
+    KI.Toolbox.MessageRedCoalition("RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")")
   end
 
 

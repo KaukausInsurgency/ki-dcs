@@ -2,7 +2,7 @@ Spatial = {}
 
 function Spatial.Distance(p1, p2)
   env.info("Spatial.Distance Called")
-  return math.sqrt( (math.abs(p2.x - p1.x) ^ 2) + ( (math.abs(p2.y - p1.y) ^ 2)) )
+  return math.sqrt( (math.abs(p2.x - p1.x) ^ 2) + ( (math.abs(p2.z - p1.z) ^ 2)) )
 end
 
 function Spatial.RelativePositionFromHeading(p, heading, distance)
@@ -10,9 +10,9 @@ function Spatial.RelativePositionFromHeading(p, heading, distance)
   env.info("Spatial.RelativePositionFromHeading - Original Position (" .. tostring(p.x) .. ", " .. tostring(p.y) .. ", " .. tostring(p.z) .. ")")
 
   local nx = p.x + (distance * math.cos(- heading + 90))
-  local ny = p.y + (distance * math.sin(- heading + 90))
+  local ny = p.z + (distance * math.sin(- heading + 90))
   env.info("Spatial.RelativePositionFromHeading - New Position (" .. tostring(nx) .. ", " .. tostring(ny) .. ", " .. tostring(p.z) .. ")")
-  return {x = nx, y = ny, z = p.z}
+  return {x = nx, y = p.y, z = ny}
 end
 
 function Spatial.PositionAt12Oclock(g, _offset)
