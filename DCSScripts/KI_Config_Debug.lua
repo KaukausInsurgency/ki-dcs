@@ -25,6 +25,9 @@ KI.Config.SaveMissionRate = 300
 -- Controls the rate at which all capture points are updated/managed by KI Engine
 KI.Config.CPUpdateRate = 15
 
+-- Controls the rate at which we check if a player is in a zone and display message to them
+KI.Config.PlayerInZoneCheckRate = 10
+
 -- controls the rate at which side missions are generated and/or managed from the queue
 KI.Config.SideMissionUpdateRate = 1200 
 

@@ -4,30 +4,15 @@ KI.Data =
   Depots = {},
   SideMissions = {},
   ActiveMissions = {},
-  Templates = 
-  {
-    "TemplateInsCamp",
-    "InfantrySquadTemplate",
-    "ATSquadTemplate",
-    "MANPADSSquadTemplate",
-    "Spawn FuelTruck Template",
-    "Spawn CommandTruck Template",
-    "Spawn AmmoTruck Template",
-    "Spawn PowerTruck Template",
-    "Spawn MechBTR Template",
-    "Spawn TankT72 Template",
-    "Spawn WatchTower Template",
-    "Spawn Outpost Template"
-  },
   GameEventQueue = {},                -- data queue of game events
   OnlinePlayers = {},
-  Sorties = {},                       -- list of current sorties active in format ["UCID"] = { Role, SortieID }
+  PlayerInZone = {},                  -- hash of players inside a zone
   SpawnID = 0,
   SortieID = 0,
   SessionID = KI.Null,
   ServerID = KI.Null,
-  GameEventFileID = 0,
-  Waypoints = {}
+  GameEventFileID = 0,  
+  Waypoints = {}                      -- hash of ai ground waypoints
 }
 
 

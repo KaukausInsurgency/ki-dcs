@@ -148,8 +148,18 @@ local function StartKI()
   KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
   env.info("KI - Data Loaded")
   
-  timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + 5)
-  timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + 5)
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(1, t) end,
+                                   function(err) env.info("KI.Scheduled.IsPlayerInZone ERROR : " .. err) end)
+                                   
+    if not success then
+      return t + KI.Config.PlayerInZoneCheckRate
+    else
+      return result
+    end
+  end, 1, timer.getTime() + KI.Config.PlayerInZoneCheckRate)
+  timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + KI.Config.CPUpdateRate)
+  timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + KI.Config.SideMissionUpdateRate)
   timer.scheduleFunction(KI.Scheduled.DataTransmissionPlayers, {}, timer.getTime() + KI.Config.DataTransmissionPlayerUpdateRate)
   timer.scheduleFunction(KI.Scheduled.DataTransmissionGameEvents, {}, timer.getTime() + KI.Config.DataTransmissionGameEventsUpdateRate)
   timer.scheduleFunction(KI.Scheduled.DataTransmissionGeneral, {}, timer.getTime() + KI.Config.DataTransmissionGeneralUpdateRate)

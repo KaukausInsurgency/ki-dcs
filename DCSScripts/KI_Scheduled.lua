@@ -4,6 +4,61 @@ end
 
 KI.Scheduled = {}
 
+-- this function checks if players are inside any zones, and sends a message to them so that they know they are inside a zone
+function KI.Scheduled.IsPlayerInZone(side, time)
+  env.info("KI.Scheduled.IsPlayerInZone called (side: " .. tostring(side) .. ", time: " .. tostring(time) .. ")")
+  local _groups = coalition.getGroups(side, Group.Category.HELICOPTER)
+  local moosegrp = GROUP  -- localizing the global variable as it improves performance storing a local reference
+  
+  -- loop through groups
+  for j = 1, #_groups do
+    local _unit = _groups[j]:getUnit(1)
+    local _pname = _unit:getPlayerName()
+    if _pname then
+      env.info("KI.Scheduled.IsPlayerInZone - player name found : " .. _pname)
+      local _grp = moosegrp:Find(_groups[j])
+
+      local _grpID = _groups[j]:getID()
+      local _inzone = false
+      local _name = ""
+      
+      for i = 1, #KI.Data.CapturePoints do
+        local _cp = KI.Data.CapturePoints[i]
+        if _grp:IsCompletelyInZone(_cp.Zone) then      
+          _name = _cp.Name
+          _inzone = true
+          env.info("KI.Scheduled.IsPlayerInZone - Player " .. _pname .. " is inside capture point " .. _name)
+          break      
+        end   
+      end
+      
+      if not _inzone then
+        for i = 1, #KI.Data.Depots do
+          local _depot = KI.Data.Depots[i]
+          if _grp:IsCompletelyInZone(_depot.Zone) then
+            _name = _depot.Name
+            _inzone = true
+            env.info("KI.Scheduled.IsPlayerInZone - Player " .. _pname .. " is inside depot " .. _name)
+            break      
+          end   
+        end
+      end
+      
+      if _inzone and KI.Data.PlayerInZone[_pname] == nil then
+        trigger.action.outTextForGroup(_grpID, "You are now entering " .. _name, 30, false)
+        KI.Data.PlayerInZone[_pname] = true
+      elseif not _inzone then
+        env.info("KI.Scheduled.IsPlayerInZone - player " .. _pname .. " is not inside any zones, removing from hash")
+        KI.Data.PlayerInZone[_pname] = nil
+      end
+    end -- end player name
+  end -- end looping through red helicopters
+  
+  return time + KI.Config.PlayerInZoneCheckRate
+end
+
+
+
 -- looping function that updates Capture Point unit counts and their status (whether contested, blue, red, neutral, etc)
 function KI.Scheduled.UpdateCPStatus(arg, time)
   env.info("KI.Scheduled.UpdateCPStatus called")
