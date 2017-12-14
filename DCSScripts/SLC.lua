@@ -36,6 +36,30 @@ function SLC.AddInfantryInstance(g, st, sn)
 end
 
 
+-- checks if the passed in group is capable of transporting infantry
+function SLC.CanTransportInfantry(moosegrp)
+  env.info("SLC.CanTransportInfantry called")
+  if not moosegrp then return false end
+  
+  local _u = moosegrp:GetUnit(1):GetDCSObject()
+  
+  -- if this setting is nil or 0, allow all helos to transport
+  if not SLC.Config.InfantryTransportingHelicopters or #SLC.Config.InfantryTransportingHelicopters == 0 then
+    env.info("SLC.CanTransportInfantry - WARNING - No definitions exist - All airframes allowed to transport infantry")
+    return true
+  end
+  
+  for i = 1, #SLC.Config.InfantryTransportingHelicopters do
+    if _u:getTypeName() == SLC.Config.InfantryTransportingHelicopters[i] then
+      env.info("SLC.CanTransportInfantry - group " .. moosegrp.GroupName .. " is capable to transport infantry")
+      return true
+    end
+  end
+  
+  env.info("SLC.CanTransportInfantry - group " .. moosegrp.GroupName .. " cannot transport infantry")
+  return false
+end
+
 
 -- GenerateName
 -- Generates a new name for the spawned group, and increments the spawnID counter
@@ -528,12 +552,15 @@ function SLC.AddSLCRadioItems(g, pilotname)
                                             SLC.PerformAction,
                                             SLC.Pack, "Pack Nearest", g, pilotname)
     
-  local m_deploy = MENU_GROUP:New(g, "Deploy Management", m_main)
-    
-    local m_loadunload = MENU_GROUP_COMMAND:New(g, "Load/Unload Troops", m_deploy, 
-                                                SLC.PerformAction,
-                                                SLC.LoadUnload, "Load/Unload Troops", "Deploy Management", g, pilotname)
-    
+  -- this menu will only be available if the airframe is capable of transporting infantry
+  if SLC.CanTransportInfantry(g) then
+    local m_deploy = MENU_GROUP:New(g, "Deploy Management", m_main)
+      
+      local m_loadunload = MENU_GROUP_COMMAND:New(g, "Load/Unload Troops", m_deploy, 
+                                                  SLC.PerformAction,
+                                                  SLC.LoadUnload, "Load/Unload Troops", "Deploy Management", g, pilotname)
+  end  
+  
   env.info("SLC.AddSLCRadioItems Items Added")
 end
 

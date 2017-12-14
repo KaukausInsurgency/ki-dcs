@@ -9,6 +9,10 @@ function()
   UT.ValidateSetup(function() return GROUP:FindByName("TestHelicopterAirSLC") ~= nil end)
   UT.ValidateSetup(function() return GROUP:FindByName("TestHelicopterGroundSLC") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestCargoSLC") ~= nil end)
+  UT.ValidateSetup(function() return GROUP:FindByName("SLCMi8") ~= nil end)
+  UT.ValidateSetup(function() return GROUP:FindByName("SLCHuey") ~= nil end)
+  UT.ValidateSetup(function() return GROUP:FindByName("SLCGazelle") ~= nil end)
+  UT.ValidateSetup(function() return GROUP:FindByName("SLCA10") ~= nil end) 
   UT.ValidateSetup(function() return SLC.Config.ComponentTypes ~= nil end)
   UT.ValidateSetup(function() return SLC.Config.ComponentTypes.AmmoTruckCrate ~= nil end)
   UT.ValidateSetup(function() return SLC.Config.Assembler ~= nil end)
@@ -55,6 +59,34 @@ function()
   UT.TestCompare(function() return SLC.InAir(UT.TestData.AirHelo) end)
   UT.TestCompare(function() return SLC.InAir(UT.TestData.GroundHelo) == false end)
   
+  
+  -- SLC.CanTransportInfantry(moosegrp)
+  if true then
+    SLC.Config.InfantryTransportingHelicopters =
+    {
+      "Mi-8MT",
+      "UH-1H"
+    }
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == false end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == false end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == false end)
+    
+    SLC.Config.InfantryTransportingHelicopters = {}
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == true end)
+    
+    SLC.Config.InfantryTransportingHelicopters = nil
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == true end)
+  end
   
   
   -- SLC.IsCargoValid(cargo)

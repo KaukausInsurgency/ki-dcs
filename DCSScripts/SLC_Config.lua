@@ -54,8 +54,8 @@ SLC.Config.PilotNames =
 
 SLC.Config.InfantryTransportingHelicopters =
 {
-  "Mi-8 MTV2",
-  "UH1H"
+  "Mi-8MT",
+  "UH-1H"
 }
 
 -- static definitions of base cargo types
