@@ -29,7 +29,9 @@ function CP:New(name, zone, spawnZone, type)
   
   self.Name = name
   self.Zone = ZONE:New(zone)
-  self.SpawnZone = ZONE:New(spawnZone)
+  if spawnZone then
+    self.SpawnZone = ZONE:New(spawnZone)
+  end
   self.Type = type or CP.Enum.CAPTUREPOINT
   self.Position = LOCPOS:NewFromZone(self.Zone)
   return self

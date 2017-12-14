@@ -88,5 +88,20 @@ UT.TestCase("CP",
       UT.TestCompare(function() return _cp:GetOwnership() == "Blue" end)
       UT.TestFunction(CP.SetCoalitionCounts, _cp, 1, 1)
       UT.TestCompare(function() return _cp:GetOwnership() == "Contested" end)
+      
+      
+      -- testing optional parameter SpawnZone Constructor
+      if true then
+        local _cap = CP:New("Test CP", "TestCPZone")
+        UT.TestCompare(function() return _cap.Zone ~= nil end)
+        UT.TestCompare(function() return _cap.Name == "Test CP" end)
+        UT.TestCompare(function() return _cap.Zone.ZoneName == "TestCPZone" end)
+        UT.TestCompare(function() return _cap.SpawnZone == nil end)
+        UT.TestCompare(function() return _cap.Type == CP.Enum.CAPTUREPOINT end)
+        UT.TestCompare(function() return _cap.Defenses ~= nil end)
+        UT.TestCompare(function() return count_hash(_cap.Defenses) == 0 end)
+        UT.TestCompare(function() return _cap.Position.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
+        UT.TestCompare(function() return _cap.Position.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
+      end
     end)
   

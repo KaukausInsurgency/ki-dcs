@@ -14,6 +14,7 @@ UT.TestCase("AICOM", nil, nil,
       
       -- Creating Mockup Capture Points
       local TestMockUpCapturePoints = {}
+      local MockUpCapturePoint_NoSpawnZone = {}
       if true then
         local cp1 = CP:New("NeutralCP", "NeutralCP", "NeutralCP")
         cp1:SetCoalitionCounts(0, 0)
@@ -38,6 +39,8 @@ UT.TestCase("AICOM", nil, nil,
         local cp6 = CP:New("BlueCP20", "BlueCP20", "BlueCP20")
         cp6:SetCoalitionCounts(0, 20)
         table.insert(TestMockUpCapturePoints, cp6)
+        
+        MockUpCapturePoint_NoSpawnZone = CP:New("BlueCP20", "BlueCP20")
       end
     
       
@@ -151,8 +154,10 @@ UT.TestCase("AICOM", nil, nil,
       UT.TestCompare(function() return AnalyzedCapturePoints[6].Cost == 25 end)
       UT.TestCompare(function() return AnalyzedCapturePoints[6].Action == AICOM.Enum.Actions.Attack end)
       
-      
-      
+      -- Test that capture points with no spawn zone are ignored in analysis - this should return 0 results
+      local AnalysisResults = AICOM.Analyze({ [1] = MockUpCapturePoint_NoSpawnZone })
+      UT.TestCompare(function() return AnalysisResults ~= nil end)
+      UT.TestCompare(function() return #AnalysisResults == 0 end)
       
       -- Test 3 - ANALYZE PAY
 

@@ -94,36 +94,40 @@ function AICOM.Analyze(CapturePoints)
   local _cpAnalysis = {}
   for i = 1, #CapturePoints do
     local _cp = CapturePoints[i]
-    local _cost = 0
-    local _own = _cp:GetOwnership()
-    local _type = 0
-    
-    -- Assign initial cost values for the ownership of a point
-    -- Neutral points are the most valuable to the AI
-    -- Contested are second most important
-    -- Blue are third, with red being forth
-    if _own == "Neutral" then
-      _cost = _cost + 1
-      _type = AICOM.Enum.Actions.Attack
-    elseif _own == "Blue" then
-      _cost = _cost + 5
-      _type = AICOM.Enum.Actions.Attack
-    elseif _own == "Red" then
-      _cost = _cost + 7
-      _type = AICOM.Enum.Actions.Reinforce
+    if _cp.SpawnZone then
+      local _cost = 0
+      local _own = _cp:GetOwnership()
+      local _type = 0
+      
+      -- Assign initial cost values for the ownership of a point
+      -- Neutral points are the most valuable to the AI
+      -- Contested are second most important
+      -- Blue are third, with red being forth
+      if _own == "Neutral" then
+        _cost = _cost + 1
+        _type = AICOM.Enum.Actions.Attack
+      elseif _own == "Blue" then
+        _cost = _cost + 5
+        _type = AICOM.Enum.Actions.Attack
+      elseif _own == "Red" then
+        _cost = _cost + 7
+        _type = AICOM.Enum.Actions.Reinforce
+      else
+        -- contested
+        _cost = _cost + 3
+        _type = AICOM.Enum.Actions.Reinforce
+      end
+      
+      -- now include blue units and red units into the cost (with red units being half the cost of a blue unit)
+      _cost = _cost + _cp.BlueUnits
+      if _cp.RedUnits > 0 then
+        _cost = _cost + (_cp.RedUnits / 2)  -- add red units as a cost, but for half the price of blue units
+      end
+      
+      table.insert(_cpAnalysis, { CapturePoint = _cp, Cost = _cost, Action = _type })
     else
-      -- contested
-      _cost = _cost + 3
-      _type = AICOM.Enum.Actions.Reinforce
+      env.info("AICOM.Analyze - Capture Point " .. _cp.Name .. " has no spawn zone - ignoring")
     end
-    
-    -- now include blue units and red units into the cost (with red units being half the cost of a blue unit)
-    _cost = _cost + _cp.BlueUnits
-    if _cp.RedUnits > 0 then
-      _cost = _cost + (_cp.RedUnits / 2)  -- add red units as a cost, but for half the price of blue units
-    end
-    
-    table.insert(_cpAnalysis, { CapturePoint = _cp, Cost = _cost, Action = _type })
   end
   
   env.info("AICOM.Analyze - Dumping results")
