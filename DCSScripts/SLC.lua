@@ -31,8 +31,8 @@ end
 
 
 -- Add Infantry Instance to InfantryInstances table
-function SLC.AddInfantryInstance(g, st, sn)
-  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn })
+function SLC.AddInfantryInstance(g, st, sn, mn)
+  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn, MenuName = mn })
 end
 
 
@@ -147,7 +147,7 @@ function SLC.GetNearbyInfantryGroups(groupTransport)
       env.info("SLC.GetNearbyInfantryGroups distance : " .. tostring(distance) .. " metres")
       if distance < SLC.Config.CrateQueryDistance and not inf.Group:InAir() then
         env.info("SLC.GetNearbyInfantryGroups - infantry is inside query distance - adding to results")
-        table.insert(inf_results, { Group = inf.Group, SpawnTemplate = inf.SpawnTemplate, SpawnName = inf.SpawnName, Distance = distance })
+        table.insert(inf_results, { Group = inf.Group, SpawnTemplate = inf.SpawnTemplate, SpawnName = inf.SpawnName, MenuName = inf.MenuName, Distance = distance })
       else
         env.info("SLC.GetNearbyInfantryGroups - infantry is outside query distance - ignore")
       end
@@ -257,7 +257,7 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   --env.info("SLC.SpawnGroup spVec3 (x = " .. tostring(spawnpos.x) .. ", y = " .. tostring(spawnpos.y) .. ", z = " .. tostring(spawnpos.z) .. ")")
   local NewGroup = SpawnVeh:SpawnFromVec3(spawnpos)
   -- add to map of infantry instances
-  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName)
+  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName)
   env.info("SLC.Infantry Spawned as Group " .. NewGroup.GroupName)
   local _groupID = g:GetDCSObject():getID()
   trigger.action.outTextForGroup(_groupID, "SLC - Infantry has been spawned at your 12 O'clock position", 10, false)
@@ -383,7 +383,7 @@ function SLC.UnloadTroops(g, p)
   local NewGroup = SpawnVeh:SpawnFromVec3(pos)
   
   env.info("SLC.UnloadTroops - spawned unloaded group " .. NewGroup.GroupName .. " - adding to instance map")
-  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName)
+  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName)
   env.info("SLC.UnloadTroops - removing TransportInstance for " .. p)
   SLC.TransportInstances[p] = nil
   local _groupID = g:GetDCSObject():getID()
@@ -442,6 +442,7 @@ end
 -- LoadUnload
 -- Handles the loading/unloading of troops
 function SLC.LoadUnload(g, pilot)
+  env.info("SLC.LoadUnload called")
   if SLC.TransportInstances[pilot] then
     env.info("SLC.LoadUnload - " .. pilot .. " already has troop cargo")
     return { Action = "DISMOUNT", Result = SLC.UnloadTroops(g, pilot) }
@@ -453,6 +454,16 @@ function SLC.LoadUnload(g, pilot)
 end
 
 
+function SLC.ViewCargoContents(g, pilot)
+  env.info("SLC.ViewCargoContents called")
+  local _groupID = g:GetDCSObject():getID()
+  local _ti = SLC.TransportInstances[pilot]
+  if _ti then
+    trigger.action.outTextForGroup(_groupID, "You are currently transporting : " .. _ti.MenuName, 15, false)
+  else
+    trigger.action.outTextForGroup(_groupID, "You have no cargo", 15, false)
+  end
+end
 
 
 --Performs menu action
@@ -559,6 +570,10 @@ function SLC.AddSLCRadioItems(g, pilotname)
       local m_loadunload = MENU_GROUP_COMMAND:New(g, "Load/Unload Troops", m_deploy, 
                                                   SLC.PerformAction,
                                                   SLC.LoadUnload, "Load/Unload Troops", "Deploy Management", g, pilotname)
+      
+      local m_viewcargo = MENU_GROUP_COMMAND:New(g, "Check Cargo", m_deploy, 
+                                                  SLC.PerformAction,
+                                                  SLC.ViewCargoContents, "Check Cargo", "Deploy Management", g, pilotname)
   end  
   
   env.info("SLC.AddSLCRadioItems Items Added")

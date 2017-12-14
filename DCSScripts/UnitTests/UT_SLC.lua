@@ -420,6 +420,7 @@ function()
     UT.TestCompare(function() 
       for i = 1, #InfantryList do
         if InfantryList[i].Group.GroupName == UT.TestData.MANPADSquad.GroupName then
+          UT.TestCompare(function() return InfantryList[i].MenuName == "MANPADS Squad" end)
           return true
         end
       end
@@ -428,6 +429,7 @@ function()
     UT.TestCompare(function() 
       for i = 1, #InfantryList do
         if InfantryList[i].Group.GroupName == UT.TestData.ATSquad.GroupName then
+          UT.TestCompare(function() return InfantryList[i].MenuName == "Anti Tank Squad" end)
           return true
         end
       end
@@ -457,6 +459,10 @@ function()
     UT.TestCompare(function() return 
         string.match(SLC.TransportInstances["SLCPilot1"].SpawnName, "SLC ATInfantry") or
         string.match(SLC.TransportInstances["SLCPilot1"].SpawnName, "SLC MANPADS") end)
+        
+    -- MenuName property should exist and match one of these units
+    UT.TestCompare(function() return SLC.TransportInstances["SLCPilot1"].MenuName == "MANPADS Squad" or
+                                     SLC.TransportInstances["SLCPilot1"].MenuName == "Anti Tank Squad" end)  
       
     -- Now unload troops - first time should succeed, subsequent attempts should fail
     UT.TestData.UnloadedSquad = SLC.UnloadTroops(UT.TestData.PlayerGroup, "SLCPilot1")

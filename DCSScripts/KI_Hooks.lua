@@ -88,27 +88,47 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
       return result
     end
   elseif parentAction == "Deploy Management" then
-    local _cp = KI.Query.FindCP_Group(transGroup)
-    -- if the pilot has troops already loaded and not in capture point, disallow 
-    if not _cp and SLC.TransportInstances[pilotname] then
-      env.info("SLC.Config.PreOnRadioAction - Troop Deployment cannot be called outside of a capture zone")
-      trigger.action.outTextForGroup(_groupID, "SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 15, false)
-      return false
-    elseif _cp and SLC.TransportInstances[pilotname] then
-      env.info("SLC.Config.PreOnRadioAction - Troop Deployment is valid and inside a capture zone")
-      local result, msg = _cp:Fortify("Infantry", 1)
-      if not result then
-        trigger.action.outTextForGroup(_groupID, msg, 15, false)
+    local success, result = xpcall(
+    function()
+      -- pass through if check cargo was called
+      if actionName == "Check Cargo" then
+        return true
       end
+      
+      local _cp = KI.Query.FindCP_Group(transGroup)
+      -- if the pilot has troops already loaded and not in capture point, disallow 
+      if not _cp and SLC.TransportInstances[pilotname] then
+        env.info("SLC.Config.PreOnRadioAction - Troop Deployment cannot be called outside of a capture zone")
+        trigger.action.outTextForGroup(_groupID, "SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 15, false)
+        return false
+      elseif _cp and SLC.TransportInstances[pilotname] then
+        env.info("SLC.Config.PreOnRadioAction - Troop Deployment is valid and inside a capture zone")
+        local result, msg = _cp:Fortify("Infantry", 1)
+        if not result then
+          trigger.action.outTextForGroup(_groupID, msg, 15, false)
+        end
+        return result
+      else
+        env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
+        if _cp then
+          local result, msg = _cp:Unfortify("Infantry", 1)
+          if not result then
+            trigger.action.outTextForGroup(_groupID, msg, 15, false)
+          end
+          return result
+        else
+          return true
+        end    
+      end
+    end, function(err) env.info("SLC.Config.PreOnRadioAction ERROR - " .. err) end)
+    
+    if success then
       return result
     else
-      env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
-      local result, msg = _cp:Unfortify("Infantry", 1)
-      if not result then
-        trigger.action.outTextForGroup(_groupID, msg, 15, false)
-      end
-      return result
+      return false
     end
+    
+    
   else
     return true
   end

@@ -347,6 +347,8 @@ function AICOM.Spawn(AAGroups, GNDGroups, CPObj)
                             spawngrp:TaskRouteToVec2(vec2, 20, "Off Road")
                             if AICOM.Config.OnSpawnGroup then
                               env.info("AICOM.Spawn - callback found")
+                              vec2.z = vec2.y
+                              vec2.y = 0
                               AICOM.Config.OnSpawnGroup(spawngrp, vec2)
                             end
                           end, CPObj.Zone)

@@ -17,7 +17,7 @@ AICOM.Config.TurnRate = 120     -- the rate at which the AI Commander can make m
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
 AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
 AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
-AICOM.Config.PopulationCap = 20     -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
+AICOM.Config.PopulationCap = 80     -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
 AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
 AICOM.Config.AmbushPoints = {}
 
