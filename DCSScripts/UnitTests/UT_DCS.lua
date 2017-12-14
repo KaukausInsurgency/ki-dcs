@@ -5,6 +5,7 @@ function()
   UT.ValidateSetup(function() return Unit.getByName("DCSHelo") ~= nil end) 
   UT.ValidateSetup(function() return Unit.getByName("DCSStructure") ~= nil end) 
   UT.ValidateSetup(function() return StaticObject.getByName("DCSCargo") ~= nil end) 
+  UT.ValidateSetup(function() return Unit.getByName("DCSLateActivationUnit") ~= nil end) 
 end, nil,
 function()
 
@@ -13,6 +14,8 @@ function()
   UT.TestCompare(function() return Unit.getByName("DCSGroundUnit"):getCategory() == Unit.Category.GROUND_UNIT end)
   UT.TestCompare(function() return Unit.getByName("DCSHelo"):getCategory() == Unit.Category.HELICOPTER end)
   UT.TestCompare(function() return Unit.getByName("DCSStructure"):getCategory() == Unit.Category.STRUCTURE end)
+  
+  UT.ValidateSetup(function() return not Unit.getByName("DCSLateActivationUnit"):isActive() end) 
   
   -- test airbase getByName works
   UT.TestCompare(function() return Airbase.getByName("Batumi") ~= nil end)

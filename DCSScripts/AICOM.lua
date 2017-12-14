@@ -60,6 +60,30 @@ function AICOM.Init()
   table.sort(AICOM.ForcesGNDCostSorted, sortCostGND)
 end
 
+function AICOM.CalculatePopulationCap(side)
+  env.info("AICOM.CalculatePopulationCap called")
+  local _groups = coalition.getGroups(side, Group.Category.GROUND)
+  local _count = 0
+  
+  for j = 1, #_groups do
+    local _g = _groups[j]
+    if _g:isExist() then
+      for index, data in pairs(_g:getUnits()) do
+        if data:isActive() then
+          _count = _count + 1
+        else
+          env.info("AICOM.CalculatePopulationCap - Inactive group found - ignoring")
+          -- it is not possible to partially activate a group, so if any unit in the group 
+          -- is not active, assume the entire group is inactive
+          break   
+        end
+      end
+    end
+  end
+  env.info("AICOM.CalculatePopulationCap - returned " .. tostring(_count))
+  return _count
+end
+
 function AICOM.Analyze(CapturePoints)
   env.info("AICOM.Analyze Called")
   if CapturePoints then
@@ -362,6 +386,15 @@ end
 -- Scheduled function - main function of AICOM
 function AICOM.DoTurn(args, time)
   env.info("AICOM.DoTurn called")
+  
+  -- check the pop cap and see if we've hit the limit
+  local _cap = AICOM.CalculatePopulationCap(2)
+  if _cap >= AICOM.Config.PopulationCap then
+    env.info("AICOM.DoTurn - pop cap has been reached (" .. tostring(_cap) .. "/" .. tostring(AICOM.Config.PopulationCap) .. ") - Doing nothing")
+    KI.UTDATA.AICOM_POPCAP_REACHED = true
+    return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
+  end
+  
   -- reset the CurrentMoney and RemainingMoves
   AICOM.CurrentMoney = AICOM.Config.InitResource
   AICOM.MovesRemaining = AICOM.Config.InitMoves

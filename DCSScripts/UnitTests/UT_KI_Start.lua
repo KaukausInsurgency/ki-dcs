@@ -80,7 +80,7 @@ assert(loadfile(path .. "KI_Init.lua"))()
 assert(loadfile(path .. "KI_Loader.lua"))()
 assert(loadfile(path .. "KI_Scheduled.lua"))()
 assert(loadfile(path .. "KI_Hooks.lua"))()
-assert(loadfile(path .. "AICOM_Config.lua"))()
+assert(loadfile(path .. "UnitTests\\AICOM_Config_UT.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
 
 KI.UTDATA = {}

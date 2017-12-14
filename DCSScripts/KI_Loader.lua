@@ -90,7 +90,7 @@ function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
       _group.Units = {}
       local _first = true
       for k, up in pairs(gp:getUnits()) do
-        if up:isExist() and up:getLife() > 0 then
+        if up:isExist() and up:getLife() > 0 and up:isActive() then
           if _first then
             _group.Country = up:getCountry()
             _first = false

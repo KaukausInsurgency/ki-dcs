@@ -297,6 +297,20 @@ function()
     UT.TestCompare(function() return
                             string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC OutPost") or 
                             string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC FuelTruck") end)
+    
+    UT.TestCompare(function() return 
+                            not (
+                              string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC OutPost") and 
+                              string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC OutPost")
+                            )
+                          end)
+    
+    UT.TestCompare(function() return 
+                            not (
+                              string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC FuelTruck") and 
+                              string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC FuelTruck")
+                            )
+                          end)
       
     -- crates should be destroyed
     UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)

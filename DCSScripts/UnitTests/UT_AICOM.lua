@@ -585,11 +585,22 @@ UT.TestCase("AICOM", nil, nil,
         UT.TestCompare(function() return WAS_CALLBACK_CALLED end)
       end   
       --]]
+      
+      if true then
+        UT.Log("Enemy Pop Cap: " .. tostring(AICOM.CalculatePopulationCap(2)))
+        UT.TestCompare(function() return AICOM.CalculatePopulationCap(2) > 0 end)
+        
+        AICOM.Config.PopulationCap = 0
+        AICOM.DoTurn({}, 0)
+        UT.TestCompare(function() return KI.UTDATA.AICOM_POPCAP_REACHED end)
+        
+      end
     end,
     function()
       WAS_CALLBACK_CALLED = nil
       if UT.TestData.CallBackGroup then
         UT.TestData.CallBackGroup:Destroy()    
       end
+      AICOM.Config.PopulationCap = 20
     end)
   
