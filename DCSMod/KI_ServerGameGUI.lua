@@ -283,6 +283,7 @@ KIServer.JSON = JSON
 KIServer.LastOnFrameTimeInitCheck = 0         
 KIServer.LastOnFrameTime = 0
 KIServer.LastOnFrameTimeBanCheck = 0
+KIServer.LastOnFrameTimeHeartbeat = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
 KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\GameEvents"
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the TCP Server call will fail
@@ -305,9 +306,12 @@ KIServer.Actions.RequestServer = "GetOrAddServer"
 KIServer.Actions.IsPlayerBanned = "IsPlayerBanned"
 KIServer.Actions.BanPlayer = "BanPlayer"
 KIServer.Actions.UnbanPlayer = "UnbanPlayer"
+KIServer.Actions.SendHeartbeat = "SendHeartbeat"
 
-
-
+KIServer.FlagValues = {}
+KIServer.FlagValues.MISSION_READY_TO_RECEIVE = 1
+KIServer.FlagValues.MISSION_READY_TO_READ = 2
+KIServer.FlagValues.MISSION_RESTARTING = 3
 
 
 
@@ -403,8 +407,22 @@ function KIServer.RequestEndSession()
       return false
     end
   end
-    
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID, RealTimeEnd = DCS.getRealTime() })
+  
+  local _flagval = KIServer.GetFlagValue(KIServer.Flag)
+  local _status = "Offline"
+  
+  if _flagval == KIServer.FlagValues.MISSION_RESTARTING then
+    _status = "Restarting"
+  end
+  
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, 
+                { 
+                  ServerID = KIServer.Data.ServerID, 
+                  SessionID = KIServer.Data.SessionID, 
+                  RealTimeEnd = DCS.getRealTime(),
+                  ServerStatus = _status
+                })
+                
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 30) then
@@ -513,6 +531,7 @@ local function InitKIServerConfig()
     KIServer.Config.DataRefreshRate = _config["DataRefreshRate"]
     KIServer.Config.BanCheckRate = _config["BanCheckRate"]
     KIServer.Config.InitCheckRate = _config["InitCheckRate"]
+    KIServer.Config.HeartbeatCheckRate = _config["HeartbeatCheckRate"]
     KIServer.Config.TCPCheckReceiveRate = _config["TCPCheckReceiveRate"]
     KIServer.Config.ServerPlayerID = _config["ServerPlayerID"]
     KIServer.Config.ServerName = _config["ServerName"]
@@ -544,6 +563,7 @@ local function InitKIServerConfig()
     KIServer.Config.BanCheckRate = 300 -- how often should the server send request for banlist from TCP Server
     KIServer.Config.InitCheckRate = 5  -- how often should the server try to contact the TCP Server for session if it failed first time
     KIServer.Config.TCPCheckReceiveRate = 5 -- how often the server should try to receive data from TCP Server
+    KIServer.Config.HeartbeatCheckRate = 30 -- how often the server should contact the TCP server about it's connection status
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
     KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\Kaukasus Insurgency\Server\]]
@@ -1073,6 +1093,7 @@ KIHooks.onSimulationFrame = function()
     KIServer.LastOnFrameTime = 0
     KIServer.LastOnFrameTimeBanCheck = 0
     KIServer.LastOnFrameTimeInitCheck = 0
+    KIServer.LastOnFrameTimeHeartbeat = 0
     KIServer.Data.ServerID = KIServer.Null 
     KIServer.Data.SessionID = KIServer.Null 
     KIServer.Data.PendingPlayerInfoQueue = {}   
@@ -1098,7 +1119,7 @@ KIHooks.onSimulationFrame = function()
     KIServer.LastOnFrameTimeInitCheck = DCS.getModelTime()
     
     -- If the mission has sent the signal, continue processing
-    if KIServer.GetFlagValue(KIServer.Flag) == 1 then
+    if KIServer.GetFlagValue(KIServer.Flag) == KIServer.FlagValues.MISSION_READY_TO_RECEIVE then
       KIHooks.FirstTimeInit = false
       net.log("KIServer Init - Requesting Session Data")
       
@@ -1114,7 +1135,7 @@ KIHooks.onSimulationFrame = function()
           socket.try(KIServer.UDPSendSocket:sendto(msgdata, "127.0.0.1", KIServer.Config.SERVER_SESSION_SEND_TO_PORT))
           net.log("KIServer Init - Send UDP message to Game")
           -- This is a poor mans CriticalSection / Lock to prevent the game from attempting to read from the socket before the server has finished sending it
-          KIServer.SetFlagValue(KIServer.Flag, 2) -- notify the Game that the server has sent the data and it can attempt to receive it
+          KIServer.SetFlagValue(KIServer.Flag, KIServer.FlagValues.MISSION_READY_TO_READ) -- notify the Game that the server has sent the data and it can attempt to receive it
           net.log("KIServer Init - Set Flag to '2'")
           KIHooks.onPlayerConnect(1)  -- raise this event to force the server player connection to happen
         else
@@ -1128,8 +1149,9 @@ KIHooks.onSimulationFrame = function()
     end
   end
   
+  
+  -- Mission Data
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
-    
   if ElapsedTime >= KIServer.Config.DataRefreshRate and KIHooks.Initialized then
     KIServer.LastOnFrameTime = DCS.getModelTime()
     -- Try Receive Mission Side Data via UDP queue
@@ -1153,6 +1175,18 @@ KIHooks.onSimulationFrame = function()
     KIServer.TryProcessDBData()
   end
   
+  
+  -- Heartbeat
+  local ElapsedTimeHeartbeatCheck = DCS.getModelTime() - KIServer.LastOnFrameTimeHeartbeat
+  if ElapsedTimeHeartbeatCheck >= KIServer.Config.HeartbeatCheckRate and KIHooks.Initialized then
+    net.log("KIHooks.onSimulationFrame - Sending Heartbeat")
+    KIServer.LastOnFrameTimeHeartbeat = DCS.getModelTime()
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.SendHeartbeat, false, { ServerID = KIServer.Data.ServerID})
+    KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame - SendHeartbeat")
+  end
+  
+  
+  -- Ban Check
   local ElapsedTimeBanCheck = DCS.getModelTime() - KIServer.LastOnFrameTimeBanCheck
   if ElapsedTimeBanCheck >= KIServer.Config.BanCheckRate and KIHooks.Initialized then
     KIServer.LastOnFrameTimeBanCheck = DCS.getModelTime()
@@ -1164,7 +1198,7 @@ KIHooks.onSimulationFrame = function()
     end
     
     local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.IsPlayerBanned, true, UCIDList)
-    KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame")
+    KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame - IsPlayerBanned")
   end
 end
 
