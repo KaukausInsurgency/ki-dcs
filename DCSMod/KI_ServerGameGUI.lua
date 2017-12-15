@@ -735,6 +735,14 @@ function KIServer.TryProcessMissionData()
         
         if Data.OnlinePlayers then
           KIServer.UpdatePlayerLives(Data.OnlinePlayers)
+          local BulkPlayerUpdateRequest = {}
+          for pid, pinfo in pairs(KIServer.Data.OnlinePlayers) do
+            if pinfo and pinfo.Lives ~= KIServer.Null then 
+              table.insert(BulkPlayerUpdateRequest, KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo))
+            end      
+          end
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, true, BulkPlayerUpdateRequest)
+          KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.CapturePoints then
           net.log("KIServer.TryProcessMissionData() - got CapturePoints data from Mission - sending to TCP Server")
           local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, true, Data.CapturePoints)

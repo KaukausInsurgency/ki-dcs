@@ -622,9 +622,14 @@ function KI.Hooks.GameEventHandler:onEvent(event)
     elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
       -- we track the unit the player is in for things like depot resupply scoring and zone capture
       env.info("KI.Hooks.GameEventHandler - Player Enter Unit Raised")
+      if event.initiator == nil then
+        env.info("KI.Hooks.GameEventHandler - Player Enter Unit - initiator is nil")
+      end
       for pid, op in pairs(KI.Data.OnlinePlayers) do
         if op.Name == playerName then
+          env.info("KI.Hooks.GameEventHandler - Player Enter Unit - found player in collection")
           op.Unit = event.initiator
+          break
         end
       end
     elseif event.id == world.event.S_EVENT_MISSION_START then
