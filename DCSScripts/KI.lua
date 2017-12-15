@@ -148,6 +148,9 @@ local function StartKI()
   KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
   env.info("KI - Data Loaded")
   
+  
+  
+  
   timer.scheduleFunction(function(args, t)
     local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(1, t) end,
                                    function(err) env.info("KI.Scheduled.IsPlayerInZone ERROR : " .. err) end)
@@ -158,16 +161,88 @@ local function StartKI()
       return result
     end
   end, 1, timer.getTime() + KI.Config.PlayerInZoneCheckRate)
-  timer.scheduleFunction(KI.Scheduled.UpdateCPStatus, {}, timer.getTime() + KI.Config.CPUpdateRate)
-  timer.scheduleFunction(KI.Scheduled.CheckSideMissions, {}, timer.getTime() + KI.Config.SideMissionUpdateRate)
-  timer.scheduleFunction(KI.Scheduled.DataTransmissionPlayers, {}, timer.getTime() + KI.Config.DataTransmissionPlayerUpdateRate)
-  timer.scheduleFunction(KI.Scheduled.DataTransmissionGameEvents, {}, timer.getTime() + KI.Config.DataTransmissionGameEventsUpdateRate)
-  timer.scheduleFunction(KI.Scheduled.DataTransmissionGeneral, {}, timer.getTime() + KI.Config.DataTransmissionGeneralUpdateRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.UpdateCPStatus(args,t) end,
+                                   function(err) env.info("KI.Scheduled.UpdateCPStatus ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.CPUpdateRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.CPUpdateRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.CheckSideMissions(args,t) end,
+                                   function(err) env.info("KI.Scheduled.CheckSideMissions ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.SideMissionUpdateRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.SideMissionUpdateRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.DataTransmissionPlayers(args,t) end,
+                                   function(err) env.info("KI.Scheduled.DataTransmissionPlayers ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.DataTransmissionPlayerUpdateRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.DataTransmissionPlayerUpdateRate)
+
+
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.DataTransmissionGameEvents(args,t) end,
+                                   function(err) env.info("KI.Scheduled.DataTransmissionGameEvents ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.DataTransmissionGameEventsUpdateRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.DataTransmissionGameEventsUpdateRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.DataTransmissionGeneral(args,t) end,
+                                   function(err) env.info("KI.Scheduled.DataTransmissionGeneral ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.DataTransmissionGeneralUpdateRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.DataTransmissionGeneralUpdateRate)
+  
+  
   timer.scheduleFunction(function(args, time) 
-      KI.Loader.SaveData() 
-      return time + KI.Config.SaveMissionRate
-    end, {}, timer.getTime() + KI.Config.SaveMissionRate)
-  timer.scheduleFunction(AICOM.DoTurn, {}, timer.getTime() + AICOM.Config.TurnRate)
+    local success, result = xpcall(function() 
+          KI.Loader.SaveData() 
+          return time + KI.Config.SaveMissionRate 
+      end,
+      function(err) env.info("KI.Loader.SaveData ERROR : " .. err) end)
+      
+    if not success then
+      return t + KI.Config.SaveMissionRate
+    else
+      return result
+    end   
+  end, {}, timer.getTime() + KI.Config.SaveMissionRate)
+    
+    
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return AICOM.DoTurn(args,t) end,
+                                   function(err) env.info("AICOM.DoTurn ERROR : " .. err) end)
+    if not success then
+      return t + AICOM.Config.TurnRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + AICOM.Config.TurnRate)
+  
   env.info("KI - Scheduled functions created")
 
   world.addEventHandler(KI.Hooks.GameEventHandler)
