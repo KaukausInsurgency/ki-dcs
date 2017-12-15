@@ -88,8 +88,10 @@ function CP:Unfortify(resource, count)
     end
     self.Defenses[resource] = { qty = _dqty, cap = _cap } 
     msg = resource .. " was removed from " .. self.Name .. "! (Capacity: " .. tostring(_dqty) .. " / " .. tostring(_cap) .. ")"
+    result = true
   else
     msg = "Capture Point cannot be unfortified with this type of unit!"
+    result = false
   end
   return result, msg
 end

@@ -89,8 +89,10 @@ function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
       }
       _group.Units = {}
       local _first = true
+      local _groupActive = false
       for k, up in pairs(gp:getUnits()) do
-        if up:isExist() and up:getLife() > 0 and up:isActive() then
+        _groupActive = up:isActive()
+        if up:isExist() and up:getLife() > 0 and _groupActive then
           if _first then
             _group.Country = up:getCountry()
             _first = false
@@ -106,7 +108,9 @@ function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
           table.insert(_group.Units, _unit)
         end
       end
-      table.insert(byrefTable, _group)
+      if _groupActive then
+        table.insert(byrefTable, _group)
+      end
     end
   end
 end
@@ -415,6 +419,7 @@ function KI.Loader.SaveData()
   t.StaticObjects = KI.Loader.ExtractStaticData()
   t.GarbageCollectionQueue = GC.Queue
   t.SLC = {} 
+  t.SLCSpawnID = SLC.Config.SpawnID
   t.SLC.InfantryInstances = SLC.InfantryInstances
   t.SLC.CargoInstances = SLC.CargoInstances
   t.SLC.TransportInstances = SLC.TransportInstances
@@ -485,11 +490,18 @@ function KI.Loader.LoadData()
       KI.Data.SortieID = _dataTable["SortieID"]
     end
     
+    if not _dataTable["SLCSpawnID"] then
+      env.info("KI.Loader.LoadData ERROR - SLCSpawnID could not be found in file")
+      return false
+    else
+      SLC.Config.SpawnID = _dataTable["SLCSpawnID"]
+    end
+    
     if not _dataTable["SpawnID"] then
       env.info("KI.Loader.LoadData ERROR - SpawnID could not be found in file")
       return false
     else
-      KI.Data.SpawnID = _dataTable["SpawnID"] -- load the current SortieID saved in memory
+      KI.Data.SpawnID = _dataTable["SpawnID"] -- load the current SpawnID saved in memory
     end
     
     if not _dataTable["GameEventFileID"] then

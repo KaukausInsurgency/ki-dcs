@@ -13,7 +13,7 @@ end
 
 AICOM.Config = {}
 AICOM.Config.OnSpawnGroup = nil  -- callback method when the AI Commander spawns a unit (with arguments: MOOSE:GROUP and DCSVec3)
-AICOM.Config.TurnRate = 120     -- the rate at which the AI Commander can make moves/actions
+AICOM.Config.TurnRate = 600     -- the rate at which the AI Commander can make moves/actions
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
 AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
 AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn

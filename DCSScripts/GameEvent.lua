@@ -74,7 +74,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     targetName = dcs_event_obj.target:getName()
     target = dcs_event_obj.target:getTypeName()
     targetType = KI.Defines.UnitTypes[target] or KI.Null
-    targetCategory = KI.Defines.UnitCategories[dcs_event_obj.target:getCategory()]
+    targetCategory = KI.Defines.UnitCategories[dcs_event_obj.target:getCategory()] or KI.Null
     targetPlayerName = KI.Null
     if dcs_event_obj.target.getPlayerName then
       targetPlayerName = dcs_event_obj.target:getPlayerName() or KI.Null

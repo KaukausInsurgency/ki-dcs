@@ -24,7 +24,7 @@ function KI.IncrementSpawnID()
 end
 
 function KI.GenerateName(name)
-  return name .. tostring(KI.IncrementSpawnID())
+  return name .. " Spawn" .. tostring(KI.IncrementSpawnID())
 end
 
 function KI.IncrementSortieID()

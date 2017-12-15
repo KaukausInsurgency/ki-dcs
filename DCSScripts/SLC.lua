@@ -64,11 +64,16 @@ end
 -- GenerateName
 -- Generates a new name for the spawned group, and increments the spawnID counter
 function SLC.GenerateName(n)
-  SLC.Config.SpawnID = SLC.Config.SpawnID + 1
-  env.info("SLC.GenerateName - Returned (" .. n .. " " .. tostring(SLC.Config.SpawnID) .. ")")
-  return n .. " " .. tostring(SLC.Config.SpawnID)
+  return n .. " Spawn" .. tostring(SLC.IncrementSpawnID())
 end
 
+
+function SLC.IncrementSpawnID()
+  env.info("SLC.IncrementSpawnID called")
+  SLC.Config.SpawnID = SLC.Config.SpawnID + 1
+  env.info("SLC.IncrementSpawnID - New ID: " .. tostring(SLC.Config.SpawnID))
+  return SLC.Config.SpawnID
+end
 
 
 function SLC.InAir(obj)
@@ -252,7 +257,6 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   env.info("SLC.SpawnGroup Called")
   local spawnpos = Spatial.PositionAt12Oclock(g, 25)
   local SpawnVeh = SPAWN:NewWithAlias(infcomp.SpawnTemplate, SLC.GenerateName(infcomp.SpawnName))
-  --local SpawnVeh = SPAWN:New(grStruct.Template)
   --env.info("SLC.SpawnGroup gVec3 (x = " .. tostring(g:GetVec3().x) .. ", y = " .. tostring(g:GetVec3().y) .. ", z = " .. tostring(g:GetVec3().z) .. ")")
   --env.info("SLC.SpawnGroup spVec3 (x = " .. tostring(spawnpos.x) .. ", y = " .. tostring(spawnpos.y) .. ", z = " .. tostring(spawnpos.z) .. ")")
   local NewGroup = SpawnVeh:SpawnFromVec3(spawnpos)
@@ -376,11 +380,10 @@ function SLC.UnloadTroops(g, p)
     env.info("SLC.UnloadTroops - pilot " .. p .. " is not carrying any troops - aborting")
     return nil
   end
-  --assert(troopInfo.Group == nil, "ASSERT FAILED: GROUP WAS NOT NIL IN UNLOADTROOPS(g, p) CALL")
   
   local pos = Spatial.PositionAt12Oclock(g, SLC.Config.ObjectSpawnDistance)
   local SpawnVeh = SPAWN:NewWithAlias(troopInfo.SpawnTemplate, SLC.GenerateName(troopInfo.SpawnName))
-  local NewGroup = SpawnVeh:SpawnFromVec3(pos)
+  local NewGroup = SpawnVeh:SpawnFromVec3(pos, SLC.IncrementSpawnID())
   
   env.info("SLC.UnloadTroops - spawned unloaded group " .. NewGroup.GroupName .. " - adding to instance map")
   SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName)

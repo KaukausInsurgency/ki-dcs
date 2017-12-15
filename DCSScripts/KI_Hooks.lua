@@ -109,9 +109,7 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
         env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
         if _cp then
           local result, msg = _cp:Unfortify("Infantry", 1)
-          if not result then
-            trigger.action.outTextForGroup(_groupID, msg, 15, false)
-          end
+          trigger.action.outTextForGroup(_groupID, msg, 15, false)
           return result
         else
           return true
@@ -182,6 +180,9 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
         env.info("SLC.Config.PostOnRadioAction - troop instance was not found - doing nothing")
       end
     elseif parentAction == "Deploy Management" then
+      if actionName == "Check Cargo" then
+        return true
+      end
       env.info("SLC.Config.PostOnRadioAction - creating transport event")
       -- create the dismount event and raise it
       -- get the location - since you can only unload troops at a capture point, look for capture point
