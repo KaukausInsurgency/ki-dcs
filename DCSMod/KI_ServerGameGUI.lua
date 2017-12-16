@@ -1,6 +1,5 @@
 -- Mock objects for debugging outside of DCS
 
-local JSONPath = "\\Scripts\\JSON.lua"
 local IsMockTest = DCS == nil
 --net.log("KI_Server - IsMockTest Running: " .. tostring(IsMockTest))
 
@@ -235,8 +234,6 @@ if IsMockTest then
     DCS.onPlayerDisconnect(1, "Disconnected")
     DCS.onPlayerDisconnect(6, "Disconnected")
   end
-  
-  JSONPath = "S:\\Eagle Dynamics\\DCS World\\DCS World\\Scripts\\JSON.lua"
 end 
 -- END TEST MOCKUP DATA
 
@@ -252,8 +249,6 @@ end
 
 
 
-JSONPath = "D:\\DCS World 1.5\\Scripts\\JSON.lua"
-
 
 
 
@@ -264,13 +259,17 @@ net.log("KI Server Invoked - Starting KI Server Tools...")
 package.path  = package.path..";.\\LuaSocket\\?.lua;"
 package.cpath = package.cpath..";.\\LuaSocket\\?.dll;"
 
+local JSONPath = lfs.writedir() .. "Scripts\\JSON.lua"
 local _errormsg = ""
 net.log("JSON File Path: " .. JSONPath)
+
 local _JSONsuccess, JSON = xpcall(function() return loadfile(JSONPath)() end, function(err) _errormsg = err end)
 if _JSONsuccess and JSON then
   net.log("KI Server Tools - JSON Loaded")
 else
   net.log("KI Server Tools - ERROR Loading JSON: " .. _errormsg)
+  net.log("KI Server Tools has failed to load because JSON.lua could not be found.")
+  return nil
 end
 local _socket = require("socket")
 
