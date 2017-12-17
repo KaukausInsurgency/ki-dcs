@@ -12,7 +12,8 @@ KI.Data =
   SessionID = KI.Null,
   ServerID = KI.Null,
   GameEventFileID = 0,  
-  Waypoints = {}                      -- hash of ai ground waypoints
+  Waypoints = {},                     -- hash of ai ground waypoints
+  UnitIDs = {}                        -- hash of unit IDs in format [tostring(unit.id_)] = DCS Unit Obj
 }
 
 

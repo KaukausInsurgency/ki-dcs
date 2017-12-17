@@ -4,6 +4,91 @@ end
 
 KI.Scheduled = {}
 
+
+function KI.Scheduled.ScanForSlingloadEvents(args, time)
+  env.info("KI.Scheduled.ScanForSlingloadEvents called")
+  
+  local FilesToDelete = {}
+  local RawEvents = {}
+  for file in lfs.dir(KI.Config.PathSlingloadEvents) do
+    env.info("KI.Scheduled.ScanForSlingloadEvents - file : " .. file)
+    if string.match(file, ".lua") then 
+      env.info("KI.Scheduled.ScanForSlingloadEvents - unprocessed file found (File: " .. file .. ")")
+      local filePath = KI.Config.PathSlingloadEvents .. "\\" .. file
+      env.info("KI.Scheduled.ScanForSlingloadEvents - full file path : " .. filePath)
+      local _data, _err = loadfile(filePath)
+
+      if _data then
+        table.insert(RawEvents, _data())
+      else
+        env.info("KI.Scheduled.ScanForSlingloadEvents ERROR opening file (" .. filePath .. ") error: " .. _err)
+      end -- end data read
+      
+      table.insert(FilesToDelete, filePath)
+    end -- end string match .lua
+  end -- end for file iteration
+  
+  env.info("KI.Scheduled.ScanForSlingloadEvents - deleting files")
+  for i = 1, #FilesToDelete do
+    -- delete the file
+    os.remove(FilesToDelete[i])
+  end
+  
+  env.info("KI.Scheduled.ScanForSlingloadEvents - searching for player match")
+  for i = 1, #RawEvents do
+    
+    for uid, obj in pairs(KI.Data.UnitIDs) do
+    
+      local re = RawEvents[i]
+      env.info("KI.Scheduled.ScanForSlingloadEvents (op.id_: " .. uid .. ", HeliID: " .. re["HeliID"] .. ")")
+      if uid == re["HeliID"] then
+        
+        for c = 1, #SLC.CargoInstances do
+          env.info("KI.Scheduled.ScanForSlingloadEvents - matched heliID (" .. re["HeliID"] .. ")")
+          local cargo = SLC.CargoInstances[c]
+          if cargo.Object and cargo.Object.id_ then
+            env.info("KI.Scheduled.ScanForSlingloadEvents (cargo.Object.id_: " .. tostring(cargo.Object.id_) .. ", CargoID: " .. re["CargoID"] .. ")")
+            if tostring(cargo.Object.id_) == re["CargoID"] then
+              env.info("KI.Scheduled.ScanForSlingloadEvents - matched cargoID (" .. re["CargoID"] .. ")")
+              local e = {}
+              if re["Event"] == "HOOK" then
+                e.id = KI.Defines.Event.KI_EVENT_SLING_HOOK
+              elseif re["Event"] == "UNHOOK" then
+                e.id = KI.Defines.Event.KI_EVENT_SLING_UNHOOK
+              elseif re["Event"] == "UNHOOK_CRASH" then
+                e.id = KI.Defines.Event.KI_EVENT_SLING_UNHOOK_DESTROYED
+              end
+              
+              if e.id then
+                local cargo_name = "Cargo"
+                if cargo.Object:isExist() then         
+                  cargo_name = cargo.Object:getName()
+                end
+                e.initiator = obj
+                e.cargo = cargo_name
+                e.time = re["Time"]
+                env.info("KI.Scheduled.ScanForSlingloadEvents - raising slingload event")
+                KI.Hooks.GameEventHandler:onEvent(e)  -- raise the event
+              end
+              break
+            end
+          else
+            env.info("KI.Scheduled.ScanForSlingloadEvents - cargo.Object is nil, or cargo.Object.id_ is nil")
+          end
+          
+        end -- end for
+        
+        break
+      end -- end if heliID not nil
+      
+    end  -- end for
+    
+  end -- end for
+  
+end
+
+
+
 -- this function checks if players are inside any zones, and sends a message to them so that they know they are inside a zone
 function KI.Scheduled.IsPlayerInZone(side, time)
   env.info("KI.Scheduled.IsPlayerInZone called (side: " .. tostring(side) .. ", time: " .. tostring(time) .. ")")
@@ -327,6 +412,8 @@ end
 
 function KI.Scheduled.DataTransmissionGameEvents(args, time)
   env.info("DataTransmissionGameEvents called")
+  KI.Scheduled.ScanForSlingloadEvents(args, time)
+  
   if KI.Data.GameEventQueue and #KI.Data.GameEventQueue > 0 then
     local FilePath = KI.Config.PathGameEvents .. "\\GE_" .. KI.IncrementGameEventFileID() .. ".lua"
     env.info("DataTransmissionGameEvents - Generated File Path : " .. FilePath)

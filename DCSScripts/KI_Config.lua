@@ -49,8 +49,11 @@ KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
 -- path to saved game file
 KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
 
--- path to gameevents file
+-- path to gameevent files
 KI.Config.PathGameEvents = lfs.writedir() .. KI.Config.ParentFolder .. "GameEvents"
+
+-- path to slingload event files
+KI.Config.PathSlingloadEvents = lfs.writedir() .. KI.Config.ParentFolder .. "SlingloadEvents"
 
 -- IP Address of TCP Server - no function at this time
 KI.Config.TCPServerIP = "127.0.0.1"

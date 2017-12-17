@@ -88,7 +88,7 @@ namespace SlingloadEventsWatcher
                                 if (hash.ContainsKey(heliID))
                                 {
                                     Console.WriteLine("DCS: Player Hooked Cargo (heliID: " + heliID + ", cargoID: " + hash[heliID] + ")");
-                                    string luastring = "local t = {\n\t[\"Event\"] = \"HOOK\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + hash[heliID] + "\", [\"Time\"] = " + time + "\n}";
+                                    string luastring = "local t = {\n\t[\"Event\"] = \"HOOK\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + hash[heliID] + "\", [\"Time\"] = " + time + "\n}\nreturn t";
                                     File.WriteAllText(writePath + "\\sl_eh_" + filecount + ".lua", luastring);
                                     filecount++;
                                 }
@@ -106,7 +106,7 @@ namespace SlingloadEventsWatcher
                                 if (hash.ContainsKey(heliID))
                                 {
                                     Console.WriteLine("DCS: Player Unhooked Cargo (heliID: " + heliID + ", cargoID: " + hash[heliID] + ")");
-                                    string luastring = "local t = {\n\t[\"Event\"] = \"UNHOOK\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + hash[heliID] + "\", [\"Time\"] = " + time + "\n}";
+                                    string luastring = "local t = {\n\t[\"Event\"] = \"UNHOOK\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + hash[heliID] + "\", [\"Time\"] = " + time + "\n}\nreturn t";
                                     File.WriteAllText(writePath + "\\sl_eh_" + filecount + ".lua", luastring);
                                     filecount++;
                                 }
@@ -125,7 +125,7 @@ namespace SlingloadEventsWatcher
                                 {
                                     string heliID = hash.FirstOrDefault(x => x.Value == cargoID).Key;
                                     Console.WriteLine("DCS: Player Destroyed Cargo (heliID: " + heliID + ", cargoID: " + cargoID + ")");
-                                    string luastring = "local t = {\n\t[\"Event\"] = \"UNHOOK_CRASH\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + cargoID + "\", [\"Time\"] = " + time + "\n}";
+                                    string luastring = "local t = {\n\t[\"Event\"] = \"UNHOOK_CRASH\", [\"HeliID\"] = \"" + heliID + "\", [\"CargoID\"] = \"" + cargoID + "\", [\"Time\"] = " + time + "\n}\nreturn t";
                                     File.WriteAllText(writePath + "\\sl_eh_" + filecount + ".lua", luastring);
                                     filecount++;
                                 }

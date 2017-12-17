@@ -624,14 +624,12 @@ function KI.Hooks.GameEventHandler:onEvent(event)
       env.info("KI.Hooks.GameEventHandler - Player Enter Unit Raised")
       if event.initiator == nil then
         env.info("KI.Hooks.GameEventHandler - Player Enter Unit - initiator is nil")
+      elseif event.initiator.id_ == nil then
+        env.info("KI.Hooks.GameEventHandler - Player Enter Unit - initiator.id_ is nil")
       end
-      for pid, op in pairs(KI.Data.OnlinePlayers) do
-        if op.Name == playerName then
-          env.info("KI.Hooks.GameEventHandler - Player Enter Unit - found player in collection")
-          op.Unit = event.initiator
-          break
-        end
-      end
+      
+      env.info("Player Enter Unit - initiator.id_ = " .. tostring(event.initiator.id_))
+      KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator
     elseif event.id == world.event.S_EVENT_MISSION_START then
     
     elseif event.id == world.event.S_EVENT_BIRTH and playerName then
@@ -660,6 +658,16 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                   )
     elseif event.id == KI.Defines.Event.KI_EVENT_DEPOT_RESUPPLY and playerName then
       env.info("KI.Hooks.GameEventHandler - Depot Resupply Event raised")
+      table.insert(KI.Data.GameEventQueue, 
+                   GameEvent.CreateGameEvent(KI.Data.SessionID, 
+                                             KI.Data.ServerID, 
+                                             event, 
+                                             timer.getTime()) 
+                  )
+    elseif (event.id == KI.Defines.Event.KI_EVENT_SLING_HOOK or 
+            event.id == KI.Defines.Event.KI_EVENT_SLING_UNHOOK or
+            event.id == KI.Defines.Event.KI_EVENT_SLING_UNHOOK_DESTROYED) and playerName then
+      env.info("KI.Hooks.GameEventHandler - Slingload Event raised")
       table.insert(KI.Data.GameEventQueue, 
                    GameEvent.CreateGameEvent(KI.Data.SessionID, 
                                              KI.Data.ServerID, 
