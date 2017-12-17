@@ -39,12 +39,14 @@ namespace SlingloadEventsWatcher
             string CargoCrashString = "DCS: cargoCrashed:";
 
             AutoResetEvent wh = new AutoResetEvent(false);
-            FileSystemWatcher fsw = new FileSystemWatcher(args[0])
+            FileSystemWatcher fsw = new FileSystemWatcher(path)
             {
                 Filter = "dcs.log",
                 EnableRaisingEvents = true
             };
             fsw.Changed += (s, e) => wh.Set();
+
+            Console.WriteLine("Watching for slingload events in dcs.log...");
 
             FileStream fs = new FileStream(path + "\\dcs.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using (var sr = new StreamReader(fs))
@@ -52,12 +54,26 @@ namespace SlingloadEventsWatcher
                 string s = "";
                 Dictionary<string, string> hash = new Dictionary<string, string>();
                 int filecount = 0;
+                long filesize = fs.Length;
                 while (true)
                 {
-                    while(true)
+                    // if the file size has been reduced (ie because DCS restart) then reset the stream position back to 0 to read from the beginning of the file again
+                    if (fs.Length < filesize)
+                    {
+                        Console.WriteLine("dcs.log has been refreshed - detecting DCS start up");
+                        fs.Seek(0, SeekOrigin.Begin);
+                        filesize = fs.Length;
+                    }
+                    else if (fs.Length > filesize)
+                    {
+                        filesize = fs.Length;
+                        Console.WriteLine("dcs.log size: " + filesize + " bytes");
+                    }
+
+                    while (true)
                     {
                         try
-                        {              
+                        {                                 
                             s = sr.ReadLine();
                             if (s == null)
                                 break;
@@ -142,7 +158,7 @@ namespace SlingloadEventsWatcher
                         }
                     }
                     
-                    wh.WaitOne(1000);
+                    wh.WaitOne(10000);  // timeout of 10 seconds if file has not changed
                 }
             }
 
