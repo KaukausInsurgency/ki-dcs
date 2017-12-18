@@ -28,6 +28,7 @@ AICOM.Enum.Actions =
 
 AICOM.CurrentMoney = AICOM.Config.InitResource
 AICOM.MovesRemaining = AICOM.Config.InitMoves
+AICOM.AmbushZones = {}
 
 function AICOM.Init()
   env.info("AICOM.Init() Called")
@@ -58,6 +59,11 @@ function AICOM.Init()
   AICOM.ForcesGNDCostSorted = KI.Toolbox.DeepCopy(AICOM.Config.Forces)
   table.sort(AICOM.ForcesAACostSorted, sortCostAA)
   table.sort(AICOM.ForcesGNDCostSorted, sortCostGND)
+  
+  env.info("AICOM.Init() - Initializing Ambush Zones")
+  for i = 1, #AICOM.Config.AmbushZones do
+    table.insert(AICOM.AmbushZones, ZONE:New(AICOM.Config.AmbushZones[i]))
+  end
 end
 
 function AICOM.CalculatePopulationCap(side)
@@ -367,6 +373,89 @@ end
 --
 
 
+function AICOM.SpawnAmbush(AAGroups, GNDGroups, ambushzone)
+  env.info("AICOM.SpawnAmbush called")
+  local _moneySpent = 0
+  
+  -- iterate over the AA Force Groups
+  for i = 1, #AAGroups do
+    local _grp = AAGroups[i]
+    _moneySpent = _moneySpent + _grp.Cost
+    env.info("AICOM.SpawnAmbush - _grp : " .. _grp.Name)
+    -- iterate over template groups and spawn them
+    for t = 1, #_grp.Templates do
+      local _template = _grp.Templates[t]
+      local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
+                          :OnSpawnGroup(function( spawngrp ) 
+                            env.info("AICOM.SpawnAmbush - OnSpawnGroup called (AA)")                        
+                            if AICOM.Config.OnSpawnGroup then
+                              env.info("AICOM.SpawnAmbush - callback found")
+                              AICOM.Config.OnSpawnGroup(spawngrp, nil)
+                            end
+                          end)
+      local NewGroup = SpawnObj:SpawnInZone(ambushzone, true)
+      if NewGroup ~= nil then
+        env.info("AICOM.SpawnAmbush - Successfully spawned AA group " .. _template .. " in zone " .. ambushzone:GetName())
+        env.info("AICOM.SpawnAmbush - Adding group to GC Queue")
+        local gc_item = GCItem:New(NewGroup.GroupName, 
+                                NewGroup, 
+                                function(obj)
+                                  return obj:IsAlive()
+                                end,
+                                function(obj)
+                                  return obj:Destroy()
+                                end,
+                                nil, nil, nil, nil, AICOM.Config.AmbushTime)
+      
+        GC.Add(gc_item)
+      else
+        env.info("AICOM.SpawnAmbush - ERROR - Failed to spawn AA group " .. _template .. " in zone " .. ambushzone:GetName())
+      end
+    end
+  end
+  
+  -- iterate over ground forces
+  for i = 1, #GNDGroups do
+    local _grp = GNDGroups[i]
+    _moneySpent = _moneySpent + _grp.Cost
+    
+    -- iterate over all template groups and spawn them
+    for t = 1, #_grp.Templates do
+      local _template = _grp.Templates[t]
+      local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
+                          :OnSpawnGroup(function( spawngrp ) 
+                            env.info("AICOM.SpawnAmbush - OnSpawnGroup called (GND)")
+                            if AICOM.Config.OnSpawnGroup then
+                              env.info("AICOM.SpawnAmbush - callback found")
+                              AICOM.Config.OnSpawnGroup(spawngrp, nil)
+                            end
+                          end)
+      local NewGroup = SpawnObj:SpawnInZone(ambushzone, true)
+      if NewGroup ~= nil then
+        env.info("AICOM.SpawnAmbush - Successfully spawned GND group " .. _template .. " in zone " .. ambushzone:GetName())
+        env.info("AICOM.SpawnAmbush - Adding group to GC Queue")
+        local gc_item = GCItem:New(NewGroup.GroupName, 
+                                NewGroup, 
+                                function(obj)
+                                  return obj:IsAlive()
+                                end,
+                                function(obj)
+                                  return obj:Destroy()
+                                end,
+                                nil, nil, nil, nil, AICOM.Config.AmbushTime)
+      
+        GC.Add(gc_item)
+      else
+        env.info("AICOM.SpawnAmbush - ERROR - Failed to spawn GND group " .. _template .. " in zone " .. ambushzone:GetName())
+      end
+    end
+  end
+  
+  env.info("AICOM.Spawn - Total Money Spent : " .. tostring(_moneySpent))
+  return _moneySpent
+end
+
+
 
 -- NOTE: parameter cost is unused in this function - consider removing
 function AICOM.PerformAction(action, cost, capturepoint)
@@ -377,7 +466,8 @@ function AICOM.PerformAction(action, cost, capturepoint)
   local _buyGNDUnits = AICOM.TryBuyGND(_willingToPay.GND)
   
   if action == AICOM.Enum.Actions.Ambush then
-    
+    env.info("AICOM.PerformAction - AI is setting up ambush")
+    _moneySpent = AICOM.SpawnAmbush(_buyAAUnits, _buyGNDUnits, capturepoint)
   else
     _moneySpent = AICOM.Spawn(_buyAAUnits, _buyGNDUnits, capturepoint)
   end
@@ -435,8 +525,8 @@ function AICOM.DoTurn(args, time)
       _cp = _cpAnalysis[_keys[_keyIndex]].CapturePoint
     else
       if not _ambushWasDone and (AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability) then 
-        _cp = AICOM.Config.AmbushPoints[AICOM.Config.Random(#AICOM.Config.AmbushPoints)]
-        _cost = 10
+        _cp = AICOM.AmbushZones[AICOM.Config.Random(#AICOM.AmbushZones)]
+        _cost = AICOM.Config.AmbushCost
         _action = AICOM.Enum.Actions.Ambush
         _ambushWasDone = true
       else 

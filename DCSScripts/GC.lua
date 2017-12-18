@@ -3,7 +3,7 @@
 
 GC = {}
 GC.Queue = {}
-GC.LoopRate = 60 --KI.Toolbox.HoursToSeconds(0.083)  -- check every 5 minutes
+GC.LoopRate = 60 -- call GC monitor every minute
 GC.OnDespawn = nil  -- external callback function that passes parameter (gcItem.Name) as parameter
 --GC.OnLifeExpired = nil -- external callback function that passes parameter (gcItem) prior to garbage collection
 

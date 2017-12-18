@@ -186,7 +186,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=276 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=296 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,7 +222,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1174 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1273 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -275,7 +275,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=474 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=485 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1007,7 +1007,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SendHeartbeat`(
 		IN ServerID INT
     )
 BEGIN
-	UPDATE ki.server SET last_heartbeat = NOW() WHERE server_id = ServerID;
+	UPDATE ki.server SET last_heartbeat = NOW(), status = "Online" WHERE server_id = ServerID;
 	SELECT 1;
 END ;;
 DELIMITER ;
@@ -1285,4 +1285,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-15 15:56:07
+-- Dump completed on 2017-12-17 20:56:54

@@ -10,8 +10,10 @@ KI.Hooks = {}
 function KI.Hooks.AICOMOnSpawnGroup(moosegrp, v2)
   local success, result = xpcall(function()
     env.info("KI.Hooks.AICOMOnSpawnGroup called")
-    KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y, z = v2.z }      -- save the group name and waypoint information
-    KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true     -- this has no function in game, but is used in Unit Tests
+    if v2 then
+      KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y, z = v2.z }      -- save the group name and waypoint information
+      KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true     -- this has no function in game, but is used in Unit Tests
+    end
     end, function(err) env.info("KI.Hooks.AICOMOnSpawnGroup - ERROR - " .. err) end)
 end
 
@@ -551,12 +553,14 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                   )
                   
           
-          local placeName = event.place:getName() or "Ground"
-          
-          local _groupID = 1
+          local placeName = "Ground"
+          if event.place and event.place.getName then
+            placeName = event.place:getName()
+          end
+
           local _group = event.initiator:getGroup()
           if _group then
-            _groupID = _group:getID()
+            local _groupID = _group:getID()
             local msg = "_______________________________________________________________________________________________________\n\n"
             msg = msg .. "  Have a good flight "..playerName.."\n\n"
             msg = msg .. "  You took off from "..placeName..".\n\n"
