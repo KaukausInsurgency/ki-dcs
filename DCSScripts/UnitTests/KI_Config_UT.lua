@@ -65,7 +65,7 @@ KI.Config.ServerName = "My Kaukasus Insurgency Server"
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "TestCPKIQuery", zone = "TestCPKIQueryZone", spawnzone = "TestCPKIQueryZone" }
+  { name = "TestCPKIQuery", zone = "TestCPKIQueryZone", spawnzone1 = "TestCPKIQueryZone", type = "CAPTUREPOINT" }
 }
 
 -- configures side missions and their properties

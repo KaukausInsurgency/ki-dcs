@@ -336,20 +336,22 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         index = index + 1
         table.insert(CapturePointSegments, {})
       end
+      local _cp = KI.Data.CapturePoints[i]
         
       local data = 
       { 
         ServerID = KI.Data.ServerID, 
-        Name = KI.Data.CapturePoints[i].Name,
-        Type = KI.Data.CapturePoints[i].Type,
-        Status = KI.Data.CapturePoints[i]:GetOwnership(),
-        BlueUnits = KI.Data.CapturePoints[i].BlueUnits,
-        RedUnits = KI.Data.CapturePoints[i].RedUnits,    
-        ResourceString = KI.Data.CapturePoints[i]:GetResourceEncoded(),
-        LatLong = KI.Data.CapturePoints[i].Position.LatLong,
-        MGRS = KI.Data.CapturePoints[i].Position.MGRS,
-        X = KI.Data.CapturePoints[i].Position.X,
-        Y = KI.Data.CapturePoints[i].Position.Y
+        Name = _cp.Name,
+        Type = _cp.Type,
+        Status = _cp:GetOwnership(),
+        BlueUnits = _cp.BlueUnits,
+        RedUnits = _cp.RedUnits,    
+        ResourceString = _cp:GetResourceEncoded(),
+        Text = _cp.Text or KI.Null,
+        LatLong = _cp.Position.LatLong,
+        MGRS = _cp.Position.MGRS,
+        X = _cp.Position.X,
+        Y = _cp.Position.Y
       }
       table.insert(CapturePointSegments[index], data)
     end
@@ -366,19 +368,19 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           index = index + 1
           table.insert(DepotSegments, {})
         end
-        
+      local _depot = KI.Data.Depots[i]
       local data = 
       { 
         ServerID = KI.Data.ServerID, 
-        Name = KI.Data.Depots[i].Name,
+        Name = _depot.Name,
         Status = "Online",
-        ResourceString = KI.Data.Depots[i]:GetResourceEncoded(),
-        CurrentCapacity = KI.Data.Depots[i].CurrentCapacity,
-        Capacity = KI.Data.Depots[i].Capacity,
-        LatLong = KI.Data.Depots[i].Position.LatLong,
-        MGRS = KI.Data.Depots[i].Position.MGRS,
-        X = KI.Data.Depots[i].Position.X,
-        Y = KI.Data.Depots[i].Position.Y
+        ResourceString = _depot:GetResourceEncoded(),
+        CurrentCapacity = _depot.CurrentCapacity,
+        Capacity = _depot.Capacity,
+        LatLong = _depot.Position.LatLong,
+        MGRS = _depot.Position.MGRS,
+        X = _depot.Position.X,
+        Y = _depot.Position.Y
       }
       table.insert(DepotSegments[index], data)
     end

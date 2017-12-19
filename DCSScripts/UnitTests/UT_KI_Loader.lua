@@ -195,7 +195,7 @@ function()
     }
   }
   UT.TestData.Depot = DWM:New("Test Depot", "Test Depot Zone")
-  UT.TestData.CapturePoint = CP:New("Test CP", "TestCPZone", "TestCPZone")
+  UT.TestData.CapturePoint = CP:New("Test CP", "TestCPZone", CP.Enum.CAPTUREPOINT, "TestCPZone")
   table.insert(KI.Data.Depots, UT.TestData.Depot)
   table.insert(KI.Data.CapturePoints, UT.TestData.CapturePoint)
   UT.TestData.cpExtract =

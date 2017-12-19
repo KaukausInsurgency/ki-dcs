@@ -38,6 +38,7 @@ CREATE TABLE `capture_point` (
   `x` double NOT NULL DEFAULT '0',
   `y` double NOT NULL DEFAULT '0',
   `image` varchar(132) NOT NULL,
+  `text` varchar(900) DEFAULT NULL,
   PRIMARY KEY (`capture_point_id`),
   KEY `FK_CP_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_CP_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
@@ -186,7 +187,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=296 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=304 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -275,7 +276,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=485 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=489 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -642,6 +643,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateCapturePoint`(
         IN LatLong VARCHAR(30),
         IN MGRS VARCHAR(20),
         IN ResourceString VARCHAR(900),
+        IN Text VARCHAR(900),
         IN X DOUBLE,
         IN Y DOUBLE
 	)
@@ -656,6 +658,7 @@ BEGIN
             capture_point.latlong = LatLong,
             capture_point.mgrs = MGRS,
             capture_point.resources = ResourceString,
+            capture_point.text = Text,
             capture_point.x = X,
             capture_point.y = Y,
             capture_point.image = fnc_GetCapturePointImage(BlueUnits, RedUnits, Type)
@@ -664,10 +667,10 @@ BEGIN
 		INSERT INTO capture_point 
         (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, 
          capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.resources,
-         capture_point.x, capture_point.y, capture_point.image, capture_point.type)
+         capture_point.text, capture_point.x, capture_point.y, capture_point.image, capture_point.type)
         VALUES (ServerID, Name, LatLong, MGRS, 
 				Status, BlueUnits, RedUnits, ResourceString,
-				X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits, Type), Type);
+				Text, X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits, Type), Type);
     END IF;
     SELECT 1;
 END ;;
@@ -1090,6 +1093,7 @@ BEGIN
             c.latlong as LatLong,
             c.mgrs as MGRS,
             c.resources as Resources,
+            c.text as Text,
             c.status as Status,
             c.blue_units as BlueUnits,
             c.red_units as RedUnits,
@@ -1285,4 +1289,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-17 20:56:54
+-- Dump completed on 2017-12-19  4:42:29

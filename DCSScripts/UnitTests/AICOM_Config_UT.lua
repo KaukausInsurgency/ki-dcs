@@ -19,40 +19,10 @@ AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commande
 AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
 AICOM.Config.PopulationCap = 20     -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
 AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
-AICOM.Config.AmbushPoints = {}
+AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
+-- collection of zones the AI will randomly select for an ambush
+AICOM.Config.AmbushZones = {}       
+AICOM.Config.AmbushCost = 30        -- max cost the AI will spend on an ambush action
+AICOM.Config.AmbushTime = KI.Toolbox.MinutesToSeconds(30) -- the amount of time the units will wait in the ambush zone before being despawned
 
-AICOM.Config.Forces =
-{
-  {
-    Name = "Infantry Platoon",
-    Templates = { "InsInfSqdA", "InsInfSqdB", "InsInfSqdA", "InsInfSqdA" }, -- group templates to use
-    Cost = 30,            -- cost to play / use
-    Strength = 40,        -- Strength in number of units generated
-    AAEffectiveness = 5,  -- Effectiveness against air units
-    GNDEffectiveness = 20 -- Effectiveness against ground units
-  },
-  {
-    Name = "MANPAD Section",
-    Templates = { "InsMANPADSqd", "InsMANPADSqd", "InsInfSqdA" },
-    Cost = 15,
-    Strength = 16,
-    AAEffectiveness = 75,
-    GNDEffectiveness = 5
-  },
-  {
-    Name = "Tank Platoon",
-    Templates = { "InsTankPlt1", "InsTankPlt1" },
-    Cost = 20,
-    Strength = 8,
-    AAEffectiveness = 15,
-    GNDEffectiveness = 45
-  },
-  {
-    Name = "BMP Platoon",
-    Templates = { "InsMechPlt1", "InsMechPlt2" },
-    Cost = 20,
-    Strength = 8,
-    AAEffectiveness = 25,
-    GNDEffectiveness = 25
-  },
-}
+AICOM.Config.Forces = {}

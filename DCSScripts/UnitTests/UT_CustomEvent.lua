@@ -8,7 +8,7 @@ end,
 function() 
   UT.TestData.PlayerUnit = Unit.getByName("SLCPilot1")
   UT.TestData.SimpleTable = { Name = "SimpleTable" }
-  UT.TestData.CP = CP:New(KI.Config.CP[1].name, KI.Config.CP[1].zone, KI.Config.CP[1].spawnzone)
+  UT.TestData.CP = CP:New(KI.Config.CP[1].name, KI.Config.CP[1].zone, CP.Enum.CAPTUREPOINT, KI.Config.CP[1].spawnzone1)
   UT.TestData.Depot = DWM:New("Test Depot", "Test Depot Zone", 7200, 150, true)
 end,
 function()

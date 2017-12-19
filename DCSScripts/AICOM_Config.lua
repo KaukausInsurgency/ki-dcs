@@ -15,10 +15,10 @@ AICOM.Config = {}
 AICOM.Config.OnSpawnGroup = nil  -- callback method when the AI Commander spawns a unit (with arguments: MOOSE:GROUP and DCSVec3)
 AICOM.Config.TurnRate = 600     -- the rate at which the AI Commander can make moves/actions
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
-AICOM.Config.InitResource = 100 -- the number of units/resources the AI Commander has access to per turn
-AICOM.Config.PopulationCap = 80     -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
+AICOM.Config.InitResource = 125 -- the number of units/resources the AI Commander has access to per turn
+AICOM.Config.PopulationCap = 100    -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
 AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
-AICOM.Config.AmbushProbability = 10 -- the probability of the AI doing an ambush action on it's third turn
+AICOM.Config.AmbushProbability = 25 -- the probability of the AI doing an ambush action on it's third turn
 
 -- collection of zones the AI will randomly select for an ambush
 AICOM.Config.AmbushZones = 
@@ -40,34 +40,46 @@ AICOM.Config.Forces =
 {
   {
     Name = "Infantry Platoon",
-    Templates = { "InsInfSqdA", "InsInfSqdB", "InsInfSqdA", "InsInfSqdA" }, -- group templates to use
-    Cost = 30,            -- cost to play / use
-    Strength = 40,        -- Strength in number of units generated
-    AAEffectiveness = 5,  -- Effectiveness against air units
-    GNDEffectiveness = 20 -- Effectiveness against ground units
+    Templates = { "InsInfSqdA", "InsInfSqdB" }, -- group templates to use
+    Cost = 30,              -- cost to play / use
+    Strength = 20,          -- Strength in number of units generated
+    AAEffectiveness = 5,    -- Effectiveness against air units
+    GNDEffectiveness = 20,  -- Effectiveness against ground units
+    SpawnZone = 2,          -- Which spawn zone will be selected (values are either 1 or 2) - these link to CP.SpawnZone1 and CP.SpawnZone2
+    Formation = "Off Road", -- When spawned, the waypoint formation to use
+    Speed = 10              -- When spawned, the waypoint speed
   },
   {
     Name = "MANPAD Section",
-    Templates = { "InsMANPADSqd", "InsMANPADSqd", "InsInfSqdA" },
+    Templates = { "InsMANPADSqd", "InsMANPADSqd" },
     Cost = 15,
-    Strength = 16,
+    Strength = 6,
     AAEffectiveness = 75,
-    GNDEffectiveness = 5
+    GNDEffectiveness = 5,
+    SpawnZone = 2,
+    Formation = "Off Road",
+    Speed = 10
   },
   {
     Name = "Tank Platoon",
-    Templates = { "InsTankPlt1", "InsTankPlt1" },
+    Templates = { "InsTankPlt1" },
     Cost = 20,
-    Strength = 8,
+    Strength = 4,
     AAEffectiveness = 15,
-    GNDEffectiveness = 45
+    GNDEffectiveness = 45,
+    SpawnZone = 1,
+    Formation = "On Road",
+    Speed = 30
   },
   {
     Name = "BMP Platoon",
     Templates = { "InsMechPlt1", "InsMechPlt2" },
-    Cost = 20,
+    Cost = 17,
     Strength = 8,
     AAEffectiveness = 25,
-    GNDEffectiveness = 25
+    GNDEffectiveness = 25,
+    SpawnZone = 1,
+    Formation = "On Road",
+    Speed = 30
   },
 }

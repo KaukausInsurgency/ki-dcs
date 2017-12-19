@@ -92,26 +92,33 @@ KI.Config.Templates =
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone = "Beslan Airport Spawn Zone", type = "AIRPORT" },
-  { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone = "Spawn Zone B", type = "AIRPORT" },
+  { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone1 = "Beslan Vehicle Spawn", spawnzone2 = "Beslan Infantry Spawn", 
+    type = "AIRPORT", text = "Tower Frequencies<br/>  - 141.000 MHz<br/>  - 42.400 MHz<br/>  - 270.000 MHz<br/>  - 4.750 MHz" },
+  { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
+    type = "AIRPORT", text = "Tower Frequencies<br/>  - 136.000 MHz<br/>  - 41.400 MHz<br/>  - 265.000 MHz<br/>  - 4.500 MHz" },
   
-  { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone = "Vladikavkaz City Spawn Zone", type = "FARP" },
-  { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone = "Spawn Zone C", type = "FARP" },
+  { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "FARP Skala Infantry Spawn", 
+    type = "FARP", text = "Tower Frequency - 127.500 MHz AM" },
+  { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone1 = "FARP Vetka Vehicle Spawn", spawnzone2 = "FARP Vetka Infantry Spawn",
+    type = "FARP", text = "Tower Frequency - 133.500 MHz AM" },
   
-  { name = "Zamankul City", zone = "Zamankul Zone", spawnzone = "Zamankul Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Chikola City", zone = "Chikola City Zone", spawnzone = "Chikola City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Tskhinvali City", zone = "Tskhinvali City Zone", spawnzone = "Tskhinvali City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Java Village", zone = "Java Zone", spawnzone = "Java Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Mizur Village", zone = "Mizur Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Buron Village", zone = "Buron Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Alagir City", zone = "Alagir City Zone", spawnzone = "Alagir City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Vladikavkaz City", zone = "Vladikavkaz City Zone", spawnzone = "Vladikavkaz City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Beslan City", zone = "Beslan City Zone", spawnzone = "Beslan City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Digora City", zone = "Digora City Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Kirovo City", zone = "Kirovo City Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Kazbegi Village", zone = "Kazbegi Zone", spawnzone = "Spawn Zone A", type = "CAPTUREPOINT" },
-  { name = "Garbani Village", zone = "Garbani Zone", spawnzone = "Kirovo City Spawn Zone", type = "CAPTUREPOINT" },
-  { name = "Zhemtala Village", zone = "Zhemtala Zone", spawnzone = "Spawn Zone B", type = "CAPTUREPOINT" }
+  
+  
+  { name = "Tskhinvali City", zone = "Tskhinvali City Zone", spawnzone1 = "Tskhinvali City Spawn Zone", spawnzone2 = "Tskhinvali City Spawn Zone", type = "CAPTUREPOINT"},
+  { name = "Java Village", zone = "Java Zone", spawnzone1 = "Java Spawn Zone", spawnzone2 = "Java Spawn Zone", type = "CAPTUREPOINT"},
+  
+  { name = "Kazbegi Village", zone = "Kazbegi Zone", spawnzone1 = "Kazbegi Vehicle Spawn", spawnzone2 = "Kazbegi Infantry Spawn", type = "CAPTUREPOINT"},
+  { name = "Garbani Village", zone = "Garbani Zone", spawnzone1 = "Garbani Vehicle Spawn", spawnzone2 = "Garbani Infantry Spawn", type = "CAPTUREPOINT" },
+  { name = "Mizur Village", zone = "Mizur Zone", spawnzone1 = "Vehicle Spawn B", spawnzone2 = "Infantry Spawn A", type = "CAPTUREPOINT"},
+  { name = "Buron Village", zone = "Buron Zone", spawnzone1 = "Vehicle Spawn B", spawnzone2 = "Infantry Spawn A", type = "CAPTUREPOINT"},
+  { name = "Zamankul City", zone = "Zamankul Zone", spawnzone1 = "Zamankul Vehicle Spawn", spawnzone2 = "Zamankul Infantry Spawn", type = "CAPTUREPOINT"},
+  { name = "Vladikavkaz City", zone = "Vladikavkaz City Zone", spawnzone1 = "Vladikavkaz Vehicle Spawn", spawnzone2 = "Vladikavkaz Infantry Spawn", type = "CAPTUREPOINT"},
+  { name = "Chikola City", zone = "Chikola City Zone", spawnzone1 = "Chikola Vehicle Spawn", spawnzone2 = "Chikola Infantry Spawn", type = "CAPTUREPOINT"},
+  { name = "Alagir City", zone = "Alagir City Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "Alagir Infantry Zone", type = "CAPTUREPOINT"},
+  { name = "Digora City", zone = "Digora City Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "Digora Infantry Spawn", type = "CAPTUREPOINT" },
+  { name = "Kirovo City", zone = "Kirovo City Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "Kirovo Infantry Spawn", type = "CAPTUREPOINT" },
+  { name = "Beslan City", zone = "Beslan City Zone", spawnzone1 = "Beslan Vehicle Spawn", spawnzone2 = "Beslan Infantry Spawn", type = "CAPTUREPOINT" },
+  { name = "Zhemtala Village", zone = "Zhemtala Zone", spawnzone1 = "Zhemtala Vehicle Spawn", spawnzone2 = "Zhemtala Infantry Spawn", type = "CAPTUREPOINT" }
 }
 
 -- configures side missions and their properties

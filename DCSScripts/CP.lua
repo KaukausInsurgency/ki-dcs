@@ -8,32 +8,40 @@ CP =
 {
   Enum = { CAPTUREPOINT = "CAPTUREPOINT", AIRPORT = "AIRPORT", FARP = "FARP"},
   Defenses = {},        -- map based on key["DefenseType"] = [qty, cap]
-  Type = "",             -- the type of capture point
+  Type = "",            -- the type of capture point
   Name = "",            -- name of the capture zone in mission editor
   Zone = nil,           -- Mission Editor Trigger Zone
   BlueUnits = 0,
   RedUnits = 0,
   Owner = "",
-  SpawnZone = nil,      -- zone where units ai units are spawned for attacking
-  Position = {}
+  SpawnZone1 = nil,     -- zone where units ai units are spawned for attacking
+  SpawnZone2 = nil,
+  Position = {},
+  Text = nil            -- extra text information that will be displayed on website
 }
 
-function CP:New(name, zone, spawnZone, type)
+function CP:New(name, zone, type, spawnzone1, spawnzone2, text)
   env.info("CP:New called")
   local self = KI.Toolbox.DeepCopy(CP)
 
-	if self ~= nil then
-		setmetatable( self, CP )
-		self.__index = self	
-	end
+  if self ~= nil then
+    setmetatable( self, CP )
+    self.__index = self 
+  end
   
   self.Name = name
   self.Zone = ZONE:New(zone)
-  if spawnZone then
-    self.SpawnZone = ZONE:New(spawnZone)
-  end
   self.Type = type or CP.Enum.CAPTUREPOINT
   self.Position = LOCPOS:NewFromZone(self.Zone)
+  if spawnzone1 then
+    self.SpawnZone1 = ZONE:New(spawnzone1)
+  end
+  if spawnzone2 then
+    self.SpawnZone2 = ZONE:New(spawnzone2)
+  end
+  if text then
+    self.Text = text
+  end
   return self
 end
 

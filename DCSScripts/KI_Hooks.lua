@@ -7,14 +7,43 @@ end
 
 KI.Hooks = {}
 
-function KI.Hooks.AICOMOnSpawnGroup(moosegrp, v2)
+function KI.Hooks.AICOMOnSpawnGroup(moosegrp, spawntype, atkzone, grpconfig)
   local success, result = xpcall(function()
+    
     env.info("KI.Hooks.AICOMOnSpawnGroup called")
-    if v2 then
-      KI.Data.Waypoints[moosegrp.GroupName] = { x = v2.x, y = v2.y, z = v2.z }      -- save the group name and waypoint information
-      KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true     -- this has no function in game, but is used in Unit Tests
+    
+    if spawntype == "MOVING" then
+      env.info("KI.Hooks.AICOMOnSpawnGroup - MOVING Spawn called")
+      local vec2 = atkzone:GetRandomVec2()
+      env.info("AICOM._SpawnGroups vec2: Group " .. moosegrp.GroupName .. " {x = " .. vec2.x .. ", y = " .. vec2.y .. "}")
+      moosegrp:TaskRouteToVec2(vec2, grpconfig.Speed, grpconfig.Formation)
+      
+      -- save the group name and waypoint information
+      KI.Data.Waypoints[moosegrp.GroupName] = 
+      { 
+        x = vec2.x, 
+        y = vec2.y, 
+        formation = grpconfig.Formation,
+        speed = grpconfig.Speed
+      }      
+      KI.UTDATA.UT_AICOM_ONSPAWNGROUP_CALLED = true  -- this has no function in game, but is used in Unit Tests
+      
+    elseif spawntype == "AMBUSH" then
+      env.info("KI.Hooks.AICOMOnSpawnGroup - AMBUSH Spawn called - adding to GC queue")
+      local gc_item = GCItem:New(moosegrp.GroupName, 
+                                moosegrp, 
+                                function(obj)
+                                  return obj:IsAlive()
+                                end,
+                                function(obj)
+                                  return obj:Destroy()
+                                end,
+                                nil, nil, nil, nil, AICOM.Config.AmbushTime)
+      
+      GC.Add(gc_item)
     end
-    end, function(err) env.info("KI.Hooks.AICOMOnSpawnGroup - ERROR - " .. err) end)
+    
+  end, function(err) env.info("KI.Hooks.AICOMOnSpawnGroup - ERROR - " .. err) end)
 end
 
 -- KI Hooks into SLC and integration with DWM Depots

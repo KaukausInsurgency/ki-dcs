@@ -84,6 +84,7 @@ assert(loadfile(path .. "UnitTests\\AICOM_Config_UT.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
 
 KI.UTDATA = {}
+KI.Null = -9999
 
 env.info("KI - Loading Tests")
 
@@ -106,7 +107,7 @@ assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
-assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
+--assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
 
 -- TO BE IMPLEMENTED

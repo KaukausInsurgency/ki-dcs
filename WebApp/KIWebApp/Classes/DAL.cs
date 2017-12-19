@@ -54,6 +54,10 @@ namespace KIWebApp.Classes
 
             foreach (DataRow dr in dt.Rows)
             {
+                string cpText = "";
+                if (dr["Text"] != DBNull.Value && dr["Text"] != null)
+                    cpText = dr.Field<string>("Text");
+
                 CapturePointModel capturepoint = new CapturePointModel
                 {
                     ID = dr.Field<int>("CapturePointID"),
@@ -62,6 +66,7 @@ namespace KIWebApp.Classes
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
                     Resources = dr.Field<string>("Resources"),
+                    Text = cpText,
                     Status = dr.Field<string>("Status"),
                     BlueUnits = dr.Field<int>("BlueUnits"),
                     RedUnits = dr.Field<int>("RedUnits"),

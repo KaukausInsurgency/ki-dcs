@@ -3,7 +3,7 @@ function()
   UT.ValidateSetup(function() return ZONE:New("TestCPZone") ~= nil end)  -- zone must exist in ME
 end, 
 function()
-  UT.TestData.TestCP = CP:New("Test CP", "TestCPZone", "TestCPZone")
+  UT.TestData.TestCP = CP:New("Test CP", "TestCPZone", CP.Enum.CAPTUREPOINT, "TestCPZone")
 end,
 function()
       
