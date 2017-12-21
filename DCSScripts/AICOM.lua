@@ -423,62 +423,70 @@ end
 function AICOM.DoTurn(args, time)
   env.info("AICOM.DoTurn called")
   
-  -- check the pop cap and see if we've hit the limit
-  local _cap = AICOM.CalculatePopulationCap(coalition.getGroups(2, Group.Category.GROUND))
-  if _cap >= AICOM.Config.PopulationCap then
-    env.info("AICOM.DoTurn - pop cap has been reached (" .. tostring(_cap) .. "/" .. tostring(AICOM.Config.PopulationCap) .. ") - Doing nothing")
-    KI.UTDATA.AICOM_POPCAP_REACHED = true
-    return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
-  end
-  
-  -- reset the CurrentMoney and RemainingMoves
-  AICOM.CurrentMoney = AICOM.Config.InitResource
-  AICOM.MovesRemaining = AICOM.Config.InitMoves
-  
-  env.info("AICOM.DoTurn - KI.Data.CapturePoints length: " .. tostring(#KI.Data.CapturePoints))
-  -- do some cost analysis on each capture point
-  local _cpAnalysis = AICOM.Analyze(KI.Data.CapturePoints)
-  
-  -- sort the cp analysis table by cost ascending (cheapest to most expensive)
-  local _keys = {}
-  for k in pairs(_cpAnalysis) do table.insert(_keys, k) end
-  table.sort(_keys, function(a, b) return _cpAnalysis[a].Cost < _cpAnalysis[b].Cost end)
-  local _moves = AICOM.SegmentAnalysis(_keys, AICOM.Config.InitMoves)
-  
-  if _moves == nil then
-    env.info("AICOM.DoTurn - ERROR - SegmentAnalysis returned nil, cannot process moves for AI - check parameters!")
-    return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
-  end
-  
-  -- this loop actually decides and performs the AI Moves
-  for t = 1, #_moves do
-    local _action = 0
-    local _cost = 0
-    local _cp = {}
-    local _keyIndex = _moves[t]
-    local _ambushWasDone = false
-    
-    if t == 1 then
-    -- for the first turn, always perform the action that is cheapest from the list
-      _action = _cpAnalysis[_keys[_keyIndex]].Action
-      _cost = _cpAnalysis[_keys[_keyIndex]].Cost
-      _cp = _cpAnalysis[_keys[_keyIndex]].CapturePoint
-    else
-      if not _ambushWasDone and (AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability) then 
-        _cp = AICOM.AmbushZones[AICOM.Config.Random(#AICOM.AmbushZones)]
-        _cost = AICOM.Config.AmbushCost
-        _action = AICOM.Enum.Actions.Ambush
-        _ambushWasDone = true
-      else 
-        local _index = AICOM.Config.Random(_keyIndex.Min, _keyIndex.Max)
-        _action = _cpAnalysis[_keys[_index]].Action
-        _cost = _cpAnalysis[_keys[_index]].Cost
-        _cp = _cpAnalysis[_keys[_index]].CapturePoint
-      end
+  local fncSuccess, result = xpcall(function()
+    -- check the pop cap and see if we've hit the limit
+    local _cap = AICOM.CalculatePopulationCap(coalition.getGroups(2, Group.Category.GROUND))
+    if _cap >= AICOM.Config.PopulationCap then
+      env.info("AICOM.DoTurn - pop cap has been reached (" .. tostring(_cap) .. "/" .. tostring(AICOM.Config.PopulationCap) .. ") - Doing nothing")
+      KI.UTDATA.AICOM_POPCAP_REACHED = true
+      return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
     end
     
-    AICOM.PerformAction(_action, _cost, _cp)
-  end
+    -- reset the CurrentMoney and RemainingMoves
+    AICOM.CurrentMoney = AICOM.Config.InitResource
+    AICOM.MovesRemaining = AICOM.Config.InitMoves
+    
+    env.info("AICOM.DoTurn - KI.Data.CapturePoints length: " .. tostring(#KI.Data.CapturePoints))
+    -- do some cost analysis on each capture point
+    local _cpAnalysis = AICOM.Analyze(KI.Data.CapturePoints)
+    
+    -- sort the cp analysis table by cost ascending (cheapest to most expensive)
+    local _keys = {}
+    for k in pairs(_cpAnalysis) do table.insert(_keys, k) end
+    table.sort(_keys, function(a, b) return _cpAnalysis[a].Cost < _cpAnalysis[b].Cost end)
+    local _moves = AICOM.SegmentAnalysis(_keys, AICOM.Config.InitMoves)
+    
+    if _moves == nil then
+      env.info("AICOM.DoTurn - ERROR - SegmentAnalysis returned nil, cannot process moves for AI - check parameters!")
+      return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
+    end
+    
+    -- this loop actually decides and performs the AI Moves
+    for t = 1, #_moves do
+      local _action = 0
+      local _cost = 0
+      local _cp = {}
+      local _keyIndex = _moves[t]
+      local _ambushWasDone = false
+      
+      if t == 1 then
+      -- for the first turn, always perform the action that is cheapest from the list
+        _action = _cpAnalysis[_keys[_keyIndex]].Action
+        _cost = _cpAnalysis[_keys[_keyIndex]].Cost
+        _cp = _cpAnalysis[_keys[_keyIndex]].CapturePoint
+      else
+        if not _ambushWasDone and (AICOM.Config.Random(1, 100) <= AICOM.Config.AmbushProbability) then 
+          _cp = AICOM.AmbushZones[AICOM.Config.Random(#AICOM.AmbushZones)]
+          _cost = AICOM.Config.AmbushCost
+          _action = AICOM.Enum.Actions.Ambush
+          _ambushWasDone = true
+        else 
+          local _index = AICOM.Config.Random(_keyIndex.Min, _keyIndex.Max)
+          _action = _cpAnalysis[_keys[_index]].Action
+          _cost = _cpAnalysis[_keys[_index]].Cost
+          _cp = _cpAnalysis[_keys[_index]].CapturePoint
+        end
+      end
+      
+      AICOM.PerformAction(_action, _cost, _cp)
+    end
+    
+    return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
+  end, function(err) env.info("AICOM.DoTurn ERROR : " .. err) end)
   
-  return time + AICOM.Config.TurnRate + AICOM.Config.Random(AICOM.Config.TurnRate / 2)
+  if fncSuccess then
+    return result
+  else
+    return nil
+  end  
 end

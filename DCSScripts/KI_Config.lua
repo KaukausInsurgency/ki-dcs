@@ -29,16 +29,16 @@ KI.Config.CPUpdateRate = 15
 KI.Config.PlayerInZoneCheckRate = 3
 
 -- controls the rate at which side missions are generated and/or managed from the queue
-KI.Config.SideMissionUpdateRate = 1200 
+KI.Config.SideMissionUpdateRate = 120 
 
 -- adds a randomness increment time to the update rate each run through
-KI.Config.SideMissionUpdateRateRandom = 600 
+KI.Config.SideMissionUpdateRateRandom = 0 
 
 -- controls the maximum amount of active side missions can run at a time
 KI.Config.SideMissionsMax = 3
 
 -- controls the maximum amount of time a side mission can remain active
-KI.Config.SideMissionMaxTime =  600 --KI.Toolbox.HoursToSeconds(1)  
+KI.Config.SideMissionMaxTime =  120 --KI.Toolbox.HoursToSeconds(1)  
 
 -- controls when the side missions .destroy method is invoked after the mission has already ended
 KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(5) 
@@ -149,7 +149,9 @@ KI.Config.SideMissions =
       destroy = function(rsc)
         -- destroys and cleans up task resources, must return true/false to indicate cleanup succeeded
         env.info("DSMT.destroy called - destroying camp object")
-        rsc.Arguments.CampObject:destroy()
+        xpcall(function() rsc.Arguments.CampObject:destroy() end,
+               function(err) env.info("DSMT.destroy (Destroy Camp) ERROR : " .. err) end)
+        
       end,
       
       -- determines the rate at which the task loop function should run

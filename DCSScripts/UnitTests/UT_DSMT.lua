@@ -1,6 +1,15 @@
 -- Side Mission Unit Tests
 
-UT.TestCase("DSMT Core", nil, nil,
+UT.TestCase("DSMT Core", nil, 
+function()
+  UT.TestData.INIT_CALLED = false
+  UT.TestData.DESTROY_CALLED = false
+  UT.TestData.COMPLETE_CALLED = false
+  UT.TestData.FAIL_CALLED = false
+  UT.TestData.ON_COMPLETE_CALLED = false
+  UT.TestData.ON_FAIL_CALLED = false
+  UT.TestData.ON_TIMEOUT_CALLED = false
+end,
     function()
       
       -- ================================== TEST DATA =========================================================--
@@ -12,57 +21,19 @@ UT.TestCase("DSMT Core", nil, nil,
       local _destroyTime = 30
       
       
-      local _init = function(name, z)
+      local _init = function(name, z)     
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
         return DSMTResource:New(nil, nil, nil, _argVal)
       end
       
-      local _destroy = function(rsc)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)
-      end
-      
-      local _complete = function(name, zone, rsc)
-        UT.TestCompare(function() return name == _missionName end)
-        UT.TestCompare(function() return z ~= nil end)
-        UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)
-      end
-      
-      local _fail = function(name, zone, rsc)
-        UT.TestCompare(function() return name == _missionName end)
-        UT.TestCompare(function() return z ~= nil end)
-        UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)
-      end
-      
-      local _oncomplete = function(name, zone, rsc)
-        UT.TestCompare(function() return name == _missionName end)
-        UT.TestCompare(function() return z ~= nil end)
-        UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)       
-      end
-      
-      local _onfail = function(name, zone, rsc)
-        UT.TestCompare(function() return name == _missionName end)
-        UT.TestCompare(function() return z ~= nil end)
-        UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)       
-      end
-        
-      local _ontimeout = function(name, zone, rsc)
-        UT.TestCompare(function() return name == _missionName end)
-        UT.TestCompare(function() return z ~= nil end)
-        UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
-        UT.TestCompare(function() return rsc ~= nil end)
-        UT.TestCompare(function() return rsc.Arguments == _argVal end)       
-      end
+      local _destroy = function(rsc) end    
+      local _complete = function(name, zone, rsc) end     
+      local _fail = function(name, zone, rsc) end    
+      local _oncomplete = function(name, zone, rsc) end   
+      local _onfail = function(name, zone, rsc) end
+      local _ontimeout = function(name, zone, rsc) end
       -- ================================== END OF TEST DATA =========================================================--
       
       
@@ -113,7 +84,16 @@ UT.TestCase("DSMT Core", nil, nil,
   
   
   
-  UT.TestCase("DSMT Manager", nil, nil,
+  UT.TestCase("DSMT Manager", nil, 
+  function()
+    UT.TestData.INIT_CALLED = false
+    UT.TestData.DESTROY_CALLED = false
+    UT.TestData.COMPLETE_CALLED = false
+    UT.TestData.FAIL_CALLED = false
+    UT.TestData.ON_COMPLETE_CALLED = false
+    UT.TestData.ON_FAIL_CALLED = false
+    UT.TestData.ON_TIMEOUT_CALLED = false
+  end,
     function()
       
       -- ================================== TEST DATA =========================================================--
@@ -128,6 +108,7 @@ UT.TestCase("DSMT Core", nil, nil,
       
       
       local _init = function(name, z)
+        UT.TestData.INIT_CALLED = true
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -135,11 +116,13 @@ UT.TestCase("DSMT Core", nil, nil,
       end
       
       local _destroy = function(rsc)
+        UT.TestData.DESTROY_CALLED = true
         UT.TestCompare(function() return rsc ~= nil end)
         UT.TestCompare(function() return rsc.Arguments == _argVal end)
       end
       
       local _complete = function(name, z, rsc)
+        UT.TestData.COMPLETE_CALLED = true
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -149,6 +132,7 @@ UT.TestCase("DSMT Core", nil, nil,
       end
       
       local _fail = function(name, z, rsc)
+        UT.TestData.FAIL_CALLED = true
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -158,6 +142,7 @@ UT.TestCase("DSMT Core", nil, nil,
       end
       
       local _oncomplete = function(name, z, rsc)
+        UT.TestData.ON_COMPLETE_CALLED = true
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -167,6 +152,7 @@ UT.TestCase("DSMT Core", nil, nil,
       end
       
       local _onfail = function(name, z, rsc)
+        UT.TestData.ON_FAIL_CALLED = true
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -176,6 +162,7 @@ UT.TestCase("DSMT Core", nil, nil,
       end
         
       local _ontimeout = function(name, z, rsc)
+        UT.TestData.ON_TIMEOUT_CALLED = true   
         UT.TestCompare(function() return name == _missionName end)
         UT.TestCompare(function() return z ~= nil end)
         UT.TestCompare(function() return z.ZoneName == _zones[1] or z.ZoneName == _zones[2] or z.ZoneName == _zones[3] end)
@@ -206,14 +193,19 @@ UT.TestCase("DSMT Core", nil, nil,
       UT.TestCompare(function() return _sm.Done == false end)
       
       UT.TestFunction(DSMT._initMission, _sm)
+      UT.TestCompare(function() return UT.TestData.INIT_CALLED end)
       
       _customMissionVal = 1
       UT.TestFunction(DSMT._manage, _sm, 0)
+      UT.TestCompare(function() return UT.TestData.COMPLETE_CALLED end)  
+      UT.TestCompare(function() return UT.TestData.ON_COMPLETE_CALLED end)
       UT.TestCompare(function() return _sm.Done == true end) -- mission should be completed
       UT.TestCompare(function() return _missionStatus == "SUCCESS" end) -- mission status should be SUCCESS
       
       _customMissionVal = 0
       UT.TestFunction(DSMT._manage, _sm, 0)
+      UT.TestCompare(function() return UT.TestData.FAIL_CALLED end)
+      UT.TestCompare(function() return UT.TestData.ON_FAIL_CALLED end)
       UT.TestCompare(function() return _sm.Done == true end) -- mission should be completed
       UT.TestCompare(function() return _missionStatus == "FAIL" end) -- mission status should be FAIL
       
@@ -235,7 +227,10 @@ UT.TestCase("DSMT Core", nil, nil,
       UT.TestCompare(function() return _sm.Life == 30 end)
       
       UT.TestFunction(DSMT._manage, _sm, 0)
+      UT.TestCompare(function() return UT.TestData.ON_TIMEOUT_CALLED end)
       UT.TestCompare(function() return _sm.Done == true end)
       UT.TestCompare(function() return _missionStatus == "TIMEOUT" end) -- mission status should be TIMEOUT
       
+      UT.TestFunction(DSMT._destroy, _sm, 0)
+      UT.TestCompare(function() return UT.TestData.DESTROY_CALLED end)
     end)

@@ -91,25 +91,33 @@ end
 
 function DSMT._manage(self, time)
   env.info("DSMT._manage called")
-  if self.Complete(self.Name, self.CurrentZone, self.Resource) then
-    self.OnComplete(self.Name, self.CurrentZone, self.Resource)
-    self.Done = true
-    DSMT._invoke(DSMT._destroy, self.DestroyTime, self.Resource)
-    return nil
-  elseif self.Fail(self.Name, self.CurrentZone, self.Resource) then
-    self.OnFail(self.Name, self.CurrentZone, self.Resource)
-    self.Done = true
-    DSMT._invoke(DSMT._destroy, self.DestroyTime, self.Resource)
-    return nil
-  elseif self.Life >= self.Expiry then
-    self.OnTimeout(self.Name, self.CurrentZone, self.Resource)
-    self.Done = true
-    DSMT._invoke(DSMT._destroy, self.DestroyTime, self.Resource)
-    return nil
+  local fncSuccess, result = xpcall(function()
+    if self.Complete(self.Name, self.CurrentZone, self.Resource) then
+      self.OnComplete(self.Name, self.CurrentZone, self.Resource)
+      self.Done = true
+      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      return nil
+    elseif self.Fail(self.Name, self.CurrentZone, self.Resource) then
+      self.OnFail(self.Name, self.CurrentZone, self.Resource)
+      self.Done = true
+      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      return nil
+    elseif self.Life >= self.Expiry then
+      self.OnTimeout(self.Name, self.CurrentZone, self.Resource)
+      self.Done = true
+      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      return nil
+    else
+      self.Life = self.Life + self.CheckRate
+      return time + self.CheckRate
+    end
+  end, function(err) env.info("DSMT._manage ERROR : " .. err) end)
+  
+  if fncSuccess then
+    return result
   else
-    self.Life = self.Life + self.CheckRate
-    return time + self.CheckRate
-  end
+    return nil
+  end  
 end
 
 function DSMT._invoke(fnc, rate, args)
