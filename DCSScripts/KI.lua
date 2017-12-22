@@ -52,7 +52,7 @@ local function ValidateKIStart()
 end
 
 if not ValidateKIStart() then
-  KI.Toolbox.MessageRedCoalition("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG")
+  KI.Toolbox.MessageRedCoalition("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300)
   return false
 end
 
@@ -148,9 +148,12 @@ local function StartKI()
   KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
   env.info("KI - Data Loaded")
   
+  env.info("KI - Enabling SSB")
+  trigger.action.setUserFlag("SSB",100) -- enable SSB Simple Slot Blocking
+  env.info("KI - SSB Enabled")
   
   
-  
+  env.info("KI - Initializing Scheduled Functions")
   timer.scheduleFunction(function(args, t)
     local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(1, t) end,
                                    function(err) env.info("KI.Scheduled.IsPlayerInZone ERROR : " .. err) end)
@@ -163,6 +166,10 @@ local function StartKI()
   end, 1, timer.getTime() + KI.Config.PlayerInZoneCheckRate)
   
   
+  xpcall(function() return KI.Scheduled.UpdateCPStatus(true,0) end,
+         function(err) env.info("KI.Scheduled.UpdateCPStatus (First Run) ERROR : " .. err) end)
+         
+  -- this will be called instantly
   timer.scheduleFunction(function(args, t)
     local success, result = xpcall(function() return KI.Scheduled.UpdateCPStatus(args,t) end,
                                    function(err) env.info("KI.Scheduled.UpdateCPStatus ERROR : " .. err) end)
@@ -171,7 +178,7 @@ local function StartKI()
     else
       return result
     end
-  end, {}, timer.getTime() + KI.Config.CPUpdateRate)
+  end, false, timer.getTime() + KI.Config.CPUpdateRate)
   
   
   timer.scheduleFunction(function(args, t)

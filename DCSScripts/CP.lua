@@ -17,7 +17,8 @@ CP =
   SpawnZone1 = nil,     -- zone where units ai units are spawned for attacking
   SpawnZone2 = nil,
   Position = {},
-  Text = nil            -- extra text information that will be displayed on website
+  Text = nil,           -- extra text information that will be displayed on website
+  Slots = {}            -- list of group name player slots - used in slot blocking
 }
 
 function CP:New(name, zone, type, spawnzone1, spawnzone2, text)

@@ -60,7 +60,7 @@ function KI.Loader.GenerateGroupTable(groupObj, hidden)
     ["route"] = {},
     ["groupId"] = groupObj.ID,
     ["tasks"] = {},
-    ["hidden"] = hidden,
+    ["hidden"] = false,
     ["units"] = unitData,
     ["y"] = unitData[1]["y"],
     ["x"] = unitData[1]["x"],
@@ -208,7 +208,7 @@ function KI.Loader.ImportCoalitionGroups(data)
     if _g["Size"] > 0 and #_g["Units"] > 0 then
       -- if the name does not match a template name, continue processing
       if not string.match(_g["Name"], "Template") then
-        local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g))
+        local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g, false))
         
         -- if the group is spawned successfully
         if _newg ~= nil then

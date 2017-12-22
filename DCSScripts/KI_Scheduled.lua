@@ -158,9 +158,16 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
   for i = 1, #KI.Data.CapturePoints do
     --env.info("KI.Scheduled.CaptureStatus looping for CP " .. KI.Data.CapturePoints[i].Name)
     
+    local _cp = KI.Data.CapturePoints[i]
     local _rcnt = 0
     local _bcnt = 0
-    local _z = KI.Data.CapturePoints[i].Zone
+    local _z = _cp.Zone
+    local _slotsdisabled = false
+    -- arg is boolean indicating if this is a first time run of this function
+    if (_cp.BlueUnits > 0 or _cp.RedUnits <= 0) and not arg then
+      _slotsdisabled = true
+    end
+    
     
     -- loop through red groups
     for j = 1, #_rGroups do
@@ -197,7 +204,7 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
       for k = 1, #_bunits do
         local _bpos = _bunits[k]:getPoint()
         if _z:IsVec3InZone(_bpos) then
-          env.info("KI.Scheduled.CaptureStatus - found blu unit inside CP " .. KI.Data.CapturePoints[i].Name)
+          env.info("KI.Scheduled.CaptureStatus - found blu unit inside CP " .. _cp.Name)
           _bcnt = _bcnt + 1 -- increment counter for red
           _inZone = true
         end
@@ -212,9 +219,25 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
       table.remove(_bGroups, _indicesToRemove[j])
     end
     
-    env.info("KI.Scheduled.UpdateCPStatus - CP Results for " .. KI.Data.CapturePoints[i].Name .. " - Red: " .. tostring(_rcnt) .. " Blue: " .. tostring(_bcnt))
+    env.info("KI.Scheduled.UpdateCPStatus - CP Results for " .. _cp.Name .. " - Red: " .. tostring(_rcnt) .. " Blue: " .. tostring(_bcnt))
     
-    KI.Data.CapturePoints[i]:SetCoalitionCounts(_rcnt, _bcnt)
+    _cp:SetCoalitionCounts(_rcnt, _bcnt)
+    
+    if _cp.Slots and #_cp.Slots > 0 then
+      env.info("KI.Scheduled.UpdateCPStatus - CP has slots")
+      -- enable slots
+      if _rcnt > 0 and _bcnt <= 0 and _slotsdisabled then
+        env.info("KI.Scheduled.UpdateCPStatus - Enabling slots for " .. _cp.Name)
+        for s = 1, #_cp.Slots do
+          trigger.action.setUserFlag(_cp.Slots[s],0)  
+        end   
+      elseif (_rcnt <= 0 or _bcnt > 0) and not _slotsdisabled then -- disable slots
+        env.info("KI.Scheduled.UpdateCPStatus - Disabling slots for " .. _cp.Name)
+        for s = 1, #_cp.Slots do
+          trigger.action.setUserFlag(_cp.Slots[s],100)  
+        end 
+      end
+    end
   end
   
   return time + KI.Config.CPUpdateRate

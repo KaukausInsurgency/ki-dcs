@@ -407,7 +407,7 @@ function KIServer.RequestEndSession()
     end
   end
   
-  local _flagval = KIServer.GetFlagValue(KIServer.Flag)
+  local _flagval = 0 -- KIServer.GetFlagValue(KIServer.Flag) -- CAUSES ACCESS VIOLATION BECAUSE SOMETIMES MISSION UNLOADS BEFORE THIS IS CALLED
   local _status = "Offline"
   
   if _flagval == KIServer.FlagValues.MISSION_RESTARTING then
@@ -496,6 +496,7 @@ KIServer.ReadFileJSON = function(path)
 end
 
 function KIServer.GetFlagValue(_flag)
+  net.log("KIServer.GetFlagValue called")
   local _status,_error  = net.dostring_in('server', " return trigger.misc.getUserFlag(\"".._flag.."\"); ")
 
   if not _status and _error then
@@ -506,8 +507,8 @@ function KIServer.GetFlagValue(_flag)
   end
 end
 
-function KIServer.SetFlagValue(_flag, _number) -- Added by FlightControl
-
+function KIServer.SetFlagValue(_flag, _number)
+  net.log("KIServer.SetFlagValue called")
   local _status,_error  = net.dostring_in('server', " return trigger.action.setUserFlag(\"".._flag.."\", " .. _number .. "); ")
 
   if not _status and _error then

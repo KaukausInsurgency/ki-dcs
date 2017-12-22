@@ -43,6 +43,7 @@ function KI.Init.CapturePoints()
   for i = 1, #KI.Config.CP do
     local ccp = KI.Config.CP[i]
     local _cp = CP:New(ccp.name, ccp.zone, ccp.type, ccp.spawnzone1, ccp.spawnzone2, ccp.text)  
+    _cp.Slots = ccp.slots
     _cp:SetDefenseUnit("Infantry", 4)
     _cp:SetDefenseUnit("Vehicle", 8) -- fortifications are considered to be vehicles
     table.insert(KI.Data.CapturePoints, _cp)

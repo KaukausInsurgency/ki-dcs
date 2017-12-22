@@ -93,14 +93,64 @@ KI.Config.Templates =
 KI.Config.CP =
 {
   { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone1 = "Beslan Vehicle Spawn", spawnzone2 = "Beslan Infantry Spawn", 
-    type = "AIRPORT", text = "Tower Frequencies<br/>  - 141.000 MHz<br/>  - 42.400 MHz<br/>  - 270.000 MHz<br/>  - 4.750 MHz" },
+    type = "AIRPORT", text = "Tower Frequencies<br/>  - 141.000 MHz<br/>  - 42.400 MHz<br/>  - 270.000 MHz<br/>  - 4.750 MHz",
+    slots = 
+    {
+      "Beslan-Su25T-1",
+      "Beslan-Su25T-2",
+      "Beslan-Su27-1",
+      "Beslan-Su27-2",
+    } 
+  },
   { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
-    type = "AIRPORT", text = "Tower Frequencies<br/>  - 136.000 MHz<br/>  - 41.400 MHz<br/>  - 265.000 MHz<br/>  - 4.500 MHz" },
+    type = "AIRPORT", text = "Tower Frequencies<br/>  - 136.000 MHz<br/>  - 41.400 MHz<br/>  - 265.000 MHz<br/>  - 4.500 MHz",
+    slots =
+    {
+      "Nalchik-Mig29-1",
+      "Nalchik-Mig29-2",
+      "Nalchik-M2000C-1",
+      "Nalchik-M2000C-2",
+      "Nalchik-Mig21-1",
+      "Nalchik-Mig21-2"
+    } 
+  },
   
   { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "FARP Skala Infantry Spawn", 
-    type = "FARP", text = "Tower Frequency - 127.500 MHz AM" },
+    type = "FARP", text = "Tower Frequency - 127.500 MHz AM",
+    slots = 
+    {
+      "Skala-Ka50-1",
+      "Skala-Ka50-2",
+      "Skala-Ka50-3",
+      "Skala-Ka50-4",
+      "Skala-Mi8-1",
+      "Skala-Mi8-2",
+      "Skala-Mi8-3",
+      "Skala-Mi8-4",
+      "Skala-UH1H-1",
+      "Skala-UH1H-2",
+      "Skala-UH1H-3",
+      "Skala-UH1H-4"
+    }
+  },
   { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone1 = "FARP Vetka Vehicle Spawn", spawnzone2 = "FARP Vetka Infantry Spawn",
-    type = "FARP", text = "Tower Frequency - 133.500 MHz AM" },
+    type = "FARP", text = "Tower Frequency - 133.500 MHz AM",
+    slots = 
+    {
+      "Vetka-Ka50-1",
+      "Vetka-Ka50-2",
+      "Vetka-Ka50-3",
+      "Vetka-Ka50-4",
+      "Vetka-Mi8-1",
+      "Vetka-Mi8-2",
+      "Vetka-Mi8-3",
+      "Vetka-Mi8-4",
+      "Vetka-UH1H-1",
+      "Vetka-UH1H-2",
+      "Vetka-UH1H-3",
+      "Vetka-UH1H-4"
+    }
+  },
   
   
   

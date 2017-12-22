@@ -54,13 +54,7 @@ ssb.enabledFlagValue = 0  -- what value to look for to enable a slot.
 -- NOTE: the player prefix must match exactly including case
 -- The examples below can be turned on by removing the -- in front
 --
-ssb.prefixes = {
-     -- "-=104th=-",
-    -- "-=VSAAF=-",
-    -- "ciribob", -- you could also add in an actual player name instead
-    "some_clan_tag",
-    "-=AnotherClan=-",
-}
+ssb.prefixes = {}
 
 
 -- any NON aircraft slot eg JTAC / GCI / GAME COMMANDER
@@ -68,10 +62,7 @@ ssb.prefixes = {
 -- PLAYER IDS are unique DCS ids that can't be changed or spoofed
 -- This script will output them when a player changes slots so you can copy them out easily :)
 -- This will only take effect if: ssb.controlNonAircraftSlots = true
-ssb.commanderPlayerUCID = {
-    "292d911c1b6f631476795cb80fd93b1f",
-    "some_uniqe_player_ucid",
-}
+ssb.commanderPlayerUCID = {}
 
 
 
@@ -311,7 +302,7 @@ ssb.rejectMessage = function(playerID)
 
     if _playerName ~= nil then
         --Disable chat message to user
-        local _chatMessage = string.format("*** Sorry %s - Slot CURRENTLY DISABLED - Pick a different slot! ***",_playerName)
+        local _chatMessage = string.format("*** %s - You cannot slot in because the capture point is not controlled by friendly forces! ***",_playerName)
         net.send_chat_to(_chatMessage, playerID)
     end
 
