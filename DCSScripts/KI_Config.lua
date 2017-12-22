@@ -19,6 +19,9 @@ KI.Config.DataTransmissionPlayerUpdateRate = 5        -- things like player data
 KI.Config.DataTransmissionGameEventsUpdateRate = 10   -- game events
 KI.Config.DataTransmissionGeneralUpdateRate = 20      -- things like depot, and capture point data
 
+-- Controls the time at which groups will be tasked with waypoints when they are respawned via KI.Loader.LoadData() - delay is required!
+KI.Config.RespawnTimeBeforeWaypointTasking = 20
+
 -- Controls the rate at which mission data is saved to file
 KI.Config.SaveMissionRate = 300
 

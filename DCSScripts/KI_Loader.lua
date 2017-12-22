@@ -58,7 +58,7 @@ function KI.Loader.GenerateGroupTable(groupObj, hidden)
     ["visible"] = true,
     ["taskSelected"] = true,
     ["route"] = {},
-    ["groupId"] = groupObj.ID,
+    --["groupId"] = groupObj.ID,        -- is an optional parameter, and may be interfering with group spawning
     ["tasks"] = {},
     ["hidden"] = false,
     ["units"] = unitData,
@@ -110,7 +110,11 @@ function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
       end
       if _groupActive then
         table.insert(byrefTable, _group)
+      else
+        env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " is not active - ignoring")
       end
+    else
+      env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " does not exist - ignoring")
     end
   end
 end
@@ -213,20 +217,26 @@ function KI.Loader.ImportCoalitionGroups(data)
         -- if the group is spawned successfully
         if _newg ~= nil then
           env.info("KI.Loader.ImportCoalitionGroups Newly Spawned Group created -- " .. _newg:getName())
-          local vec2 = KI.Data.Waypoints[_newg:getName()]
-          if vec2 then
+          local _wp = KI.Data.Waypoints[_newg:getName()]
+          if _wp then
             env.info("KI.Loader.ImportCoalitionGroups - found waypoints for group " .. _newg:getName())   
             local moosegrp = GROUP:Find(_newg)
             local grpvec2 = moosegrp:GetVec3()
-            vec2.z = vec2.y
+            _wp.z = _wp.y -- translate vec3 back into vec2
             env.info("AICOM.Spawn vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", z = " .. grpvec2.z .. "}")
-            env.info("AICOM.Spawn vec2: Waypoint {x = " .. vec2.x .. ", z = " .. vec2.z .. "}")
-            local distance = Spatial.Distance(vec2, grpvec2)
+            env.info("AICOM.Spawn vec2: Waypoint {x = " .. _wp.x .. ", z = " .. _wp.z .. "}")
+            local distance = Spatial.Distance(_wp, grpvec2)
             env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " distance to waypoint - " .. tostring(distance))
             if distance > 100 then
               env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " is still enroute to this waypoint - tasking")
-              --vec2.y = vec2.z -- translate vec3 back into vec2
-              moosegrp:TaskRouteToVec2(vec2, 40, "Off Road")
+              
+              -- Schedule a function to retask waypoints to groups - we cant do this right away because group may not exist yet
+              timer.scheduleFunction(function(args, t) 
+                env.info("KI.Loader.ImportCoalitionGroups - Scheduled Spawn called")
+                args.grp:TaskRouteToVec2(args.pos, args.pos.speed, args.pos.formation)
+                return nil
+              end, { grp = moosegrp, pos = _wp}, timer.getTime() + KI.Config.RespawnTimeBeforeWaypointTasking)
+              
             else
               env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " has completed this waypoint - ignoring")
               KI.Data.Waypoints[_newg:getName()] = nil  -- remove the group from the hash
