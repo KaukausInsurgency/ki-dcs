@@ -41,7 +41,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   end
   
   
-  local airfield = KI.Null
+  local location = KI.Null
   local weapon = KI.Null
   local weaponCategory = KI.Null
   local target = KI.Null
@@ -56,7 +56,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
   local cargo = dcs_event_obj.cargo or KI.Null
   
   if dcs_event_obj.place then
-    airfield = dcs_event_obj.place:getCallsign() or "Ground"
+    location = dcs_event_obj.place:getCallsign() or "Ground"
   end
   
   if dcs_event_obj.weapon then
@@ -102,7 +102,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["GameTime"] = dcs_event_obj.time,
     ["Role"] = dcs_event_obj.initiator:getTypeName(),
     -- optional fields
-    ["Airfield"] = airfield,
+    ["Location"] = location,
     ["Weapon"] = weapon,
     ["WeaponCategory"] = weaponCategory,
     ["TargetName"] = targetName,
