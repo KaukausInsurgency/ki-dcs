@@ -108,10 +108,9 @@
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/><br/>";       
+            content += "Red: " + this.RedUnits + "<br/>";
+            content += "Capacity: " + this.MaxCapacity + "<br/><br/>";
             content += this.Text + "<br/>";
-            var arraytable = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
-            content += GenerateTableHTMLString(arraytable);                      // generate the html table from the json object
             var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
             $(".mapcontent").first().append(tooltipspan);
         });
@@ -163,10 +162,9 @@
             content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
             content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
             content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/><br/>";
+            content += "Red: " + this.RedUnits + "<br/>";
+            content += "Capacity: " + this.MaxCapacity + "<br/><br/>";
             content += this.Text + "<br/>";
-            var json_resources = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
-            content += GenerateTableHTMLString(json_resources);     // generate the html table from the json object
             var img = $('[data-capturepointID=' + this.ID + ']');
             img.attr('src', ROOT + this.Image);
             $('#' + tooltipid).html(content);

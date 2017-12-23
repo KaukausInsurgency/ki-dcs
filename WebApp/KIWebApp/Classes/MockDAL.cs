@@ -43,7 +43,7 @@ namespace KIWebApp.Classes
                 RedUnits = 10,
                 Pos = new Position(751123.5, -125446.28125),
                 Image = "Images/markers/flag-red-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -57,7 +57,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(801123.5, -150446.28125),
                 Image = "Images/markers/flag-blue-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -71,7 +71,7 @@ namespace KIWebApp.Classes
                 RedUnits = 5,
                 Pos = new Position(767123.5, -140426.28125),
                 Image = "Images/markers/flag-contested-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -85,7 +85,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(807123.5, -220426.28125),
                 Image = "Images/markers/flag-neutral-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -99,7 +99,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(823123.5, -140426.28125),
                 Image = "Images/markers/flag-neutral-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -113,7 +113,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(817123.5, -190426.28125),
                 Image = "Images/markers/flag-neutral-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -127,7 +127,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(857123.5, -220426.28125),
                 Image = "Images/markers/flag-neutral-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             cps.Add(new CapturePointModel()
@@ -141,7 +141,7 @@ namespace KIWebApp.Classes
                 RedUnits = 0,
                 Pos = new Position(774123.5, -220426.28125),
                 Image = "Images/markers/flag-neutral-256x256.png",
-                Resources = "Type|Fortified|Limit\nInfantry|0|4\n"
+                MaxCapacity = 30
             });
 
             return cps;

@@ -8,16 +8,7 @@ UT.TestCase("CP",
     UT.TestData.Zone = ZONE:New("TestCPZone")
     UT.TestData.Vec3 = UT.TestData.Zone:GetVec3(0)
   end,
-    function()
-      local function count_hash(hash)
-        local _c = 0
-        for i, p in pairs(hash) do
-          _c = _c + 1
-        end
-        return _c
-      end
-      
-      
+    function()    
       
       -- testing base contructor
       if true then
@@ -30,8 +21,7 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.SpawnZone2 == nil end)
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
-        UT.TestCompare(function() return _cp.Defenses ~= nil end)
-        UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
+        UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
         UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
         UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
       end
@@ -47,8 +37,7 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.SpawnZone2 == nil end)
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
-        UT.TestCompare(function() return _cp.Defenses ~= nil end)
-        UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
+        UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
         UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
         UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
       end
@@ -64,8 +53,7 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.SpawnZone2.ZoneName == UT.TestData.Zone.ZoneName end)
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
-        UT.TestCompare(function() return _cp.Defenses ~= nil end)
-        UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
+        UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
         UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
         UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
       end
@@ -81,8 +69,7 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.SpawnZone2.ZoneName == UT.TestData.Zone.ZoneName end)
         UT.TestCompare(function() return _cp.Text == "VHF 130.000 AM MHz" end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
-        UT.TestCompare(function() return _cp.Defenses ~= nil end)
-        UT.TestCompare(function() return count_hash(_cp.Defenses) == 0 end)
+        UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
         UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
         UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
       end
@@ -91,36 +78,14 @@ UT.TestCase("CP",
       
       
       if true then
-        local _cp = CP:New("Test CP", "TestCPZone", CP.Enum.CAPTUREPOINT)
-        -- testing SetDefenseUnit method
-        UT.TestFunction(CP.SetDefenseUnit, _cp, "TestKey", 5)
-        UT.TestCompare(function() return count_hash(_cp.Defenses) == 1 end)
-        UT.TestCompare(function() return _cp.Defenses["TestKey"] ~= nil end)
-        UT.TestCompare(function() return _cp.Defenses["TestKey"].qty == 0 end)
-        UT.TestCompare(function() return _cp.Defenses["TestKey"].cap == 5 end)
-        
-        -- testing Fortify method
-        UT.TestFunction(CP.Fortify, _cp, "TestKey", 1)
-        UT.TestCompare(function() return _cp.Defenses["TestKey"].qty == 1 end)
-        UT.TestCompareOnce(function() return _cp:Fortify("TestKey", 1) == true end)
-        UT.TestCompare(function() return _cp.Defenses["TestKey"].qty == 2 end)
-        UT.TestFunction(CP.Fortify, _cp, "TestKey", 22)
-        UT.TestCompareOnce(function() return _cp:Fortify("TestKey", 22) == false end)
-      
-        -- testing Unfortify method
-        UT.TestFunction(CP.SetDefenseUnit, _cp, "MockKey", 5)
-        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 25)   -- this should just set qty to 0
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 0 end)      
-        UT.TestFunction(CP.Fortify, _cp, "MockKey", 5)
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 5 end)  -- checking to ensure no side effects to Unfortify
-        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 1)
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 4 end)
-        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 1)
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 3 end)
-        UT.TestFunction(CP.Unfortify, _cp, "MockKey", 2)
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 1 end)
-        UT.TestFunction(CP.Unfortify, _cp, "MockKey", -1)                       -- checking that negative numbers dont cause any wierd issues
-        UT.TestCompare(function() return _cp.Defenses["MockKey"].qty == 1 end)
+        local _cp = CP:New("Test CP", "TestCPZone", CP.Enum.CAPTUREPOINT)       
+        _cp.MaxCapacity = 0
+        UT.TestCompare(function() return _cp:Fortify("TestKey") == false end) -- should be false because cap is 0
+        _cp.MaxCapacity = 1
+        UT.TestCompare(function() return _cp:Fortify("TestKey") == true end)   -- should be true
+        _cp.RedUnits = 1
+        UT.TestCompare(function() return _cp:Fortify("TestKey") == false end)  -- should be false because cap has been reached
+
         
         -- testing ViewResources method
         UT.TestFunction(CP.ViewResources, _cp)

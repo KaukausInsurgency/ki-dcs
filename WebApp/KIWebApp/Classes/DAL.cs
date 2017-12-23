@@ -65,7 +65,7 @@ namespace KIWebApp.Classes
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
-                    Resources = dr.Field<string>("Resources"),
+                    MaxCapacity = dr.Field<int>("MaxCapacity"),
                     Text = cpText,
                     Status = dr.Field<string>("Status"),
                     BlueUnits = dr.Field<int>("BlueUnits"),

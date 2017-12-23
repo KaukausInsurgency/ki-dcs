@@ -369,7 +369,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         Status = _cp:GetOwnership(),
         BlueUnits = _cp.BlueUnits,
         RedUnits = _cp.RedUnits,    
-        ResourceString = _cp:GetResourceEncoded(),
+        MaxCapacity = _cp.MaxCapacity,
         Text = _cp.Text or KI.Null,
         LatLong = _cp.Position.LatLong,
         MGRS = _cp.Position.MGRS,

@@ -115,7 +115,7 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
         trigger.action.outTextForGroup(_groupID, "SLC - You cannot unpack crates in the wild or at depots! Unpack this crate in a capture zone!", 15, false)
         return false
       else
-        local result, msg = _cp:Fortify("Vehicle", 1)
+        local result, msg = _cp:Fortify("Vehicle")
         trigger.action.outTextForGroup(_groupID, msg, 15, false)
         return result
       end
@@ -133,18 +133,12 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
         return false
       elseif _cp and SLC.TransportInstances[pilotname] then
         env.info("SLC.Config.PreOnRadioAction - Troop Deployment is valid and inside a capture zone")
-        local result, msg = _cp:Fortify("Infantry", 1)
+        local result, msg = _cp:Fortify("Infantry")
         trigger.action.outTextForGroup(_groupID, msg, 15, false)
         return result
       else
         env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
-        if _cp then
-          local result, msg = _cp:Unfortify("Infantry", 1)
-          trigger.action.outTextForGroup(_groupID, msg, 15, false)
-          return result
-        else
-          return true
-        end    
+        return true
       end   
     else
       return true

@@ -32,9 +32,9 @@ CREATE TABLE `capture_point` (
   `status` varchar(15) NOT NULL,
   `blue_units` int(11) NOT NULL,
   `red_units` int(11) NOT NULL,
+  `max_capacity` int(11) NOT NULL,
   `latlong` varchar(30) NOT NULL,
   `mgrs` varchar(20) NOT NULL,
-  `resources` varchar(900) NOT NULL,
   `x` double NOT NULL DEFAULT '0',
   `y` double NOT NULL DEFAULT '0',
   `image` varchar(132) NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE `capture_point` (
   PRIMARY KEY (`capture_point_id`),
   KEY `FK_CP_ServerID_idx` (`server_id`),
   CONSTRAINT `FK_CP_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=306 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -187,7 +187,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=304 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=343 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,7 +223,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1273 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1337 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,7 +276,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=489 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=509 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -640,9 +640,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddOrUpdateCapturePoint`(
         IN Status VARCHAR(15), 
         IN BlueUnits INT, 
         IN RedUnits INT,
+        IN MaxCapacity INT,
         IN LatLong VARCHAR(30),
         IN MGRS VARCHAR(20),
-        IN ResourceString VARCHAR(900),
         IN Text VARCHAR(900),
         IN X DOUBLE,
         IN Y DOUBLE
@@ -657,7 +657,7 @@ BEGIN
             capture_point.red_units = RedUnits,
             capture_point.latlong = LatLong,
             capture_point.mgrs = MGRS,
-            capture_point.resources = ResourceString,
+            capture_point.max_capacity = MaxCapacity,
             capture_point.text = Text,
             capture_point.x = X,
             capture_point.y = Y,
@@ -666,10 +666,10 @@ BEGIN
 	ELSE
 		INSERT INTO capture_point 
         (capture_point.server_id, capture_point.name, capture_point.latlong, capture_point.mgrs, 
-         capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.resources,
+         capture_point.status, capture_point.blue_units, capture_point.red_units, capture_point.max_capacity,
          capture_point.text, capture_point.x, capture_point.y, capture_point.image, capture_point.type)
         VALUES (ServerID, Name, LatLong, MGRS, 
-				Status, BlueUnits, RedUnits, ResourceString,
+				Status, BlueUnits, RedUnits, MaxCapacity,
 				Text, X, Y, fnc_GetCapturePointImage(BlueUnits, RedUnits, Type), Type);
     END IF;
     SELECT 1;
@@ -1007,10 +1007,15 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `SendHeartbeat`(
-		IN ServerID INT
+		IN ServerID INT,
+        IN RestartTime INT
     )
 BEGIN
-	UPDATE ki.server SET last_heartbeat = NOW(), status = "Online" WHERE server_id = ServerID;
+	UPDATE ki.server 
+		SET last_heartbeat = NOW(),
+        status = "Online",
+		restart_time = RestartTime
+	WHERE server_id = ServerID;
 	SELECT 1;
 END ;;
 DELIMITER ;
@@ -1092,11 +1097,11 @@ BEGIN
 			c.name as Name,
             c.latlong as LatLong,
             c.mgrs as MGRS,
-            c.resources as Resources,
             c.text as Text,
             c.status as Status,
             c.blue_units as BlueUnits,
             c.red_units as RedUnits,
+            c.max_capacity as MaxCapacity,
             c.x as X,
             c.y as Y,
 			c.image as ImagePath
@@ -1289,4 +1294,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-19  4:42:29
+-- Dump completed on 2017-12-23  1:08:23
