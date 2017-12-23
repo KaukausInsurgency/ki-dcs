@@ -1,37 +1,9 @@
 -- Dynamic Side Mission Tasking class
 -- Handles the creation, management and cleanup of side missions
 
-
-
-DSMTResource = 
-{
-  Groups = {},
-  Units = {},
-  Statics = {}, -- first index is object, second index is category (used in loading/saving to file)
-  Arguments = nil
-}
-
-function DSMTResource:New(groups, units, statics, args)
-  env.info("DSMTResource:New called")
-  local self = KI.Toolbox.DeepCopy( DSMTResource )
-
-	if self ~= nil then
-		setmetatable( self, DSMTResource )
-		self.__index = self	
-	end
-  
-  self.Groups = groups or {}
-  self.Units = units or {}
-  self.Statics = statics or {}
-  self.Arguments = args or nil
-  
-  return self
-end
-
-
 DSMT = {}
 
-function DSMT:New(taskName, zones, init, destroy, complete, fail, oncomplete, onfail, ontimeout, expiry_time, checkrate, destroytime)
+function DSMT:New(taskName, taskHTMLDesc, taskHTMLImage)
   env.info("DSMT:New called")
   local self = KI.Toolbox.DeepCopy( DSMT )
 
@@ -41,23 +13,81 @@ function DSMT:New(taskName, zones, init, destroy, complete, fail, oncomplete, on
 	end
   
   self.Name = taskName
-  self.Zones = DSMT._initZones(zones)
-  self.Init = init
-  self.Destroy = destroy
-  self.Complete = complete
-  self.Fail = fail
-  self.OnComplete = oncomplete
-  self.OnFail = onfail
-  self.OnTimeout = ontimeout
-  self.Resource = nil
+  self.Desc = taskHTMLDesc
+  self.Image = taskHTMLImage
+  
+  self.Zones = {}
+  self.Arguments = nil
   self.CurrentZone = nil
-  self.CheckRate = checkrate
-  self.Expiry = expiry_time or 3600
-  self.DestroyTime = destroytime or 300
+  self.CurrentZoneRadius = nil
+  self.CurrentPosition = nil
+  self.CheckRate = 30
+  self.Expiry = 3600
+  self.DestroyTime = 300
   self.Life = 0
   self.Done = false
   return self
 end
+
+-- builder extension functions
+
+function DSMT:SetZones(zones)
+  self.Zones = DSMT._initZones(zones)
+  return self
+end
+
+function DSMT:SetCheckRate(t)
+  self.CheckRate = t
+  return self
+end
+
+function DSMT:SetExpiryTime(t)
+  self.Expiry = t
+  return self
+end
+
+function DSMT:SetDestroyTime(t)
+  self.DestroyTime = t
+  return self
+end
+
+function DSMT:SetInitFnc(fnc)
+  self.Init = fnc
+  return self
+end
+
+function DSMT:SetDestroyFnc(fnc)
+  self.Destroy = fnc
+  return self
+end
+
+function DSMT:SetCompleteFnc(fnc)
+  self.Complete = fnc
+  return self
+end
+
+function DSMT:SetFailFnc(fnc)
+  self.Fail = fnc
+  return self
+end
+
+function DSMT:SetOnCompleteFnc(fnc)
+  self.OnComplete = fnc
+  return self
+end
+
+function DSMT:SetOnFailFnc(fnc)
+  self.OnFail = fnc
+  return self
+end
+
+function DSMT:SetOnTimeoutFnc(fnc)
+  self.OnTimeout = fnc
+  return self
+end
+
+-- end builder extension functions
+
 
 
 function DSMT._initZones(zonenames)
@@ -79,31 +109,33 @@ end
 function DSMT:_initMission()
   env.info("DSMT._initMission called")
   self.CurrentZone = DSMT._selectZone(self.Zones)
-  self.Resource = self.Init(self.Name, self.CurrentZone)
+  self.CurrentPosition = LOCPOS:NewFromZone(self.CurrentZone)
+  self.CurrentZoneRadius = self.CurrentZone:GetRadius()
+  self.Arguments = self.Init(self.Name, self.CurrentZone)
   return true
 end
 
 function DSMT._destroy(self, time)
   env.info("DSMT._destroy called")
-  self.Destroy(self.Resource)
+  self.Destroy(self.Arguments)
   return nil
 end
 
 function DSMT._manage(self, time)
   env.info("DSMT._manage called")
   local fncSuccess, result = xpcall(function()
-    if self.Complete(self.Name, self.CurrentZone, self.Resource) then
-      self.OnComplete(self.Name, self.CurrentZone, self.Resource)
+    if self.Complete(self.Name, self.CurrentZone, self.Arguments) then
+      self.OnComplete(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
-    elseif self.Fail(self.Name, self.CurrentZone, self.Resource) then
-      self.OnFail(self.Name, self.CurrentZone, self.Resource)
+    elseif self.Fail(self.Name, self.CurrentZone, self.Arguments) then
+      self.OnFail(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
     elseif self.Life >= self.Expiry then
-      self.OnTimeout(self.Name, self.CurrentZone, self.Resource)
+      self.OnTimeout(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil

@@ -56,18 +56,18 @@ function KI.Init.SideMissions()
   for i = 1, #KI.Config.SideMissions do
     -- should create a validation function here
     
-    local _sm = DSMT:New(KI.Config.SideMissions[i].name, 
-                         KI.Config.SideMissions[i].zones,
-                         KI.Config.SideMissions[i].init,
-                         KI.Config.SideMissions[i].destroy,
-                         KI.Config.SideMissions[i].complete,
-                         KI.Config.SideMissions[i].fail,
-                         KI.Config.SideMissions[i].oncomplete,
-                         KI.Config.SideMissions[i].onfail,
-                         KI.Config.SideMissions[i].ontimeout,
-                         KI.Config.SideMissionMaxTime,
-                         KI.Config.SideMissions[i].rate,
-                         KI.Config.SideMissionsDestroyTime)
+    local _sm = DSMT:New(KI.Config.SideMissions[i].name, KI.Config.SideMissions[i].desc, KI.Config.SideMissions[i].image)
+                        :SetZones(KI.Config.SideMissions[i].zones)
+                        :SetCheckRate(KI.Config.SideMissions[i].rate)
+                        :SetExpiryTime(KI.Config.SideMissionMaxTime)
+                        :SetDestroyTime(KI.Config.SideMissionsDestroyTime)
+                        :SetInitFnc(KI.Config.SideMissions[i].init)
+                        :SetDestroyFnc(KI.Config.SideMissions[i].destroy)
+                        :SetCompleteFnc(KI.Config.SideMissions[i].complete)
+                        :SetFailFnc(KI.Config.SideMissions[i].fail)
+                        :SetOnCompleteFnc(KI.Config.SideMissions[i].oncomplete)
+                        :SetOnFailFnc(KI.Config.SideMissions[i].onfail)
+                        :SetOnTimeoutFnc(KI.Config.SideMissions[i].ontimeout)
     table.insert(KI.Data.SideMissions, _sm)
     env.info("KI.Init.SideMissions - Side Mission Instance created for " .. _sm.Name)
   end

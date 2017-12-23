@@ -188,6 +188,15 @@ KI.Config.SideMissions =
       -- the name of the side mission - will display in radio item menu as well as on website
       name = "Destroy Insurgent Camp", 
       
+      -- the description of the task - supports HTML and will render on website (use <br/> for new line)
+      desc = "Recon has uncovered what appears to be an insurgent camp used for recruitment and training.<br/>Command has tasked that this target be destroyed.",
+      
+      -- the image the website will use when displaying the task, check docs for preset list of images that can be used
+      image = "task_destroy",
+      
+      -- determines the rate at which the task loop function should run
+      rate = 30,
+      
       -- the list of zones that this side mission can use (will be randomly picked)
       zones = { "InsCampZone1", "InsCampZone2", "InsCampZone3", "InsCampZone4" },
       
@@ -200,32 +209,29 @@ KI.Config.SideMissions =
         local args = {}
         args.CampObject = CampObj
         KI.Toolbox.MessageRedCoalition("ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
-        -- create and initialize the task, init must return struct SideMission Class object
-        return DSMTResource:New(nil, nil, { {CampObj, "Fortifications", CampObj:getName()} }, args)
+        -- create and initialize the task, init must return arguments
+        return args
       end,
       
       -- this function tells KI how to destroy/cleanup the side mission
       -- delete and destroy all relevant objects in this function, as well as close any handlers / resources that this side mission may have used
-      destroy = function(rsc)
+      destroy = function(args)
         -- destroys and cleans up task resources, must return true/false to indicate cleanup succeeded
         env.info("DSMT.destroy called - destroying camp object")
-        xpcall(function() rsc.Arguments.CampObject:destroy() end,
+        xpcall(function() args.CampObject:destroy() end,
                function(err) env.info("DSMT.destroy (Destroy Camp) ERROR : " .. err) end)
         
       end,
-      
-      -- determines the rate at which the task loop function should run
-      rate = 30,
-      
+        
       -- this function tells KI how the side mission is to be considered complete - this function is run every so often to check if the criteria has been met - must return true/false to indicate if task is complete
-      complete = function(missionName, chosenZone, rsc)
+      complete = function(missionName, chosenZone, args)
         env.info("DSMT.complete called - checking if CampObject is alive")
-        return not rsc.Arguments.CampObject:isExist()
+        return not args.CampObject:isExist()
       end,
       
       -- this function tells KI how the side mission is to be considered failed - this function is run every so often to check if the criteria have been met - must return true/false to indicate if task is failed
       -- you can optionally leave this to return false, then once the timeout expires the mission will be considered failed and the ontimeout will be called
-      fail = function(missionName, chosenZone, rsc)
+      fail = function(missionName, chosenZone, args)
         env.info("DSMT.fail called")
         return false
       end,
@@ -233,7 +239,7 @@ KI.Config.SideMissions =
       -- this function tells KI what should happen when the side mission is completed
       -- use this function to display messages to all players
       -- no return required
-      oncomplete = function(missionName, chosenZone, rsc)
+      oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
         KI.Toolbox.MessageRedCoalition("MISSION COMPLETE - " .. missionName .. " - THE CAMP HAS BEEN SUCCESSFULLY DESTROYED!")
       end,
@@ -241,14 +247,14 @@ KI.Config.SideMissions =
       -- this function tells KI what should happen when the side mission is failed
       -- use this function to display messages to all players
       -- no return required
-      onfail = function(missionName, chosenZone, rsc)
+      onfail = function(missionName, chosenZone, args)
         env.info("DSMT.onfail called")
       end,
       
       -- this function tells KI what should happen when the side mission time runs out
       -- use this function to display messages to all players
       -- no return required
-      ontimeout = function(missionName, chosenZone, rsc)
+      ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
         KI.Toolbox.MessageRedCoalition("MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end

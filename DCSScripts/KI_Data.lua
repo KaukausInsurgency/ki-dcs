@@ -2,16 +2,17 @@ KI.Data =
 {
   CapturePoints = {},
   Depots = {},
-  SideMissions = {},
-  ActiveMissions = {},
+  SideMissions = {},                  -- list of side missions the mission will generate
+  ActiveMissions = {},                -- list of currently active missions
+  InactiveMissions = {},              -- list of missions that were completed/expired/no longer active
   GameEventQueue = {},                -- data queue of game events
-  OnlinePlayers = {},
+  OnlinePlayers = {},                 -- hash of current online players
   PlayerInZone = {},                  -- hash of players inside a zone
   SpawnID = 0,
   SortieID = 0,
   SessionID = KI.Null,
   ServerID = KI.Null,
-  GameEventFileID = 0,  
+  GameEventFileID = 0,                -- unique file ID enumerator for game events
   Waypoints = {},                     -- hash of ai ground waypoints
   UnitIDs = {}                        -- hash of unit IDs in format [tostring(unit.id_)] = DCS Unit Obj
 }

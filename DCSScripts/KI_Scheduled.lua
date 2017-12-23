@@ -408,11 +408,41 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       table.insert(DepotSegments[index], data)
     end
   end
+  
+  env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Active Missions Data")
+  local DSMTSegments = {}
+  table.insert(DSMTSegments, {})  -- create an inner array
+  if true then
+    local index = 1
+    for i = 1, #KI.Data.ActiveMissions do
+      -- segment dsmt every 6 elements
+        if i % 6 == 0 then
+          index = index + 1
+          table.insert(DSMTSegments, {})
+        end
+      local _task = KI.Data.ActiveMissions[i]
+      local data = 
+      { 
+        ServerID = KI.Data.ServerID, 
+        TaskName = _task.Name,
+        TaskDesc = _task.Desc,
+        TaskImage = _task.Image,
+        TimeRemaining = _task.Expiry - _task.Life,
+        Status = "Active",
+        LatLong = _task.CurrentPosition.LatLong,
+        MGRS = _task.CurrentPosition.MGRS,
+        X = _task.CurrentPosition.X,
+        Y = _task.CurrentPosition.Y,
+        Radius = _task.CurrentZoneRadius
+      }
+      table.insert(DSMTSegments[index], data)
+    end
+  end
 
-  env.info("KI.Scheduled.DataTransmissionGeneral - dumping capture points : " .. KI.Toolbox.Dump(CapturePointSegments))
-  env.info("KI.Scheduled.DataTransmissionGeneral - dumping depots : " .. KI.Toolbox.Dump(DepotSegments))
+  --env.info("KI.Scheduled.DataTransmissionGeneral - dumping capture points : " .. KI.Toolbox.Dump(CapturePointSegments))
+  --env.info("KI.Scheduled.DataTransmissionGeneral - dumping depots : " .. KI.Toolbox.Dump(DepotSegments))
 
-  -- 3) Depot Segments
+  -- 1) Depot Segments
   for i = 1, #DepotSegments do
     socket.try(
         KI.UDPSendSocket:sendto(KI.JSON:encode({Depots = DepotSegments[i]}) .. KI.SocketDelimiter, 
@@ -421,10 +451,19 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   end
   env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Depots to Server MOD")
   
-  -- 4) Capture Point Segments
+  -- 2) Capture Point Segments
   for i = 1, #CapturePointSegments do
     socket.try(
         KI.UDPSendSocket:sendto(KI.JSON:encode({CapturePoints = CapturePointSegments[i]}) .. KI.SocketDelimiter, 
+                                "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+      )
+  end
+  env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Capture Points to Server MOD")
+  
+  -- 3) Active Mission Segments
+  for i = 1, #DSMTSegments do
+    socket.try(
+        KI.UDPSendSocket:sendto(KI.JSON:encode({ActiveMissions = DSMTSegments[i]}) .. KI.SocketDelimiter, 
                                 "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
       )
   end
