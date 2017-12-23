@@ -72,6 +72,9 @@ KI.Config.SERVER_SESSION_RECEIVE_PORT = 6007  -- the port to listen for server s
 -- Your server name (Only really used if supporting multi-tenant game servers) -- no function at this time
 KI.Config.ServerName = "Kaukasus Insurgency Server"
 
+-- Determines whether the respawned ground group needs to be retasked it's waypoint based on it's current distance to it
+KI.Config.RespawnUnitWaypointDistance = 200
+
 -- **no function at this time - the current way of doing this is to include Template in objects you wish to have ignored by KI
 
 -- list of template groups / objects that are to be ignored by KI
