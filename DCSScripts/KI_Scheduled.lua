@@ -251,6 +251,7 @@ function KI.Scheduled.CheckSideMissions(args, time)
   for i = #KI.Data.ActiveMissions, 1, -1 do
     if KI.Data.ActiveMissions[i].Done then
       env.info("KI.Scheduled.CheckSideMissions - inactive mission was found - removing from current queue")
+      table.insert(KI.Data.InactiveMissionsQueue, KI.Data.ActiveMissions[i])
       table.remove(KI.Data.ActiveMissions, i)
     end
   end
@@ -261,6 +262,8 @@ function KI.Scheduled.CheckSideMissions(args, time)
     local sidemission = KI.Toolbox.DeepCopy(KI.Data.SideMissions[math.random(#KI.Data.SideMissions)])
     if sidemission then
       env.info("KI.Scheduled.CheckSideMissions - chosen side mission - starting ...")
+      sidemission.TaskID = KI.IncrementTaskID()
+      sidemission.InsertNewDBRecord = true
       sidemission:Start()
       table.insert(KI.Data.ActiveMissions, sidemission)
     end
@@ -411,37 +414,112 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   
   env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Active Missions Data")
   local DSMTSegments = {}
-  table.insert(DSMTSegments, {})  -- create an inner array
+  
   if true then
     local index = 1
     for i = 1, #KI.Data.ActiveMissions do
+      if index == 1 then
+        table.insert(DSMTSegments, {})  -- create an inner array
+      end
       -- segment dsmt every 6 elements
-        if i % 6 == 0 then
-          index = index + 1
-          table.insert(DSMTSegments, {})
-        end
+      if i % 6 == 0 then
+        index = index + 1
+        table.insert(DSMTSegments, {})
+      end
       local _task = KI.Data.ActiveMissions[i]
-      local data = 
-      { 
-        ServerID = KI.Data.ServerID, 
-        TaskName = _task.Name,
-        TaskDesc = _task.Desc,
-        TaskImage = _task.Image,
-        TimeRemaining = _task.Expiry - _task.Life,
-        Status = "Active",
-        LatLong = _task.CurrentPosition.LatLong,
-        MGRS = _task.CurrentPosition.MGRS,
-        X = _task.CurrentPosition.X,
-        Y = _task.CurrentPosition.Y,
-        Radius = _task.CurrentZoneRadius
-      }
+      local data = {}
+      if _task.InsertNewDBRecord then
+        data = 
+        { 
+          IsAdd = true,
+          ServerID = KI.Data.ServerID, 
+          ServerMissionID = _task.TaskID,
+          Status = _task.Status,
+          TimeRemaining = _task.Expiry - _task.Life,
+          Image = _task.Image,
+          TaskName = _task.Name,
+          TaskDesc = _task.Desc,   
+          LatLong = _task.CurrentPosition.LatLong,
+          MGRS = _task.CurrentPosition.MGRS,
+          X = _task.CurrentPosition.X,
+          Y = _task.CurrentPosition.Y
+        }
+        KI.Data.ActiveMissions[i].InsertNewDBRecord = false   -- set to false, as we dont need to add the same record multiple times
+      else
+        data = 
+        { 
+          IsAdd = false,
+          ServerID = KI.Data.ServerID, 
+          ServerMissionID = _task.TaskID,
+          Status = _task.Status,
+          TimeRemaining = _task.Expiry - _task.Life,
+          Image = _task.Image,
+          TaskName = KI.Null,
+          TaskDesc = KI.Null,          
+          LatLong = KI.Null,
+          MGRS = KI.Null,
+          X = KI.Null,
+          Y = KI.Null
+        }
+      end
       table.insert(DSMTSegments[index], data)
+    end
+    
+    env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Inactive Missions Data")
+    -- prepare the inactive mission segment queue
+    local inactivemissionsegments = {}
+    for i = 1, #KI.Data.InactiveMissionsQueue do
+      local _task = KI.Data.InactiveMissionsQueue[i]
+      local data = {}
+      if _task.InsertNewDBRecord then
+        data = 
+        { 
+          IsAdd = true,
+          ServerID = KI.Data.ServerID, 
+          ServerMissionID = _task.TaskID,
+          Status = _task.Status,
+          TimeRemaining = _task.Expiry - _task.Life,
+          TaskName = _task.Name,
+          TaskDesc = _task.Desc,
+          Image = _task.Image,
+          LatLong = _task.CurrentPosition.LatLong,
+          MGRS = _task.CurrentPosition.MGRS,
+          X = _task.CurrentPosition.X,
+          Y = _task.CurrentPosition.Y
+        }
+      else
+        data = 
+        { 
+          IsAdd = false,
+          ServerID = KI.Data.ServerID, 
+          ServerMissionID = _task.TaskID,
+          Status = _task.Status,
+          TimeRemaining = _task.Expiry - _task.Life,
+          TaskName = KI.Null,
+          TaskDesc = KI.Null,
+          Image = KI.Null,
+          LatLong = KI.Null,
+          MGRS = KI.Null,
+          X = KI.Null,
+          Y = KI.Null
+        }
+      end
+      table.insert(inactivemissionsegments, data)
+    end
+    
+    KI.Data.InactiveMissionsQueue = {}  -- empty the queue
+    
+    if #inactivemissionsegments > 0 then
+      table.insert(DSMTSegments, inactivemissionsegments)
     end
   end
 
+  env.info("KI.Scheduled.DataTransmissionGeneral - DSMTSegments count: " .. tostring(#DSMTSegments))
   --env.info("KI.Scheduled.DataTransmissionGeneral - dumping capture points : " .. KI.Toolbox.Dump(CapturePointSegments))
   --env.info("KI.Scheduled.DataTransmissionGeneral - dumping depots : " .. KI.Toolbox.Dump(DepotSegments))
 
+  env.info("KI.Scheduled.DataTransmissionGeneral - prepaing UDP Send to Server MOD")
+  
   -- 1) Depot Segments
   for i = 1, #DepotSegments do
     socket.try(
@@ -463,11 +541,11 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   -- 3) Active Mission Segments
   for i = 1, #DSMTSegments do
     socket.try(
-        KI.UDPSendSocket:sendto(KI.JSON:encode({ActiveMissions = DSMTSegments[i]}) .. KI.SocketDelimiter, 
+        KI.UDPSendSocket:sendto(KI.JSON:encode({SideMissions = DSMTSegments[i]}) .. KI.SocketDelimiter, 
                                 "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
       )
   end
-  env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Capture Points to Server MOD")
+  env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Side Missions to Server MOD")
   
   return time + KI.Config.DataTransmissionGeneralUpdateRate
 end

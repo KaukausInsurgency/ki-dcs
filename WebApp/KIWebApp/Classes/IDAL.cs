@@ -14,6 +14,8 @@ namespace KIWebApp.Classes
         List<DepotModel> GetDepots(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         List<CapturePointModel> GetCapturePoints(int serverID);
         List<CapturePointModel> GetCapturePoints(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
+        List<SideMissionModel> GetSideMissions(int serverID);
+        List<SideMissionModel> GetSideMissions(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         List<MapLayerModel> GetMapLayers(int mapID);
         List<MapLayerModel> GetMapLayers(int mapID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         List<OnlinePlayerModel> GetOnlinePlayers(int serverID);

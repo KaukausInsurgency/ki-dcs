@@ -536,9 +536,15 @@ function KI.Loader.LoadData()
       env.info("KI.Loader.LoadData ERROR - GameEventFileID could not be found in file")
       return false
     else
-      KI.Data.GameEventFileID = _dataTable["GameEventFileID"] -- load the current SortieID saved in memory
+      KI.Data.GameEventFileID = _dataTable["GameEventFileID"] -- load the current GameEventFileID saved in memory
     end
     
+    if not _dataTable["TaskID"] then
+      env.info("KI.Loader.LoadData ERROR - TaskID could not be found in file")
+      return false
+    else
+      KI.Data.TaskID = _dataTable["TaskID"] -- load the current TaskID saved in memory
+    end
     
     return true
   else

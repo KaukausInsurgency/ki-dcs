@@ -116,6 +116,40 @@
         });
     }
 
+    function RenderSideMissionsFirstTime(modelObj, rootImgPath) {
+        $(model.Missions).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
+            var Img = rootImgPath + this.Image;
+            var tooltipid = "tip_sm_content_id_" + this.ID;
+            var id_attribute = 'data-sidemissionID="' + this.ID + '"';
+            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+            dot.css({
+                position: 'absolute',
+                left: ImagePoint.x + "px",
+                top: ImagePoint.y + "px"
+            });
+            $(".mapcontent").append(dot);
+
+            var content = "<strong>" + this.Name + "</strong><br/>";
+            content += "Time Remaining: " + this.TimeRemaining + "<br/>";
+            content += "Status: " + this.Status + "<br/>";
+            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+            if (this.Desc.length < 100)
+            {
+                content += this.Desc;
+            }
+            else
+            {
+                content += this.Desc.substr(0, 99) + "...";
+            }
+            
+            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
+            $(".mapcontent").first().append(tooltipspan);
+        });
+    }
+
     function RenderMapFirstTime(modelObj, rootImgPath)
     {
         var headingcontent = $("<h2>Server: " + modelObj.ServerName + "</h2></br><h><b>Status: " + modelObj.Status + "</b></h></br><h><b>Restarts In: " + modelObj.RestartTime + "</b></h>");
@@ -123,6 +157,7 @@
 
         RenderDepotsFirstTime(modelObj, rootImgPath);
         RenderCapturePointsFirstTime(modelObj, rootImgPath);
+        RenderSideMissionsFirstTime(modelObj, rootImgPath);
 
         $('.mrk').tooltipster({
             theme: 'tooltipster-noir'
@@ -171,6 +206,70 @@
             //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
             //img.append(tooltipspan);
             //img.tooltipster('content', content);
+        });
+
+        $(modelObj.Missions).each(function (i) {   
+
+            var tooltipid = "tip_sm_content_id_" + this.ID;
+            var imghtml = $('[data-sidemissionID=' + this.ID + ']');
+
+            if (this.TimeInactive < 60 && imghtml !== null)
+            {            
+                var content = "<strong>" + this.Name + "</strong><br/>";
+                content += "Time Remaining: " + this.TimeRemaining + "<br/>";
+                content += "Status: " + this.Status + "<br/>";
+                content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+                content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+                if (this.Desc.length < 100) {
+                    content += this.Desc;
+                }
+                else {
+                    content += this.Desc.substr(0, 99) + "...";
+                }
+                
+                imghtml.attr('src', ROOT + this.Image);
+                $('#' + tooltipid).html(content);
+            }
+            else if (this.TimeInactive < 60 && imghtml === null)
+            {
+                var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
+                var Img = rootImgPath + this.Image;
+                var tooltipid = "tip_sm_content_id_" + this.ID;
+                var id_attribute = 'data-sidemissionID="' + this.ID + '"';
+                var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                    '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+                dot.css({
+                    position: 'absolute',
+                    left: ImagePoint.x + "px",
+                    top: ImagePoint.y + "px"
+                });
+                $(".mapcontent").append(dot);
+
+                var content = "<strong>" + this.Name + "</strong><br/>";
+                content += "Time Remaining: " + this.TimeRemaining + "<br/>";
+                content += "Status: " + this.Status + "<br/>";
+                content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
+                content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
+                if (this.Desc.length < 100) {
+                    content += this.Desc;
+                }
+                else {
+                    content += this.Desc.substr(0, 99) + "...";
+                }
+
+                var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
+                $(".mapcontent").first().append(tooltipspan);
+
+                $('[data-sidemissionID=' + this.ID + ']').tooltipster({
+                    theme: 'tooltipster-noir'
+                });      
+            }
+            else
+            {
+                $('[data-sidemissionID=' + this.ID + ']').remove();
+                $(tooltipid).remove();
+            }
+            
         });
     };
 

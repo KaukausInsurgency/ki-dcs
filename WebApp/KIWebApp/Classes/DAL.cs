@@ -18,6 +18,7 @@ namespace KIWebApp.Classes
         private const string SP_GET_DEPOTS= "websp_GetDepots";
         private const string SP_GET_CAPTUREPOINTS = "websp_GetCapturePoints";
         private const string SP_GET_GAME = "websp_GetGame";
+        private const string SP_GET_SIDEMISSIONS = "websp_GetSideMissions";
         private string _DBConnection;
        
         public DAL()
@@ -176,6 +177,7 @@ namespace KIWebApp.Classes
                 g.Status = status;
                 g.Depots = ((IDAL)this).GetDepots(serverID, ref conn);
                 g.CapturePoints = ((IDAL)this).GetCapturePoints(serverID, ref conn);
+                g.Missions = ((IDAL)this).GetSideMissions(serverID, ref conn);
                 g.OnlinePlayers = ((IDAL)this).GetOnlinePlayers(serverID, ref conn);
                 g.Map = ((IDAL)this).GetGameMap(serverID, ref conn);
                 break;
@@ -282,6 +284,7 @@ namespace KIWebApp.Classes
             {
                 Depots = ((IDAL)this).GetDepots(serverID, ref conn),
                 CapturePoints = ((IDAL)this).GetCapturePoints(serverID, ref conn),
+                Missions = ((IDAL)this).GetSideMissions(serverID, ref conn)
             };
 
             return mm;
@@ -415,7 +418,63 @@ namespace KIWebApp.Classes
             return servers;
         }
 
+        List<SideMissionModel> IDAL.GetSideMissions(int serverID)
+        {
+            MySqlConnection conn = new MySqlConnection(_DBConnection);
+            try
+            {
+                conn.Open();
+                return ((IDAL)this).GetSideMissions(serverID, ref conn);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
 
+        List<SideMissionModel> IDAL.GetSideMissions(int serverID, ref MySqlConnection conn)
+        {
+            if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
+                conn.Open();
+            List<SideMissionModel> missions = new List<SideMissionModel>();
+            MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_GET_SIDEMISSIONS)
+            {
+                Connection = conn,
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            cmd.Parameters.Add(new MySqlParameter("ServerID", serverID));
+            MySqlDataReader rdr = cmd.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(rdr);
 
+            foreach (DataRow dr in dt.Rows)
+            {
+                TimeSpan rt;
+                if (dr["TimeRemaining"] == DBNull.Value || dr["TimeRemaining"] == null)
+                    rt = new TimeSpan(0, 0, 0);
+                else
+                    rt = new TimeSpan(TimeSpan.TicksPerSecond * Convert.ToInt32(dr.Field<double>("TimeRemaining")));
+
+                double it = 0;
+                if (dr["TimeInactive"] != DBNull.Value && dr["TimeInactive"] != null)
+                    it = ((TimeSpan)(DateTime.Now - dr.Field<DateTime>("TimeInactive"))).TotalSeconds;
+
+                SideMissionModel mission = new SideMissionModel
+                {
+                    ID = dr.Field<int>("ServerMissionID"),
+                    Name = dr.Field<string>("Name"),
+                    Desc = dr.Field<string>("Description"),
+                    Image = dr.Field<string>("ImagePath"),
+                    Status = dr.Field<string>("Status"),
+                    TimeRemaining = rt.ToString(),
+                    TimeInactive = it,
+                    LatLong = dr.Field<string>("LatLong"),
+                    MGRS = dr.Field<string>("MGRS"),     
+                    Pos = new Position(dr.Field<double>("X"), dr.Field<double>("Y"))         
+                };
+                missions.Add(mission);
+            }
+            return missions;
+        }
     }
 }
