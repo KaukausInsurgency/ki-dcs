@@ -13,6 +13,7 @@ namespace KIWebApp.Models
         public string Desc { get; set; }
         public string Image { get; set; }
         public string Status { get; set; }
+        public bool StatusChanged { get; set; }
         public string TimeRemaining { get; set; }
         public double TimeInactive { get; set; }
         public string LatLong { get; set; }

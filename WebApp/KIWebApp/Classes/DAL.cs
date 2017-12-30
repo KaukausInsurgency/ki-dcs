@@ -69,6 +69,7 @@ namespace KIWebApp.Classes
                     MaxCapacity = dr.Field<int>("MaxCapacity"),
                     Text = cpText,
                     Status = dr.Field<string>("Status"),
+                    StatusChanged = dr.Field<ulong>("StatusChanged") == 1,  // for some reason MySql treats BIT(1) as ulong
                     BlueUnits = dr.Field<int>("BlueUnits"),
                     RedUnits = dr.Field<int>("RedUnits"),
                     Pos = new Position(dr.Field<double>("X"), dr.Field<double>("Y")),
@@ -118,6 +119,7 @@ namespace KIWebApp.Classes
                     MGRS = dr.Field<string>("MGRS"),
                     Capacity = dr.Field<int>("CurrentCapacity") + " / " + dr.Field<int>("Capacity"),
                     Status = dr.Field<string>("Status"),
+                    StatusChanged = dr.Field<ulong>("StatusChanged") == 1,  // for some reason MySQL treats BIT(1) as ulong
                     Resources = dr.Field<string>("Resources"),
                     Pos = new Position(dr.Field<double>("X"), dr.Field<double>("Y")),
                     Image = dr.Field<string>("ImagePath")
@@ -466,6 +468,7 @@ namespace KIWebApp.Classes
                     Desc = dr.Field<string>("Description"),
                     Image = dr.Field<string>("ImagePath"),
                     Status = dr.Field<string>("Status"),
+                    StatusChanged = dr.Field<ulong>("StatusChanged") == 1,  // for some reason MySQL treats BIT(1) as ulong
                     TimeRemaining = rt.ToString(),
                     TimeInactive = it,
                     LatLong = dr.Field<string>("LatLong"),

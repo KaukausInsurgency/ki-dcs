@@ -14,6 +14,7 @@ namespace KIWebApp.Models
         public string MGRS { get; set; }
         public string Capacity { get; set; }
         public string Status { get; set; }
+        public bool StatusChanged { get; set; }
         public string Resources { get; set; }
         public Position Pos { get; set; }
         public string Image { get; set; }

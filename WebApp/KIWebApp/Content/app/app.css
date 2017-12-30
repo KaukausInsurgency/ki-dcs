@@ -30,5 +30,30 @@
     border: 1px solid black;
 }
 
-    
-    
+
+.tooltipster-content {
+    font-size: 10px !important;
+}
+
+.mrk {
+    border: 2px solid transparent;
+
+    -webkit-transition: border 0.25s linear, box-shadow; 0.25s linear;
+    -moz-transition: border 0.25s linear, box-shadow; 0.25s linear;
+    transition: border 0.25s linear, box-shadow; 0.25s linear;
+
+}
+
+.mrk.active {
+    border-color: #2eb82e;
+    -webkit-box-shadow: 0 0 5px #2eb82e;
+    -moz-box-shadow: 0 0 5px #2eb82e;
+    box-shadow: 0 0 5px #2eb82e;
+}
+
+.mrk.animate {
+    border-color: #ffe900;
+    -webkit-box-shadow: 0 0 5px #ffe900;
+    -moz-box-shadow: 0 0 5px #ffe900;
+    box-shadow: 0 0 5px #ffe900;
+}
