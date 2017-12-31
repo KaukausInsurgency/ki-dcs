@@ -60,6 +60,8 @@ BEFORE UPDATE
 BEGIN
 	IF (OLD.status <> NEW.status) THEN
 		 SET NEW.status_changed = 1;
+	ELSE
+		 SET NEW.status_changed = 0;
 	END IF;
 END */;;
 DELIMITER ;
@@ -109,6 +111,8 @@ BEFORE UPDATE
 BEGIN
 	IF (OLD.status <> NEW.status) THEN
 		 SET NEW.status_changed = 1;
+	ELSE
+		 SET NEW.status_changed = 0;
 	END IF;
 END */;;
 DELIMITER ;
@@ -211,7 +215,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=356 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=358 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +251,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1346 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1347 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,7 +304,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=515 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=516 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +332,7 @@ CREATE TABLE `side_mission` (
   PRIMARY KEY (`side_mission_id`),
   KEY `fk_server_id_idx` (`server_id`),
   CONSTRAINT `fk_server_id` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -345,6 +349,8 @@ BEFORE UPDATE
 BEGIN
 	IF (OLD.status <> NEW.status) THEN
 		 SET NEW.status_changed = 1;
+	ELSE
+		 SET NEW.status_changed = 0;
 	END IF;
 END */;;
 DELIMITER ;
@@ -1521,4 +1527,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-30  3:53:06
+-- Dump completed on 2017-12-30 22:47:25
