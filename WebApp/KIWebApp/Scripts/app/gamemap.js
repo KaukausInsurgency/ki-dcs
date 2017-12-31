@@ -1,8 +1,34 @@
 ﻿$(document).ready(function () {
 
+    // async sleep function
+    function Sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function AnimateMarker(marker) {
+        if (marker.hasClass("animating"))
+        {
+            return; // if the element is already being animated then do not attach another async animation
+        }
+        marker.toggleClass("animating");
+        var timer = window.setInterval(function () {
+            marker.toggleClass('animate');
+        }, 1000);
+
+        await Sleep(10000);
+
+        if (timer) {
+            window.clearInterval(timer);
+            timer = null;
+        };
+        marker.removeClass("animate");
+        marker.toggleClass("animating");
+    };
+
     function IsStringEmptyOrWhitespace(str) {
         return str.length === 0 || !str.trim();
     }
+
     // splits a string and converts it into a json object
     function SplitStringIntoArrayTable(str, separator)
     {
@@ -57,15 +83,74 @@
         return imagepoint;
     }
 
+    function InitTooltip(elem)
+    {
+        elem.tooltipster({
+            theme: 'tooltipster-noir',
+            contentAsHTML: true,
+            trigger: 'click',
+            contentCloning: true
+        });   
+    }
+
+    function RenderDepotContent(depotModel)
+    {
+        // Render the tooltip contents
+        var content = "<strong>" + depotModel.Name + "</strong><br/>";
+        content += "Status: " + depotModel.Status + "<br/>";
+        content += "<strong>Lat Long: " + depotModel.LatLong + "</strong><br/>";
+        content += "<strong>MGRS: " + depotModel.MGRS + "</strong><br/><br/>";
+        content += 'Capacity: ' + depotModel.Capacity + '<br/>'; 
+        var arraytable = SplitStringIntoArrayTable(depotModel.Resources, "|"); 
+        content += GenerateTableHTMLString(arraytable);
+        var tooltipcontent = '<div>' + content + '</div>';
+        return tooltipcontent;
+    }
+
+    function RenderSideMissionContent(sidemissionmodel)
+    {
+        var content = "<strong>" + sidemissionmodel.Name + "</strong><br/>";
+        content += "Time Remaining: " + sidemissionmodel.TimeRemaining + "<br/>";
+        content += "Status: " + sidemissionmodel.Status + "<br/>";
+        content += "<strong>Lat Long: " + sidemissionmodel.LatLong + "</strong><br/>";
+        content += "<strong>MGRS: " + sidemissionmodel.MGRS + "</strong><br/><br/>";
+        if (sidemissionmodel.Desc.length < 50) {
+            content += sidemissionmodel.Desc;
+        }
+        else {
+            content += sidemissionmodel.Desc.substr(0, 49) + "...";
+        }
+        var tooltipcontent = '<div>' + content + '</div>';
+        return tooltipcontent;
+    }
+
+    function RenderCapturePointContent(capturepointmodel)
+    {
+        var content = "<strong>" + capturepointmodel.Name + "</strong><br/>";
+        content += "Type: " + capturepointmodel.Type + "<br/>";
+        content += "Status: " + capturepointmodel.Status + "<br/>";
+        content += "<strong>Lat Long: " + capturepointmodel.LatLong + "</strong><br/>";
+        content += "<strong>MGRS: " + capturepointmodel.MGRS + "</strong><br/>";
+        content += "Blue: " + capturepointmodel.BlueUnits + "<br/>";
+        content += "Red: " + capturepointmodel.RedUnits + "<br/>";
+        content += "Capacity: " + capturepointmodel.MaxCapacity;
+        if (capturepointmodel.Text.length !== 0)
+        {
+            content += "<br/><br/>";
+        }
+        content += capturepointmodel.Text + "<br/>";
+        var tooltipcontent = '<div>' + content + '</div>';
+        return tooltipcontent;
+    }
+
     function RenderDepotsFirstTime(modelObj, rootImgPath)
     {
         $(modelObj.Depots).each(function (i) {
             var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
             var Img = rootImgPath + this.Image;
-            var tooltipid = "tip_depot_content_id_" + this.ID;
             var id_attribute = 'data-depotID="' + this.ID + '"';
             var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
-                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+                '" origintop="' + ImagePoint.y + '" />');
             dot.css({
                 position: 'absolute',
                 left: ImagePoint.x + "px",
@@ -73,16 +158,13 @@
             });
             $(".mapcontent").append(dot);
 
-            // Render the tooltip contents
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-            content += 'Capacity: ' + this.Capacity + '<br/>';   // get the overall capacity
-            var arraytable = SplitStringIntoArrayTable(this.Resources, "|");     // now we convert this string into a json object    
-            content += GenerateTableHTMLString(arraytable);                      // generate the html table from the json object
-            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").first().append(tooltipspan);
+            var model = this;
+            var elem = $('[' + id_attribute + ']');
+            InitTooltip(elem);
+            var instances = $.tooltipster.instances('[' + id_attribute + ']');
+            $.each(instances, function (i, instance) {
+                instance.content(RenderDepotContent(model));
+            });
         });
     }
 
@@ -94,25 +176,44 @@
             var tooltipid = "tip_cp_content_id_" + this.ID;
             var id_attribute = 'data-capturepointID="' + this.ID + '"';
             var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
-                '" origintop="' + ImagePoint.y + '" data-tooltip-content="#' + tooltipid + '"' + '"/>');
+                '" origintop="' + ImagePoint.y + '" />');
             dot.css({
                 position: 'absolute',
                 left: ImagePoint.x + "px",
                 top: ImagePoint.y + "px"
             });
             $(".mapcontent").append(dot);
+            var elem = $('[' + id_attribute + ']');
+            InitTooltip(elem);
+            var model = this;
+            var instances = $.tooltipster.instances('[' + id_attribute + ']');
+            $.each(instances, function (i, instance) {
+                instance.content(RenderCapturePointContent(model));
+            });      
+        });
+    }
 
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Type: " + this.Type + "<br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
-            content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/>";
-            content += "Capacity: " + this.MaxCapacity + "<br/><br/>";
-            content += this.Text + "<br/>";
-            var tooltipspan = $('<div class="tooltip_templates" style="display: none"><span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span></div>');
-            $(".mapcontent").first().append(tooltipspan);
+    function RenderSideMissionsFirstTime(modelObj, rootImgPath) {
+        $(model.Missions).each(function (i) {
+            var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
+            var Img = rootImgPath + this.Image;
+            var tooltipid = "tip_sm_content_id_" + this.ID;
+            var id_attribute = 'data-sidemissionID="' + this.ID + '"';
+            var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                '" origintop="' + ImagePoint.y + '" />');
+            dot.css({
+                position: 'absolute',
+                left: ImagePoint.x + "px",
+                top: ImagePoint.y + "px"
+            });
+            $(".mapcontent").append(dot);
+            var elem = $('[' + id_attribute + ']');
+            InitTooltip(elem);
+            var model = this;
+            var instances = $.tooltipster.instances('[' + id_attribute + ']');
+            $.each(instances, function (i, instance) {
+                instance.content(RenderSideMissionContent(model));
+            });     
         });
     }
 
@@ -123,13 +224,12 @@
 
         RenderDepotsFirstTime(modelObj, rootImgPath);
         RenderCapturePointsFirstTime(modelObj, rootImgPath);
-
-        $('.mrk').tooltipster({
-            theme: 'tooltipster-noir'
-        });      
+        RenderSideMissionsFirstTime(modelObj, rootImgPath);
     }
 
     RenderMapFirstTime(model, ROOT);
+    var G_DCSOriginPos = model.Map.DCSOriginPosition;
+    var G_MapRatio = model.Map.Ratio;
 
     // setup signalR
     $.connection.hub.logging = true;
@@ -137,40 +237,80 @@
 
     GameHubProxy.client.UpdateMarkers = function (modelObj) {
         $(modelObj.Depots).each(function (i) {
-            var tooltipid = "tip_depot_content_id_" + this.ID;
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/><br/>";
-            content += 'Capacity: ' + this.Capacity + '<br/>';   // get the overall capacity
-            var json_resources = SplitStringIntoArrayTable(this.Resources, "|");       // now we convert this string into a json object    
-            content += GenerateTableHTMLString(json_resources);                         // generate the html table from the json object
-
             // locate the html content
             var img = $('[data-depotID=' + this.ID + ']');
             img.attr('src', ROOT + this.Image);   
-            $('#' + tooltipid).html(content);
-            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
-            //img.tooltipster('content', content);
+            var model = this;
+            var instances = $.tooltipster.instances('[data-depotID=' + this.ID + ']');
+            $.each(instances, function (i, instance) {
+                instance.content(RenderDepotContent(model));
+            });     
+
+            if (this.StatusChanged) 
+            {
+                AnimateMarker(img);
+            }
         });
 
         $(modelObj.CapturePoints).each(function (i) {
-            var tooltipid = "tip_cp_content_id_" + this.ID;
-            var content = "<strong>" + this.Name + "</strong><br/>";
-            content += "Type: " + this.Type + "<br/>";
-            content += "Status: " + this.Status + "<br/>";
-            content += "<strong>Lat Long: " + this.LatLong + "</strong><br/>";
-            content += "<strong>MGRS: " + this.MGRS + "</strong><br/>";
-            content += "Blue: " + this.BlueUnits + "<br/>";
-            content += "Red: " + this.RedUnits + "<br/>";
-            content += "Capacity: " + this.MaxCapacity + "<br/><br/>";
-            content += this.Text + "<br/>";
+            // locate the html content
             var img = $('[data-capturepointID=' + this.ID + ']');
             img.attr('src', ROOT + this.Image);
-            $('#' + tooltipid).html(content);
-            //var tooltipspan = $('<span id="' + tooltipid + '" style="font-size: 10px" >' + content + '</span>');
-            //img.append(tooltipspan);
-            //img.tooltipster('content', content);
+            var model = this;
+            var instances = $.tooltipster.instances('[data-capturepointID=' + this.ID + ']');
+            $.each(instances, function (i, instance) {
+                instance.content(RenderCapturePointContent(model));
+            });   
+
+            if (this.StatusChanged) {
+                AnimateMarker(img);
+            }
+        });
+
+        $(modelObj.Missions).each(function (i) {   
+            var imghtml = $('[data-sidemissionID=' + this.ID + ']');
+
+            if (this.TimeInactive < 60 && imghtml.length > 0)
+            {    
+                imghtml.attr('src', ROOT + this.Image);
+                var model = this;
+                var instances = $.tooltipster.instances('[data-sidemissionID=' + this.ID + ']');
+                $.each(instances, function (i, instance) {
+                    instance.content(RenderSideMissionContent(model));
+                });   
+                if (this.StatusChanged) {
+                    AnimateMarker(imghtml);
+                }
+            }
+            else if (this.TimeInactive < 60 && imghtml.length === 0)
+            {
+                var ImagePoint = DCSPosToMapPos(this.Pos, G_DCSOriginPos, G_MapRatio);
+                var Img = ROOT + this.Image;
+                var id_attribute = 'data-sidemissionID="' + this.ID + '"';
+                var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
+                    '" origintop="' + ImagePoint.y + '" />');
+                dot.css({
+                    position: 'absolute',
+                    left: ImagePoint.x + "px",
+                    top: ImagePoint.y + "px"
+                });
+                $(".mapcontent").append(dot);
+                var elem = $('[' + id_attribute + ']');
+                InitTooltip(elem);
+                var model = this;
+                var instances = $.tooltipster.instances('[' + id_attribute + ']');
+                $.each(instances, function (i, instance) {
+                    instance.content(RenderSideMissionContent(model));
+                });   
+
+                // animate the marker to indicate to user it was newly created
+                AnimateMarker(elem);
+            }
+            else
+            {
+                $('[data-sidemissionID=' + this.ID + ']').remove();
+            }
+            
         });
     };
 
@@ -201,7 +341,13 @@
         GHubProxy.server.subscribe(model.ServerID);
     });
     
-    
+    $(".mrk").hover(
+        function () {
+            $(this).toggleClass('active');
+        }, function () {
+            $(this).removeClass('active');
+        }
+    );
     
         
 

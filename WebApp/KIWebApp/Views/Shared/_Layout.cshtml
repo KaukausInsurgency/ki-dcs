@@ -14,8 +14,9 @@
 else
 {
     @Styles.Render("~/Content/tooltipster")
-    @Styles.Render("~/Content/dynatable")
+    @Styles.Render("~/Content/dynatable")    
 }
+    @Styles.Render("~/Content/app")
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/signalr")
@@ -89,7 +90,7 @@ else
         </div><!-- /.container-fluid -->
     </nav>
 
-    <div id="body">
+    <div id="body" class="grad">
         @RenderBody()
     </div>
 

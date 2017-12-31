@@ -1,0 +1,59 @@
+﻿body {
+    background: linear-gradient(to bottom, rgba(75,75,82,0.75) 0%, rgba(75,75,82,0) 100%);
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#body {
+    background: linear-gradient(#808080, #ffffff, #808080);
+}
+
+.table {
+    border-collapse: collapse;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #111010;
+    border: 1px solid black;      
+}
+
+.table th a {
+    color: #fff;
+}
+
+.table tr {
+    background-color: #bebebe;
+    border: 1px solid black;
+}
+
+
+.tooltipster-content {
+    font-size: 10px !important;
+}
+
+.mrk {
+    border: 2px solid transparent;
+
+    -webkit-transition: border 0.25s linear, box-shadow; 0.25s linear;
+    -moz-transition: border 0.25s linear, box-shadow; 0.25s linear;
+    transition: border 0.25s linear, box-shadow; 0.25s linear;
+
+}
+
+.mrk.active {
+    border-color: #2eb82e;
+    -webkit-box-shadow: 0 0 5px #2eb82e;
+    -moz-box-shadow: 0 0 5px #2eb82e;
+    box-shadow: 0 0 5px #2eb82e;
+}
+
+.mrk.animate {
+    border-color: #ffe900;
+    -webkit-box-shadow: 0 0 5px #ffe900;
+    -moz-box-shadow: 0 0 5px #ffe900;
+    box-shadow: 0 0 5px #ffe900;
+}

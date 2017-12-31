@@ -69,6 +69,9 @@ namespace KIWebApp
 
             bundles.Add(new StyleBundle("~/Content/dynatable").Include(
                 "~/Content/dynatable/jquery.dynatable.css"));
+
+            bundles.Add(new StyleBundle("~/Content/app").Include(
+                "~/Content/app/app.css"));
         }
     }
 }

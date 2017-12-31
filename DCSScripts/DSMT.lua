@@ -26,6 +26,7 @@ function DSMT:New(taskName, taskHTMLDesc, taskHTMLImage)
   self.DestroyTime = 300
   self.Life = 0
   self.Done = false
+  self.Status = ""
   return self
 end
 
@@ -127,20 +128,24 @@ function DSMT._manage(self, time)
     if self.Complete(self.Name, self.CurrentZone, self.Arguments) then
       self.OnComplete(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
+      self.Status = "Complete"
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
     elseif self.Fail(self.Name, self.CurrentZone, self.Arguments) then
       self.OnFail(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
+      self.Status = "Failed"
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
     elseif self.Life >= self.Expiry then
       self.OnTimeout(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
+      self.Status = "Timeout"
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
     else
       self.Life = self.Life + self.CheckRate
+      self.Status = "Active"
       return time + self.CheckRate
     end
   end, function(err) env.info("DSMT._manage ERROR : " .. err) end)
@@ -162,6 +167,7 @@ function DSMT:Start()
   env.info("DSMT:Start called")
   if self:_initMission() then
     -- invoke the manager
+    self.Status = "Active"
     DSMT._invoke(DSMT._manage, self.CheckRate, self)
   end
 end

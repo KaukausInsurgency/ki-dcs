@@ -4,7 +4,7 @@ KI.Data =
   Depots = {},
   SideMissions = {},                  -- list of side missions the mission will generate
   ActiveMissions = {},                -- list of currently active missions
-  InactiveMissions = {},              -- list of missions that were completed/expired/no longer active
+  InactiveMissionsQueue = {},         -- data queue of missions that were completed/expired/no longer active
   GameEventQueue = {},                -- data queue of game events
   OnlinePlayers = {},                 -- hash of current online players
   PlayerInZone = {},                  -- hash of players inside a zone
@@ -13,6 +13,7 @@ KI.Data =
   SessionID = KI.Null,
   ServerID = KI.Null,
   GameEventFileID = 0,                -- unique file ID enumerator for game events
+  TaskID = 0,                         -- unique ID for active side missions
   Waypoints = {},                     -- hash of ai ground waypoints
   UnitIDs = {}                        -- hash of unit IDs in format [tostring(unit.id_)] = DCS Unit Obj
 }
@@ -41,4 +42,11 @@ function KI.IncrementGameEventFileID()
   KI.Data.GameEventFileID = KI.Data.GameEventFileID + 1
   env.info("KI.IncrementGameEventFileID - New ID: " .. tostring(KI.Data.GameEventFileID))
   return KI.Data.GameEventFileID
+end
+
+function KI.IncrementTaskID()
+  env.info("KI.IncrementTaskID called")
+  KI.Data.TaskID = KI.Data.TaskID + 1
+  env.info("KI.IncrementTaskID - New ID: " .. tostring(KI.Data.TaskID))
+  return KI.Data.TaskID
 end

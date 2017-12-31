@@ -192,7 +192,7 @@ KI.Config.SideMissions =
       desc = "Recon has uncovered what appears to be an insurgent camp used for recruitment and training.<br/>Command has tasked that this target be destroyed.",
       
       -- the image the website will use when displaying the task, check docs for preset list of images that can be used
-      image = "task_destroy",
+      image = "camp",
       
       -- determines the rate at which the task loop function should run
       rate = 30,

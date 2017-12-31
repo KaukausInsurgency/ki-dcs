@@ -299,6 +299,7 @@ KIServer.Actions.AddConnectEvent = "AddConnectionEvent"       -- adds connect / 
 KIServer.Actions.AddGameEvent = "AddGameEvent"
 KIServer.Actions.AddOrUpdateCapturePoint = "AddOrUpdateCapturePoint"
 KIServer.Actions.AddOrUpdateDepot = "AddOrUpdateDepot"
+KIServer.Actions.AddOrUpdateSideMission = "AddOrUpdateSideMission"
 KIServer.Actions.RequestSession = "CreateSession"
 KIServer.Actions.EndSession = "EndSession"
 KIServer.Actions.RequestServer = "GetOrAddServer"
@@ -772,6 +773,10 @@ function KIServer.TryProcessMissionData()
         elseif Data.Depots then
           net.log("KIServer.TryProcessMissionData() - got Depots data from Mission - sending to TCP Server")
           local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, true, Data.Depots)
+          KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
+        elseif Data.SideMissions then
+          net.log("KIServer.TryProcessMissionData() - got SideMissions data from Mission - sending to TCP Server")
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateSideMission, true, Data.SideMissions)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         end
         -- if we fail to decode the JSON of the packet, continue on

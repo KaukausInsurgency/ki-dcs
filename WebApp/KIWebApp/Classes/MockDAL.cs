@@ -514,5 +514,15 @@ APC|8
         {
             return ((IDAL)this).GetMarkers(serverID);
         }
+
+        List<SideMissionModel> IDAL.GetSideMissions(int serverID)
+        {
+            throw new NotImplementedException();
+        }
+
+        List<SideMissionModel> IDAL.GetSideMissions(int serverID, ref MySqlConnection conn)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace KIWebApp.Models
     {
         public List<DepotModel> Depots { get; set; }
         public List<CapturePointModel> CapturePoints { get; set; }
+        public List<SideMissionModel> Missions { get; set; }
     }
 }

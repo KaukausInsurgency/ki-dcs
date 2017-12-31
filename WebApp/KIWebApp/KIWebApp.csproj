@@ -243,11 +243,13 @@
     <Compile Include="Models\MarkerViewModel.cs" />
     <Compile Include="Models\OnlinePlayerModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
+    <Compile Include="Models\SideMissionModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singletons\GLOBAL.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
+    <Content Include="Content\app\app.css" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
@@ -322,6 +324,8 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Images\markers\airport-blue-200x200.png" />
+    <Content Include="Images\markers\airport-contested-200x200.png" />
+    <Content Include="Images\markers\airport-neutral-200x200.png" />
     <Content Include="Images\markers\airport-red-200x200.png" />
     <Content Include="Images\map\Beslan_Sample-800x427.png" />
     <Content Include="Images\map\Beslan_Sample.png" />
@@ -330,6 +334,8 @@
     <Content Include="Images\markers\depot-contested-256x256.png" />
     <Content Include="Images\markers\depot-red-256x256.png" />
     <Content Include="Images\markers\farp-blue-200x200.png" />
+    <Content Include="Images\markers\farp-contested-200x200.png" />
+    <Content Include="Images\markers\farp-neutral-200x200.png" />
     <Content Include="Images\markers\farp-red-200x200.png" />
     <Content Include="Images\flag-512x512.png" />
     <Content Include="Images\markers\flag-blue-256x256.png" />
@@ -341,6 +347,7 @@
     <Content Include="Images\map\map-2685x1487.png" />
     <Content Include="Images\map\map-800x443.png" />
     <Content Include="Images\map-control.png" />
+    <Content Include="Images\markers\task-camp-200x200.png" />
     <Content Include="Images\role\role-a10c-30x30.png" />
     <Content Include="Images\role\role-f15-30x30.png" />
     <Content Include="Images\role\role-f5e3-30x30.png" />
