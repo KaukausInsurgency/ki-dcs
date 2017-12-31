@@ -37,11 +37,10 @@
 
 .mrk {
     border: 2px solid transparent;
-
+    border-radius: 32px;
     -webkit-transition: border 0.25s linear, box-shadow; 0.25s linear;
     -moz-transition: border 0.25s linear, box-shadow; 0.25s linear;
     transition: border 0.25s linear, box-shadow; 0.25s linear;
-
 }
 
 .mrk.active {
