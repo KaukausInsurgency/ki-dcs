@@ -435,12 +435,24 @@ end
 
 
 function KI.Loader.SaveData()
-  env.info("KI.Loader.SaveData() called")
-  local t = KI.Data
+  env.info("KI.Loader.SaveData() called") 
   local _groups = {}
   
   KI.Loader.ExtractCoalitionGroupData(1, 2, _groups)
   KI.Loader.ExtractCoalitionGroupData(2, 2, _groups)
+  
+  local t = {}
+  t.CapturePoints = KI.Data.CapturePoints
+  t.Depots = KI.Data.Depots
+  t.ActiveMissions = KI.Data.ActiveMissions
+  t.InactiveMissionsQueue = KI.Data.InactiveMissionsQueue
+  t.GameEventQueue = KI.Data.GameEventQueue
+  t.SpawnID = KI.Data.SpawnID
+  t.SortieID = KI.Data.SortieID
+  t.GameEventFileID = KI.Data.GameEventFileID
+  t.TaskID = KI.Data.TaskID
+  t.Waypoints = KI.Data.Waypoints
+  --t.UnitIDs = KI.Data.UnitIDs
   
   -- append GroundGroups, Statics to missiondata
   t.GroundGroups = _groups

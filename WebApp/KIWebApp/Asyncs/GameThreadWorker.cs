@@ -13,6 +13,8 @@ namespace KIWebApp.Asyncs
 
     public class GameThreadWorker : IDisposable
     {
+        readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private System.Threading.Timer timer_update_markers;
         private System.Threading.Timer timer_update_players;
         private IHubContext hub;
@@ -24,6 +26,7 @@ namespace KIWebApp.Asyncs
 
         public GameThreadWorker(int serverID)
         {
+            logger.Info("Game Thread Worker Starting (ServerID: " + serverID + ")");
             conn = new MySqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DBMySqlConnect"].ConnectionString);
             conn.Open();
             hub = GlobalHost.ConnectionManager.GetHubContext<KIWebApp.Hubs.GameHub>();
@@ -47,6 +50,7 @@ namespace KIWebApp.Asyncs
 
         public void Dispose()
         {
+            logger.Info("Game Thread Worker Closing (ServerID: " + this.ServerID + ")");
             timer_update_markers.Dispose();
             timer_update_players.Dispose();
             conn.Close();

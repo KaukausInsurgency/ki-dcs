@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -24,6 +25,8 @@ namespace KIWebApp
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             //BundleTable.EnableOptimizations = true;
             //AuthConfig.RegisterAuth();
+
+            log4net.Config.XmlConfigurator.Configure(new FileInfo(Server.MapPath("~/Log4net.config")));
         }
     }
 }
