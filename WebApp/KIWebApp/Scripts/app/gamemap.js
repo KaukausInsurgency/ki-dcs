@@ -228,6 +228,8 @@
     }
 
     RenderMapFirstTime(model, ROOT);
+    var G_DCSOriginPos = model.Map.DCSOriginPosition;
+    var G_MapRatio = model.Map.Ratio;
 
     // setup signalR
     $.connection.hub.logging = true;
@@ -268,7 +270,7 @@
         $(modelObj.Missions).each(function (i) {   
             var imghtml = $('[data-sidemissionID=' + this.ID + ']');
 
-            if (this.TimeInactive < 60 && imghtml !== null)
+            if (this.TimeInactive < 60 && imghtml.length > 0)
             {    
                 imghtml.attr('src', ROOT + this.Image);
                 var model = this;
@@ -280,10 +282,10 @@
                     AnimateMarker(imghtml);
                 }
             }
-            else if (this.TimeInactive < 60 && imghtml === null)
+            else if (this.TimeInactive < 60 && imghtml.length === 0)
             {
-                var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
-                var Img = rootImgPath + this.Image;
+                var ImagePoint = DCSPosToMapPos(this.Pos, G_DCSOriginPos, G_MapRatio);
+                var Img = ROOT + this.Image;
                 var id_attribute = 'data-sidemissionID="' + this.ID + '"';
                 var dot = $('<img ' + id_attribute + ' class="mrk" src="' + Img + '" width="32" height="32" originleft="' + ImagePoint.x +
                     '" origintop="' + ImagePoint.y + '" />');
