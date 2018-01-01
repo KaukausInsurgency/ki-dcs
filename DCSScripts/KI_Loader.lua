@@ -143,22 +143,6 @@ function KI.Loader.ExtractStaticData()
     env.info("KI.Loader.ExtractStaticData - FATAL ERROR (SLC NOT INITIALIZED)")
   end
   
-  if KI.Data.ActiveMissions then
-    env.info("KI.Loader.ExtractStaticData - Extracting DSMT Static Objects") 
-    for i = 1, #KI.Data.ActiveMissions do
-      if not KI.Data.ActiveMissions[i].Done and KI.Data.ActiveMissions[i].Resource and KI.Data.ActiveMissions[i].Resource.Statics then
-        env.info("KI.Loader.ExtractStaticData - found active side mission with static object resources")
-        for k = 1, #KI.Data.ActiveMissions[i].Resource.Statics do
-          local _staticTable = KI.Loader.GenerateStaticTable(KI.Data.ActiveMissions[i].Resource.Statics[k][1], 
-                                                             KI.Data.ActiveMissions[i].Resource.Statics[k][2], "DSMT", false)
-          table.insert(_data, _staticTable)
-        end
-      end
-    end
-  else
-    env.info("KI.Loader.ExtractStaticData - FATAL ERROR (KI.Data.ActiveMissions NOT INITIALIZED)")
-  end
-  
   return _data
 end
 --
@@ -232,8 +216,19 @@ function KI.Loader.ImportCoalitionGroups(data)
   
   for i = 1, #data["GroundGroups"] do
     local _g = data["GroundGroups"][i]
+    
+    local IsSideMissionObject = false
+    for k = 1, #data["SideMissionGroundObjects"] do
+      local _sm = data["SideMissionGroundObjects"][k]
+      if _g["Name"] == _sm then
+        env.info("KI.Loader.ImportStaticObjects - found side mission ground group - ignoring")
+        IsSideMissionObject = true
+        break
+      end
+    end
+    
     -- check if the group has size > 0 and ignore if it does
-    if _g["Size"] > 0 and #_g["Units"] > 0 then
+    if _g["Size"] > 0 and #_g["Units"] > 0 and not IsSideMissionObject then
       local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g, false))
       -- if the group is spawned successfully
       if _newg ~= nil then
@@ -282,31 +277,45 @@ function KI.Loader.ImportStaticObjects(data)
   env.info("KI.Loader.ImportStaticObjects called")
   for i = 1, #data["StaticObjects"] do
     local _s = data["StaticObjects"][i]
-    
-    local obj = coalition.addStaticObject(_s["CountryID"], {
-      country = _s["Country"],
-      category = _s["Category"],
-      x = _s["x"],
-      y = _s["y"],
-      type = _s["Type"],
-      name = _s["Name"],
-      mass = _s["Mass"],
-      canCargo = _s["CanCargo"],
-      heading = _s["Heading"]
-    })
-  
-    -- if the static object belongs to SLC, Relink the Cargo with SLC module (and GC if necessary)
-    if obj then
-      env.info("KI.Loader.ImportStaticObjects - static object spawned (" .. _s["Name"] .. ")")
-    
-      if _s["Component"] == "SLC" then
-        SLC.RelinkCargo(obj)
-      elseif _s["Component"] == "DSMT" then
-        -- somepoint will need to relink the GC and DSMT to this item
+    local IsSideMissionObject = false
+    for k = 1, #data["SideMissionGroundObjects"] do
+      local _sm = data["SideMissionGroundObjects"][k]
+      if _s["Name"] == _sm then
+        env.info("KI.Loader.ImportStaticObjects - found side mission static object - ignoring")
+        IsSideMissionObject = true
+        break
       end
-    else
-      env.info("KI.Loader.ImportStaticObjects - ERROR - Static Object failed to spawn (" .. _s["Name"] .. ")")
     end
+    
+    if not IsSideMissionObject then
+    
+      local obj = coalition.addStaticObject(_s["CountryID"], {
+        country = _s["Country"],
+        category = _s["Category"],
+        x = _s["x"],
+        y = _s["y"],
+        type = _s["Type"],
+        name = _s["Name"],
+        mass = _s["Mass"],
+        canCargo = _s["CanCargo"],
+        heading = _s["Heading"]
+      })
+    
+      -- if the static object belongs to SLC, Relink the Cargo with SLC module (and GC if necessary)
+      if obj then
+        env.info("KI.Loader.ImportStaticObjects - static object spawned (" .. _s["Name"] .. ")")
+      
+        if _s["Component"] == "SLC" then
+          SLC.RelinkCargo(obj)
+        elseif _s["Component"] == "DSMT" then
+          -- somepoint will need to relink the GC and DSMT to this item
+        end
+      else
+        env.info("KI.Loader.ImportStaticObjects - ERROR - Static Object failed to spawn (" .. _s["Name"] .. ")")
+      end
+    
+    end
+    
   end
   
   return true
@@ -432,6 +441,75 @@ function KI.Loader.ImportGC(data)
 end
 
 
+function KI.Loader.ImportDSMT(data)
+  env.info("KI.Loader.ImportDSMT called")
+  
+  for i = 1, #data["ActiveMissions"] do
+    
+    local task = data["ActiveMissions"][i]
+    local taskFound = false
+    
+    if not task.Done then
+    
+      env.info("KI.Loader.ImportDSMT - searching for side mission " .. task.Name)
+      
+      -- locate the existing task in this table
+      for j = 1, #KI.Data.SideMissions do
+      
+        local _sidemission = KI.Data.SideMissions[j]
+        
+        if task.Name == _sidemission.Name then
+        
+          taskFound = true
+          env.info("KI.Loader.ImportDSMT - found side mission " .. task.Name .. " - reinitializing")
+          local activemission = KI.Toolbox.DeepCopy(_sidemission)
+          
+          env.info("KI.Loader.ImportDSMT - finding current zone")
+          for z = 1, #_sidemission.Zones do
+          
+            local _zone = _sidemission.Zones[z]
+            local p = _zone.Zone.point
+            local cp = task["CurrentZone"]["Zone"]["point"]
+            
+            if p.y == cp.y and p.x == cp.x and p.z == cp.z then
+              env.info("KI.Loader.ImportDSMT - found zone " .. _zone:GetName())
+              activemission.CurrentZone = _zone
+              break
+            end
+            
+          end
+          
+          if activemission.CurrentZone then
+            activemission.InsertNewDBRecord = task.InsertNewDBRecord
+            activemission.TaskID = task.TaskID
+            activemission.Expiry = task.Expiry
+            activemission.DestroyTime = task.DestroyTime
+            activemission.Life = task.Life
+            activemission.Done = task.Done
+            activemission:Start(activemission.CurrentZone)
+            table.insert(KI.Data.ActiveMissions, activemission)
+            env.info("KI.Loader.ImportDSMT - created active mission")
+          else
+            env.info("KI.Loader.ImportDSMT - ERROR - could not find CurrentZone for mission!")
+          end
+          
+          break         
+        end
+        
+      end -- end for
+      
+    end -- if not task done
+    
+    if not taskFound and not task.Done then
+      env.info("KI.Loader.ImportDSMT - ERROR - could not find side mission " .. task.Name .. " !")
+    end
+    
+  end -- end for
+
+  return true
+  
+end
+
 
 
 function KI.Loader.SaveData()
@@ -452,6 +530,7 @@ function KI.Loader.SaveData()
   t.GameEventFileID = KI.Data.GameEventFileID
   t.TaskID = KI.Data.TaskID
   t.Waypoints = KI.Data.Waypoints
+  t.SideMissionGroundObjects = KI.Data.SideMissionGroundObjects
   --t.UnitIDs = KI.Data.UnitIDs
   
   -- append GroundGroups, Statics to missiondata
@@ -515,6 +594,11 @@ function KI.Loader.LoadData()
     
     if not KI.Loader.ImportGC(_dataTable) then
       env.info("KI.Loader.LoadData ERROR - ImportGC returned false")
+      return false
+    end
+    
+    if not KI.Loader.ImportDSMT(_dataTable) then
+      env.info("KI.Loader.LoadData ERROR - ImportDSMT returned false")
       return false
     end
     

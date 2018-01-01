@@ -208,6 +208,7 @@ KI.Config.SideMissions =
         local CampObj = SpawnVeh:SpawnFromPointVec2(chosenZone:GetRandomPointVec2(), math.random(359), KI.GenerateName("Insurgent Camp"))
         local args = {}
         args.CampObject = CampObj
+        KI.AddSideMissionObject(CampObj.StaticName)
         KI.Toolbox.MessageRedCoalition("ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
         -- create and initialize the task, init must return arguments
         return args

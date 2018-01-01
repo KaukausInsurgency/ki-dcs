@@ -107,9 +107,13 @@ function DSMT._selectZone(zones)
 end
 
 
-function DSMT:_initMission()
+function DSMT:_initMission(chosenzone)
   env.info("DSMT._initMission called")
-  self.CurrentZone = DSMT._selectZone(self.Zones)
+  if not chosenzone then
+    self.CurrentZone = DSMT._selectZone(self.Zones)
+  else
+    self.CurrentZone = chosenzone
+  end
   self.CurrentPosition = LOCPOS:NewFromZone(self.CurrentZone)
   self.CurrentZoneRadius = self.CurrentZone:GetRadius()
   self.Arguments = self.Init(self.Name, self.CurrentZone)
@@ -125,6 +129,8 @@ end
 function DSMT._manage(self, time)
   env.info("DSMT._manage called")
   local fncSuccess, result = xpcall(function()
+    self.Life = self.Life + self.CheckRate
+    
     if self.Complete(self.Name, self.CurrentZone, self.Arguments) then
       self.OnComplete(self.Name, self.CurrentZone, self.Arguments)
       self.Done = true
@@ -143,8 +149,7 @@ function DSMT._manage(self, time)
       self.Status = "Timeout"
       DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
       return nil
-    else
-      self.Life = self.Life + self.CheckRate
+    else 
       self.Status = "Active"
       return time + self.CheckRate
     end
@@ -163,9 +168,9 @@ function DSMT._invoke(fnc, rate, args)
 end
 
 
-function DSMT:Start()
+function DSMT:Start(chosenzone)
   env.info("DSMT:Start called")
-  if self:_initMission() then
+  if self:_initMission(chosenzone) then
     -- invoke the manager
     self.Status = "Active"
     DSMT._invoke(DSMT._manage, self.CheckRate, self)
