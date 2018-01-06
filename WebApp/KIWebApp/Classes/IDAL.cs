@@ -26,5 +26,7 @@ namespace KIWebApp.Classes
         GameModel GetGame(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
         MarkerViewModel GetMarkers(int serverID);
         MarkerViewModel GetMarkers(int serverID, ref MySql.Data.MySqlClient.MySqlConnection conn);
+        SearchResultsModel GetSearchResults(string query);
+        SearchResultsModel GetSearchResults(string query, ref MySql.Data.MySqlClient.MySqlConnection conn);
     }
 }

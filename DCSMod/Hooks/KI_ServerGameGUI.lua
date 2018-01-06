@@ -1189,7 +1189,7 @@ KIHooks.onSimulationFrame = function()
     net.log("KIHooks.onSimulationFrame - Sending Heartbeat")
     KIServer.LastOnFrameTimeHeartbeat = DCS.getModelTime()
     local restart_time = KIServer.Config.MissionRestartTime - DCS.getModelTime()
-    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.SendHeartbeat, false, { ServerID = KIServer.Data.ServerID, RestartTime = restart_time })
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.SendHeartbeat, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID, RestartTime = restart_time })
     KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame - SendHeartbeat")
   end
   
@@ -1479,7 +1479,7 @@ end
 --"pilot_death", playerID, unit_missionID
 --
 -- this handler is responsible for returning player to spectators when they die
-KIHooks.onGameEvent = function(eventName,playerID,arg2,arg3,arg4) 
+KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, victimPlayerID, victimUnitType, victimSide, weaponName) 
   if (KIServer.IsRunning() and KIHooks.Initialized) then
     net.log("KIHooks.onGameEvent() called")
     
@@ -1497,6 +1497,55 @@ KIHooks.onGameEvent = function(eventName,playerID,arg2,arg3,arg4)
         net.log("Player died - returning them to spectators")
         net.force_player_slot(playerID, 0, '')    -- force return to spectators
       end
+    elseif eventName == "kill" then
+      xpcall(function() 
+        local _playerDetails = net.get_player_info(playerID)
+        local _victimPlayer = net.get_player_info(victimPlayerID) or nil
+        local _targetUCID = KIServer.Null
+        local _playerUCID = KIServer.Null
+        local _playerName = "AI"
+        if _victimPlayer then
+          _targetUCID = _victimPlayer.ucid
+        end
+        if _playerDetails then
+          _playerUCID = _playerDetails.ucid
+          _playerName = "Player"
+        end
+        
+        local gameevent =
+        {
+          ["SessionID"] = KIServer.Data.SessionID,
+          ["ServerID"] = KIServer.Data.SessionID,
+          ["SortieID"] = KIServer.Null,
+          ["UCID"] = _playerUCID,
+          ["Event"] = "KILL",
+          ["PlayerName"] = _playerName,
+          ["PlayerSide"] = killerSide,
+          ["RealTime"] = DCS.getRealTime(),
+          ["GameTime"] = DCS.getModelTime(),
+          ["Role"] = killerUnitType,
+          -- optional fields
+          ["Location"] = KIServer.Null,
+          ["Weapon"] = weaponName,
+          ["WeaponCategory"] = KIServer.Null,
+          ["TargetName"] = KIServer.Null,
+          ["TargetModel"] = victimUnitType,
+          ["TargetType"] = KIServer.Null,
+          ["TargetCategory"] = KIServer.Null,
+          ["TargetSide"] = victimSide,
+          ["TargetIsPlayer"] = _victimPlayer ~= nil,
+          ["TargetPlayerUCID"] =  _targetUCID,
+          ["TargetPlayerName"] = KIServer.Null,
+          ["TransportUnloadedCount"] = KIServer.Null,
+          ["Cargo"] = KIServer.Null
+        }
+        
+        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, false, gameevent)
+        if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onGameEvent()", 3) then
+          net.log("KIHooks.onGameEvent() - Successfully sent GameEvent to TCP Server")
+        end
+      
+      end, function(err) net.log("KIHooks.onGameEvent() - ERROR - " .. err) end)
       
     end
     

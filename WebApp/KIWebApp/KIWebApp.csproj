@@ -245,6 +245,9 @@
     <Compile Include="Models\MapModels.cs" />
     <Compile Include="Models\MarkerViewModel.cs" />
     <Compile Include="Models\OnlinePlayerModel.cs" />
+    <Compile Include="Models\PlayerModel.cs" />
+    <Compile Include="Models\SearchModel.cs" />
+    <Compile Include="Models\SearchResultsModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
     <Compile Include="Models\SideMissionModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -472,6 +475,7 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Servers\Index.cshtml" />
     <Content Include="Views\Servers\Game.cshtml" />
+    <Content Include="Views\Home\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

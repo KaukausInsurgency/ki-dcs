@@ -524,5 +524,15 @@ APC|8
         {
             throw new NotImplementedException();
         }
+
+        SearchResultsModel IDAL.GetSearchResults(string query)
+        {
+            throw new NotImplementedException();
+        }
+
+        SearchResultsModel IDAL.GetSearchResults(string query, ref MySqlConnection conn)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

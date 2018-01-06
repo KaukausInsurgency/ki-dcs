@@ -18,6 +18,28 @@ USE `ki`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `backup_connection_log`
+--
+
+DROP TABLE IF EXISTS `backup_connection_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `backup_connection_log` (
+  `id` bigint(32) unsigned NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `session_id` int(11) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `player_ucid` varchar(128) NOT NULL,
+  `player_name` varchar(128) NOT NULL,
+  `player_id` int(11) NOT NULL,
+  `ip_address` varchar(20) NOT NULL,
+  `game_time` bigint(32) NOT NULL,
+  `real_time` bigint(32) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=372 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `capture_point`
 --
 
@@ -215,7 +237,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=358 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=372 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -236,7 +258,7 @@ CREATE TABLE `raw_gameevents_log` (
   `player_side` int(11) DEFAULT NULL,
   `real_time` bigint(32) NOT NULL,
   `game_time` bigint(32) NOT NULL,
-  `role` varchar(25) DEFAULT NULL,
+  `role` varchar(45) DEFAULT NULL,
   `location` varchar(60) DEFAULT NULL,
   `weapon` varchar(60) DEFAULT NULL,
   `weapon_category` varchar(20) DEFAULT NULL,
@@ -251,7 +273,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1347 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1364 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,6 +289,150 @@ CREATE TABLE `role_image` (
   `role` varchar(45) NOT NULL,
   PRIMARY KEY (`role_image_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_airframe_kd`
+--
+
+DROP TABLE IF EXISTS `rpt_airframe_kd`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_airframe_kd` (
+  `ucid` varchar(128) NOT NULL,
+  `airframe` varchar(45) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `kills` int(11) NOT NULL DEFAULT '0',
+  `deaths` int(11) NOT NULL DEFAULT '0',
+  `is_model` bit(1) NOT NULL DEFAULT b'0',
+  `is_type` bit(1) NOT NULL DEFAULT b'0',
+  `is_category` bit(1) NOT NULL DEFAULT b'0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_airframe_sortie`
+--
+
+DROP TABLE IF EXISTS `rpt_airframe_sortie`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_airframe_sortie` (
+  `sortie_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ucid` varchar(128) NOT NULL,
+  `airframe` varchar(45) NOT NULL,
+  `sortie_time` bigint(64) NOT NULL,
+  `shots` int(11) NOT NULL,
+  `gunshots` int(11) NOT NULL,
+  `hits` int(11) NOT NULL,
+  `kills` int(11) NOT NULL,
+  `transport_mount` int(11) NOT NULL,
+  `transport_dismount` int(11) NOT NULL,
+  `cargo_unpacked` int(11) NOT NULL,
+  `depot_resupply` int(11) NOT NULL,
+  `cargo_hooked` int(11) NOT NULL,
+  `cargo_unhooked` int(11) NOT NULL,
+  PRIMARY KEY (`sortie_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_airframe_stats`
+--
+
+DROP TABLE IF EXISTS `rpt_airframe_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_airframe_stats` (
+  `ucid` varchar(128) NOT NULL,
+  `airframe` varchar(45) NOT NULL,
+  `flight_time` bigint(64) NOT NULL DEFAULT '0',
+  `avg_flight_time` bigint(64) NOT NULL DEFAULT '0',
+  `takeoffs` int(11) NOT NULL DEFAULT '0',
+  `landings` int(11) NOT NULL DEFAULT '0',
+  `slingload_hooks` int(11) NOT NULL DEFAULT '0',
+  `slingload_unhooks` int(11) NOT NULL DEFAULT '0',
+  `kills` int(11) NOT NULL DEFAULT '0',
+  `kills_player` int(11) NOT NULL DEFAULT '0',
+  `kills_friendly` int(11) NOT NULL DEFAULT '0',
+  `deaths` int(11) NOT NULL DEFAULT '0',
+  `transport_mounts` int(11) NOT NULL DEFAULT '0',
+  `transport_dismounts` int(11) NOT NULL DEFAULT '0',
+  `depot_resupplies` int(11) NOT NULL DEFAULT '0',
+  `cargo_unpacked` int(11) NOT NULL DEFAULT '0',
+  `completed_sorties` int(11) NOT NULL DEFAULT '0',
+  `ejects` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_airframe_weapon`
+--
+
+DROP TABLE IF EXISTS `rpt_airframe_weapon`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_airframe_weapon` (
+  `ucid` varchar(128) NOT NULL,
+  `airframe` varchar(45) NOT NULL,
+  `weapon` varchar(60) NOT NULL,
+  `shots` int(11) NOT NULL DEFAULT '0',
+  `hits` int(11) NOT NULL DEFAULT '0',
+  `kills` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_overall_server_traffic`
+--
+
+DROP TABLE IF EXISTS `rpt_overall_server_traffic`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_overall_server_traffic` (
+  `server_id` int(11) NOT NULL,
+  `ucid` varchar(128) NOT NULL,
+  `num_connects` int(11) NOT NULL DEFAULT '0',
+  `avg_online_time` bigint(64) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_overall_stats`
+--
+
+DROP TABLE IF EXISTS `rpt_overall_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_overall_stats` (
+  `ucid` varchar(128) NOT NULL,
+  `game_time` bigint(64) NOT NULL DEFAULT '0' COMMENT 'total in game time in seconds',
+  `takeoffs` int(11) NOT NULL DEFAULT '0',
+  `landings` int(11) NOT NULL DEFAULT '0',
+  `slingload_hooks` int(11) NOT NULL DEFAULT '0',
+  `slingload_unhooks` int(11) NOT NULL DEFAULT '0',
+  `kills` int(11) NOT NULL DEFAULT '0',
+  `deaths` int(11) NOT NULL DEFAULT '0',
+  `ejects` int(11) NOT NULL DEFAULT '0',
+  `transport_mounts` int(11) NOT NULL DEFAULT '0',
+  `transport_dismounts` int(11) NOT NULL DEFAULT '0',
+  `depot_resupplies` int(11) NOT NULL DEFAULT '0',
+  `cargo_unpacked` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ucid`),
+  UNIQUE KEY `ucid_UNIQUE` (`ucid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `rpt_updated`
+--
+
+DROP TABLE IF EXISTS `rpt_updated`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_updated` (
+  `last_updated` datetime(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -301,10 +467,11 @@ CREATE TABLE `session` (
   `end` datetime DEFAULT NULL,
   `real_time_start` bigint(32) DEFAULT NULL,
   `real_time_end` bigint(32) DEFAULT NULL,
+  `last_heartbeat` datetime DEFAULT NULL,
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=516 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -332,7 +499,7 @@ CREATE TABLE `side_mission` (
   PRIMARY KEY (`side_mission_id`),
   KEY `fk_server_id_idx` (`server_id`),
   CONSTRAINT `fk_server_id` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -371,6 +538,22 @@ CREATE TABLE `sproc_log` (
   `text` varchar(5000) DEFAULT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `target`
+--
+
+DROP TABLE IF EXISTS `target`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `target` (
+  `target_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model` varchar(60) NOT NULL,
+  `type` varchar(25) DEFAULT NULL COMMENT 'NOTE - type is nullable as not all DCS objects have a type ''ie buildings do not have a type to them, they are simply counted as STRUCTURES)',
+  `category` varchar(15) NOT NULL,
+  PRIMARY KEY (`target_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -611,6 +794,29 @@ BEGIN
     FROM role_image ri WHERE ri.role = role;
     
 	RETURN RoleImage;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `fnc_GetSessionLastHeartbeatInSeconds` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetSessionLastHeartbeatInSeconds`( ServerID INT, SessionID INT) RETURNS int(11)
+BEGIN
+	SET @LastHeartbeat = 0;
+	SELECT TIME_TO_SEC( TIMEDIFF( NOW(), COALESCE(last_heartbeat, FROM_UNIXTIME(0)) )) INTO @LastHeartbeat
+	FROM ki.session WHERE server_id = ServerID AND session_id = SessionID;
+    
+    RETURN @LastHeartbeat;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1110,91 +1316,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `rpt_PlayerOnlineTime` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `rpt_PlayerOnlineTime`(IN ucid VARCHAR(128), INOUT totaltime INT)
-BEGIN
-	DECLARE v_finished INTEGER DEFAULT 0;
-	
-    DECLARE v_event varchar(20) DEFAULT "";
-    DECLARE v_time BIGINT DEFAULT 0;
-    DECLARE v_server_id INT DEFAULT 0;
-    DECLARE v_session_id INT DEFAULT 0;
-    
-    DECLARE v_start BIGINT DEFAULT 0;
-    DECLARE v_end BIGINT;
-    
-    
-	DEClARE con_cursor CURSOR FOR 
-	SELECT type, real_time, server_id, session_id FROM ki.raw_connection_log WHERE player_ucid = ucid;
-
-	-- declare NOT FOUND handler
-	DECLARE CONTINUE HANDLER 
-		FOR NOT FOUND SET v_finished = 1;
-
-	CALL ki.log("rpt_PlayerOnlineTime", CONCAT("totaltime: ", totaltime));
-    
-	OPEN con_cursor;
-
-	online_time: LOOP
-		CALL ki.log("rpt_PlayerOnlineTime", "In Loop");
-        
-		FETCH con_cursor INTO v_event, v_time, v_server_id, v_session_id;
-
-		IF v_finished = 1 THEN 
-			CALL ki.log("rpt_PlayerOnlineTime", "Finished Loop");
-			LEAVE online_time;
-		END IF;
-        
-        IF v_event = "CONNECTED" THEN
-			
-            
-			IF v_start != 0 then
-				CALL ki.log("rpt_PlayerOnlineTime", "CONNECTED EVENT TWICE IN A ROW");
-                CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_server_id", v_server_id));
-                CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_session_id", v_session_id));
-				-- If the next event is not a disconnect event, assume that the player or server crashed, and get the time from the session
-				SELECT session.real_time_end INTO v_end FROM ki.session WHERE server_id = v_server_id AND session_id = v_session_id;
-                IF v_end != NULL THEN
-					CALL ki.log("rpt_PlayerOnlineTime", "SETTING v_end TO SESSION END TIME");
-					SET totaltime = totaltime + (v_end - v_start);
-				ELSE
-					SELECT session.real_time_start INTO v_end FROM ki.session WHERE session.server_id = v_server_id AND session.session_id = v_session_id;
-					CALL ki.log("rpt_PlayerOnlineTime", "SETTING v_end To the SESSION START + 4 Hours");
-                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("fnc_SESSION_LENGTH : ", fnc_SESSION_LENGTH()));
-                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("totaltime : ", totaltime));
-                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_start : ", v_start));
-                    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("v_end : ", v_end));
-                    SET totaltime = totaltime + ((v_end + fnc_SESSION_LENGTH()) - v_start);
-                END IF;
-            END IF;
-			SET v_start = v_time;
-		ELSEIF v_event = "DISCONNECTED" THEN
-			CALL ki.log("rpt_PlayerOnlineTime", "DISCONNECTED EVENT - CALCULATING END TIME");
-            SET totaltime = totaltime + (v_time - v_start);
-            SET v_start = 0;
-		END IF;
-		
-        CALL ki.log("rpt_PlayerOnlineTime", CONCAT("IN LOOP: Total Time: ", totaltime));
-	END LOOP online_time;
-
-	CLOSE con_cursor;
-	
-    CALL ki.log("rpt_PlayerOnlineTime", CONCAT("Total Time: ", totaltime));
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `SendHeartbeat` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1207,6 +1328,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `SendHeartbeat`(
 		IN ServerID INT,
+        IN SessionID INT,
         IN RestartTime INT
     )
 BEGIN
@@ -1215,6 +1337,9 @@ BEGIN
         status = "Online",
 		restart_time = RestartTime
 	WHERE server_id = ServerID;
+    UPDATE ki.session
+		SET last_heartbeat = NOW()
+	WHERE server_id = ServerID and session_id = SessionID;
 	SELECT 1;
 END ;;
 DELIMITER ;
@@ -1517,6 +1642,58 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `websp_SearchPlayers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `websp_SearchPlayers`(IN Criteria VARCHAR(128))
+BEGIN
+	SELECT player.ucid AS UCID,
+		   player.name AS Name,
+           player.banned AS Banned
+    FROM ki.player 
+    WHERE LOWER(player.name) LIKE CONCAT("%", LOWER(Criteria), "%");
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `websp_SearchServers` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `websp_SearchServers`(IN Criteria VARCHAR(128))
+BEGIN
+	SELECT s.server_id as ServerID, 
+		   s.name as ServerName, 
+           s.ip_address as IPAddress,  
+           COUNT(op.ucid) as OnlinePlayers,
+           s.restart_time as RestartTime,
+           s.status
+	FROM server s
+    LEFT JOIN online_players op
+		ON s.server_id = op.server_id
+	WHERE LOWER(s.name) LIKE CONCAT("%", LOWER(Criteria), "%")
+	GROUP BY s.server_id, s.name;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1527,4 +1704,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-30 22:47:25
+-- Dump completed on 2018-01-06  3:13:40

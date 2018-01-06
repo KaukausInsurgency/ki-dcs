@@ -19,6 +19,8 @@ namespace KIWebApp.Classes
         private const string SP_GET_CAPTUREPOINTS = "websp_GetCapturePoints";
         private const string SP_GET_GAME = "websp_GetGame";
         private const string SP_GET_SIDEMISSIONS = "websp_GetSideMissions";
+        private const string SP_SEARCH_PLAYERS = "websp_SearchPlayers";
+        private const string SP_SEARCH_SERVERS = "websp_SearchServers";
         private string _DBConnection;
        
         public DAL()
@@ -478,6 +480,101 @@ namespace KIWebApp.Classes
                 missions.Add(mission);
             }
             return missions;
+        }
+
+        SearchResultsModel IDAL.GetSearchResults(string query)
+        {
+            MySqlConnection conn = new MySqlConnection(_DBConnection);
+            try
+            {
+                conn.Open();
+                return ((IDAL)this).GetSearchResults(query, ref conn);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        SearchResultsModel IDAL.GetSearchResults(string query, ref MySqlConnection conn)
+        {
+            if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
+                conn.Open();
+            SearchResultsModel results = new SearchResultsModel();
+
+            { 
+                MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_SEARCH_PLAYERS)
+                {
+                    Connection = conn,
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                cmd.Parameters.Add(new MySqlParameter("Criteria", query));
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                DataTable dt = new DataTable();
+                dt.Load(rdr);
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    PlayerModel player = new PlayerModel
+                    {
+                        UCID = dr.Field<string>("UCID"),
+                        Name = dr.Field<string>("Name")
+                    };
+                    results.PlayerResults.Add(player);
+                }
+            }
+
+            {
+                MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_SEARCH_SERVERS)
+                {
+                    Connection = conn,
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                cmd.Parameters.Add(new MySqlParameter("Criteria", query));
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                DataTable dt = new DataTable();
+                dt.Load(rdr);
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    TimeSpan rt;
+                    if (dr["RestartTime"] == DBNull.Value || dr["RestartTime"] == null)
+                    {
+                        rt = new TimeSpan(0, 0, 0);
+                    }
+                    else
+                    {
+                        rt = new TimeSpan(TimeSpan.TicksPerSecond * dr.Field<int>("RestartTime"));
+                    }
+
+                    string status = "Offline";
+                    string img = "Images/status-red-128x128.png";
+                    if (dr["Status"] != DBNull.Value && dr["Status"] != null)
+                    {
+                        status = dr.Field<string>("Status");
+                        if (status.ToUpper() == "ONLINE")
+                            img = "Images/status-green-128x128.png";
+                        else if (status.ToUpper() == "OFFLINE")
+                            img = "Images/status-red-128x128.png";
+                        else
+                            img = "Images/status-yellow-128x128.png";
+                    }
+
+                    ServerModel server = new ServerModel
+                    {
+                        ServerID = dr.Field<int>("ServerID"),
+                        ServerName = dr.Field<string>("ServerName"),
+                        IPAddress = dr.Field<string>("IPAddress"),
+                        Status = status,
+                        StatusImage = img,
+                        RestartTime = rt,
+                        OnlinePlayers = Convert.ToInt32(dr.Field<long>("OnlinePlayers"))
+                    };
+                    results.ServerResults.Add(server);
+                }
+            }
+
+            return results;
         }
     }
 }
