@@ -235,6 +235,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ServersController.cs" />
     <Compile Include="Classes\IDAL.cs" />
+    <Compile Include="Controllers\StatisticsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -329,13 +330,13 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="Images\icon-stats-256x256.png" />
     <Content Include="Images\markers\airport-blue-200x200.png" />
     <Content Include="Images\markers\airport-contested-200x200.png" />
     <Content Include="Images\markers\airport-neutral-200x200.png" />
     <Content Include="Images\markers\airport-red-200x200.png" />
     <Content Include="Images\map\Beslan_Sample-800x427.png" />
     <Content Include="Images\map\Beslan_Sample.png" />
-    <Content Include="Images\depot-512x512.png" />
     <Content Include="Images\markers\depot-blue-256x256.png" />
     <Content Include="Images\markers\depot-contested-256x256.png" />
     <Content Include="Images\markers\depot-red-256x256.png" />
@@ -343,12 +344,10 @@
     <Content Include="Images\markers\farp-contested-200x200.png" />
     <Content Include="Images\markers\farp-neutral-200x200.png" />
     <Content Include="Images\markers\farp-red-200x200.png" />
-    <Content Include="Images\flag-512x512.png" />
     <Content Include="Images\markers\flag-blue-256x256.png" />
     <Content Include="Images\markers\flag-contested-256x256.png" />
     <Content Include="Images\markers\flag-neutral-256x256.png" />
     <Content Include="Images\markers\flag-red-256x256.png" />
-    <Content Include="Images\helipad-200x200png.png" />
     <Content Include="Images\map\map-1880x1041.png" />
     <Content Include="Images\map\map-2685x1487.png" />
     <Content Include="Images\map\map-800x443.png" />
@@ -371,8 +370,8 @@
     <Content Include="Images\status-green-128x128.png" />
     <Content Include="Images\status-red-128x128.png" />
     <Content Include="Images\status-yellow-128x128.png" />
+    <Content Include="Scripts\app\registertable.js" />
     <Content Include="Scripts\app\gamemap.js" />
-    <Content Include="Scripts\app\Servers.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\dynatable\jquery.dynatable.js" />
@@ -476,6 +475,9 @@
     <Content Include="Views\Servers\Index.cshtml" />
     <Content Include="Views\Servers\Game.cshtml" />
     <Content Include="Views\Home\Search.cshtml" />
+    <Content Include="Views\Statistics\Index.cshtml" />
+    <Content Include="Views\Statistics\PlayerStats.cshtml" />
+    <Content Include="Views\Statistics\ServerStats.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

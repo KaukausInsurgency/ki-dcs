@@ -29,7 +29,7 @@ namespace KIWebApp
                 "~/Scripts/jquery.signalR-2.2.2.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/app").Include(
-                "~/Scripts/app/Servers.js"));
+                "~/Scripts/app/registertable.js"));
 
             // Game Map bundle
             bundles.Add(new ScriptBundle("~/bundles/gamemap").Include(

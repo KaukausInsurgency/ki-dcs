@@ -1,11 +1,8 @@
 ﻿@model KIWebApp.Models.SearchResultsModel
-
 @{
-    ViewBag.Title = "Search";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Search</h2>
 
 <div id="main-content">
     <p class="error" data-bind="text: error"></p>
@@ -45,7 +42,7 @@
                     string imgurl = "~/" + item.StatusImage;
 
                     <tr class="clickable-row">
-                        <td><div class="ServerID" style="display:none;">@item.ServerID</div><b>@item.ServerName</b></td>
+                        <td><div class="ServerID" style="display:none;">@item.ServerID</div><b>@item.ServerName</b><div style="float:right;" align="right"><img class="clickable-img" title="View Server Statistics" src="@Url.Content("~/Images/icon-stats-256x256.png")" height="16" width="16" /></div></td>
                         <td>@item.IPAddress</td>
                         <td><img src="@Url.Content(imgurl)" width="16" height="16" /> @item.Status</td>
                         <td>@item.RestartTime</td>
@@ -60,4 +57,42 @@
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
     @Scripts.Render("~/bundles/dynatable")
+    @Scripts.Render("~/bundles/app")
 }
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        RegisterTable('#servers-table', function () {
+            var serverIDDiv = $(this).closest('tr').find('.ServerID');
+            var id = parseInt(serverIDDiv.text());
+            var url = '@Url.Action("Game", "Servers")' + "?serverID=" + id;
+            window.location.href = url;
+        });
+
+        RegisterTable('#players-table', function () {
+            var ucidIDDiv = $(this).closest('tr').find('.UCID');
+            var ucid = ucidIDDiv.text();
+            var url = '@Url.Action("PlayerStats", "Statistics")' + '?playerUCID=' + ucid;
+            window.location.href = url;
+        });
+
+        $('.clickable-img').click(function () {
+            var serverIDDiv = $(this).closest('tr').find('.ServerID');
+            var id = parseInt(serverIDDiv.text());
+            var url = '@Url.Action("ServerStats", "Statistics")' + "?serverID=" + id;
+            window.location.href = url;
+            return false;
+        });
+
+        $('.clickable-img').hover(function () {
+            $(this).css('cursor', 'pointer');
+            $(this).css('background-color', '#B5B5B5');
+        }, function () {
+            $(this).css('background-color', '');
+        });
+
+        $('.clickable-img').tooltipster({
+            theme: 'tooltipster-noir'
+        });   
+    });
+</script>
