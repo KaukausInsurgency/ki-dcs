@@ -30,9 +30,12 @@ UPDATE ki.rpt_overall_stats rpt
 			(SELECT COUNT(id) FROM raw_gameevents_log WHERE ucid = rpt.ucid AND event = "DEPOT_RESUPPLY"),
 		rpt.cargo_unpacked = rpt.cargo_unpacked + 
 			(SELECT COUNT(id) FROM raw_gameevents_log WHERE ucid = rpt.ucid AND event = "CARGO_UNPACKED"),
+		rpt.kills = rpt.kills +
+			(SELECT COUNT(id) FROM ki.raw_gameevents_log 
+				 WHERE (event = "KILL") AND ucid = rpt.ucid),
 		rpt.deaths = rpt.deaths +
 			(SELECT COUNT(DISTINCT sortie_id) FROM ki.raw_gameevents_log 
-				 WHERE (event LIKE "DEAD" Or event LIKE "CRASH" Or event LIKE "PILOT_DEAD") AND ucid = rpt.ucid),
+				 WHERE (event = "DEAD" Or event = "CRASH" Or event = "PILOT_DEAD") AND ucid = rpt.ucid),
 		rpt.ejects = rpt.ejects +
 			(SELECT COUNT(id) FROM raw_gameevents_log WHERE ucid = rpt.ucid AND event = "EJECTION");
                  

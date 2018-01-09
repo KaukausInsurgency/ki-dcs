@@ -360,7 +360,6 @@ CREATE TABLE `rpt_airframe_stats` (
   `transport_dismounts` int(11) NOT NULL DEFAULT '0',
   `depot_resupplies` int(11) NOT NULL DEFAULT '0',
   `cargo_unpacked` int(11) NOT NULL DEFAULT '0',
-  `completed_sorties` int(11) NOT NULL DEFAULT '0',
   `ejects` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -424,6 +423,25 @@ CREATE TABLE `rpt_overall_stats` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `rpt_player_session_series`
+--
+
+DROP TABLE IF EXISTS `rpt_player_session_series`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rpt_player_session_series` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ucid` varchar(128) NOT NULL,
+  `session_id` bigint(32) NOT NULL,
+  `event` varchar(45) NOT NULL,
+  `game_time` bigint(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_session_idx` (`session_id`),
+  CONSTRAINT `fk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=1087 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `rpt_updated`
 --
 
@@ -467,6 +485,8 @@ CREATE TABLE `session` (
   `end` datetime DEFAULT NULL,
   `real_time_start` bigint(32) DEFAULT NULL,
   `real_time_end` bigint(32) DEFAULT NULL,
+  `game_time_start` bigint(32) DEFAULT NULL,
+  `game_time_end` bigint(32) DEFAULT NULL,
   `last_heartbeat` datetime DEFAULT NULL,
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
@@ -553,7 +573,23 @@ CREATE TABLE `target` (
   `type` varchar(25) DEFAULT NULL COMMENT 'NOTE - type is nullable as not all DCS objects have a type ''ie buildings do not have a type to them, they are simply counted as STRUCTURES)',
   `category` varchar(15) NOT NULL,
   PRIMARY KEY (`target_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `weapon`
+--
+
+DROP TABLE IF EXISTS `weapon`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `weapon` (
+  `weapon_id` int(11) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `category` varchar(20) NOT NULL,
+  PRIMARY KEY (`weapon_id`),
+  UNIQUE KEY `unique_weapon` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1172,6 +1208,7 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateSession`(
 		ServerID INT,
         RealTimeStart BIGINT,
+        GameTimeStart BIGINT,
         RefreshMissionData BOOL
     )
 BEGIN
@@ -1181,8 +1218,8 @@ BEGIN
 	END IF;
 	DELETE FROM online_players WHERE server_id = ServerID;
     UPDATE ki.server SET status = "Online" WHERE server_id = ServerID;
-	INSERT INTO session (server_id, start, real_time_start)
-    VALUES (ServerID, NOW(), RealTimeStart);
+	INSERT INTO session (server_id, start, real_time_start, game_time_start)
+    VALUES (ServerID, NOW(), RealTimeStart, GameTimeStart);
     SELECT LAST_INSERT_ID() AS SessionID;
 END ;;
 DELIMITER ;
@@ -1204,11 +1241,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `EndSession`(
 		ServerID INT,
         SessionID INT,
         RealTimeEnd BIGINT,
+        GameTimeEnd BIGINT,
         ServerStatus VARCHAR(10)
     )
 BEGIN
 	DELETE FROM online_players WHERE server_id = ServerID;
-    UPDATE session SET end = NOW(), real_time_end = RealTimeEnd WHERE server_id = ServerID AND session_id = SessionID;
+    UPDATE session 
+		SET end = NOW(), 
+			real_time_end = RealTimeEnd,
+            game_time_end = GameTimeEnd
+		WHERE server_id = ServerID AND session_id = SessionID;
     UPDATE ki.server SET status = ServerStatus WHERE server_id = ServerID;
     SELECT 1;
 END ;;
@@ -1310,6 +1352,104 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `log`(sproc VARCHAR(128), text VARCH
 BEGIN
 	INSERT INTO ki.sproc_log (sproc_log.sproc, sproc_log.text)
     VALUES (sproc, text);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `rptsp_GetLastSessionSeries` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rptsp_GetLastSessionSeries`(IN UCID VARCHAR(128))
+BEGIN   
+    -- DECLARE SessionID INT;
+    -- SET SessionID = 66;
+	SELECT 
+		s.event AS Event,
+		s.game_time - ss.game_time_start AS Time
+	FROM ki.rpt_player_session_series s
+    INNER JOIN ki.session ss
+		ON s.session_id = ss.session_id
+	WHERE s.ucid = UCID AND s.session_id = 
+		 ( 	
+			SELECT MAX(session_id) 
+			FROM rpt_player_session_series sss
+            WHERE sss.ucid = UCID
+		 );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `rptsp_GetPlayerOverallStats` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rptsp_GetPlayerOverallStats`(IN UCID VARCHAR(128))
+BEGIN
+	SELECT 
+        p.name AS PlayerName,
+        p.lives AS PlayerLives,
+        p.banned AS PlayerBanned,
+		game_time AS TotalGameTime,
+        takeoffs AS TakeOffs,
+        landings AS Landings,
+        slingload_hooks AS SlingLoadHooks,
+        slingload_unhooks AS SlingLoadUnhooks,
+        kills AS Kills,
+        deaths AS Deaths,
+        ejects AS Ejects,
+        transport_mounts AS TransportMounts,
+        transport_dismounts AS TransportDismounts,
+        depot_resupplies AS DepotResupplies,
+        cargo_unpacked AS CargoUnpacked,
+        landings / takeoffs AS SortieSuccessRatio,
+        slingload_unhooks / slingload_hooks AS SlingLoadSuccessRatio,
+        kills / (deaths + ejects) AS KillDeathEjectRatio,
+        transport_dismounts / transport_mounts AS TransportSuccessRatio
+	FROM rpt_overall_stats r
+    INNER JOIN ki.player p
+    ON r.ucid = p.ucid
+    WHERE r.ucid = UCID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `rptsp_GetTopAirframeSeries` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rptsp_GetTopAirframeSeries`(IN UCID VARCHAR(128), IN RowLimit INT)
+BEGIN
+	SELECT 
+		a.airframe AS Airframe,
+        a.flight_time AS TotalTime
+	FROM rpt_airframe_stats a
+    WHERE a.ucid = UCID
+    LIMIT RowLimit;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1704,4 +1844,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-06  3:13:40
+-- Dump completed on 2018-01-08 19:34:46

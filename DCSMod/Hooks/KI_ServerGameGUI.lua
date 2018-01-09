@@ -374,7 +374,13 @@ function KIServer.RequestNewSession()
     net.log("KIServer.RequestNewSession - WARNING - RefreshMissionData is enabled - please turn this off in KIServerConfig.lua when running a live server")
   end
   
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, { ServerID = KIServer.Data.ServerID, RealTimeStart = DCS.getRealTime(), RefreshMissionData = KIServer.Config.RefreshMissionData })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, 
+    { 
+      ServerID = KIServer.Data.ServerID, 
+      RealTimeStart = DCS.getRealTime(), 
+      GameTimeStart = DCS.getModelTime(), 
+      RefreshMissionData = KIServer.Config.RefreshMissionData 
+    })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 10) then
@@ -420,6 +426,7 @@ function KIServer.RequestEndSession()
                   ServerID = KIServer.Data.ServerID, 
                   SessionID = KIServer.Data.SessionID, 
                   RealTimeEnd = DCS.getRealTime(),
+                  GameTimeEnd = DCS.getModelTime(), 
                   ServerStatus = _status
                 })
                 

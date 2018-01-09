@@ -10,15 +10,18 @@ namespace KIWebApp.Controllers
     public class StatisticsController : Controller
     {
         private IDAL dal;
+        private IDAL_Rpt rptdal;
 
         public StatisticsController()
         {
             dal = new DAL();
+            rptdal = new DAL_Rpt();
         }
 
-        public StatisticsController(IDAL dal)
+        public StatisticsController(IDAL dal, IDAL_Rpt rptdal)
         {
             this.dal = dal;
+            this.rptdal = rptdal;
         }
 
         public ActionResult Index()
@@ -31,9 +34,9 @@ namespace KIWebApp.Controllers
             return View();
         }
 
-        public ActionResult PlayerStats(string ucid)
+        public ActionResult PlayerStats(string playerUCID)
         {
-            return View();
+            return View(rptdal.GetOverallPlayerStats(playerUCID));
         }
     }
 }

@@ -42,6 +42,8 @@ namespace KIWebApp
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
 
+            bundles.Add(new ScriptBundle("~/bundles/statistics").Include(
+                        "~/Scripts/app/dashboard-overall.js"));
 
 
 
@@ -72,6 +74,9 @@ namespace KIWebApp
 
             bundles.Add(new StyleBundle("~/Content/app").Include(
                 "~/Content/app/app.css"));
+
+            bundles.Add(new StyleBundle("~/Content/statistics").Include(
+                "~/Content/app/dashboard-overall.css"));
         }
     }
 }

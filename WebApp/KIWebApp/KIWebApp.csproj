@@ -229,6 +229,8 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Asyncs\GameThreadWorker.cs" />
     <Compile Include="Classes\DAL.cs" />
+    <Compile Include="Classes\DAL_Rpt.cs" />
+    <Compile Include="Classes\IDAL_Rpt.cs" />
     <Compile Include="Classes\MockDAL.cs" />
     <Compile Include="Classes\Position.cs" />
     <Compile Include="Classes\Resolution.cs" />
@@ -241,12 +243,17 @@
     </Compile>
     <Compile Include="Hubs\GameHub.cs" />
     <Compile Include="Models\CapturePointModel.cs" />
+    <Compile Include="Models\SessionDataPlotModel.cs" />
     <Compile Include="Models\DepotModel.cs" />
     <Compile Include="Models\GameModel.cs" />
     <Compile Include="Models\MapModels.cs" />
     <Compile Include="Models\MarkerViewModel.cs" />
     <Compile Include="Models\OnlinePlayerModel.cs" />
     <Compile Include="Models\PlayerModel.cs" />
+    <Compile Include="Models\RptAirframeOverallStatsModel.cs" />
+    <Compile Include="Models\RptPlayerOverallStatsModel.cs" />
+    <Compile Include="Models\RptSessionSeriesModel.cs" />
+    <Compile Include="Models\RptTopAirframeSeriesModel.cs" />
     <Compile Include="Models\SearchModel.cs" />
     <Compile Include="Models\SearchResultsModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
@@ -257,6 +264,7 @@
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Content\app\app.css" />
+    <Content Include="Content\app\dashboard-overall.css" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
@@ -370,6 +378,7 @@
     <Content Include="Images\status-green-128x128.png" />
     <Content Include="Images\status-red-128x128.png" />
     <Content Include="Images\status-yellow-128x128.png" />
+    <Content Include="Scripts\app\dashboard-overall.js" />
     <Content Include="Scripts\app\registertable.js" />
     <Content Include="Scripts\app\gamemap.js" />
     <Content Include="Scripts\bootstrap.js" />
