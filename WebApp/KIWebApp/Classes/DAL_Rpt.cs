@@ -13,7 +13,7 @@ namespace KIWebApp.Classes
         private const string SP_PLAYER_STATS_OVERALL = "rptsp_GetPlayerOverallStats";
         private const string SP_TOP_AIRFRAME_SERIES = "rptsp_GetTopAirframeSeries";
         private const string SP_LAST_SESSION_SERIES = "rptsp_GetLastSessionSeries";
-        private const string SP___ = "rptsp_GetTopAirframeSeries";
+        private const string SP_LAST_X_SESSIONS_SERIES = "rptsp_GetLast5SessionsBarGraph";
 
         private string _DBConnection;
 
@@ -117,6 +117,7 @@ namespace KIWebApp.Classes
 
             playerstats.TopAirframesSeries = ((IDAL_Rpt)this).GetTopAirframeSeries(ucid, ref conn);
             playerstats.LastSessionSeries = ((IDAL_Rpt)this).GetLastSessionSeries(ucid, ref conn);
+            playerstats.LastXSessionsEventsSeries = ((IDAL_Rpt)this).GetLastSetSessions(ucid, ref conn);
             return playerstats;
         }
 
@@ -196,7 +197,7 @@ namespace KIWebApp.Classes
             {
                 string evt = dr.Field<string>("Event");
                 long t = dr.Field<long>("Time");
-                SessionDataPlotModel plot = new SessionDataPlotModel();
+                RptSessionDataPlotModel plot = new RptSessionDataPlotModel();
                 plot.x = t * 1000;  // highcharts treats the number as milliseconds - need to multiply by 1000 to convert seconds to milliseconds
                 bool IsNew = false;
                 RptSessionSeriesModel series = session_series.FirstOrDefault(x => x.name == evt);
@@ -216,6 +217,80 @@ namespace KIWebApp.Classes
                 if (IsNew)
                     session_series.Add(series);
             }
+            return session_series;
+        }
+
+        List<RptSessionEventsDataModel> IDAL_Rpt.GetLastSetSessions(string ucid)
+        {
+            MySqlConnection conn = new MySqlConnection(_DBConnection);
+            try
+            {
+                conn.Open();
+                return ((IDAL_Rpt)this).GetLastSetSessions(ucid, ref conn);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        List<RptSessionEventsDataModel> IDAL_Rpt.GetLastSetSessions(string ucid, ref MySqlConnection conn)
+        {
+            if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
+                conn.Open();
+            List<RptSessionEventsDataModel> session_series = new List<RptSessionEventsDataModel>();
+            MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_LAST_X_SESSIONS_SERIES)
+            {
+                Connection = conn,
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            cmd.Parameters.Add(new MySqlParameter("UCID", ucid));
+            MySqlDataReader rdr = cmd.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(rdr);
+
+            // hash of [SessionID].[EventName].[Count]
+            Dictionary<long, Dictionary<string, int>> event_count_map = new Dictionary<long, Dictionary<string, int>>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                long sessionID = dr.Field<long>("SessionID");
+                string evt = dr.Field<string>("Event");
+                long c = dr.Field<long>("EventCount");  // for some reason MySQL typed this as a long when it should not be
+
+                if (!event_count_map.ContainsKey(sessionID))
+                {
+                    event_count_map[sessionID] = new Dictionary<string, int>();
+
+                    // hardcoding sucks, but unless the sproc can return the data definitions first, it's difficult for this code to know what data plots to zero out
+                    event_count_map[sessionID]["KILL"] = 0;
+                    event_count_map[sessionID]["TAKEOFF"] = 0;
+                    event_count_map[sessionID]["LAND"] = 0;
+                }
+                      
+                event_count_map[sessionID][evt] = Convert.ToInt32(c);
+            }
+
+            foreach (var session_pair in event_count_map)
+            {
+                foreach(var event_pair in session_pair.Value)
+                {
+                    RptSessionEventsDataModel series = session_series.FirstOrDefault(x => x.name == event_pair.Key);
+                    if (series == null)
+                    {
+                        series = new RptSessionEventsDataModel();
+                        series.name = event_pair.Key;
+                        series.data.Add(event_pair.Value);
+                        session_series.Add(series);
+                    }
+                    else
+                    {
+                        series.data.Add(event_pair.Value);
+                    }
+                    
+                }
+
+            }
+
             return session_series;
         }
     }

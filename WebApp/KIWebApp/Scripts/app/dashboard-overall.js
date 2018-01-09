@@ -64,10 +64,6 @@ $(document).ready(function () {
             text: 'Last Session'
         },
 
-        subtitle: {
-            text: 'December 29th, 2017'
-        },
-
         yAxis: {
             title: {
                 text: 'Count'
@@ -150,6 +146,61 @@ $(document).ready(function () {
 
 
 
+    Highcharts.chart('last-5-sessions', {
+        chart: {
+            type: 'bar',
+            backgroundColor: null
+        },
+        title: {
+            text: 'Last 5 Sessions'
+        },
+        xAxis: {
+            categories: ['5', '4', '3', '2', '1'],
+            title: {
+                text: null
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Activity',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            },
+            allowDecimals: false
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 80,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        credits: {
+            enabled: false
+        },
+        exporting: { enabled: false },
+        series: model.LastXSessionsEventsSeries
+    });
+
+
+
+
+
+
     Highcharts.chart('airframe-chart', {
         chart: {
             margin: [0, 0, 30, 0],
@@ -180,7 +231,8 @@ $(document).ready(function () {
                 dataLabels: {
                     enabled: false
                 },
-                showInLegend: true
+                showInLegend: true,
+                borderWidth: 0
             }
         },
         exporting: { enabled: false },
@@ -229,7 +281,8 @@ $(document).ready(function () {
                 dataLabels: {
                     enabled: false
                 },
-                showInLegend: true
+                showInLegend: true,
+                borderWidth: 0
             }
         },
         exporting: { enabled: false },

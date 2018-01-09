@@ -243,7 +243,8 @@
     </Compile>
     <Compile Include="Hubs\GameHub.cs" />
     <Compile Include="Models\CapturePointModel.cs" />
-    <Compile Include="Models\SessionDataPlotModel.cs" />
+    <Compile Include="Models\RptSessionEventsDataModel.cs" />
+    <Compile Include="Models\RptSessionDataPlotModel.cs" />
     <Compile Include="Models\DepotModel.cs" />
     <Compile Include="Models\GameModel.cs" />
     <Compile Include="Models\MapModels.cs" />

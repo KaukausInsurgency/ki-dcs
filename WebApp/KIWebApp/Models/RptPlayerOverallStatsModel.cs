@@ -30,5 +30,6 @@ namespace KIWebApp.Models
 
         public List<RptTopAirframeSeriesModel> TopAirframesSeries { get; set; }
         public List<RptSessionSeriesModel> LastSessionSeries { get; set; }
+        public List<RptSessionEventsDataModel> LastXSessionsEventsSeries { get; set; }
     }
 }
