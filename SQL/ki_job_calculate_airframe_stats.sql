@@ -30,11 +30,11 @@ SELECT
   l1.id AS ci_id,
   l1.sortie_id AS ci_sortie_id,
   l1.event AS ci_event,
-  l1.real_time AS ci_time,
+  l1.model_time AS ci_time,
   l2.id AS co_id,
   l2.sortie_id AS co_sortie_id,
   l2.event AS co_event,
-  l2.real_time AS co_time
+  l2.model_time AS co_time
 FROM
   raw_gameevents_log l1 
 LEFT JOIN raw_gameevents_log l2 
@@ -59,8 +59,26 @@ SELECT * FROM ki.temp_flight_time;
 DELETE a.* FROM ki.temp_flight_time a 
 INNER JOIN ki.temp_flight_time_clone b 
 	ON a.ci_id = b.ci_id WHERE a.co_id > b.co_id;
+    
+    
+-- Its possible that there will not be a matched LAND or DEAD event to a takeoff
+-- (Ie if the players game crashes or if the server crashes)
+-- In this case we use the last captured event from the same session id and sortie id
+-- This means that when the player or server crashes, some flight time data will be lost
+-- This is a good solution for the case where a player Takes off, crashes, reconnects, then takes off again
+-- That is a scenario that is really difficult to handle and calculate
+UPDATE ki.temp_flight_time a
+INNER JOIN ki.raw_gameevents_log g 
+	ON a.session_id = g.session_id AND a.ci_sortie_id = g.sortie_id
+	SET a.co_id = g.id,
+		a.co_sortie_id = g.sortie_id,
+		a.co_event = "LAST_EVENT", 
+		a.co_time = g.model_time
+WHERE a.co_time IS NULL AND g.model_time IS NOT NULL 
+	  AND g.id = (SELECT MAX(id) FROM ki.raw_gameevents_log WHERE session_id = a.session_id AND sortie_id = a.ci_sortie_id);
 
 
+      
 -- Insert new airframe/ucid records into the table
 INSERT INTO rpt_airframe_stats (ucid, airframe)
 SELECT DISTINCT t1.ucid, role

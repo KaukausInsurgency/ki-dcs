@@ -12,7 +12,7 @@ SELECT server_id, session_id, ucid, role, sortie_id,
 		SUM(CASE WHEN event = "SLING_HOOK" THEN 1 ELSE 0 END) AS SlingHooks,
         SUM(CASE WHEN event = "SLING_UNHOOK" THEN 1 ELSE 0 END) AS SlingUnhooks,
         (
-			SELECT real_time
+			SELECT model_time
             FROM ki.raw_gameevents_log
             WHERE id = 
 				(
@@ -22,7 +22,7 @@ SELECT server_id, session_id, ucid, role, sortie_id,
 				)
         ) AS SortieStartTime,
         (
-			SELECT real_time
+			SELECT model_time
             FROM ki.raw_gameevents_log
             WHERE id = 
 				(

@@ -8,17 +8,17 @@ Author: Igneous01
 
 GameEvent = {}
 
-GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTime)
+GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, modelTime)
   env.info("GameEvent.CreateGameEvent called (sessionID: " 
            .. tostring(sessionID) .. ", serverID: " 
            .. tostring(serverID) .. ", dcs_event_obj: "
            .. tostring(dcs_event_obj ~= nil) .. ", realTime: "
-           .. tostring(realTime) .. ")")
+           .. tostring(modelTime) .. ")")
   if sessionID == nil or 
     serverID == nil or 
     dcs_event_obj == nil or 
     dcs_event_obj.initiator == nil or
-    realTime == nil then
+    modelTime == nil then
     
     env.info("GameEvent.CreateGameEvent - invalid parameters (one or more is nil) exiting")
     return nil
@@ -98,7 +98,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, realTim
     ["Event"] = KI.Defines.EventNames[dcs_event_obj.id],
     ["PlayerName"] = playerName,
     ["PlayerSide"] = dcs_event_obj.initiator:getCoalition(),
-    ["RealTime"] = realTime,
+    ["ModelTime"] = modelTime,
     ["GameTime"] = dcs_event_obj.time,
     ["Role"] = dcs_event_obj.initiator:getTypeName(),
     -- optional fields

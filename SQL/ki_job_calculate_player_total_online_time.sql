@@ -45,6 +45,7 @@ SET a.co_id = NULL, a.co_type = NULL, a.co_time = NULL
 WHERE a.ci_id < b.ci_id;
 
 -- UPDATE the check out time to be the session end time if there is a session end time (and the check out time is NULL)
+-- It's possible that the player crashed and no disconnect was recorded, but we'll just assume it's the end of the session
 UPDATE ki.temp_connect_pairs AS tcp
 INNER JOIN ki.session s 
 	ON s.session_id = tcp.session_id

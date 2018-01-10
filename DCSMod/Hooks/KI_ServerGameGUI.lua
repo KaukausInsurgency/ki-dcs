@@ -674,6 +674,7 @@ KIServer.UpdatePlayerLives = function(data)
         if dop.Lives ~= KIServer.Null then
           KIServer.Data.OnlinePlayers[tostring(pid)].Lives = dop.Lives
         end
+        KIServer.Data.OnlinePlayers[tostring(pid)].SortieID = dop.SortieID
       end
     end
   end
@@ -994,7 +995,7 @@ function KIServer.TCPSocket.ReceiveUntilComplete(timeout)
       return nil
     end
   else
-    net.log("KIServer.TCPSocket.ReceiveUntilComplete - ERROR in receiving header data (reason: " .. _error .. ")")
+    net.log("KIServer.TCPSocket.ReceiveUntilComplete - WARNING - did not receive header data (reason: " .. _error .. ")")
     if _error == "closed" then
       KIServer.TCPSocket.Disconnect()   -- disconnect the socket if the server closed the connection
     end
@@ -1495,7 +1496,7 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
     or eventName == "eject"
     or eventName == "pilot_death" then
       -- is player still in a valid slot
-      local _playerDetails = net.get_player_info(playerID)
+      local _playerDetails = net.get_player_info(playerID) or nil
 
       if _playerDetails ~= nil and 
          _playerDetails.side ~= 0 and 
@@ -1506,30 +1507,56 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
       end
     elseif eventName == "kill" then
       xpcall(function() 
-        local _playerDetails = net.get_player_info(playerID)
+        local _playerDetails = net.get_player_info(playerID) or nil
         local _victimPlayer = net.get_player_info(victimPlayerID) or nil
+        
+        -- we dont care about AI vs AI kills, so lets not track them
+        if _playerDetails == nil and _victimPlayer == nil then
+          return
+        end
+        
+        local _playerID = -1
         local _targetUCID = KIServer.Null
         local _playerUCID = KIServer.Null
         local _playerName = "AI"
+        local _targetPlayerName = "AI"
+        
+        -- if the victim is a player, populate the data into variables
         if _victimPlayer then
           _targetUCID = _victimPlayer.ucid
+          _targetPlayerName = _victimPlayer.name
         end
+        
+        -- if the initiator is a player, populate the data into variables
         if _playerDetails then
           _playerUCID = _playerDetails.ucid
-          _playerName = "Player"
+          _playerName = _playerDetails.name
+          _playerID = _playerDetails.id
+        end
+        
+        local _sortieID = KIServer.Null
+        
+        -- if the initiator is a player, try to find their OnlinePlayer record, and get the sortieID
+        if _playerID >= 0 then
+          for pid, op in pairs(KIServer.Data.OnlinePlayers) do
+            if pid == _playerID then
+              _sortieID = op.SortieID
+              break
+            end
+          end
         end
         
         local gameevent =
         {
           ["SessionID"] = KIServer.Data.SessionID,
-          ["ServerID"] = KIServer.Data.SessionID,
-          ["SortieID"] = KIServer.Null,
+          ["ServerID"] = KIServer.Data.ServerID,
+          ["SortieID"] = _sortieID,
           ["UCID"] = _playerUCID,
           ["Event"] = "KILL",
           ["PlayerName"] = _playerName,
           ["PlayerSide"] = killerSide,
-          ["RealTime"] = DCS.getRealTime(),
-          ["GameTime"] = DCS.getModelTime(),
+          ["ModelTime"] = DCS.getModelTime(),
+          ["GameTime"] = DCS.getRealTime(),
           ["Role"] = killerUnitType,
           -- optional fields
           ["Location"] = KIServer.Null,
@@ -1542,7 +1569,7 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
           ["TargetSide"] = victimSide,
           ["TargetIsPlayer"] = _victimPlayer ~= nil,
           ["TargetPlayerUCID"] =  _targetUCID,
-          ["TargetPlayerName"] = KIServer.Null,
+          ["TargetPlayerName"] = _targetPlayerName,
           ["TransportUnloadedCount"] = KIServer.Null,
           ["Cargo"] = KIServer.Null
         }

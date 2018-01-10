@@ -36,7 +36,7 @@ CREATE TABLE `backup_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=372 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=377 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,7 +237,7 @@ CREATE TABLE `raw_connection_log` (
   `game_time` bigint(32) NOT NULL,
   `real_time` bigint(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=372 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=379 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -256,7 +256,7 @@ CREATE TABLE `raw_gameevents_log` (
   `event` varchar(45) NOT NULL,
   `player_name` varchar(128) NOT NULL,
   `player_side` int(11) DEFAULT NULL,
-  `real_time` bigint(32) NOT NULL,
+  `model_time` bigint(32) NOT NULL,
   `game_time` bigint(32) NOT NULL,
   `role` varchar(45) DEFAULT NULL,
   `location` varchar(60) DEFAULT NULL,
@@ -273,7 +273,7 @@ CREATE TABLE `raw_gameevents_log` (
   `transport_unloaded_count` int(11) DEFAULT NULL,
   `cargo` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1365 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1663 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -333,7 +333,7 @@ CREATE TABLE `rpt_airframe_sortie` (
   `cargo_hooked` int(11) NOT NULL,
   `cargo_unhooked` int(11) NOT NULL,
   PRIMARY KEY (`sortie_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=256 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -438,7 +438,7 @@ CREATE TABLE `rpt_player_session_series` (
   PRIMARY KEY (`id`),
   KEY `fk_session_idx` (`session_id`),
   CONSTRAINT `fk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1024 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2048 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -491,7 +491,7 @@ CREATE TABLE `session` (
   PRIMARY KEY (`session_id`),
   KEY `server_id_idx` (`server_id`),
   CONSTRAINT `Session_ServerID` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=527 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -519,7 +519,7 @@ CREATE TABLE `side_mission` (
   PRIMARY KEY (`side_mission_id`),
   KEY `fk_server_id_idx` (`server_id`),
   CONSTRAINT `fk_server_id` FOREIGN KEY (`server_id`) REFERENCES `server` (`server_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -982,7 +982,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddGameEvent`(
         IN Event VARCHAR(45),
         IN PlayerName VARCHAR(128),
         IN PlayerSide INT,
-        IN RealTime BIGINT(32),
+        IN ModelTime BIGINT(32),
         IN GameTime BIGINT(32),
         IN Role VARCHAR(25),
         IN Location VARCHAR(60),
@@ -1000,11 +1000,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddGameEvent`(
         IN Cargo VARCHAR(128)
 	)
 BEGIN
-	INSERT INTO raw_gameevents_log (server_id, session_id, sortie_id, ucid, event, player_name, player_side, real_time, game_time, 
+	INSERT INTO raw_gameevents_log (server_id, session_id, sortie_id, ucid, event, player_name, player_side, model_time, game_time, 
 									role, location, weapon, weapon_category, target_name, target_model, target_type,
 									target_category, target_side, target_is_player, target_player_ucid, target_player_name,
                                     transport_unloaded_count, cargo)
-    VALUES(ServerID, SessionID, SortieID, UCID, Event, PlayerName, PlayerSide, RealTime, GameTime, 
+    VALUES(ServerID, SessionID, SortieID, UCID, Event, PlayerName, PlayerSide, ModelTime, GameTime, 
 		   Role, Location, Weapon, WeaponCategory, TargetName, TargetModel, TargetType, 
            TargetCategory, TargetSide, TargetIsPlayer, TargetPlayerUCID, TargetPlayerName,
            TransportUnloadedCount, Cargo);
@@ -1879,4 +1879,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-09  3:47:26
+-- Dump completed on 2018-01-10  1:11:44

@@ -15,7 +15,7 @@ namespace TAWKI_TCPServer
 {
     class KIDB
     {
-        public const int LUANULL = -9999;        // THIS IS IMPORTANT - CHANGING THIS WILL BREAK IF THE LUA NIL PLACEHOLDER IS NOT THE SAME!!!
+        public const Int64 LUANULL = -9999;        // THIS IS IMPORTANT - CHANGING THIS WILL BREAK IF THE LUA NIL PLACEHOLDER IS NOT THE SAME!!!
         public const string ACTION_GET_SERVERID = "GetOrAddServer";
         public static string DBConnection = "";
 
@@ -68,7 +68,7 @@ namespace TAWKI_TCPServer
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 foreach (var d in dataDictionary)
                 {
-                    if (d.Value is int && (int)d.Value == LUANULL)
+                    if (d.Value.GetType() == typeof(Int64) && (Int64)d.Value == LUANULL)
                         cmd.Parameters.AddWithValue(d.Key, null);
                     else
                         cmd.Parameters.AddWithValue(d.Key, d.Value);                 

@@ -73,7 +73,7 @@ namespace SlingloadEventsWatcher
                     while (true)
                     {
                         try
-                        {                                 
+                        {
                             s = sr.ReadLine();
                             if (s == null)
                                 break;
@@ -94,7 +94,7 @@ namespace SlingloadEventsWatcher
                                 }
                                 Console.WriteLine("DCS: Player Choosing Cargo (heliID: " + heliID + ", cargoID: " + cargoID + ")");
                                 hash[heliID] = cargoID;
-                            }                       
+                            }
                             else if (s.Contains(HookCargoString))
                             {
                                 int startIndex = s.IndexOf(HookCargoString) + HookCargoString.Length;
@@ -157,7 +157,7 @@ namespace SlingloadEventsWatcher
                             break;
                         }
                     }
-                    
+
                     wh.WaitOne(10000);  // timeout of 10 seconds if file has not changed
                 }
             }

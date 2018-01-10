@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "SlingloadEventsWatcher": {
-      "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\david\\Saved Games\\DCS\\Logs\" \"C:\\Users\\david\\Saved Games\\DCS\\Missions\\Kaukasus Insurgency\\SlingloadEvents\""
-    }
-  }
-}
