@@ -72,14 +72,6 @@ function CP:ViewResources()
   return msg
 end
 
-function CP:GetResourceEncoded()
-  local msg = "Type|Fortified|Limit\n"
-  for res, val in pairs(self.Defenses) do
-    msg = msg .. res .. "|" .. val.qty .. "|" .. val.cap .. "\n"
-  end
-  return msg
-end
-
 function CP:SetCoalitionCounts(reds, blues)
   env.info("CP.SetCoalitionCounts called")
   self.BlueUnits = blues

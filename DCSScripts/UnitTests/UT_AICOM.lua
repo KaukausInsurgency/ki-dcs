@@ -720,7 +720,7 @@ function()
   -- the MOOSE:SPAWN:OnSpawnGroup handler is deferred execution
   -- This handler will be invoked after the unit tests have finished running, making it impossible to check here
   -- testing Custom Call back
-  --
+  --[[
   if true then
     local _cp = CP:New("NeutralCP", "NeutralCP", CP.Enum.CAPTUREPOINT, "NeutralCP", "NeutralCP")
     UT.TestData.WAS_CALLBACK_CALLED = false
@@ -740,7 +740,7 @@ function()
     local moneySpent = AICOM.Spawn({AICOM.Config.Forces[1]}, {}, _cp)     
     UT.TestCompare(function() return UT.TestData.WAS_CALLBACK_CALLED end)
   end   
-  --
+  ]]--
   
   
 end,

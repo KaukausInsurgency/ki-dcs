@@ -89,7 +89,6 @@ UT.TestCase("CP",
         
         -- testing ViewResources method
         UT.TestFunction(CP.ViewResources, _cp)
-        UT.TestFunction(CP.GetResourceEncoded, _cp)
       end
       
       

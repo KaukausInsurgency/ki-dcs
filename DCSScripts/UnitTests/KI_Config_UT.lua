@@ -72,3 +72,9 @@ KI.Config.CP =
 KI.Config.SideMissions =
 {
 }
+
+-- Minimum distance needed to stop a respawned unit from moving to a waypoint
+KI.Config.RespawnUnitWaypointDistance = 100
+
+-- Delay to assign waypoint to unit after being respawned
+KI.Config.RespawnTimeBeforeWaypointTasking = 15

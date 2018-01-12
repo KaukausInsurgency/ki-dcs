@@ -83,5 +83,24 @@ UT.TestCase("DWM", nil, nil,
       
       UT.TestCompareOnce(function() return _d:Give("Tanks", 40) == false end)
       UT.TestCompareOnce(function() return _d:Give("TestKey", 22) == false end)
+      
+      -- Testing a depot constructed with infinite supply option
+      if true then
+        local _infdepot = DWM:New("Test Depot", "Test Depot Zone", 0, -1, true)
+        -- testing SetResource method
+        UT.TestFunction(DWM.SetResource, _infdepot, "Infantry", 0, 0)
+        UT.TestFunction(DWM.SetResource, _infdepot, "Tanks", 0, 0)
+        UT.TestFunction(DWM.SetResource, _infdepot, "Building", 0, 0)
+      
+        -- number of calls to take should not matter as the depot has an infinite capacity
+        for i = 1, 50 do
+          UT.TestCompare(function() return _infdepot:Take("Tanks", 1) end)
+        end
+        
+        -- all of these should return true as there is no validation to take place when IsSupplier is set to true
+        UT.TestCompare(function() return _infdepot:Take("Infantry", 1000) end)
+        UT.TestCompare(function() return _infdepot:Take("Building", -19358) end)
+      
+      end
     end)
   

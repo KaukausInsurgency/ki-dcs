@@ -62,20 +62,26 @@ function DWM:Take(resource, count)
   local msg = ""
   local result = false
   if self.Resources[resource] then
-    local _rqty = self.Resources[resource].qty
-    local _cap = self.Resources[resource].cap
-    if _rqty > 0 then
-      if count <= _rqty then
-        _rqty = _rqty - count
-        self.Resources[resource] = { qty = _rqty, cap = _cap }
-        self.CurrentCapacity = self.CurrentCapacity - (count * _cap)
-        result = true
-        msg = "Depot resource (" .. resource .. ") taken! (Remaining: " .. _rqty .. ", Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
-      else
-        msg = "Depot only has " .. _rqty .. " of this resource (" .. resource .. "), cannot take!"
-      end
+    -- if depot is set as supplier, it has infinite resources so perform no checks
+    if self.IsSupplier then
+      result = true
+      msg = "Depot resource (" .. resource .. ") taken! (Remaining: infinite, Capacity: infinite / infinite)"
     else
-      msg = "Depot has run out of this resource (" .. resource .. ")!"
+      local _rqty = self.Resources[resource].qty
+      local _cap = self.Resources[resource].cap
+      if _rqty > 0 then
+        if count <= _rqty then
+          _rqty = _rqty - count
+          self.Resources[resource] = { qty = _rqty, cap = _cap }
+          self.CurrentCapacity = self.CurrentCapacity - (count * _cap)
+          result = true
+          msg = "Depot resource (" .. resource .. ") taken! (Remaining: " .. _rqty .. ", Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
+        else
+          msg = "Depot only has " .. _rqty .. " of this resource (" .. resource .. "), cannot take!"
+        end
+      else
+        msg = "Depot has run out of this resource (" .. resource .. ")!"
+      end
     end
   else
     msg = "Depot does not carry this type of resource!"
@@ -87,19 +93,24 @@ function DWM:Give(resource, count)
   local msg = ""
   local result = false
   if self.Resources[resource] then
-    local _rqty = self.Resources[resource].qty
-    local _cap = self.Resources[resource].cap
-    -- if the depot has enough capacity to store the resource, do so
-    if (self.CurrentCapacity + (count * _cap)) <= self.Capacity then
-      env.info("DWM:Give - Depot has enough capacity to accept this resource")
-      _rqty = _rqty + count
-      self.Resources[resource] = { qty = _rqty, cap = _cap }
-      self.CurrentCapacity = self.CurrentCapacity + (count * _cap)
+    if self.IsSupplier then
+      msg = "Resource (" .. resource .. ") given to " .. self.Name .. "! (Remaining: infinite, Capacity: infinite / infinite)"
       result = true
-      msg = "Resource (" .. resource .. ") given to " .. self.Name .. "! (Remaining: " .. _rqty .. ", Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
     else
-      msg = "Depot does not have enough capacity to take this resource! (Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
-    end
+      local _rqty = self.Resources[resource].qty
+      local _cap = self.Resources[resource].cap
+      -- if the depot has enough capacity to store the resource, do so
+      if (self.CurrentCapacity + (count * _cap)) <= self.Capacity then
+        env.info("DWM:Give - Depot has enough capacity to accept this resource")
+        _rqty = _rqty + count
+        self.Resources[resource] = { qty = _rqty, cap = _cap }
+        self.CurrentCapacity = self.CurrentCapacity + (count * _cap)
+        result = true
+        msg = "Resource (" .. resource .. ") given to " .. self.Name .. "! (Remaining: " .. _rqty .. ", Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
+      else
+        msg = "Depot does not have enough capacity to take this resource! (Capacity: " .. tostring(self.CurrentCapacity) .. " / " .. tostring(self.Capacity) .. ")"
+      end
+    end   
   else
     msg = "Depot does not accept this type of resource!"
   end
@@ -108,19 +119,35 @@ end
   
 function DWM:ViewResources()
   local msg = "DWM - " .. self.Name .. "\n"
-  msg = msg .. "Depot Capacity: " .. self.CurrentCapacity .. " / " .. self.Capacity .. "\n"
-  msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
-  for res, val in pairs(self.Resources) do
-    msg = msg .. string.format("%-25s|%-5d", res, val.qty) .. "\n"
+  if self.IsSupplier then
+    msg = msg .. "Depot Capacity: infinite / infinite\n"
+    msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
+    for res, val in pairs(self.Resources) do
+      msg = msg .. string.format("%-25s|%-5d", res, "infinite") .. "\n"
+    end
+  else
+    msg = msg .. "Depot Capacity: " .. self.CurrentCapacity .. " / " .. self.Capacity .. "\n"
+    msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
+    for res, val in pairs(self.Resources) do
+      msg = msg .. string.format("%-25s|%-5d", res, val.qty) .. "\n"
+    end
   end
+  
   return msg
 end
 
 function DWM:GetResourceEncoded()
   local msg = "Resource|Count\n"
-  for res, val in pairs(self.Resources) do
-    msg = msg .. res .. "|" .. val.qty .. "\n"
+  if self.IsSupplier then
+    for res, val in pairs(self.Resources) do
+      msg = msg .. res .. "|" .. "infinite" .. "\n"
+    end
+  else
+    for res, val in pairs(self.Resources) do
+      msg = msg .. res .. "|" .. val.qty .. "\n"
+    end
   end
+  
   return msg
 end
   

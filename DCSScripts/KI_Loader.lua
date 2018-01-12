@@ -55,12 +55,12 @@ function KI.Loader.GenerateGroupTable(groupObj, hidden)
   local unitData = KI.Loader.GenerateUnitsTable(groupObj.Units)
   local groupData = 
   {
-    ["visible"] = true,
+    ["visible"] = false,
     ["taskSelected"] = true,
     ["route"] = {},
     --["groupId"] = groupObj.ID,        -- is an optional parameter, and may be interfering with group spawning
     ["tasks"] = {},
-    ["hidden"] = false,
+    ["hidden"] = hidden,
     ["units"] = unitData,
     ["y"] = unitData[1]["y"],
     ["x"] = unitData[1]["x"],
