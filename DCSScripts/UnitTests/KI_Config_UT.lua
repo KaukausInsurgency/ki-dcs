@@ -5,9 +5,6 @@ end
 
 KI.Config = {}
 
--- 1 is red coalition, 2 is blue coalition -- no function at this time
-KI.Config.PlayerCoalition = 1 
-
 -- Controls the maximum lifetime of a crate sitting idle at a depot until it is despawned
 KI.Config.CrateDespawnTime_Depot = 120
 
@@ -58,9 +55,6 @@ KI.Config.DBServerIP = "192.168.1.254"
 
 -- Port Number of Database Server Connection
 KI.Config.DBServerPort = 9983
-
--- Your server name (Only really used if supporting multi-tenant game servers)
-KI.Config.ServerName = "My Kaukasus Insurgency Server"
 
 -- configures capture points in mission
 KI.Config.CP =

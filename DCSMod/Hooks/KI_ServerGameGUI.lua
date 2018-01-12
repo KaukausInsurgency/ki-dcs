@@ -543,8 +543,6 @@ local function InitKIServerConfig()
     KIServer.Config.TCPCheckReceiveRate = _config["TCPCheckReceiveRate"]
     KIServer.Config.ServerPlayerID = _config["ServerPlayerID"]
     KIServer.Config.ServerName = _config["ServerName"]
-    KIServer.Config.ConfigDirectory = _config["ConfigDirectory"]
-    KIServer.Config.LogDirectory = _config["LogDirectory"]
     KIServer.Config.MissionRestartTime = _config["MissionRestartTime"]
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = tonumber(_config["GAMEGUI_SEND_TO_PORT"])
@@ -575,8 +573,6 @@ local function InitKIServerConfig()
     KIServer.Config.HeartbeatCheckRate = 30 -- how often the server should contact the TCP server about it's connection status
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
-    KIServer.Config.ConfigDirectory = lfs.writedir() .. [[Missions\Kaukasus Insurgency\Server\]]
-    KIServer.Config.LogDirectory = KIServer.Config.ConfigDirectory .. [[net.log]]
     KIServer.Config.MissionRestartTime = 14400  -- 4 hrs time until restart
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
