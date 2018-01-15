@@ -28,6 +28,11 @@ namespace KIWebApp.Classes
             _DBConnection = System.Configuration.ConfigurationManager.ConnectionStrings["DBMySqlConnect"].ConnectionString;
         }
 
+        public DAL(string connection)
+        {
+            _DBConnection = connection;
+        }
+
         List<CapturePointModel> IDAL.GetCapturePoints(int serverID)
         {
             MySqlConnection conn = new MySqlConnection(_DBConnection);

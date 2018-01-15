@@ -22,6 +22,11 @@ namespace KIWebApp.Classes
             _DBConnection = System.Configuration.ConfigurationManager.ConnectionStrings["DBMySqlConnect"].ConnectionString;
         }
 
+        public DAL_Rpt(string connection)
+        {
+            _DBConnection = connection;
+        }
+
         List<RptAirframeOverallStatsModel> IDAL_Rpt.GetAirframeStats(string ucid)
         {
             MySqlConnection conn = new MySqlConnection(_DBConnection);
