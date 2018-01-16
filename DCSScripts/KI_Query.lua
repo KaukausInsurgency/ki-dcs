@@ -120,3 +120,60 @@ function KI.Query.FindNearestPlayer_Static(cargo)
   end
   return punit
 end
+
+function KI.Query.GetDepots(IsSupplier) 
+  env.info("KI.Query.GetDepots called")
+  if IsSupplier then
+    IsSupplier = true
+  else
+    IsSupplier = false
+  end
+  local results = {}
+  for i = 1, #KI.Data.Depots do
+    local _d = KI.Data.Depots[i]
+    if _d.IsSupplier == IsSupplier then
+      table.insert(results, _d)
+    end
+  end
+  
+  return results
+end
+
+function KI.Query.GetDepotsResupplyRequired(SupplyCapacity) 
+  env.info("KI.Query.GetDepotsResupplyRequired called")
+  if not SupplyCapacity then
+    SupplyCapacity = 0
+  end
+  local results = {}
+  for i = 1, #KI.Data.Depots do
+    local _d = KI.Data.Depots[i]
+    if not _d.IsSupplier and (_d.CurrentCapacity / _d.Capacity) <= SupplyCapacity then
+      table.insert(results, _d)
+    end
+  end
+  
+  return results
+end
+
+function KI.Query.GetClosestSupplierDepot(Suppliers, Depot)
+  env.info("KI.Query.GetClosestSupplierDepot called")
+  if not Suppliers or not Depot then
+    return nil
+  end
+  local result = {}
+  local _dist
+  local _dpos = Depot.Object:getPoint()
+  
+  for i = 1, #Suppliers do
+    local _supplier = Suppliers[i]
+    local _spos = _supplier.Object:getPoint()
+    local _d = Spatial.Distance(_dpos, _spos)
+    
+    if _dist == nil or _d < _dist then
+      _dist = _d
+      result = _supplier
+    end 
+  end
+  
+  return result
+end

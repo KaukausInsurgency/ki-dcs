@@ -1,6 +1,10 @@
 -- Unit Tests for Depot Warehouse Management class
 
-UT.TestCase("DWM", nil, nil,
+UT.TestCase("DWM", 
+    function()
+      -- convoy template must exist
+      UT.ValidateSetup(function() return GROUP:FindByName(DWM.Config.ConvoyGroupTemplates[1]) ~= nil end)
+    end, nil,
     function()
       local function count_hash(hash)
         local _c = 0
@@ -101,6 +105,13 @@ UT.TestCase("DWM", nil, nil,
         UT.TestCompare(function() return _infdepot:Take("Infantry", 1000) end)
         UT.TestCompare(function() return _infdepot:Take("Building", -19358) end)
       
+      end
+      
+      -- Testing spawn convoy works
+      if true then
+        DWM.Config.OnSpawnGroup = nil -- we dont want to have a callback, just confirm the spawn is successful
+        local _depot = DWM:New("Test Depot", "Test Depot Zone", 0, -1, false)
+        UT.TestCompare(function() return _depot:SpawnConvoy(_depot) end)
       end
     end)
   

@@ -16,7 +16,7 @@ function KI.Init.Depots()
     env.info("KI.InitDepotZones - looping through static objects (" .. n .. ")")
     if string.match(n, "Depot") then
       env.info("KI.InitDepotZones - found Depot object - initializing")
-      local _depot = DWM:New(n, n .. " Zone", 7200, 150, true)
+      local _depot = DWM:New(n, n .. " Zone", 7200, 150, false)
       _depot:SetResource("Infantry", 40, 1)
       _depot:SetResource("APC", 8, 2)
       _depot:SetResource("Tank", 8, 3)

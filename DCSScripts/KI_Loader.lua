@@ -531,6 +531,7 @@ function KI.Loader.SaveData()
   t.TaskID = KI.Data.TaskID
   t.Waypoints = KI.Data.Waypoints
   t.SideMissionGroundObjects = KI.Data.SideMissionGroundObjects
+  t.Convoys = KI.Data.Convoys
   --t.UnitIDs = KI.Data.UnitIDs
   
   -- append GroundGroups, Statics to missiondata
