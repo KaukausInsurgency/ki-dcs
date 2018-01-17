@@ -19,6 +19,7 @@ end
 
 function UT.EndTest()
   local msg = ""
+  env.info("UT.EndTest() called")
   env.info("UT.EndTest() Called (failed Cases: " .. #UT.FailedTestCases .. ")")
   if #UT.FailedTestCases > 0 then
     for i = 1, #UT.FailedTestCases do
@@ -144,10 +145,10 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
       UT.Log("UT - Test Setup Validation Complete")
     else
       UT.Log("UT - Test Setup Validation FAILED - ERROR - " .. UT.GetCaughtError())
-      UT.Log("UT - Test Case FAILED - Setup is not valid!")
+      UT.Log("UT - Test Case FAILED - Setup is not valid!")    
       table.insert(UT.FailedTestCases, casename)
       UT.WriteToFile()
-      UT.Reset()
+      UT.Reset()    
       return false
     end
   else

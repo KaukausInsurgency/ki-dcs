@@ -1,16 +1,15 @@
-KI.Init.Depots()
-KI.Init.CapturePoints()
-KI.Init.SideMissions()
-
 UT.TestCase("KI_Query", 
   -- Validate
 function()
+
+
   UT.ValidateSetup(function() return GROUP:FindByName("TestGroupInsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return GROUP:FindByName("TestGroupOutsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestStaticInsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestStaticOutsideDepotZone") ~= nil end)
   UT.ValidateSetup(function() return StaticObject.getByName("TestQueryCargo") ~= nil end)
   UT.ValidateSetup(function() return Unit.getByName("SLCPilot1") ~= nil end)
+  --[[
   UT.ValidateSetup(function() 
       -- this depot must exist for this test case to run
       for i = 1, #KI.Data.Depots do
@@ -29,10 +28,11 @@ function()
       end
       return false
     end)
-  UT.ValidateSetup(function() return StaticObject.getByName("Supplier1") ~= nil end)
-  UT.ValidateSetup(function() return StaticObject.getByName("Supplier2") ~= nil end)
-  UT.ValidateSetup(function() return StaticObject.getByName("Depot1") ~= nil end)
-  UT.ValidateSetup(function() return StaticObject.getByName("Depot2") ~= nil end)
+  ]]
+  UT.ValidateSetup(function() return StaticObject.getByName("Supplier 1") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("Supplier 2") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("Depot 1") ~= nil end)
+  UT.ValidateSetup(function() return StaticObject.getByName("Depot 2") ~= nil end)
   UT.ValidateSetup(function() return ZONE:New("Supplier 1 Zone") ~= nil end)
   UT.ValidateSetup(function() return ZONE:New("Supplier 2 Zone") ~= nil end)
   UT.ValidateSetup(function() return ZONE:New("Depot 1 Zone") ~= nil end)
@@ -53,6 +53,9 @@ function()
     ["1"] = { UCID = "AAAA", Name = "DemoPlayer", Role = "A10C", Unit = Unit.getByName("SLCPilot1") }
     
   }
+  KI.Init.Depots()
+  KI.Init.CapturePoints()
+  KI.Init.SideMissions()
 end,
 
 -- Test Case
@@ -129,16 +132,16 @@ function()
     
     -- first prepare the KI.Data.Depots array for testing
     KI.Data.Depots = {}
-    table.insert(KI.Data.Depots, DWM:New("Supplier1", "Supplier 1 Zone", 7200, 150, true))
-    table.insert(KI.Data.Depots, DWM:New("Supplier2", "Supplier 2 Zone", 7200, 150, true))
-    table.insert(KI.Data.Depots, DWM:New("Depot1", "Depot 1 Zone", 7200, 150, false))
+    table.insert(KI.Data.Depots, DWM:New("Supplier 1", "Supplier 1 Zone", 7200, 150, true))
+    table.insert(KI.Data.Depots, DWM:New("Supplier 2", "Supplier 2 Zone", 7200, 150, true))
+    table.insert(KI.Data.Depots, DWM:New("Depot 1", "Depot 1 Zone", 7200, 150, false))
     
     -- This should return all depots that have IsSupplier == true
     if true then
       local resultset = KI.Query.GetDepots(true)
       UT.TestCompare(function() return #resultset == 2 end)
-      UT.TestCompare(function() return resultset[1].Name == "Supplier1" end)
-      UT.TestCompare(function() return resultset[2].Name == "Supplier2" end)
+      UT.TestCompare(function() return resultset[1].Name == "Supplier 1" end)
+      UT.TestCompare(function() return resultset[2].Name == "Supplier 2" end)
       
       local resultset2 = KI.Query.GetDepots("string")
       -- these results should be equal, as any arg type should translate to true
@@ -149,7 +152,7 @@ function()
     if true then
       local resultset = KI.Query.GetDepots(false)
       UT.TestCompare(function() return #resultset == 1 end)
-      UT.TestCompare(function() return resultset[1].Name == "Depot1" end)
+      UT.TestCompare(function() return resultset[1].Name == "Depot 1" end)
       
       local resultset2 = KI.Query.GetDepots()
       
@@ -163,17 +166,17 @@ function()
   if true then   
     -- first prepare the KI.Data.Depots array for testing
     KI.Data.Depots = {}
-    table.insert(KI.Data.Depots, DWM:New("Supplier1", "Supplier 1 Zone", 7200, 150, true))
-    table.insert(KI.Data.Depots, DWM:New("Depot1", "Depot 1 Zone", 7200, 150, false))
-    table.insert(KI.Data.Depots, DWM:New("Depot2", "Depot 2 Zone", 7200, 150, false))
+    table.insert(KI.Data.Depots, DWM:New("Supplier 1", "Supplier 1 Zone", 7200, 150, true))
+    table.insert(KI.Data.Depots, DWM:New("Depot 1", "Depot 1 Zone", 7200, 150, false))
+    table.insert(KI.Data.Depots, DWM:New("Depot 2", "Depot 2 Zone", 7200, 150, false))
     KI.Data.Depots[2].CurrentCapacity = 75
-    
+    KI.Data.Depots[3].CurrentCapacity = 130
     -- This should return a single result - the depot that has 50% current capacity
     local resultset = KI.Query.GetDepotsResupplyRequired(0.5)
     UT.TestCompare(function() return #resultset == 1 end)
-    UT.TestCompare(function() return resultset[1].Name == "Depot1" end)
+    UT.TestCompare(function() return resultset[1].Name == "Depot 1" end)
     
-    local resultset2 = KI.Query.GetDepots()
+    local resultset2 = KI.Query.GetDepotsResupplyRequired()
     -- should return empty result set, as no depots have 0% current capacity
     UT.TestCompare(function() return #resultset2 == 0 end)   
   end
@@ -181,20 +184,20 @@ function()
   -- KI.Query.GetClosestSupplierDepot
   if true then
     local Suppliers = {}
-    table.insert(Suppliers, DWM:New("Supplier1", "Supplier 1 Zone", 7200, 150, true))
-    table.insert(Suppliers, DWM:New("Supplier2", "Supplier 2 Zone", 7200, 150, true))
-    local _depotA = DWM:New("Depot1", "Depot 1 Zone", 7200, 150, false)
-    local _depotB = DWM:New("Depot2", "Depot 2 Zone", 7200, 150, false)
+    table.insert(Suppliers, DWM:New("Supplier 1", "Supplier 1 Zone", 7200, 150, true))
+    table.insert(Suppliers, DWM:New("Supplier 2", "Supplier 2 Zone", 7200, 150, true))
+    local _depotA = DWM:New("Depot 1", "Depot 1 Zone", 7200, 150, false)
+    local _depotB = DWM:New("Depot 2", "Depot 2 Zone", 7200, 150, false)
     
     -- Depot 1 should be closest to Supplier 1
     local _closestA = KI.Query.GetClosestSupplierDepot(Suppliers, _depotA)
     UT.TestCompare(function() return _closestA ~= nil end)   
-    UT.TestCompare(function() return _closestA.Name == "Supplier1" end)   
+    UT.TestCompare(function() return _closestA.Name == "Supplier 1" end)   
     
     -- Depot 2 should be closest to Supplier 2
     local _closestB = KI.Query.GetClosestSupplierDepot(Suppliers, _depotB)
     UT.TestCompare(function() return _closestB ~= nil end)   
-    UT.TestCompare(function() return _closestB.Name == "Supplier2" end)  
+    UT.TestCompare(function() return _closestB.Name == "Supplier 2" end)  
     
     -- should return nil
     UT.TestCompare(function() return KI.Query.GetClosestSupplierDepot(Suppliers, nil) == nil end)   

@@ -110,8 +110,34 @@ UT.TestCase("DWM",
       -- Testing spawn convoy works
       if true then
         DWM.Config.OnSpawnGroup = nil -- we dont want to have a callback, just confirm the spawn is successful
-        local _depot = DWM:New("Test Depot", "Test Depot Zone", 0, -1, false)
+        local _depot = DWM:New("Test Depot", "Test Depot Zone", 0, 100, false)
         UT.TestCompare(function() return _depot:SpawnConvoy(_depot) end)
+      end
+      
+      -- Testing resupply algorithm
+      if true then
+        local _depot = DWM:New("Test Depot", "Test Depot Zone", 0, 100, false)
+        _depot:SetResource("A", 4, 4)
+        _depot:SetResource("B", 3, 3)
+        _depot:SetResource("C", 15, 1)
+        _depot:SetResource("D", 5, 2)
+        
+        -- depot needs to be initialized to 50% capacity
+        UT.TestCompare(function() return _depot.CurrentCapacity == 50 end)
+        _depot:Resupply(25)
+        -- supplying 25 points should generate these results:
+        -- https://stackoverflow.com/questions/48275086/distribute-numbers-so-that-each-bucket-is-relatively-even?noredirect=1#comment83549109_48275086
+        UT.TestCompare(function() return (_depot.Resources["A"].qty * _depot.Resources["A"].cap) == 24 end)
+        UT.TestCompare(function() return (_depot.Resources["B"].qty * _depot.Resources["B"].cap) == 24 end)
+        UT.TestCompare(function() return (_depot.Resources["C"].qty * _depot.Resources["C"].cap) == 25 end)
+        UT.TestCompare(function() return (_depot.Resources["D"].qty * _depot.Resources["D"].cap) == 26 end)
+        
+        -- results should be unchanged
+        _depot:Resupply(nil)
+        UT.TestCompare(function() return (_depot.Resources["A"].qty * _depot.Resources["A"].cap) == 24 end)
+        UT.TestCompare(function() return (_depot.Resources["B"].qty * _depot.Resources["B"].cap) == 24 end)
+        UT.TestCompare(function() return (_depot.Resources["C"].qty * _depot.Resources["C"].cap) == 25 end)
+        UT.TestCompare(function() return (_depot.Resources["D"].qty * _depot.Resources["D"].cap) == 26 end)
       end
     end)
   

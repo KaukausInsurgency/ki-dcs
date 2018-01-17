@@ -1,17 +1,18 @@
+if not DWM then
+  DWM = {}
+end
+
 --Depot Warehouse Management
-DWM = 
-{
-  Resources = {},       -- map based on key["ResourceName"] = [qty, cap]
-  Name = "",            -- name of the depot in mission editor
-  Object = nil,         -- the static object found from the name
-  Zone = nil,           -- Mission Editor Trigger Zone
-  SupplyCheckRate = 0,  -- the rate at which supplies are checked and whether the depot should call for a convoy
-  Capacity = 0,         -- the maximum capacity the warehouse can hold
-  CurrentCapacity = 0,
-  IsSupplier = false,   -- whether this depot can resupply other depots
-  Suppliers = {},       -- list of suppliers
-  Position = {}
-}
+DWM.Resources = {}       -- map based on key["ResourceName"] = [qty, cap]
+DWM.Name = ""            -- name of the depot in mission editor
+DWM.Object = nil         -- the static object found from the name
+DWM.Zone = nil           -- Mission Editor Trigger Zone
+DWM.SupplyCheckRate = 0  -- the rate at which supplies are checked and whether the depot should call for a convoy
+DWM.Capacity = 0         -- the maximum capacity the warehouse can hold
+DWM.CurrentCapacity = 0
+DWM.IsSupplier = false   -- whether this depot can resupply other depots
+DWM.Suppliers = {}       -- list of suppliers
+DWM.Position = {}
 
 function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   local self = KI.Toolbox.DeepCopy( DWM )
@@ -175,19 +176,46 @@ end
 
 
 function DWM:Resupply(stock)
-  local function sortCapacity (a, b)
-    if (b.qty < a.qty) then
-      return true
-    elseif (b.cap < a.cap) then
-      return true
-    else
-      return false
+  local function findlowest (hash)
+    env.info("findlowest called")
+    local result = nil
+    for res, p in pairs(hash) do
+      if not result then
+        result = {res = res, qty = p.qty, cap = p.cap}
+      elseif (p.qty * p.cap) < (result.qty * result.cap) then
+        result = {res = res, qty = p.qty, cap = p.cap}
+      elseif (p.qty * p.cap) == (result.qty * result.cap) and p.cap < result.cap then
+        result = {res = res, qty = p.qty, cap = p.cap}
+      end
     end
+    env.info("findlowest result: " .. KI.Toolbox.Dump(result))
+    return result
   end
   
-  local resources = KI.Toolbox.DeepCopy(self.Resources)
-  table.sort(resources, sortCapacity)
-  for res, p in pairs(resources) do
+  if stock == nil or self.Resources == nil then
+    env.info("DWM:Resupply - stock or resources invalid - exiting")
+    return
+  end
+  
+  for i = 1, stock do
     
+    -- sort and find the resource with the least amount of space allocated
+    local resource = findlowest(self.Resources)
+    if resource == nil then
+      env.info("DWM:Resupply - could not find lowest resource - exiting")
+      break
+    end
+    -- pre calculate what the new capacity of the depot would be
+    local newcapacity = self.CurrentCapacity + (1 * resource.cap)
+    if newcapacity <= self.Capacity then
+      env.info("DWM:Resupply - adding stock")
+      self.Resources[resource.res].qty = resource.qty + 1
+    end
+    
+    local debugstring = ""
+    for res, p in pairs(self.Resources) do
+      debugstring = debugstring .. res .. ":" .. tostring(p.cap * p.qty) .. ", "
+    end
+    env.info("DWM:ResupplyTE - Iteration: " .. tostring(i) .. " Lowest: " .. resource.res .. " : " .. debugstring)
   end
 end
