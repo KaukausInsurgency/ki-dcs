@@ -31,3 +31,5 @@ Technologies/Frameworks used:
 11. Log4Net - web application logging
 12. MySql .Net Connector
 13. MySql Database
+14. MOOSE DCS Scripting Framework
+15. MIST DCS Scripting Framework
