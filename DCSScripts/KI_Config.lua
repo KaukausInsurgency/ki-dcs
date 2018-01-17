@@ -63,6 +63,29 @@ KI.Config.SERVER_SESSION_RECEIVE_PORT = 6007  -- the port to listen for server s
 -- Determines whether the respawned ground group needs to be retasked it's waypoint based on it's current distance to it
 KI.Config.RespawnUnitWaypointDistance = 200
 
+-- Determines when a depot will request a convoy resupply - values range from 0 to 1. For 50% capacity use 0.5
+KI.Config.DepotMinCapacityToResupply = 0.5
+
+-- The number of units a convoy will resupply to a depot (distributing this amount equally among all items)
+KI.Config.ResupplyConvoyAmount = 25
+
+-- Determines the rate at which depots are checked if they need to be resupplied
+KI.Config.DepotResupplyCheckRate = 60
+
+-- Determines the rate at which active convoys are checked if alive or completed waypoint
+KI.Config.ResupplyConvoyCheckRate = 60
+
+-- Determines when a convoy has reached a depot to resupply it 
+-- (this ideally should match KI.Config.RespawnUnitWaypointDistance because on respawn, if this value is less the respawned unit
+-- will not be tasked with a move waypoint, causing the convoy to be stuck in a never completed state
+KI.Config.ConvoyMinimumDistanceToDepot = KI.Config.RespawnUnitWaypointDistance
+
+KI.Config.Depots =
+{
+  { name = "Urvan Depot", supplier = true },
+  { name = "Troickaya Depot", supplier = true },
+}
+
 -- configures capture points in mission
 KI.Config.CP =
 {

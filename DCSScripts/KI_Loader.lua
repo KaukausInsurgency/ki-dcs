@@ -377,6 +377,7 @@ function KI.Loader.ImportDWM(data)
         env.info("KI.Loader.ImportDWM - updating Depot " .. depot.Name)
         depot.CurrentCapacity = _depotdata["CurrentCapacity"]
         depot.Resources = _depotdata["Resources"] -- overwrite the existing resources of the depot
+        depot.IsSuppliesEnRoute = _depotdata["IsSuppliesEnRoute"] or false
       end
     end
   end
@@ -565,10 +566,15 @@ function KI.Loader.LoadData()
     local _dataTable = _data()
     
     if not _dataTable["Waypoints"] then
-      env.info("KI.Loader.LoadData ERROR - Data.Waypoints is nil")
-      return false
+      env.info("KI.Loader.LoadData WARNING - Data.Waypoints could not be found in file")
     else
       KI.Data.Waypoints = _dataTable["Waypoints"]
+    end
+    
+    if not _dataTable["Convoys"] then
+      env.info("KI.Loader.LoadData WARNING - Convoys could not be found in file")
+    else
+      KI.Data.Convoys = _dataTable["Convoys"] -- load the current TaskID saved in memory
     end
     
     -- spawn in ground units

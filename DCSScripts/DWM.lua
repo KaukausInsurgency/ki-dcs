@@ -12,6 +12,7 @@ DWM.Capacity = 0         -- the maximum capacity the warehouse can hold
 DWM.CurrentCapacity = 0
 DWM.IsSupplier = false   -- whether this depot can resupply other depots
 DWM.Suppliers = {}       -- list of suppliers
+DWM.IsSuppliesEnRoute = false    -- bool: whether an active convoy is already on route to supply the depot
 DWM.Position = {}
 
 function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
@@ -47,6 +48,7 @@ function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   self.CurrentCapacity = 0
   self.IsSupplier = isSupplier
   self.SupplyCheckRate = checkRate
+  self.IsSuppliesEnRoute = false
   
   return self
 end
@@ -157,12 +159,12 @@ function DWM:SpawnConvoy(Supplier)
   if not Supplier then return false end
   local _template = DWM.Config.ConvoyGroupTemplates[math.random(#DWM.Config.ConvoyGroupTemplates)]
   local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))
-                      :OnSpawnGroup(function( spawngrp, spawnzone, wpzone ) 
+                      :OnSpawnGroup(function( spawngrp, fromDepot, toDepot ) 
                           if DWM.Config.OnSpawnGroup then
                             env.info("DWM:SpawnConvoy - callback found")
-                            DWM.Config.OnSpawnGroup(spawngrp, spawnzone, wpzone)
+                            DWM.Config.OnSpawnGroup(spawngrp, fromDepot, toDepot)
                           end
-                      end, Supplier.Zone, self.Zone)
+                      end, Supplier, self)
                       
   local NewGroup = SpawnObj:SpawnInZone(Supplier.Zone, true)
   if NewGroup ~= nil then
@@ -216,6 +218,11 @@ function DWM:Resupply(stock)
     for res, p in pairs(self.Resources) do
       debugstring = debugstring .. res .. ":" .. tostring(p.cap * p.qty) .. ", "
     end
-    env.info("DWM:ResupplyTE - Iteration: " .. tostring(i) .. " Lowest: " .. resource.res .. " : " .. debugstring)
+    env.info("DWM:Resupply - Iteration: " .. tostring(i) .. " Lowest: " .. resource.res .. " : " .. debugstring)
+  end
+  
+  if DWM.Config.OnDepotResupplied then
+    env.info("DWM:Resupply - Callback found")
+    DWM.Config.OnDepotResupplied(self)
   end
 end

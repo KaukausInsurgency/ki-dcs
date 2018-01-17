@@ -9,8 +9,8 @@ DWM.Config = {}
 DWM.Config.ConvoyGroupTemplates = 
 {
   [1] = "LogisticConvoyTemplate1",
-  [2] = "LogisticConvoyTemplate2",
-  [3] = "LogisticConvoyTemplate3"
+  [2] = "LogisticConvoyTemplate2"
 }
 
-DWM.Config.OnSpawnGroup = nil
+DWM.Config.OnSpawnGroup = nil       -- passes arguments (moosegrp, fromDepot, toDepot)
+DWM.Config.OnDepotResupplied = nil  -- passes argument depot 

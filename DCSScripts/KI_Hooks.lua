@@ -7,6 +7,48 @@ end
 
 KI.Hooks = {}
 
+function KI.Hooks.DWMOnDepotResupplied(depot)
+  local success, result = xpcall(function()
+  
+    env.info("KI.Hooks.DWMOnDepotResupplied called")
+    
+    KI.Toolbox.MessageRedCoalition("A convoy has successfully reached and resupplied " .. depot.Name .. "!", 30)
+  end, function(err) env.info("KI.Hooks.DWMOnDepotResupplied - ERROR - " .. err) end)
+end
+
+function KI.Hooks.DWMOnSpawnGroup(moosegrp, fromdepot, todepot)
+  local success, result = xpcall(function()
+  
+    env.info("KI.Hooks.DWMOnSpawnGroup called")
+    
+    -- the reason we dont store a referene to the moosegrp object or the depot object is that this data is exported to file.
+    -- when it's exported the object is fragmented and methods lost, so when we read from file and respawn/reinit everything
+    -- we can search and match on group name and depot name
+    KI.Data.Convoys[moosegrp.GroupName] = 
+    {
+      DestinationDepotName = todepot.Name
+    }
+    
+    -- save the group name and waypoint information
+    -- need to flip the X, and Y values here, because Position flips them originally for website to location calculations to work
+    -- DCS requires the x and y values to be in their original position, so we are flipping them back
+    -- Note to self - find some way of standardizing this stuff as it's very confusing having to translate DCS coordinates for some reason
+    KI.Data.Waypoints[moosegrp.GroupName] = 
+    { 
+      x = todepot.Position.Y, 
+      y = todepot.Position.X, 
+      formation = "On Road",
+      speed = 60
+    }      
+    
+    todepot.IsSuppliesEnRoute = true  -- should update the reference in KI.Data.Depots
+    
+    moosegrp:TaskRouteToZone(todepot.Zone, false, 60, "On Road")
+      
+  end, function(err) env.info("KI.Hooks.DWMOnSpawnGroup - ERROR - " .. err) end)
+  
+end
+
 function KI.Hooks.AICOMOnSpawnGroup(moosegrp, spawntype, atkzone, grpconfig)
   local success, result = xpcall(function()
     
@@ -166,6 +208,11 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
     if parentAction == "Depot Management" then
       -- add to despawn queue
       --KI.DespawnQueue[actionResult:getName()] = { lastPosition = actionResult:getPoint(), inDepotZone = false, timesChecked = 0 }
+      
+      if actionName == "View Depot Contents" then
+        return
+      end
+      
       env.info("SLC.Config.PostOnRadioAction - adding Depot item to GC Queue")
       
       local gc_item = GCItem:New(actionResult:getName(), 

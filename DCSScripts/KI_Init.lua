@@ -16,7 +16,22 @@ function KI.Init.Depots()
     env.info("KI.InitDepotZones - looping through static objects (" .. n .. ")")
     if string.match(n, "Depot") then
       env.info("KI.InitDepotZones - found Depot object - initializing")
-      local _depot = DWM:New(n, n .. " Zone", 7200, 150, false)
+      
+      local IsSupplier = false
+      local Capacity = 400
+      for k = 1, #KI.Config.Depots do
+        local cdepot = KI.Config.Depots[k]
+        if cdepot.name == n then
+          env.info("KI.InitDepotZones - found match in KI.Config.Depots")
+          IsSupplier = cdepot.supplier
+          if IsSupplier then
+            Capacity = -1
+          end
+        end
+      end
+      
+      -- temporarily change depot size to 400 to test convoy resupply
+      local _depot = DWM:New(n, n .. " Zone", 7200, Capacity, IsSupplier)
       _depot:SetResource("Infantry", 40, 1)
       _depot:SetResource("APC", 8, 2)
       _depot:SetResource("Tank", 8, 3)

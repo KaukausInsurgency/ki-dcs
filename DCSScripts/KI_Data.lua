@@ -17,7 +17,7 @@ KI.Data =
   Waypoints = {},                     -- hash of ai ground waypoints
   UnitIDs = {},                       -- hash of unit IDs in format [tostring(unit.id_)] = DCS Unit Obj - used for slingload events scanning
   SideMissionGroundObjects = {},      -- list of group, static object names
-  Convoys = {}                        -- list of active logistic convoys
+  Convoys = {}                        -- hash of active logistic convoys
 }
 
 

@@ -77,7 +77,7 @@ local socket = require("socket")
 --initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
 
 -- load profiler
-assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
+--assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
 
 -- do a partial load of KI because we need access to certain data
 assert(loadfile(path .. "Spatial.lua"))()
@@ -142,6 +142,9 @@ local function StartKI()
   SLC.Config.PreOnRadioAction = KI.Hooks.SLCPreOnRadioAction
   SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
   AICOM.Config.OnSpawnGroup = KI.Hooks.AICOMOnSpawnGroup
+  DWM.Config.OnSpawnGroup = KI.Hooks.DWMOnSpawnGroup
+  DWM.Config.OnDepotResupplied = KI.Hooks.DWMOnDepotResupplied
+  
   --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
   GC.OnDespawn = KI.Hooks.GCOnDespawn
   KI.Init.Depots()
@@ -194,6 +197,28 @@ local function StartKI()
       return result
     end
   end, {}, timer.getTime() + KI.Config.SideMissionUpdateRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.CheckDepotSupplyLevels(args,t) end,
+                                   function(err) env.info("KI.Scheduled.CheckDepotSupplyLevels ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.DepotResupplyCheckRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.DepotResupplyCheckRate)
+  
+  
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.CheckConvoyCompletedRoute(args,t) end,
+                                   function(err) env.info("KI.Scheduled.CheckConvoyCompletedRoute ERROR : " .. err) end)
+    if not success then
+      return t + KI.Config.ResupplyConvoyCheckRate
+    else
+      return result
+    end
+  end, {}, timer.getTime() + KI.Config.ResupplyConvoyCheckRate)
   
   
   timer.scheduleFunction(function(args, t)

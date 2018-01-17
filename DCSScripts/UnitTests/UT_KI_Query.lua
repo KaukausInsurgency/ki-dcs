@@ -205,6 +205,23 @@ function()
     UT.TestCompare(function() return KI.Query.GetClosestSupplierDepot(nil, nil) == nil end)  
   end
   
+  -- KI.Query.FindDepotByName
+  if true then   
+    -- first prepare the KI.Data.Depots array for testing
+    KI.Data.Depots = {}
+    table.insert(KI.Data.Depots, DWM:New("Supplier 1", "Supplier 1 Zone", 7200, 150, true))
+    table.insert(KI.Data.Depots, DWM:New("Depot 1", "Depot 1 Zone", 7200, 150, false))
+    table.insert(KI.Data.Depots, DWM:New("Depot 2", "Depot 2 Zone", 7200, 150, false))
+    
+    -- should return Depot 1
+    local resultset = KI.Query.FindDepotByName("Depot 1")
+    UT.TestCompare(function() return resultset.Name == "Depot 1" end)
+    
+    local resultset2 = KI.Query.FindDepotByName()
+    -- should return nil
+    UT.TestCompare(function() return resultset2 == nil end)   
+  end
+  
 end,
 
 -- TearDown

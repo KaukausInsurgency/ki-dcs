@@ -273,6 +273,79 @@ function KI.Scheduled.CheckSideMissions(args, time)
 end
 
 
+function KI.Scheduled.CheckDepotSupplyLevels(args, time)
+  env.info("KI.Scheduled.CheckDepotSupplyLevels called")
+  local suppliers = KI.Query.GetDepots(true)
+  local depots = KI.Query.GetDepotsResupplyRequired(KI.Config.DepotMinCapacityToResupply)
+  
+  for i = 1, #depots do
+    local _d = depots[i]
+    local _stock = (_d.CurrentCapacity / _d.Capacity)
+    
+    env.info("KI.Scheduled.CheckDepotSupplyLevels - Depot " .. _d.Name 
+    .. " is requesting a resupply (Stock: " .. tostring(_stock) .. ", Config: " 
+    .. tostring(KI.Config.DepotMinCapacityToResupply) .. ")")
+    
+    local nearestSupplier = KI.Query.GetClosestSupplierDepot(suppliers, _d)
+    if nearestSupplier then    
+      env.info("KI.Scheduled.CheckDepotSupplyLevels - Found supplier " 
+      .. nearestSupplier.Name .. " for depot " .. _d.Name)
+      
+      if _d:SpawnConvoy(nearestSupplier) then    
+        env.info("KI.Scheduled.CheckDepotSupplyLevels - Successfully spawned convoy group at " 
+        .. nearestSupplier.Name .. " for depot " .. _d.Name)
+      else
+        env.info("KI.Scheduled.CheckDepotSupplyLevels ERROR - Failed to spawn convoy group at " 
+        .. nearestSupplier.Name .. " for depot " .. _d.Name)
+      end
+    else
+      env.info("KI.Scheduled.CheckDepotSupplyLevels ERROR - KI.Query.GetClosestSupplierDepot returned nil")
+    end
+  end
+  
+  return time + KI.Config.DepotResupplyCheckRate
+end
+
+function KI.Scheduled.CheckConvoyCompletedRoute(args, time)
+  env.info("KI.Scheduled.CheckConvoyCompletedRoute called")
+  local _keysToRemove = {}
+  for gname, o in pairs(KI.Data.Convoys) do
+    local _grp = GROUP:FindByName(gname)
+    local _depot = KI.Query.FindDepotByName(o.DestinationDepotName) 
+    if _grp ~= nil and _grp:IsAlive() and _depot ~= nil then   
+          
+      local _gPos = _grp:GetVec3()
+      local _dPos = _depot.Zone:GetVec3()
+      local _distance = Spatial.Distance(_dPos, _gPos)
+      env.info("KI.Scheduled.CheckConvoyCompletedRoute - Convoy " .. gname 
+      .. " is still alive (distance to depot: " .. tostring(_distance) .. ")")
+      if _distance <= KI.Config.ConvoyMinimumDistanceToDepot then
+        env.info("KI.Scheduled.CheckConvoyCompletedRoute - Convoy is resupplying depot")
+        _depot:Resupply(KI.Config.ResupplyConvoyAmount)
+        _depot.IsSuppliesEnRoute = false
+        table.insert(_keysToRemove, gname)
+        _grp:Destroy()
+      end
+   
+    elseif _depot == nil then
+      env.info("KI.Scheduled.CheckConvoyCompletedRoute ERROR - KI.Query.FindDepotByName returned nil (criteria: " .. gname .. ")")
+      table.insert(_keysToRemove, gname)
+    else
+      env.info("KI.Scheduled.CheckConvoyCompletedRoute - Convoy Group " .. gname .. " is dead - ignoring")
+      _depot.IsSuppliesEnRoute = false
+      KI.Toolbox.MessageRedCoalition("A convoy heading for " .. _depot.Name .. " has been destroyed!", 30)
+      table.insert(_keysToRemove, gname)
+    end -- end if group alive
+  end
+  
+  env.info("KI.Scheduled.CheckConvoyCompletedRoute - cleaning up hash")
+  for i = 1, #_keysToRemove do
+    KI.Data.Convoys[_keysToRemove[i]] = nil
+  end
+
+  return time + KI.Config.ResupplyConvoyCheckRate
+end
+
 function KI.Scheduled.DataTransmissionPlayers(args, time)
   env.info("KI.Scheduled.DataTransmissionPlayers called")
   

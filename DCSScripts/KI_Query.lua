@@ -147,7 +147,7 @@ function KI.Query.GetDepotsResupplyRequired(SupplyCapacity)
   local results = {}
   for i = 1, #KI.Data.Depots do
     local _d = KI.Data.Depots[i]
-    if not _d.IsSupplier and (_d.CurrentCapacity / _d.Capacity) <= SupplyCapacity then
+    if not _d.IsSupplier and not _d.IsSuppliesEnRoute and (_d.CurrentCapacity / _d.Capacity) <= SupplyCapacity then
       table.insert(results, _d)
     end
   end
@@ -160,7 +160,7 @@ function KI.Query.GetClosestSupplierDepot(Suppliers, Depot)
   if not Suppliers or not Depot then
     return nil
   end
-  local result = {}
+  local result = nil
   local _dist
   local _dpos = Depot.Object:getPoint()
   
@@ -176,4 +176,20 @@ function KI.Query.GetClosestSupplierDepot(Suppliers, Depot)
   end
   
   return result
+end
+
+function KI.Query.FindDepotByName(name)
+  env.info("KI.Query.FindDepotByName called")
+  if not name then
+    return nil
+  end
+  
+  for i = 1, #KI.Data.Depots do
+    local _d = KI.Data.Depots[i]
+    if _d.Name == name then
+      return _d
+    end
+  end
+  
+  return nil
 end
