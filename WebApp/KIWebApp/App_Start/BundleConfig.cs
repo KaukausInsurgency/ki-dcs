@@ -66,16 +66,16 @@ namespace KIWebApp
                         "~/Content/bootstrap.css",
                         "~/Content/bootstrap-theme.css"));
 
-            bundles.Add(new StyleBundle("~/Content/tooltipster").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/tooltipster").Include(
                         "~/Content/tooltipster/tooltipster.bundle.min.css"));
 
-            bundles.Add(new StyleBundle("~/Content/dynatable").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/dynatable").Include(
                 "~/Content/dynatable/jquery.dynatable.css"));
 
-            bundles.Add(new StyleBundle("~/Content/app").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/app").Include(
                 "~/Content/app/app.css"));
 
-            bundles.Add(new StyleBundle("~/Content/statistics").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/statistics").Include(
                 "~/Content/app/dashboard-overall.css"));
         }
     }
