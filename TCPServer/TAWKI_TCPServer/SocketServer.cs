@@ -38,6 +38,7 @@ namespace TAWKI_TCPServer
             _thread = new Thread(ManageSocket);
             _serversock = new Socket(SocketType.Stream, ProtocolType.Tcp);
             _serversock.ReceiveBufferSize = 256000;
+            _serversock.NoDelay = true;
             _request_size = req_size;
             _clients = new List<SocketClient>();
         }
