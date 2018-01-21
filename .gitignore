@@ -274,3 +274,8 @@ WebApp/KIWebApp/obj/Debug/KIWebApp.pdb
 WebApp/KIWebApp/obj/Debug/KIWebApp.csproj.FileListAbsolute.txt
 WebApp/KIWebApp.Tests/bin/Debug/KIWebApp.Tests.pdb
 WebApp/KIWebApp/Properties/PublishProfiles/FolderProfile.pubxml
+TCPServer/.vs/TAWKI_TCPServer/v15/.suo
+TCPServer/.vs/TAWKI_TCPServer/v15/Server/sqlite3/db.lock
+TCPServer/.vs/TAWKI_TCPServer/v15/Server/sqlite3/storage.ide
+WebApp/.vs/KIWebServer/v15/.suo
+WebApp/.vs/KIWebServer/v15/Server/sqlite3/storage.ide
