@@ -283,6 +283,7 @@ KIServer.LastOnFrameTimeInitCheck = 0
 KIServer.LastOnFrameTime = 0
 KIServer.LastOnFrameTimeBanCheck = 0
 KIServer.LastOnFrameTimeHeartbeat = 0
+KIServer.LastOnFrameTimeMissionRestart = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
 KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\GameEvents"
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the TCP Server call will fail
@@ -592,6 +593,9 @@ local function InitKIServerConfig()
     net.log("InitKIServerConfig() - Generating New Config file")
     KIServer.WriteToFileJSON(KIServer.ConfigFileDirectory, KIServer.Config)
   end
+  
+  -- this config is always the same value
+  KIServer.Config.MissionRestartCheckRate = 1
 end
 
 InitKIServerConfig()
@@ -1071,9 +1075,11 @@ KIHooks = {}
 KIHooks.Initialized = false
 KIHooks.FirstTimeInit = true
 KIHooks.RetryDBConnectionAttempts = 3
+KIHooks.Stop = false
+
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
-  if not KIServer.IsRunning() then 
+  if not KIServer.IsRunning() or KIHooks.Stop then 
     -- if the server was initialized at somepoint, but the game is no longer running, send a TCP request to end the current session
     if KIHooks.Initialized then
       net.log("KIHooks.onSimulationFrame - the Mission has ended - Ending Session and Processing message queue")
@@ -1100,6 +1106,7 @@ KIHooks.onSimulationFrame = function()
       KIServer.TCPSocket.Disconnect()
     end
     KIHooks.Initialized = false
+    KIHooks.Stop = false
     KIHooks.FirstTimeInit = true
     KIHooks.RetryDBConnectionAttempts = 3
     KIServer.LastOnFrameTime = 0
@@ -1125,6 +1132,7 @@ KIHooks.onSimulationFrame = function()
   -- onetime call to get serverID and SessionID from DB
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
   -- if the first call to initialize fails - we'll wait every few seconds before attempting it again
+  -- this prevents the game from locking up as these sockets do block on receive as this data is extremely important
   if DCS.getModelTime() > 0 and not KIHooks.Initialized and 
      (KIHooks.FirstTimeInit or ElapsedTimeInit >= KIServer.Config.InitCheckRate)
      and KIHooks.RetryDBConnectionAttempts > 0 then
@@ -1161,6 +1169,21 @@ KIHooks.onSimulationFrame = function()
     end
   end
   
+  -- check for mission restarts
+  local ElapsedTimeRestart = DCS.getModelTime() - KIServer.LastOnFrameTimeMissionRestart
+  if ElapsedTimeRestart >= KIServer.Config.MissionRestartCheckRate and KIHooks.Initialized then
+    KIServer.LastOnFrameTimeMissionRestart = DCS.getModelTime()
+    
+    -- when a mission restart happens, this simulation loop is frozen until the new mission is loaded, so we need to check if upon startup
+    -- if the flag is nil or 0, as thats our only way of knowing the mission was restarted
+    local _flag = KIServer.GetFlagValue(KIServer.Flag)
+    if _flag == KIServer.FlagValues.MISSION_RESTARTING or
+       _flag == nil or
+       _flag == 0 then
+      net.log("KIServer - detected mission restart")
+      KIHooks.Stop = true
+    end
+  end
   
   -- Mission Data
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime

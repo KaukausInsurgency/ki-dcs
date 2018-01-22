@@ -462,7 +462,7 @@ function KI.Hooks.GC_Crate_IsIdle(args)
       local _lastPos = args.LastPosition
       local _newPos = args.Object:getPoint()
 
-      -- check if in a depot zone
+      -- check if in a depot zone, depot zone idle time is far less than a crate in the wild
       local _depot = KI.Query.FindDepot_Static(args.Object)
       if _depot then
         env.info("KI.Hooks.GC_Crate_IsIdle - " .. args.Object:getName() .. " is inside depot zone " .. _depot.Name)
@@ -471,27 +471,36 @@ function KI.Hooks.GC_Crate_IsIdle(args)
         env.info("KI.Hooks.GC_Crate_IsIdle - " .. args.Object:getName() .. " is not inside a depot zone")
         args.Depot = nil
       end
-
-      -- if the distance is less than 5 metres increment count
-      if Spatial.Distance(_newPos, _lastPos) < 5 then
-        env.info("KI.Hooks.GC_Crate_Predicate - crate position has not changed since last check")
+      
+      -- need to see if there are any players nearby
+      local _isPlayerNear = false
+      local _punit, _pdistance = KI.Query.FindNearestPlayer_Static(args.Object)
+      
+      if _punit ~= nil and _pdistance < 50 then
+        _isPlayerNear = true
+      end
+      
+      -- compute crate distance
+      local crate_distance = Spatial.Distance(_newPos, _lastPos) 
+      
+      -- if the distance is less than 5 metres and no players are nearby, increment count
+      if crate_distance < 5 and not _isPlayerNear then
+        env.info("KI.Hooks.GC_Crate_Predicate - crate position has not changed since last check and no players nearby")
         if args.Depot then
           args.DepotIdleTime = args.DepotIdleTime + GC.LoopRate
         else
           args.DepotIdleTime = 0
         end
         return true
-      else
+      elseif crate_distance >= 5 then
         env.info("KI.Hooks.GC_Crate_Predicate - crate position has changed, resetting")
         args.LastPosition = _newPos
         args.WasMoved = true
-        local _punit, _pdistance = KI.Query.FindNearestPlayer_Static(args.Object)
+        
         if _punit then
           env.info("KI.Hooks.GC_Crate_Predicate - closest player found that changed crate")
           args.PlayerUnit = _punit -- assume that the closest player to the cargo is the one that is slingloading it / should get credit for resupply
           args.PlayerDistance = _pdistance
-        else
-          args.PlayerDistance = 51 -- hardcoding this value, we need this to be set when we check if the crate is expired
         end
         return false
       end
@@ -592,6 +601,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         KI.Scheduled.DataTransmissionPlayers({}, 0)
         KI.Scheduled.DataTransmissionGeneral({}, 0)
         KI.Scheduled.DataTransmissionGameEvents({}, 0)
+        trigger.action.setUserFlag("9000", 3) -- notify server mod that the mission has restarted
         return
       end
 
