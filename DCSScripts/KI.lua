@@ -63,7 +63,7 @@ end
 
 
 
-local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
+local path = ...
 local require = require
 local loadfile = loadfile
 
