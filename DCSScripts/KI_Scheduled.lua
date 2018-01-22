@@ -148,22 +148,19 @@ end
 function KI.Scheduled.UpdateCPStatus(arg, time)
   env.info("KI.Scheduled.UpdateCPStatus called")
   local _rGroups = coalition.getGroups(1, Group.Category.GROUND)
-  --local _rGroups = coalition.getGroups(1)
-  --env.info("KI.Scheduled.UpdateCPStatus - retrieved red ground units")
   local _bGroups = coalition.getGroups(2, Group.Category.GROUND)
-  --local _bGroups = coalition.getGroups(2)
-  --env.info("KI.Scheduled.UpdateCPStatus - retrieved blue ground units")
-  local _indicesToRemove = {}
-  --env.info("KI.Scheduled.UpdateCPStatus - Data.CapturePoints count: " .. tostring(#KI.Data.CapturePoints))
   for i = 1, #KI.Data.CapturePoints do
-    --env.info("KI.Scheduled.CaptureStatus looping for CP " .. KI.Data.CapturePoints[i].Name)
+    local _indicesToRemove = {}
     
     local _cp = KI.Data.CapturePoints[i]
     local _rcnt = 0
     local _bcnt = 0
     local _z = _cp.Zone
     local _slotsdisabled = false
+    
     -- arg is boolean indicating if this is a first time run of this function
+    -- on the very first call to UpdateCPStatus - set all slots to disabled
+    -- then let the function correct itself and open up any slots after counting all the units
     if (_cp.BlueUnits > 0 or _cp.RedUnits <= 0) and not arg then
       _slotsdisabled = true
     end
@@ -171,14 +168,11 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     
     -- loop through red groups
     for j = 1, #_rGroups do
-      --env.info("KI.Scheduled.CaptureStatus - looping through red groups")
-      --env.info("Group: " .. _rGroups[j]:getName())
       local _runits = _rGroups[j]:getUnits()
       local _inZone = false
       for k = 1, #_runits do
         local _rpos = _runits[k]:getPoint()
         if _z:IsVec3InZone(_rpos) then
-          --env.info("KI.Scheduled.CaptureStatus - found red unit inside CP " .. KI.Data.CapturePoints[i].Name)
           _rcnt = _rcnt + 1 -- increment counter for red
           _inZone = true
         end
@@ -189,22 +183,22 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     end
     
     -- remove red units that have already been found from future iterations
-    for j = 1, #_indicesToRemove do
-      --env.info("KI.Scheduled.CaptureStatus - removing found red units from future iterations")
+    -- this helps reduce the number of inner for loop iterations and optimizes the function
+    -- needs to be reverse for loop because each time you remove an item all the indexes are shifted down
+    -- so iterating from end to beginning makes the most sense here
+    for j = #_indicesToRemove, 1, -1 do
       table.remove(_rGroups, _indicesToRemove[j])
     end
 
+    -- empty out the array
     _indicesToRemove = {}
     
     for j = 1, #_bGroups do
-      --env.info("KI.Scheduled.CaptureStatus - looping through blu groups")
-      --env.info("Group: " .. _reds[j]:getName())
       local _bunits = _bGroups[j]:getUnits()
       local _inZone = false
       for k = 1, #_bunits do
         local _bpos = _bunits[k]:getPoint()
         if _z:IsVec3InZone(_bpos) then
-          env.info("KI.Scheduled.CaptureStatus - found blu unit inside CP " .. _cp.Name)
           _bcnt = _bcnt + 1 -- increment counter for red
           _inZone = true
         end
@@ -214,8 +208,11 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
       end
     end
     
-    for j = 1, #_indicesToRemove do
-      --env.info("KI.Scheduled.CaptureStatus - removing found blue units from future iterations")
+    -- remove blue units that have already been found from future iterations
+    -- this helps reduce the number of inner for loop iterations and optimizes the function
+    -- needs to be reverse for loop because each time you remove an item all the indexes are shifted down
+    -- so iterating from end to beginning makes the most sense here
+    for j = #_indicesToRemove, 1, -1 do
       table.remove(_bGroups, _indicesToRemove[j])
     end
     
