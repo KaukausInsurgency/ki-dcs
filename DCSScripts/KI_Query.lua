@@ -118,7 +118,7 @@ function KI.Query.FindNearestPlayer_Static(cargo)
       env.info("KI.Query.FindNearestPlayer_Static - OnlinePlayer object has no Unit - skipping")
     end
   end
-  return punit
+  return punit, pdistance
 end
 
 function KI.Query.GetDepots(IsSupplier) 
