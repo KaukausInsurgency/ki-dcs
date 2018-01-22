@@ -693,23 +693,13 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                              timer.getTime()) 
                   )
       return
-    elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
-      -- we track the unit the player is in for things like depot resupply scoring and zone capture
-      env.info("KI.Hooks.GameEventHandler - Player Enter Unit Raised")
-      if event.initiator == nil then
-        env.info("KI.Hooks.GameEventHandler - Player Enter Unit - initiator is nil")
-      elseif event.initiator.id_ == nil then
-        env.info("KI.Hooks.GameEventHandler - Player Enter Unit - initiator.id_ is nil")
-      end
-      
-      env.info("Player Enter Unit - initiator.id_ = " .. tostring(event.initiator.id_))
-      KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator
-    elseif event.id == world.event.S_EVENT_MISSION_START then
-    
+    -- elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
+    -- elseif event.id == world.event.S_EVENT_MISSION_START then
     elseif event.id == world.event.S_EVENT_BIRTH and playerName then
       -- Initialize any radio menu items for the player
       SLC.InitSLCForUnit(event.initiator:getName())
-      return
+      -- we track the unit the player is in for things like depot resupply scoring and zone capture
+      KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator
       
     --elseif event.id == world.event.S_EVENT_PLAYER_COMMENT  then
     elseif (event.id == KI.Defines.Event.KI_EVENT_TRANSPORT_DISMOUNT or 
@@ -748,9 +738,6 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                                              event, 
                                              timer.getTime()) 
                   )
-    
-    else
-      return
   	end
   end,
   function(err) env.info("KI.Hooks.GameEventHandler ERROR - " .. err) end)
