@@ -6,10 +6,10 @@ end
 KI.Config = {}
 
 -- Controls the maximum lifetime of a crate sitting idle at a depot until it is despawned
-KI.Config.CrateDespawnTime_Depot = 120
+KI.Config.CrateDespawnTime_Depot = KI.Toolbox.MinutesToSeconds(15)  
 
 -- Controls the maximum lifetime of a crate/troops sitting idle in the wild until it is despawned
-KI.Config.CrateDespawnTime_Wild = 300
+KI.Config.CrateDespawnTime_Wild = KI.Toolbox.MinutesToSeconds(30)  
 
 -- Controls the rate at which data transmissions are sent to the server mod
 KI.Config.DataTransmissionPlayerUpdateRate = 5        -- things like player data
@@ -20,7 +20,7 @@ KI.Config.DataTransmissionGeneralUpdateRate = 20      -- things like depot, and 
 KI.Config.RespawnTimeBeforeWaypointTasking = 20
 
 -- Controls the rate at which mission data is saved to file
-KI.Config.SaveMissionRate = 300
+KI.Config.SaveMissionRate = KI.Toolbox.MinutesToSeconds(5)
 
 -- Controls the rate at which all capture points are updated/managed by KI Engine
 KI.Config.CPUpdateRate = 15
@@ -29,22 +29,22 @@ KI.Config.CPUpdateRate = 15
 KI.Config.PlayerInZoneCheckRate = 3
 
 -- controls the rate at which side missions are generated and/or managed from the queue
-KI.Config.SideMissionUpdateRate = 120 
+KI.Config.SideMissionUpdateRate = KI.Toolbox.MinutesToSeconds(30)  
 
 -- adds a randomness increment time to the update rate each run through
-KI.Config.SideMissionUpdateRateRandom = 0 
+KI.Config.SideMissionUpdateRateRandom = KI.Toolbox.MinutesToSeconds(15)  
 
 -- controls the maximum amount of active side missions can run at a time
-KI.Config.SideMissionsMax = 3
+KI.Config.SideMissionsMax = 1
 
 -- controls the maximum amount of time a side mission can remain active
-KI.Config.SideMissionMaxTime =  120 --KI.Toolbox.HoursToSeconds(1)  
+KI.Config.SideMissionMaxTime = KI.Toolbox.HoursToSeconds(1)  
 
 -- controls when the side missions .destroy method is invoked after the mission has already ended
-KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(5) 
+KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(15) 
 
 -- parent folder of saved game files
-KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
+KI.Config.ParentFolder = "Missions\\KIAlpha\\"
 
 -- path to saved game file
 KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
@@ -64,16 +64,16 @@ KI.Config.SERVER_SESSION_RECEIVE_PORT = 6007  -- the port to listen for server s
 KI.Config.RespawnUnitWaypointDistance = 200
 
 -- Determines when a depot will request a convoy resupply - values range from 0 to 1. For 50% capacity use 0.5
-KI.Config.DepotMinCapacityToResupply = 0.5
+KI.Config.DepotMinCapacityToResupply = 0.6
 
 -- The number of units a convoy will resupply to a depot (distributing this amount equally among all items)
-KI.Config.ResupplyConvoyAmount = 25
+KI.Config.ResupplyConvoyAmount = 40
 
 -- Determines the rate at which depots are checked if they need to be resupplied
-KI.Config.DepotResupplyCheckRate = 60
+KI.Config.DepotResupplyCheckRate = KI.Toolbox.MinutesToSeconds(7) 
 
 -- Determines the rate at which active convoys are checked if alive or completed waypoint
-KI.Config.ResupplyConvoyCheckRate = 60
+KI.Config.ResupplyConvoyCheckRate = KI.Toolbox.MinutesToSeconds(2) 
 
 -- Determines when a convoy has reached a depot to resupply it 
 -- (this ideally should match KI.Config.RespawnUnitWaypointDistance because on respawn, if this value is less the respawned unit
@@ -96,8 +96,16 @@ KI.Config.CP =
     {
       "Beslan-Su25T-1",
       "Beslan-Su25T-2",
-      "Beslan-Su27-1",
-      "Beslan-Su27-2",
+      "Beslan-AJS37-1",
+      "Beslan-AJS37-2",
+	  "Beslan-A10C-1",
+	  "Beslan-A10C-2",
+	  "Beslan-A10A-1",
+	  "Beslan-A10A-2",
+	  "Beslan-AV8B-1",
+	  "Beslan-AV8B-2",
+	  "Beslan-F5E3-1",
+	  "Beslan-F5E3-2",
     } 
   },
   { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
@@ -105,17 +113,25 @@ KI.Config.CP =
     capacity = 30,
     slots =
     {
-      "Nalchik-Mig29-1",
-      "Nalchik-Mig29-2",
+      "Nalchik-Su25-1",
+      "Nalchik-Su25-2",
       "Nalchik-M2000C-1",
       "Nalchik-M2000C-2",
       "Nalchik-Mig21-1",
-      "Nalchik-Mig21-2"
+      "Nalchik-Mig21-2",
+	  "Nalchik-A10C-1",
+	  "Nalchik-A10C-2",
+	  "Nalchik-AJS37-1",
+	  "Nalchik-AJS37-2",
+	  "Nalchik-Su25T-1",
+	  "Nalchik-Su25T-2",
+	  "Nalchik-AV8B-1",
+	  "Nalchik-AV8B-2",
     } 
   },
   
   { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "FARP Skala Infantry Spawn", 
-    type = "FARP", text = "Tower Frequency - 127.500 MHz AM",
+    type = "FARP", text = "Tower Frequency - 133.500 MHz AM",
     capacity = 30,
     slots = 
     {
@@ -130,11 +146,15 @@ KI.Config.CP =
       "Skala-UH1H-1",
       "Skala-UH1H-2",
       "Skala-UH1H-3",
-      "Skala-UH1H-4"
+      "Skala-UH1H-4",
+	  "Skala-SA342L-1",
+	  "Skala-SA342L-2",
+	  "Skala-SA342M-1",
+	  "Skala-SA342M-2"
     }
   },
   { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone1 = "FARP Vetka Vehicle Spawn", spawnzone2 = "FARP Vetka Infantry Spawn",
-    type = "FARP", text = "Tower Frequency - 133.500 MHz AM",
+    type = "FARP", text = "Tower Frequency - 127.500 MHz AM",
     capacity = 30,
     slots = 
     {
@@ -149,14 +169,36 @@ KI.Config.CP =
       "Vetka-UH1H-1",
       "Vetka-UH1H-2",
       "Vetka-UH1H-3",
-      "Vetka-UH1H-4"
+      "Vetka-UH1H-4",
+	  "Vetka-SA342L-1",
+	  "Vetka-SA342L-2",
+	  "Vetka-SA342M-1",
+	  "Vetka-SA342M-2"
     }
   },
-  
-  
-  
-  { name = "Tskhinvali City", zone = "Tskhinvali City Zone", capacity = 30, spawnzone1 = "Tskhinvali City Spawn Zone", spawnzone2 = "Tskhinvali City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Java Village", zone = "Java Zone", capacity = 30, spawnzone1 = "Java Spawn Zone", spawnzone2 = "Java Spawn Zone", type = "CAPTUREPOINT"},
+  { name = "FARP Torba", zone = "FARP Torba Zone", spawnzone1 = nil, spawnzone2 = nil,
+    type = "FARP", text = "Tower Frequency - 129.000 MHz AM",
+    capacity = 30,
+    slots = 
+    {
+      "Torba-Ka50-1",
+      "Torba-Ka50-2",
+      "Torba-Ka50-3",
+      "Torba-Ka50-4",
+      "Torba-Mi8-1",
+      "Torba-Mi8-2",
+      "Torba-Mi8-3",
+      "Torba-Mi8-4",
+      "Torba-UH1H-1",
+      "Torba-UH1H-2",
+      "Torba-UH1H-3",
+      "Torba-UH1H-4",
+	  "Torba-SA342L-1",
+	  "Torba-SA342L-2",
+	  "Torba-SA342M-1",
+	  "Torba-SA342M-2"
+    }
+  },
   
   { name = "Kazbegi Village", zone = "Kazbegi Zone", capacity = 30, spawnzone1 = "Kazbegi Vehicle Spawn", spawnzone2 = "Kazbegi Infantry Spawn", type = "CAPTUREPOINT"},
   { name = "Garbani Village", zone = "Garbani Zone", capacity = 30, spawnzone1 = "Garbani Vehicle Spawn", spawnzone2 = "Garbani Infantry Spawn", type = "CAPTUREPOINT" },

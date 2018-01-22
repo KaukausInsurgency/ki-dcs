@@ -49,7 +49,26 @@ SLC.Config.PilotNames =
   "SLCPilot27",
   "SLCPilot28",
   "SLCPilot29",
-  "SLCPilot30"
+  "SLCPilot30",
+  "SLCPilot31",
+  "SLCPilot32",
+  "SLCPilot33",
+  "SLCPilot34",
+  "SLCPilot35",
+  "SLCPilot36",
+  "SLCPilot37",
+  "SLCPilot38",
+  "SLCPilot39",
+  "SLCPilot40",
+  "SLCPilot41",
+  "SLCPilot42",
+  "SLCPilot43",
+  "SLCPilot44",
+  "SLCPilot45",
+  "SLCPilot46",
+  "SLCPilot47",
+  "SLCPilot48",
+  "SLCPilot49",
 }
 
 SLC.Config.InfantryTransportingHelicopters =

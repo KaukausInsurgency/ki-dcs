@@ -63,7 +63,7 @@ end
 
 
 
-local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
+local path = ...
 local require = require
 local loadfile = loadfile
 
@@ -283,6 +283,16 @@ local function StartKI()
 
   world.addEventHandler(KI.Hooks.GameEventHandler)
   env.info("KI - World Event Handlers registered")
+  
+  
+  --[[ debug 
+  KI.Scheduled.CheckDepotSupplyLevels({},5)
+  KI.Scheduled.CheckSideMissions({},5)
+  KI.Scheduled.CheckDepotSupplyLevels({},5)
+  KI.Scheduled.CheckConvoyCompletedRoute({},5)
+  AICOM.DoTurn({},5)
+  -- end debug]]
+   
 end
 
 -- creating instances of this socket as we need to have this ready before the server Mod can send data

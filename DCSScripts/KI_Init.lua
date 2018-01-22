@@ -18,7 +18,7 @@ function KI.Init.Depots()
       env.info("KI.InitDepotZones - found Depot object - initializing")
       
       local IsSupplier = false
-      local Capacity = 400
+      local Capacity = 150
       for k = 1, #KI.Config.Depots do
         local cdepot = KI.Config.Depots[k]
         if cdepot.name == n then
