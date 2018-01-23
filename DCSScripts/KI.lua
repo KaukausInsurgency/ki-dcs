@@ -90,6 +90,13 @@ local function StartKI()
   KI.JSON = JSON
   -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
   KI.Null = -9999   
+  
+  -- function that forces a mission restart
+  KI.MissionRestart = function()
+    local _e = {}
+    _e.id = world.event.S_EVENT_MISSION_END
+    KI.Hooks.GameEventHandler:onEvent(_e)
+  end
 
   env.info("KI - Loading Scripts")
   

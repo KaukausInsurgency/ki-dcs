@@ -313,7 +313,7 @@ KIServer.FlagValues = {}
 KIServer.FlagValues.MISSION_READY_TO_RECEIVE = 1
 KIServer.FlagValues.MISSION_READY_TO_READ = 2
 KIServer.FlagValues.MISSION_RESTARTING = 3
-
+KIServer.FlagValues.SERVER_STOPPED = 4
 
 
 KIServer.Data = {}
@@ -595,7 +595,7 @@ local function InitKIServerConfig()
   end
   
   -- this config is always the same value
-  KIServer.Config.MissionRestartCheckRate = 1
+  KIServer.Config.MissionRestartCheckRate = 5
 end
 
 InitKIServerConfig()
@@ -1104,6 +1104,11 @@ KIHooks.onSimulationFrame = function()
       
       KIServer.RequestEndSession()
       KIServer.TCPSocket.Disconnect()
+	  
+  	  if KIHooks.Stop then
+    		-- notify the game that the server has completed the end session ritual and that the mission can safely restart
+    		KIServer.SetFlagValue(KIServer.Flag, KIServer.FlagValues.SERVER_STOPPED) 
+  	  end
     end
     KIHooks.Initialized = false
     KIHooks.Stop = false
@@ -1176,10 +1181,7 @@ KIHooks.onSimulationFrame = function()
     
     -- when a mission restart happens, this simulation loop is frozen until the new mission is loaded, so we need to check if upon startup
     -- if the flag is nil or 0, as thats our only way of knowing the mission was restarted
-    local _flag = KIServer.GetFlagValue(KIServer.Flag)
-    if _flag == KIServer.FlagValues.MISSION_RESTARTING or
-       _flag == nil or
-       _flag == 0 then
+    if KIServer.GetFlagValue(KIServer.Flag) == KIServer.FlagValues.MISSION_RESTARTING then
       net.log("KIServer - detected mission restart")
       KIHooks.Stop = true
     end
@@ -1600,7 +1602,6 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
         end
       
       end, function(err) net.log("KIHooks.onGameEvent() - ERROR - " .. err) end)
-      
     end
     
   end
