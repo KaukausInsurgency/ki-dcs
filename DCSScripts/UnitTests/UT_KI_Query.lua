@@ -113,8 +113,9 @@ function()
   
   -- testing FindNearestPlayer to Static
   if true then
-    UT.TestCompare(function() return KI.Query.FindNearestPlayer_Static(UT.TestData.testStaticInZone) ~= nil end)
-    UT.TestCompare(function() return KI.Query.FindNearestPlayer_Static(UT.TestData.testStaticInZone):getPlayerName() == Unit.getByName("SLCPilot1"):getPlayerName() end)
+    local _player, _dist = KI.Query.FindNearestPlayer_Static(UT.TestData.testStaticInZone)
+    UT.TestCompare(function() return _player:getPlayerName() == Unit.getByName("SLCPilot1"):getPlayerName() end)
+    UT.TestCompare(function() return _dist > 0 end)
   end
   
   -- KI.Query.GetDepots

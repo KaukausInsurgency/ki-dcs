@@ -6,6 +6,7 @@ end
 KI.Config = {}
 
 -- Controls the maximum lifetime of a crate sitting idle at a depot until it is despawned
+<<<<<<< HEAD
 KI.Config.CrateDespawnTime_Depot = KI.Toolbox.MinutesToSeconds(15)  
 
 -- Controls the maximum lifetime of a crate/troops sitting idle in the wild until it is despawned

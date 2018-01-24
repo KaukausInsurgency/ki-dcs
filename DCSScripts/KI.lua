@@ -90,6 +90,13 @@ local function StartKI()
   KI.JSON = JSON
   -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
   KI.Null = -9999   
+  
+  -- function that forces a mission restart
+  KI.MissionRestart = function()
+    local _e = {}
+    _e.id = world.event.S_EVENT_MISSION_END
+    KI.Hooks.GameEventHandler:onEvent(_e)
+  end
 
   env.info("KI - Loading Scripts")
   
@@ -307,7 +314,7 @@ env.info("KI - Waiting to receive signal from Server Mod")
 timer.scheduleFunction(function(args, t)
     env.info("KI - scheduledfunction (wait for Init Flag) called...")    
     
-    if trigger.misc.getUserFlag("9000") ~= 1 then
+    if trigger.misc.getUserFlag("9000") == 2 then
       env.info("KI - Received Signal from SERVER MOD - Initializing KI Mission")
       local _error = ""
       local ki_start_result = xpcall(function() return StartKI() end, function(err) _error = err end)

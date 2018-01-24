@@ -283,6 +283,7 @@ KIServer.LastOnFrameTimeInitCheck = 0
 KIServer.LastOnFrameTime = 0
 KIServer.LastOnFrameTimeBanCheck = 0
 KIServer.LastOnFrameTimeHeartbeat = 0
+KIServer.LastOnFrameTimeMissionRestart = 0
 KIServer.ConfigFileDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Server\\KIServerConfig.lua"
 KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\GameEvents"
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the TCP Server call will fail
@@ -312,7 +313,7 @@ KIServer.FlagValues = {}
 KIServer.FlagValues.MISSION_READY_TO_RECEIVE = 1
 KIServer.FlagValues.MISSION_READY_TO_READ = 2
 KIServer.FlagValues.MISSION_RESTARTING = 3
-
+KIServer.FlagValues.SERVER_STOPPED = 4
 
 
 KIServer.Data = {}
@@ -592,6 +593,9 @@ local function InitKIServerConfig()
     net.log("InitKIServerConfig() - Generating New Config file")
     KIServer.WriteToFileJSON(KIServer.ConfigFileDirectory, KIServer.Config)
   end
+  
+  -- this config is always the same value
+  KIServer.Config.MissionRestartCheckRate = 5
 end
 
 InitKIServerConfig()
@@ -1070,9 +1074,11 @@ KIHooks = {}
 KIHooks.Initialized = false
 KIHooks.FirstTimeInit = true
 KIHooks.RetryDBConnectionAttempts = 3
+KIHooks.Stop = false
+
 -- Main Loop for KIServer - data transmissions to TCP / DB, UDP / Mission Script, etc
 KIHooks.onSimulationFrame = function()
-  if not KIServer.IsRunning() then 
+  if not KIServer.IsRunning() or KIHooks.Stop then 
     -- if the server was initialized at somepoint, but the game is no longer running, send a TCP request to end the current session
     if KIHooks.Initialized then
       net.log("KIHooks.onSimulationFrame - the Mission has ended - Ending Session and Processing message queue")
@@ -1097,8 +1103,14 @@ KIHooks.onSimulationFrame = function()
       
       KIServer.RequestEndSession()
       KIServer.TCPSocket.Disconnect()
+	  
+  	  if KIHooks.Stop then
+    		-- notify the game that the server has completed the end session ritual and that the mission can safely restart
+    		KIServer.SetFlagValue(KIServer.Flag, KIServer.FlagValues.SERVER_STOPPED) 
+  	  end
     end
     KIHooks.Initialized = false
+    KIHooks.Stop = false
     KIHooks.FirstTimeInit = true
     KIHooks.RetryDBConnectionAttempts = 3
     KIServer.LastOnFrameTime = 0
@@ -1124,6 +1136,7 @@ KIHooks.onSimulationFrame = function()
   -- onetime call to get serverID and SessionID from DB
   -- if we successfully receive both - send immediate UDP response to Mission Server to notify 
   -- if the first call to initialize fails - we'll wait every few seconds before attempting it again
+  -- this prevents the game from locking up as these sockets do block on receive as this data is extremely important
   if DCS.getModelTime() > 0 and not KIHooks.Initialized and 
      (KIHooks.FirstTimeInit or ElapsedTimeInit >= KIServer.Config.InitCheckRate)
      and KIHooks.RetryDBConnectionAttempts > 0 then
@@ -1160,6 +1173,18 @@ KIHooks.onSimulationFrame = function()
     end
   end
   
+  -- check for mission restarts
+  local ElapsedTimeRestart = DCS.getModelTime() - KIServer.LastOnFrameTimeMissionRestart
+  if ElapsedTimeRestart >= KIServer.Config.MissionRestartCheckRate and KIHooks.Initialized then
+    KIServer.LastOnFrameTimeMissionRestart = DCS.getModelTime()
+    
+    -- when a mission restart happens, this simulation loop is frozen until the new mission is loaded, so we need to check if upon startup
+    -- if the flag is nil or 0, as thats our only way of knowing the mission was restarted
+    if KIServer.GetFlagValue(KIServer.Flag) == KIServer.FlagValues.MISSION_RESTARTING then
+      net.log("KIServer - detected mission restart")
+      KIHooks.Stop = true
+    end
+  end
   
   -- Mission Data
   local ElapsedTime = DCS.getModelTime() - KIServer.LastOnFrameTime
@@ -1576,7 +1601,6 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
         end
       
       end, function(err) net.log("KIHooks.onGameEvent() - ERROR - " .. err) end)
-      
     end
     
   end
