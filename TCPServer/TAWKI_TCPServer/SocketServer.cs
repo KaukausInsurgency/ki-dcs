@@ -129,14 +129,21 @@ namespace TAWKI_TCPServer
                     SocketClient client = new SocketClient(_serversock.EndAccept(ar), _request_size, _clients.Count);
                     
                     bool is_valid = false;
-                    foreach (string valid_ip in _whitelist_clients)
+
+                    if (_whitelist_clients != null)
                     {
-                        if (client.Address == valid_ip)
+                        foreach (string valid_ip in _whitelist_clients)
                         {
-                            is_valid = true;
-                            break;
+                            if (client.Address == valid_ip)
+                            {
+                                is_valid = true;
+                                break;
+                            }
                         }
                     }
+                    else
+                        is_valid = true;
+                    
 
                     if (!is_valid)
                     {
