@@ -856,6 +856,12 @@ KIServer.TCPSocket =
 
 function KIServer.TCPSocket.Connect()
   net.log("KIServer.TCPSocket.Connect called")
+  
+  -- if the socket handle is not nil, invoke close on it just in case it was still left open
+  if KIServer.TCPSocket.Object ~= nil then
+    KIServer.TCPSocket.Object:close()
+  end
+  
   -- start connection
   KIServer.TCPSocket.Object = socket.tcp()
   KIServer.TCPSocket.Object:settimeout(.0001)
