@@ -100,7 +100,7 @@ namespace KIWebApp.Classes
                 playerstats.PlayerName = dr.Field<string>("PlayerName");
                 playerstats.PlayerLives = dr.Field<int>("PlayerLives");
                 playerstats.PlayerBanned = dr.Field<ulong>("PlayerBanned") == 1;  // for some reason MySql treats BIT(1) as ulong
-                playerstats.TotalGameTime = totaltime;
+                playerstats.TotalGameTime = (int)(totaltime.TotalHours) + ":" + totaltime.ToString(@"mm\:ss");
                 playerstats.TakeOffs = dr.Field<int>("TakeOffs");
                 playerstats.Landings = dr.Field<int>("Landings");
                 playerstats.SlingLoadHooks = dr.Field<int>("SlingLoadHooks");
