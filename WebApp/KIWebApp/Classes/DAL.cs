@@ -213,7 +213,11 @@ namespace KIWebApp.Classes
             if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
                 conn.Open();
 
-            GameMapModel map = new GameMapModel();
+            GameMapModel map = new GameMapModel
+            {
+                MapExists = false,
+                Layers = new List<MapLayerModel>()
+            };
             MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_GET_GAMEMAP)
             {
                 Connection = conn,
@@ -231,6 +235,7 @@ namespace KIWebApp.Classes
                 map.Resolution = new Resolution(dr.Field<double>("Width"), dr.Field<double>("Height"));
                 map.Ratio = dr.Field<double>("Ratio");
                 map.Layers = ((IDAL)this).GetMapLayers(dr.Field<int>("GameMapID"), ref conn);
+                map.MapExists = true;
                 break;
             }
             return map;

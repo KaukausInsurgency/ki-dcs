@@ -12,8 +12,8 @@
     }
 
     #viewport {
-        width: @(Model.Map.Resolution.Width)px;
-        height: @(Model.Map.Resolution.Height)px;
+        width: @(Model.Map.MapExists ? Model.Map.Resolution.Width : 800)px;
+        height: @(Model.Map.MapExists ? Model.Map.Resolution.Height : 450)px;
         cursor: move;
         overflow: hidden;
         border: 5px solid black;
@@ -87,12 +87,27 @@
 <div id="GameMap" style="position:relative">
     <div class="mapwrapper">
         <div id="viewport">
-            <div style="background: url(@Url.Content("~/" + Model.Map.ImagePath)) no-repeat; width: @(Model.Map.Resolution.Width)px; height: @(Model.Map.Resolution.Height)px;" class='map-layer'>
-                <!--top level map content goes here-->
-                <div class="mapcontent">
-                    <!--map content goes here-->
-                </div>
-            </div>
+            @{
+                if (Model.Map.MapExists)
+                {
+                    <div style="background: url(@Url.Content("~/" + Model.Map.ImagePath)) no-repeat; width: @(Model.Map.Resolution.Width)px; height: @(Model.Map.Resolution.Height)px;" class='map-layer'>
+                        <!--top level map content goes here-->
+                        <div class="mapcontent">
+                            <!--map content goes here-->
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div style="background: url(@Url.Content("~/Images/map/map-none-800x450.jpg")) no-repeat; width: 800px; height: 450px;" class='map-layer'>
+                        <!--top level map content goes here-->
+                        <div class="mapcontent">
+                            <!--map content goes here-->
+                        </div>
+                    </div>
+                }
+            }
+            
             @foreach (var item in @Model.Map.Layers)
             {
                 string h = item.Resolution.Height + "px";

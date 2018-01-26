@@ -1,5 +1,13 @@
 ﻿$(document).ready(function () {
 
+    if (!model.Map.MapExists)
+    {
+        var headingcontent = $("<h2>Server: " + model.ServerName + "</h2></br><h><b>Status: " + model.Status + "</b></h></br><h><b>Restarts In: " + model.RestartTime +
+                                "</b></h></br><h><b>Warning: No map was found for this server</b></h>");
+        $("#Heading").append(headingcontent);
+        return;
+    }
+
     // async sleep function
     function Sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
