@@ -93,80 +93,82 @@
         clear: both;
     }
 
-.dash-header {
-    line-height: 12px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 10px;
-}
+    .dash-header {
+        line-height: 12px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-left: 10px;
+    }
 
-.dash-header-large-font {
-    font-size: 22px;
-    font-weight: bold;
-    color: #333333;
-}
+    .dash-header-large-font {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333333;
+    }
 
-.dash-header-small-font {
-    font-size: 10px;
-    color: #808080;
-}
+    .dash-header-small-font {
+        font-size: 10px;
+        color: #808080;
+    }
 
-.dark-gray-font {
-    color: #333333;
-}
+    .dark-gray-font {
+        color: #333333;
+    }
 
-hr {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(67, 67, 72, 0.75), rgba(0, 0, 0, 0));
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-    background-color: #f1f2f4;
-}
+    hr {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(67, 67, 72, 0.75), rgba(0, 0, 0, 0));
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+        background-color: #f1f2f4;
+    }
 
-h2 {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-}
+    h2 {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
 
-h3 {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-}
+    h3 {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        font-size: 19px !important;
+    }
 
 
-.linechart {
-    width: 50%;
-    float: left;
-    position: relative;
-    height: 300px;
-    margin: 0 auto;
-}
 
-.piechart {
-    width: 50%;
-    float: left;
-    position: relative;
-    height: 200px;
-    margin: 0 auto;
-}
+    .linechart {
+        width: 50%;
+        float: left;
+        position: relative;
+        height: 300px;
+        margin: 0 auto;
+    }
 
-.dash-main-title {
-    margin-bottom: 5px;
-}
+    .piechart {
+        width: 50%;
+        float: left;
+        position: relative;
+        height: 200px;
+        margin: 0 auto;
+    }
 
-.dash-sub-title {
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
+    .dash-main-title {
+        margin-bottom: 5px;
+    }
 
-.dash-background-color {
-    background-color: #F6F8F9;
-}
+    .dash-sub-title {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
 
-/*
+    .dash-background-color {
+        background-color: #F6F8F9;
+    }
+
+    /*
 .dash-background-lighter-color {
     background-color: #f1f2f4;
 }
