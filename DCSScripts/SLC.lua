@@ -475,7 +475,7 @@ function SLC.PerformAction(action, actionName, parentAction, transportGroup, pil
   env.info("SLC.PerformAction called")
   -- verify that pilot is on ground
   local u = transportGroup:GetDCSUnit(1)
-  if SLC.InAir(u) then
+  if SLC.InAir(u) and actionName ~= "Check Cargo" then
     local _groupID = transportGroup:GetDCSObject():getID()
     trigger.action.outTextForGroup(_groupID, "SLC - You must be landed in order to perform an action", 10, false)
   else
