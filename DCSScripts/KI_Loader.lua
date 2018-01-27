@@ -364,7 +364,7 @@ function KI.Loader.ImportSLC(data)
     local _grp = GROUP:FindByName(_slc["Group"]["GroupName"])
     if (_grp ~= nil) then
       env.info("KI.Loader.ImportSLC - Adding SLC Infantry Instance " .. _slc["Group"]["GroupName"])
-      SLC.AddInfantryInstance(_grp, _slc["SpawnTemplate"], _slc["SpawnName"])
+      SLC.AddInfantryInstance(_grp, _slc["SpawnTemplate"], _slc["SpawnName"], _slc["MenuName"], _grp:GetSize())
     else
       env.info("KI.Loader.ImportSLC - ERROR could not find SLC Infantry Instance " .. _slc["Group"]["GroupName"])
     end

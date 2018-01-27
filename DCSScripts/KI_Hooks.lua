@@ -168,14 +168,15 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
         end
 
         local _cp = KI.Query.FindCP_Group(transGroup)
+        local _grp = SLC.TransportInstances[pilotname]
         -- if the pilot has troops already loaded and not in capture point, disallow
-        if not _cp and SLC.TransportInstances[pilotname] then
+        if not _cp and _grp then
           env.info("SLC.Config.PreOnRadioAction - Troop Deployment cannot be called outside of a capture zone")
           trigger.action.outTextForGroup(_groupID, "SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 15, false)
           return false
-        elseif _cp and SLC.TransportInstances[pilotname] then
+        elseif _cp and _grp then
           env.info("SLC.Config.PreOnRadioAction - Troop Deployment is valid and inside a capture zone")
-          local result, msg = _cp:Fortify("Infantry")
+          local result, msg = _cp:Fortify("Infantry", _grp.Size)
           trigger.action.outTextForGroup(_groupID, msg, 15, false)
           return result
         else

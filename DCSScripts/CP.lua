@@ -47,15 +47,16 @@ function CP:New(name, zone, type, spawnzone1, spawnzone2, text)
   return self
 end
 
-function CP:Fortify(resource)
+function CP:Fortify(resource, val)
   env.info("CP.Fortify called")
+  val = val or 1
   local msg = ""
   local result = false
-  
-  if self.RedUnits < self.MaxCapacity then
+  local newtotal = self.RedUnits + val
+  if newtotal < self.MaxCapacity then
     env.info("CP:Fortify - CP has enough capacity to accept this fortification")
     result = true
-    msg = self.Name .. " fortified with " .. resource .. "! (Capacity: " .. tostring(self.RedUnits) .. " / " .. tostring(self.MaxCapacity) .. ")"
+    msg = self.Name .. " fortified with " .. resource .. "! (Capacity: " .. tostring(newtotal) .. " / " .. tostring(self.MaxCapacity) .. ")"
   else
     msg = "Capture Point cannot be fortified any further! (Capacity: " .. tostring(self.RedUnits) .. " / " .. tostring(self.MaxCapacity) .. ")"
   end

@@ -31,8 +31,8 @@ end
 
 
 -- Add Infantry Instance to InfantryInstances table
-function SLC.AddInfantryInstance(g, st, sn, mn)
-  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn, MenuName = mn })
+function SLC.AddInfantryInstance(g, st, sn, mn, s)
+  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn, MenuName = mn, Size = s })
 end
 
 
@@ -152,7 +152,15 @@ function SLC.GetNearbyInfantryGroups(groupTransport)
       env.info("SLC.GetNearbyInfantryGroups distance : " .. tostring(distance) .. " metres")
       if distance < SLC.Config.CrateQueryDistance and not inf.Group:InAir() then
         env.info("SLC.GetNearbyInfantryGroups - infantry is inside query distance - adding to results")
-        table.insert(inf_results, { Group = inf.Group, SpawnTemplate = inf.SpawnTemplate, SpawnName = inf.SpawnName, MenuName = inf.MenuName, Distance = distance })
+        table.insert(inf_results, 
+          { 
+            Group = inf.Group, 
+            SpawnTemplate = inf.SpawnTemplate, 
+            SpawnName = inf.SpawnName, 
+            MenuName = inf.MenuName, 
+            Size = inf.Size,
+            Distance = distance 
+          })
       else
         env.info("SLC.GetNearbyInfantryGroups - infantry is outside query distance - ignore")
       end
@@ -261,7 +269,7 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   --env.info("SLC.SpawnGroup spVec3 (x = " .. tostring(spawnpos.x) .. ", y = " .. tostring(spawnpos.y) .. ", z = " .. tostring(spawnpos.z) .. ")")
   local NewGroup = SpawnVeh:SpawnFromVec3(spawnpos)
   -- add to map of infantry instances
-  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName)
+  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName, NewGroup:GetSize())
   env.info("SLC.Infantry Spawned as Group " .. NewGroup.GroupName)
   local _groupID = g:GetDCSObject():getID()
   trigger.action.outTextForGroup(_groupID, "SLC - Infantry has been spawned at your 12 O'clock position", 10, false)
@@ -386,7 +394,7 @@ function SLC.UnloadTroops(g, p)
   local NewGroup = SpawnVeh:SpawnFromVec3(pos, SLC.IncrementSpawnID())
   
   env.info("SLC.UnloadTroops - spawned unloaded group " .. NewGroup.GroupName .. " - adding to instance map")
-  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName)
+  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName, NewGroup:GetSize())
   env.info("SLC.UnloadTroops - removing TransportInstance for " .. p)
   SLC.TransportInstances[p] = nil
   local _groupID = g:GetDCSObject():getID()
