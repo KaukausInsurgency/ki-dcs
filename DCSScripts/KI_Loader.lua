@@ -51,11 +51,13 @@ end
 -- Generates table that DCS spawn group expects
 function KI.Loader.GenerateGroupTable(groupObj, hidden)
   env.info("KI.Loader.GenerateGroupTable called")
-  hidden = hidden or true
+  if hidden == nil then 
+    hidden = true
+  end
   local unitData = KI.Loader.GenerateUnitsTable(groupObj.Units)
   local groupData = 
   {
-    ["visible"] = false,
+    ["visible"] = not hidden,
     ["taskSelected"] = true,
     ["route"] = {},
     --["groupId"] = groupObj.ID,        -- is an optional parameter, and may be interfering with group spawning
@@ -229,7 +231,12 @@ function KI.Loader.ImportCoalitionGroups(data)
     
     -- check if the group has size > 0 and ignore if it does
     if _g["Size"] > 0 and #_g["Units"] > 0 and not IsSideMissionObject then
-      local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g, false))
+      -- hide the group on the map if blue coalition
+      local _hidden = _g["Coalition"] ~= 1
+      if not _hidden then
+        env.info("KI.Loader.ImportCoalitionGroups Group " .. _g["Name"] .. " is not hidden")
+      end
+      local _newg = coalition.addGroup(_g["Country"], _g["Category"], KI.Loader.GenerateGroupTable(_g, _hidden))
       -- if the group is spawned successfully
       if _newg ~= nil then
         env.info("KI.Loader.ImportCoalitionGroups Newly Spawned Group created -- " .. _newg:getName())
