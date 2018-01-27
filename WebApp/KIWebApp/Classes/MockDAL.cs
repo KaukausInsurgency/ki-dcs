@@ -534,5 +534,15 @@ APC|8
         {
             throw new NotImplementedException();
         }
+
+        ServerViewModel IDAL.GetServerInfo(int serverID)
+        {
+            throw new NotImplementedException();
+        }
+
+        ServerViewModel IDAL.GetServerInfo(int serverID, ref MySqlConnection conn)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

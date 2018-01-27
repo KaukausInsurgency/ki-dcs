@@ -258,6 +258,7 @@
     <Compile Include="Models\SearchModel.cs" />
     <Compile Include="Models\SearchResultsModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
+    <Compile Include="Models\ServerViewModel.cs" />
     <Compile Include="Models\SideMissionModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singletons\GLOBAL.cs" />
@@ -376,6 +377,7 @@
     <Content Include="Images\role\role-mig21-30x30.png" />
     <Content Include="Images\role\role-mig29-30x30.png" />
     <Content Include="Images\role\role-none-30x30.png" />
+    <Content Include="Images\role\role-spectator-30x30.png" />
     <Content Include="Images\role\role-su25-30x30.png" />
     <Content Include="Images\role\role-su27-30x30.png" />
     <Content Include="Images\role\role-uh1h-30x30.png" />

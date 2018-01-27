@@ -21,6 +21,7 @@ namespace KIWebApp.Classes
         private const string SP_GET_SIDEMISSIONS = "websp_GetSideMissions";
         private const string SP_SEARCH_PLAYERS = "websp_SearchPlayers";
         private const string SP_SEARCH_SERVERS = "websp_SearchServers";
+        private const string SP_GET_SERVER_INFO = "websp_GetServerInfo";
         private string _DBConnection;
        
         public DAL()
@@ -585,6 +586,56 @@ namespace KIWebApp.Classes
             }
 
             return results;
+        }
+
+        ServerViewModel IDAL.GetServerInfo(int serverID)
+        {
+            MySqlConnection conn = new MySqlConnection(_DBConnection);
+            try
+            {
+                conn.Open();
+                return ((IDAL)this).GetServerInfo(serverID, ref conn);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        ServerViewModel IDAL.GetServerInfo(int serverID, ref MySqlConnection conn)
+        {
+            if (conn.State == ConnectionState.Closed || conn.State == ConnectionState.Broken)
+                conn.Open();
+
+            ServerViewModel s = new ServerViewModel();
+            MySqlCommand cmd = new MySql.Data.MySqlClient.MySqlCommand(SP_GET_SERVER_INFO)
+            {
+                Connection = conn,
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            cmd.Parameters.Add(new MySqlParameter("ServerID", serverID));
+            MySqlDataReader rdr = cmd.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(rdr);
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                TimeSpan rt;
+                if (dr["RestartTime"] == DBNull.Value || dr["RestartTime"] == null)
+                    rt = new TimeSpan(0, 0, 0);
+                else
+                    rt = new TimeSpan(TimeSpan.TicksPerSecond * dr.Field<int>("RestartTime"));
+
+                string status = "Offline";
+                if (dr["Status"] != DBNull.Value && dr["Status"] != null)
+                    status = dr.Field<string>("Status");
+
+                s.ServerID = serverID;
+                s.RestartTime = rt.ToString();
+                s.Status = status;
+                break;
+            }
+            return s;
         }
     }
 }

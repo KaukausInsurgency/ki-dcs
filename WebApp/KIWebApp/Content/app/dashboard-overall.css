@@ -70,6 +70,21 @@
     width: 2px;
 }
 
+.dash-columns-four {
+    float: left;
+    width: 25%;
+    position: relative;
+}
+
+    .dash-columns-four:after {
+        content: "";
+        position: absolute;
+        bottom: 20%;
+        left: 0;
+        height: 73%;
+        width: 2px;
+    }
+
 .dash-columns-three {
     float: left;
     width: 30%;
@@ -78,10 +93,10 @@
 
 
 .dash-row {
+    margin-top = 0;
     margin-left: 10%;
     margin-right: 10%;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     padding-top: 5px;
     padding-bottom: 5px;
 }
@@ -127,13 +142,13 @@
     }
 
     h2 {
-        margin-top: 0px !important;
-        margin-bottom: 0px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
 
     h3 {
-        margin-top: 0px !important;
-        margin-bottom: 0px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
         font-size: 19px !important;
     }
 
@@ -160,8 +175,8 @@
     }
 
     .dash-sub-title {
-        margin-top: 0px;
-        margin-bottom: 0px;
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
     .dash-background-color {
