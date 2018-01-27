@@ -711,6 +711,9 @@ function KI.Hooks.GameEventHandler:onEvent(event)
             event,
             timer.getTime())
         )
+        
+        -- if a helicopter died/left slot remove the cargo contents from the heli
+        SLC.TransportInstances[event.initiator:getName()] = nil
         return
       elseif (event.id == world.event.S_EVENT_REFUELING or
         event.id == world.event.S_EVENT_REFUELING_STOP) and playerName then
