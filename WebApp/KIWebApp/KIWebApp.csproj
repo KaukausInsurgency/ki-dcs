@@ -377,6 +377,7 @@
     <Content Include="Images\role\role-mig21-30x30.png" />
     <Content Include="Images\role\role-mig29-30x30.png" />
     <Content Include="Images\role\role-none-30x30.png" />
+    <Content Include="Images\role\role-sample-30x30.png" />
     <Content Include="Images\role\role-spectator-30x30.png" />
     <Content Include="Images\role\role-su25-30x30.png" />
     <Content Include="Images\role\role-su27-30x30.png" />
