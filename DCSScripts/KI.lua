@@ -5,12 +5,13 @@ end
 local function ValidateKIStart()
   local requiredModules =
   {
-    ["lfs"] = lfs,
-    ["io"] = io,
-    ["require"] = require,
-    ["loadfile"] = loadfile,
-    ["package.path"] = package.path,
-    ["package.cpath"] = package.cpath,
+    ["lfs"] = lfs ~= nil,
+    ["io"] = io ~= nil,
+    ["os"] = os ~= nil,
+    ["require"] = require ~= nil,
+    ["loadfile"] = loadfile ~= nil,
+    ["package.path"] = package.path ~= nil,
+    ["package.cpath"] = package.cpath ~= nil,
     ["JSON"] = "Scripts\\JSON.lua",
     ["Socket"] = "socket"
   }
@@ -31,17 +32,18 @@ local function ValidateKIStart()
       package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
       callSuccess, callResult = xpcall(function() return require(item) ~= nil end, errorHandler)
     else
-      callSuccess, callResult = xpcall(function() return item ~= nil end, errorHandler)
+      callSuccess, callResult = xpcall(function() return item end, errorHandler)
     end
-    
+
     if not callSuccess or not callResult then
       isValid = false
-      msg = msg .. "\t" .. key
+      msg = msg .. "\t" .. key .. ","
     end
   end
   
   if not isValid then
-    env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing:\n" .. msg)
+    env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing: " .. msg)
+    env.info("KI - Please review MissionScripting.lua as important modules have been sanitized.")
     return false
   else
     env.info("KI - STARTUP VALIDATION COMPLETE")
@@ -52,7 +54,8 @@ local function ValidateKIStart()
 end
 
 if not ValidateKIStart() then
-  KI.Toolbox.MessageRedCoalition("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300)
+  trigger.action.outTextForCoalition(1, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
+  trigger.action.outTextForCoalition(2, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
   return false
 end
 
