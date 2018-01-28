@@ -119,13 +119,17 @@ namespace KIWebApp.Classes
 
             foreach (DataRow dr in dt.Rows)
             {
+                int currentcap = dr.Field<int>("CurrentCapacity");
+                int cap = dr.Field<int>("Capacity");
+                // if the cap or currentcap are -1, these are marked as supplier depots with infinite resources
+                string capacity = (cap == -1 || currentcap == -1)? "Infinite" : (currentcap + " / " + cap);
                 DepotModel depot = new DepotModel
                 {
                     ID = dr.Field<int>("DepotID"),
                     Name = dr.Field<string>("Name"),
                     LatLong = dr.Field<string>("LatLong"),
                     MGRS = dr.Field<string>("MGRS"),
-                    Capacity = dr.Field<int>("CurrentCapacity") + " / " + dr.Field<int>("Capacity"),
+                    Capacity = capacity,
                     Status = dr.Field<string>("Status"),
                     StatusChanged = dr.Field<ulong>("StatusChanged") == 1,  // for some reason MySQL treats BIT(1) as ulong
                     Resources = dr.Field<string>("Resources"),

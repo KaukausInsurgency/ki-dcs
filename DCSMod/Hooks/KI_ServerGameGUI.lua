@@ -864,11 +864,11 @@ function KIServer.TCPSocket.Connect()
   
   -- start connection
   KIServer.TCPSocket.Object = socket.tcp()
-  KIServer.TCPSocket.Object:settimeout(.0001)
+  KIServer.TCPSocket.Object:settimeout(5)
   KIServer.TCPSocket.Object:setoption("tcp-nodelay", true)
   KIServer.TCPSocket.IsConnected = false
   local _r, _err = KIServer.TCPSocket.Object:connect(KIServer.Config.TCP_SERVER_IP, KIServer.Config.TCP_SERVER_PORT)
-  
+  KIServer.TCPSocket.Object:settimeout(.0001)
   if _r ~= 1 or _err then
     net.log("KIServer.TCPSocket.Connect - ERROR - Failed to connect to TCP Server (Reason: " .. _err .. ")")
     KIServer.TCPSocket.IsConnected = false
@@ -1566,8 +1566,9 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
         
         -- if the initiator is a player, try to find their OnlinePlayer record, and get the sortieID
         if _playerID >= 0 then
+          local _pidstr = tostring(_playerID)
           for pid, op in pairs(KIServer.Data.OnlinePlayers) do
-            if pid == _playerID then
+            if pid == _pidstr then
               _sortieID = op.SortieID
               break
             end

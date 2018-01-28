@@ -465,14 +465,21 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           table.insert(DepotSegments, {})
         end
       local _depot = KI.Data.Depots[i]
+      local _currentCapacity = _depot.CurrentCapacity
+      local _maxCapacity = _depot.Capacity
+      
+      if _depot.IsSupplier then
+        _currentCapacity = -1
+        _maxCapacity = -1
+      end
       local data = 
       { 
         ServerID = KI.Data.ServerID, 
         Name = _depot.Name,
         Status = "Online",
         ResourceString = _depot:GetResourceEncoded(),
-        CurrentCapacity = _depot.CurrentCapacity,
-        Capacity = _depot.Capacity,
+        CurrentCapacity = _currentCapacity,
+        Capacity = _maxCapacity,
         LatLong = _depot.Position.LatLong,
         MGRS = _depot.Position.MGRS,
         X = _depot.Position.X,
