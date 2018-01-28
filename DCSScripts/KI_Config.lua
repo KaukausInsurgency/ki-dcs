@@ -80,6 +80,12 @@ KI.Config.ResupplyConvoyCheckRate = 60
 -- will not be tasked with a move waypoint, causing the convoy to be stuck in a never completed state
 KI.Config.ConvoyMinimumDistanceToDepot = KI.Config.RespawnUnitWaypointDistance
 
+-- Determines whether F10 Map Markers will be rendered for all depot positions - true turns this on
+KI.Config.DisplayDepotMarkers = false
+
+-- Determines whether F10 Map Markers will be rendered for all capture point positions - true turns this on
+KI.Config.DisplayCapturePointMarkers = true 
+
 KI.Config.Depots =
 {
   { name = "Urvan Depot", supplier = true },

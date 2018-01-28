@@ -46,8 +46,13 @@ function KI.Init.Depots()
       _depot:SetResource("Outpost Pipes", 4, 3)
       _depot:SetResource("Outpost Wood", 4, 2)
       _depot:SetResource("Outpost Supplies", 4, 1)
-      table.insert(KI.Data.Depots, _depot)
+      table.insert(KI.Data.Depots, _depot)   
       env.info("KI.InitDepotZones - DWM Instance created for " .. n)
+      
+      if KI.Config.DisplayDepotMarkers then
+        env.info("KI.InitDepotZones - Creating F10 Map Marker")
+        trigger.action.markToAll(KI.IncrementMarkerID(), _depot.Name, _depot.Zone:GetVec3())
+      end
     end
   end
 end
@@ -60,8 +65,13 @@ function KI.Init.CapturePoints()
     local _cp = CP:New(ccp.name, ccp.zone, ccp.type, ccp.spawnzone1, ccp.spawnzone2, ccp.text)  
     _cp.Slots = ccp.slots
     _cp.MaxCapacity = ccp.capacity
-    table.insert(KI.Data.CapturePoints, _cp)
+    table.insert(KI.Data.CapturePoints, _cp)   
     env.info("KI.Init.CapturePoints - CP Instance created for " .. _cp.Name)
+    
+    if KI.Config.DisplayCapturePointMarkers then
+      env.info("KI.CapturePoints - Creating F10 Map Marker")
+      trigger.action.markToAll(KI.IncrementMarkerID(), _cp.Name, _cp.Zone:GetVec3())
+    end    
   end
 end
 
