@@ -22,6 +22,31 @@ function ConfigChecker.IsFunction(x)
   return type(x) == "function", "Must be type function!"
 end
 
+function ConfigChecker.IsStaticObject(x)
+  return StaticObject.getByName(x) ~= nil, "Static Object '" .. tostring(x) .. "' must exist!"
+end
+
+function ConfigChecker.IsZone(x)
+  return trigger.misc.getZone(x) ~= nil, "Zone '" .. tostring(x) .. "' must exist!"
+end
+
+function ConfigChecker.IsGroup(x)
+  return Group.getByName(x) ~= nil, "Group '" .. tostring(x) .. "' must exist!"
+end
+
+function ConfigChecker.AreZones(x)
+  local _msg = ""
+  local result = true
+  for i = 1, #x do
+    if trigger.misc.getZone(x[i]) == nil then
+      _msg = _msg .. "Zone '" .. tostring(x[i]) .. "' must exist!\n"
+      result = false
+    end
+  end
+  
+  return result, _msg
+end
+
 function ConfigChecker.IsNumberPositive(x)
   return x > 0, "Must be positive number!"
 end
@@ -134,22 +159,105 @@ function ConfigChecker.SetConfigValue(config, val)
   end      
 end
 
+function ConfigChecker.WriteFileArray(path, arr)
+  local _filehandle, _err = io.open(path, "w")
+  if _filehandle then
+    for i = 1, #arr do
+      _filehandle:write(arr[i], "\n")
+    end
+    _filehandle:flush()
+    _filehandle:close()
+    _filehandle = nil
+    return true
+  else
+    env.info("ConfigChecker.KIConfig Write To File ERROR: " .. _err)
+    return false
+  end
+end
 
 ConfigChecker.KIConfigDictionary = 
 {
+  { 
+    Name = "KI.Config.DataTransmissionPlayerUpdateRate", Default = 5, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings = 
+    {
+      function(x) return x < 3, "Low values can have a large impact on game and network performance." end,
+      function(x) return x > 10, "High values can have a large impact on player experience and waiting time to slot in." end
+    }
+  },
+  { 
+    Name = "KI.Config.DataTransmissionGameEventsUpdateRate", Default = 30, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings =
+    {
+      function(x) return x < 5, "Low values can have a large impact on game and network performance." end
+    }
+  },
+  { 
+    Name = "KI.Config.DataTransmissionGeneralUpdateRate", Default = 15, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings =
+    {
+      function(x) return x < 8, "Low values can have a large impact on game and network performance." end,
+      function(x) return x > 30, "High values cause significant delay between live map and in game status." end
+    }
+  },
+  { 
+    Name = "KI.Config.SaveMissionRate", Default = 300, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings = 
+    {
+      function(x) return x < 60, "Low values can have a significant impact on game performance" end
+    }
+  },
+  { 
+    Name = "KI.Config.CPUpdateRate", Default = 10, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}
+  },
+  { 
+    Name = "KI.Config.PlayerInZoneCheckRate", Default = 3, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings =
+    {
+      function(x) return x > 5, "High values will negatively effect the players experience when entering/leaving zones" end
+    }
+  },
+  { 
+    Name = "KI.Config.SideMissionUpdateRate", Default = 2700, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}
+  },
+  { 
+    Name = "KI.Config.SERVERMOD_RECEIVE_PORT", Default = 6005, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
+    Warnings = {ConfigChecker.IsReservedPort}
+  },
+  { 
+    Name = "KI.Config.SERVERMOD_SEND_TO_PORT", Default = 6006, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
+    Warnings = {ConfigChecker.IsReservedPort}
+  },
+  { 
+    Name = "KI.Config.SERVER_SESSION_RECEIVE_PORT", Default = 6007, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
+    Warnings = {ConfigChecker.IsReservedPort}
+  },
+  
+  
   { Name = "KI.Config.CrateDespawnTime_Depot", Default = 300, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.CrateDespawnTime_Wild", Default = 14400, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.DataTransmissionPlayerUpdateRate", Default = 5, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.DataTransmissionGameEventsUpdateRate", Default = 10, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.DataTransmissionGeneralUpdateRate", Default = 15, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.RespawnTimeBeforeWaypointTasking", Default = 20, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.SaveMissionRate", Default = 300, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.CPUpdateRate", Default = 10, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.PlayerInZoneCheckRate", Default = 3, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.SideMissionUpdateRate", Default = 2700, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
+  { Name = "KI.Config.CrateDespawnTime_Wild", Default = 14400, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}}, 
+  { Name = "KI.Config.RespawnTimeBeforeWaypointTasking", Default = 20, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}}, 
   { Name = "KI.Config.SideMissionUpdateRateRandom", Default = 900, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
   { Name = "KI.Config.SideMissionsMax", Default = 3, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
-  { Name = "KI.Config.SideMissionMaxTime", Default = 3600, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
+  
+  { 
+    Name = "KI.Config.SideMissionMaxTime", Default = 3600, 
+    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive},
+    Warnings =
+    {
+      function(x) return x < 1800, "Low values may make it impossible for players to complete the mission in any reasonable amount of time. Please consider using larger value." end
+    }
+  },
 
   { Name = "KI.Config.SideMissionsDestroyTime", Default = 600, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
   { Name = "KI.Config.ParentFolder", Default = "Missions\\\\Kaukasus Insurgency\\\\", 
@@ -176,22 +284,6 @@ ConfigChecker.KIConfigDictionary =
     Default = lfs.writedir() .. "Missions\\\\Kaukasus Insurgency\\\\SlingloadEvents", 
     Rules = {ConfigChecker.IsString, ConfigChecker.IsPath}
   },
-  
-  { 
-    Name = "KI.Config.SERVERMOD_RECEIVE_PORT", Default = 6005, 
-    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
-    Warnings = {ConfigChecker.IsReservedPort}
-  },
-  { 
-    Name = "KI.Config.SERVERMOD_SEND_TO_PORT", Default = 6006, 
-    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
-    Warnings = {ConfigChecker.IsReservedPort}
-  },
-  { 
-    Name = "KI.Config.SERVER_SESSION_RECEIVE_PORT", Default = 6007, 
-    Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive, ConfigChecker.IsPort},
-    Warnings = {ConfigChecker.IsReservedPort}
-  },
   { 
     Name = "KI.Config.RespawnUnitWaypointDistance", 
     Default = 200, 
@@ -204,8 +296,8 @@ ConfigChecker.KIConfigDictionary =
     Rules = {ConfigChecker.IsNumber, function(x) return x >= 0 and x <= 1, "Value must be between 0 and 1!" end},
     Warnings = 
     {
-      function(x) return x >= 0.81, "This may cause performance issues in multiplayer, we recommend reducing this value to at least 0.8" end,
-      function(x) return x >= 0 and x <= 0.05, "This is a very low value; resupply convoy may never be called for this depot" end
+      function(x) return x >= 0.81, "This may cause performance issues in multiplayer, we recommend reducing this value to at least 0.8." end,
+      function(x) return x >= 0 and x <= 0.05, "This is a very low value; resupply convoy may never be called for this depot." end
     }
   },
   { 
@@ -245,6 +337,10 @@ ConfigChecker.KIConfigDictionary =
           elseif not ConfigChecker.IsString(tt.name) then
             msg = msg .. "\n" .. "depot property 'name' must be type string!"
             result = false
+          elseif not ConfigChecker.IsStaticObject(tt.name) then
+            local _, _innerMsg = ConfigChecker.IsStaticObject(tt.name)
+            msg = msg .. "\n" .. _innerMsg
+            result = false
           elseif tt.supplier == nil then
             msg = msg .. "\n" .. "depot property 'supplier' cannot be nil!"
             result = false
@@ -254,7 +350,7 @@ ConfigChecker.KIConfigDictionary =
           end
         end
         
-        return result
+        return result, msg
       end  
     }
   },
@@ -304,7 +400,11 @@ ConfigChecker.KIConfigDictionary =
             result = false
           elseif not ConfigChecker.IsTable(tt.zones) then
             msg = msg .. "\n" .. "sidemission property 'zones' must be type table!"
-            result = false           
+            result = false    
+          elseif not ConfigChecker.AreZones(tt.zones) then
+            local _, _innerMsg = ConfigChecker.AreZones(tt.zones)
+            msg = msg .. "\n" .. _innerMsg
+            result = false    
           elseif tt.init == nil then
             msg = msg .. "\n" .. "sidemission property 'init' cannot be nil!"
             result = false
@@ -349,9 +449,11 @@ ConfigChecker.KIConfigDictionary =
             result = false
           end -- end if
           
+          
+          
         end -- end for
         
-        return result
+        return result, msg
       end,
     }
   },
@@ -364,8 +466,9 @@ ConfigChecker.KIConfigDictionary =
 -- since users may have multiple copies of a config, pass in a path here instead
 function ConfigChecker.KIConfig(path)
   env.info("ConfigChecker.KIConfig() called")
+  local filedata = {}
   local loadSuccess, config = xpcall(function() return assert(loadfile(path))() end, 
-                                     function(err) env.info("KI ConfigChecker - ERROR loading KI.Config - " .. err) end)
+                                     function(err) table.insert(filedata, "KI ConfigChecker - ERROR loading KI.Config - " .. err) end)
   local canrun = true
                     
   if loadSuccess then
@@ -376,16 +479,18 @@ function ConfigChecker.KIConfig(path)
       local _failed = false
       
       if _val == nil then
-        env.info("KI ConfigChecker - property " .. _config.Name .. " cannot be undefined!")
+        table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " cannot be undefined!")
         _failed = true
       else
       
         for r = 1, #_config.Rules do
           local _rule = _config.Rules[r]
           local _result, _msg = _rule(_val)
-          
+          if _msg == nil then
+            _msg = "Missing Message"
+          end
           if not _result then
-            env.info("KI ConfigChecker - property " .. _config.Name .. " " .. _msg)
+            table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " " .. _msg)
             _failed = true
             break
           end
@@ -398,13 +503,13 @@ function ConfigChecker.KIConfig(path)
       
         if _config.Default then
           if ConfigChecker.SetConfigValue(_config.Name, _config.Default) then
-            env.info("KI ConfigChecker - property " .. _config.Name .. " Defaulted to value " .. tostring(_config.Default))
+            table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " Defaulted to value " .. tostring(_config.Default))
           else
-            env.info("KI ConfigChecker - could not set default on property " .. _config.Name .. " - Aborting")
+            table.insert(filedata, "KI ConfigChecker - ERROR - could not set default on property " .. _config.Name .. " - Aborting")
             canrun = false
           end
         else
-          env.info("KI ConfigChecker - property " .. _config.Name .. " Cannot be defaulted to any value - Aborting")
+          table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " ERROR - Cannot be defaulted to any value - Aborting")
           canrun = false
         end
       
@@ -414,8 +519,8 @@ function ConfigChecker.KIConfig(path)
           for r = 1, #_config.Warnings do
             local _w = _config.Warnings[r]
             local _result, _msg = _w(_val)
-            if not _result then
-              env.info("KI ConfigChecker - property " .. _config.Name .. " WARNING - " .. _msg)
+            if _result then
+              table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " WARNING - " .. _msg)
             end
           end
         end -- end if warnings
@@ -427,6 +532,10 @@ function ConfigChecker.KIConfig(path)
   else
     canrun = false
   end
+  
+  local _kiconfiglog = lfs.writedir() .. "Logs\\kiconfig.log"
+  
+  ConfigChecker.WriteFileArray(_kiconfiglog, filedata)
   
   return canrun
 end

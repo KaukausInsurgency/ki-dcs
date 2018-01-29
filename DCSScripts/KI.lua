@@ -83,8 +83,9 @@ assert(loadfile(path .. "KI_Toolbox.lua"))()
 assert(loadfile(path .. "ConfigChecker.lua"))()
 
 local kiconfigpath = path .. "KI_Config.lua"
+--local kiconfigpath = path .. "KI_Config_BrokenTest.lua"
 if not ConfigChecker.KIConfig(kiconfigpath) then
-  env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW PREVIOUS ERRORS")
+  env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW LOGS IN - " .. lfs.writedir() .. "Logs")
   return false
 end
 

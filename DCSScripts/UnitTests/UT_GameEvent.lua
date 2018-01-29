@@ -73,7 +73,6 @@ function()
     return UT.TestData.MockWeapon["Desc"]
   end
   function UT.TestData.MockWeapon.getCategory(me)
-    UT.Log("UT.TestData.MockWeapon.getCategory() - " .. tostring(UT.TestData.MockWeapon["Category"]))
     return UT.TestData.MockWeapon["Category"]
   end
 
@@ -137,6 +136,15 @@ function()
     subPlace = 0
   }
   
+  UT.TestData.EvtDeathSceneryMock = GenerateEventMock(world.event.S_EVENT_DEAD,
+  {
+    isExist = function() return true end,
+    destroy = function() return nil end,
+    getCategory = function() return "Building" end,
+    getName = function() return "Scenery 11AA3" end,
+    getTypeName = function() return "SCENERY" end
+  }, 1200)
+  
   KI.Data.OnlinePlayers = 
   { 
     { Name = "New callsign", UCID = "AAA", Role = "Ka-50", Lives = 5, Banned = false, SortieID = 1 }
@@ -146,7 +154,6 @@ function()
   
   if true then
     local ge = GameEvent.CreateGameEvent(1, 1, UT.TestData.EvtPlayerTakeoffMock, 1300)
-    UT.Log(KI.Toolbox.Dump(ge))
     UT.TestCompare(function() return ge ~= nil end)
     UT.TestCompare(function() return ge["SessionID"] == 1 end)
     UT.TestCompare(function() return ge["ServerID"] == 1 end)
@@ -215,8 +222,7 @@ function()
     UT.TestCompare(function() return ge["TargetName"] == "TestKIScoreEnemyAir1" end)
     UT.TestCompare(function() return ge["TargetModel"] == "Su-25T" end)
     UT.TestCompare(function() return ge["TargetType"] == "STRIKER" end)
-    --UT.Log("ge['TargetCategory'] == 'AIR' : " .. ge["TargetCategory"])
-    --UT.TestCompare(function() return ge["TargetCategory"] == "AIR" end)
+    UT.TestCompare(function() return ge["TargetCategory"] == "AIR" end)
     UT.TestCompare(function() return ge["TargetSide"] == 2 end)
     UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return ge["TargetPlayerUCID"] == KI.Null end)
@@ -241,8 +247,7 @@ function()
     UT.TestCompare(function() return ge["TargetName"] == "TestKIScoreEnemyGround1" end)
     UT.TestCompare(function() return ge["TargetModel"] == "T-55" end)
     UT.TestCompare(function() return ge["TargetType"] == "TANK" end)
-    --UT.Log("ge['TargetCategory'] == 'GROUND' : " .. ge["TargetCategory"])
-    --UT.TestCompare(function() return ge["TargetCategory"] == "GROUND" end)
+    UT.TestCompare(function() return ge["TargetCategory"] == "GROUND" end)
     UT.TestCompare(function() return ge["TargetSide"] == 2 end)
     UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return ge["TargetPlayerUCID"] == KI.Null end)
@@ -251,7 +256,6 @@ function()
 
   if true then
     local ge = GameEvent.CreateGameEvent(1,1,UT.TestData.EvtCargoDeathMock,1200)
-    UT.Log(KI.Toolbox.Dump(ge))
     UT.TestCompare(function() return ge["SessionID"] == 1 end)
     UT.TestCompare(function() return ge["ServerID"] == 1 end)
     UT.TestCompare(function() return ge["SortieID"] == KI.Null end)
@@ -273,6 +277,15 @@ function()
     UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return ge["TargetPlayerUCID"] == KI.Null end)
     UT.TestCompare(function() return ge["TargetPlayerName"] == KI.Null end)
+  end
+  
+  -- unit tests for bug #171 (Error when scenery object dies)
+  if true then
+    local ge = GameEvent.CreateGameEvent(1,1,UT.TestData.EvtDeathSceneryMock,1200)
+    UT.TestCompare(function() return ge["Event"] == "DEAD" end)
+    UT.TestCompare(function() return ge["PlayerName"] == "STATIC OBJECT" end)
+    UT.TestCompare(function() return ge["PlayerSide"] == 0 end)
+    UT.TestCompare(function() return ge["Role"] == "SCENERY" end)
   end
 
   -- Test Cases for Custom KI Events
