@@ -53,7 +53,7 @@ function CP:Fortify(resource, val)
   local msg = ""
   local result = false
   local newtotal = self.RedUnits + val
-  if newtotal < self.MaxCapacity then
+  if newtotal <= self.MaxCapacity then
     env.info("CP:Fortify - CP has enough capacity to accept this fortification")
     result = true
     msg = self.Name .. " fortified with " .. resource .. "! (Capacity: " .. tostring(newtotal) .. " / " .. tostring(self.MaxCapacity) .. ")"

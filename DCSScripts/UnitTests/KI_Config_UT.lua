@@ -56,6 +56,8 @@ KI.Config.DBServerIP = "192.168.1.254"
 -- Port Number of Database Server Connection
 KI.Config.DBServerPort = 9983
 
+KI.Config.Depots = {}
+
 -- configures capture points in mission
 KI.Config.CP =
 {

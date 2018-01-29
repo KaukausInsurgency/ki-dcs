@@ -94,8 +94,8 @@ end
 function UT.TestCompare(cmp)
   --local line = ""
   --line = debug.getinfo(1).currentline
-  
-  local _success, _result = xpcall(cmp, UT.ErrorHandler)
+  local errorstr = "NO ERROR"
+  local _success, _result = xpcall(cmp, function(err) errorstr = err end)
   -- debug.traceback()
   -- debug.getinfo(1, "n").name returns current function name
   -- debug.getinfo(2) returns calling function
@@ -103,7 +103,7 @@ function UT.TestCompare(cmp)
     --env.info("UT: PASS - " .. debug.getinfo(2, "n").name .. " - Line: " .. debug.getinfo(2).currentline)
     UT.Pass = UT.Pass + 1
   else
-    local m = "UT: FAILURE - ERROR - " .. UT.GetCaughtError() .. " - " .. debug.traceback("TestCompare TraceBack", 2)
+    local m = "UT: FAILURE - ERROR - " .. errorstr .. " - " .. debug.traceback("TestCompare TraceBack", 2)
     UT.Log(m)
     UT.Fail = UT.Fail + 1
   end

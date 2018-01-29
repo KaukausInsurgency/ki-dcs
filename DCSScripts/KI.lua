@@ -61,11 +61,6 @@ end
 
 
 
-
-
-
-
-
 local path = ...
 local require = require
 local loadfile = loadfile
@@ -82,10 +77,18 @@ local socket = require("socket")
 -- load profiler
 --assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
 
--- do a partial load of KI because we need access to certain data
+-- do a partial load of KI because we need access to certain modules
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
-assert(loadfile(path .. "KI_Config.lua"))()
+assert(loadfile(path .. "ConfigChecker.lua"))()
+
+local kiconfigpath = path .. "KI_Config.lua"
+if not ConfigChecker.KIConfig(kiconfigpath) then
+  env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW PREVIOUS ERRORS")
+  return false
+end
+
+
 
 local function StartKI()
   

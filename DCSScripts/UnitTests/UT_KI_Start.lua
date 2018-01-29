@@ -60,6 +60,7 @@ end
 local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 
 env.info("KI - Loading Files")
+assert(loadfile(path .. "ConfigChecker.lua"))()
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
 assert(loadfile(path .. "LOCPOS.lua"))()
@@ -87,23 +88,29 @@ assert(loadfile(path .. "AICOM.lua"))()
 KI.UTDATA = {}
 KI.Null = -9999
 
+local socket = require 'socket'
+
 env.info("KI - Loading Tests")
 
 assert(loadfile(path .. "UnitTests\\UT.lua"))()
 
 -- IMPLEMENTED UNIT TESTS
 assert(loadfile(path .. "UnitTests\\UT_DCS.lua"))()
+assert(loadfile(path .. "UnitTests\\UT_ConfigChecker.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_Spatial.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_LOCPOS.lua"))
 assert(loadfile(path .. "UnitTests\\UT_CP.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DSMT.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DWM.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GC.lua"))()
+socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_AICOM.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Query.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
+socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
+socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()

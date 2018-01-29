@@ -82,13 +82,13 @@ UT.TestCase("CP",
         _cp.MaxCapacity = 0
         UT.TestCompare(function() return _cp:Fortify("TestKey") == false end) -- should be false because cap is 0
         _cp.MaxCapacity = 1
+        _cp.RedUnits = 0
         UT.TestCompare(function() return _cp:Fortify("TestKey") == true end)   -- should be true
         _cp.RedUnits = 1
         UT.TestCompare(function() return _cp:Fortify("TestKey") == false end)  -- should be false because cap has been reached
         _cp.MaxCapacity = 10
         _cp.RedUnits = 5
         UT.TestCompare(function() return _cp:Fortify("TestKey", 5) == true end) -- should be 5 + 5 = 10 still in the limit
-        UT.TestCompare(function() return _cp.RedUnits == _cp.MaxCapacity end)
         
         -- testing ViewResources method
         UT.TestFunction(CP.ViewResources, _cp)
