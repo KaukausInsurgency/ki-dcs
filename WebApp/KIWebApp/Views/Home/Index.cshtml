@@ -10,16 +10,223 @@
         return cookieToken + ":" + formToken;                
     }
 }
+<hr/>
 
-<header>
-</header>
+<input id="antiForgeryToken" type="hidden" value="@GetAntiForgeryToken()" />
+<div id="home" class="content has-bg home" style="height: 647px;">
+    <div class="content-bg">
+        <img src="~/Images/bg/bg-home-1920x1080.jpg" alt="Home">
+    </div>
+    <div class="container home-content">
+        <h1>Kaukasus Insurgency</h1>
+        <h3>Distributed Multiplayer Dynamic Campaign</h3>
+    </div>
+    <br><br>
+</div>
 
-<div id="main-content">
-    <p class="error" data-bind="text: error"></p>
-    <input id="antiForgeryToken" type="hidden" value="@GetAntiForgeryToken()" />
+<div id="about" class="content" data-scrollview="true">
+    <!-- begin container -->
+    <div class="container fadeInDown contentAnimated finishAnimated" data-animation="true" data-animation-type="fadeInDown">
+        <h2 class="content-title">About Us</h2>
+        <p class="content-desc">
+            Kaukasus Insurgency is a fully customizable multiplayer campaign engine that gives server owners the possibility of hosting a dynamic campaign in DCS.
+        </p>
+        <!-- begin row -->
+        <div class="row">
+            <!-- begin col-4 -->
+            <div class="col-md-4 col-sm-6">
+                <!-- begin about -->
+                <div class="about">
+                    <h3>Features</h3>
+                    <p>
+                        <b>Customize the game the way you want</b> - KI is designed to work on any map, any area, with any number of strategic points on the map.
+                        
+                    </p>
+                    <p>
+                        <b>Create your own missions and tasks</b> - KI comes with a configurable interface for creating missions and tasks that are randomly selected and created.
+
+                    </p>
+                    <p>
+                        <b>Hosted Live Map and Stats</b> - we will host your live map on our website, and sync up player stats to the cloud.
+
+                    </p>
+                    <p>
+                        <b>Scripting Support</b> - KI supports custom scripting for your needs.
+                    </p>
+                </div>
+                <!-- end about -->
+            </div>
+            <!-- end col-4 -->
+            <!-- begin col-4 -->
+            <div class="col-md-4 col-sm-6">
+                <h3>What we need</h3>
+                <!-- begin about-author -->
+                <div class="about-author">
+                    <p>
+                        We are currently looking for web designers to design our site, and server admins interested in piloting the project.
+                    </p>
+                </div>
+                <!-- end about-author -->
+            </div>
+            <!-- end col-4 -->
+            <!-- begin col-4 -->
+            <div class="col-md-4 col-sm-12">
+                <h3>Donating</h3>
+                <!-- begin skills -->
+                <p>
+                    All forms of donations are appreciated while we continue working on this project.
+                    <br>Proceeds will go to hosting the data center and keeping the website up.
+                </p>
+                <!-- end skills -->
+            </div>
+            <!-- end col-4 -->
+        </div>
+        <!-- end row -->
+    </div>
+    <!-- end container -->
 </div>
 
 
 @section scripts {
     @Scripts.Render("~/bundles/knockout")
+    <style>
+
+        #body {
+            padding-top: 0px !important;
+        }
+
+        hr {
+            border: 0;
+            height: 15px !important;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(67, 67, 72, 0.75), rgba(0, 0, 0, 0));
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+            background-color: #f1f2f4;
+        }
+
+        .content {
+            padding: 60px 15px 75px
+        }
+
+            .content .content-title {
+                text-align: center;
+                position: relative;
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                margin-top: 0
+            }
+
+                .content .content-title:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    width: 40px;
+                    background: #242a30;
+                    height: 2px;
+                    bottom: 0;
+                    left: 50%;
+                    margin-left: -20px
+                }
+
+            .content .content-desc {
+                text-align: center;
+                margin-bottom: 60px;
+                color: #242a30
+            }
+
+            .content.has-bg {
+                padding-bottom: 60px;
+                overflow: hidden;
+                position: relative
+            }
+
+                .content.has-bg .content-bg {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    bottom: 0;
+                    right: 0;
+                }
+
+                    .content.has-bg .content-bg img {
+                        max-width: 100%
+                    }
+
+                .content.has-bg .content-title:after {
+                    background: #fff
+                }
+
+                .content.has-bg .content-bg:before {
+                    content: '';
+                    background: url(/Images/bg/bg-cover.png);
+                    position: absolute;
+                    opacity: 0.8;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                }
+
+                .content.has-bg .container {
+                    position: relative
+                }
+
+                    .content.has-bg .container .content-title {
+                        color: #fff
+                    }
+
+                    .content.has-bg .container .content-desc {
+                        color: rgba(255, 255, 255, .6)
+                    }
+
+                .content.has-bg h1, .content.has-bg h2, .content.has-bg h3, .content.has-bg h4, .content.has-bg h5, .content.has-bg h6 {
+                    color: #fff
+                }
+
+        .home {
+            padding: 0 !important;
+            color: #fff
+        }
+
+        .home-content {
+            z-index: 1020;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            color: #8F8E8E;
+            margin-top: -120px;
+            padding: 0 15px;
+            text-align: center
+        }
+
+            .home-content h1, .home-content h2, .home-content h3, .home-content h4 {
+                color: #fff;
+                margin: 0 0 30px;
+                font-weight: 300
+            }
+
+            .home-content h1 {
+                font-size: 64px;
+                font-weight: 600
+            }
+
+            .home-content h3 {
+                font-size: 32px
+            }
+
+            .home-content p {
+                margin-bottom: 60px
+            }
+
+            .home-content a:focus, .home-content a:hover {
+                color: #fff
+            }
+
+            .home-content .btn + .btn {
+                margin-left: 15px
+            }
+    </style>
 }

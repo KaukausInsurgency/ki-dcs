@@ -14,6 +14,7 @@ KI.Data =
   ServerID = KI.Null,
   GameEventFileID = 0,                -- unique file ID enumerator for game events
   TaskID = 0,                         -- unique ID for active side missions
+  MarkerID = 0,                       -- unique ID for each marker on the map
   Waypoints = {},                     -- hash of ai ground waypoints
   UnitIDs = {},                       -- hash of unit IDs in format [tostring(unit.id_)] = DCS Unit Obj - used for slingload events scanning
   SideMissionGroundObjects = {},      -- list of group, static object names
@@ -51,6 +52,13 @@ function KI.IncrementTaskID()
   KI.Data.TaskID = KI.Data.TaskID + 1
   env.info("KI.IncrementTaskID - New ID: " .. tostring(KI.Data.TaskID))
   return KI.Data.TaskID
+end
+
+function KI.IncrementMarkerID()
+  env.info("KI.IncrementMarkerID called")
+  KI.Data.MarkerID = KI.Data.MarkerID + 1
+  env.info("KI.IncrementMarkerID - New ID: " .. tostring(KI.Data.MarkerID))
+  return KI.Data.MarkerID
 end
 
 function KI.AddSideMissionObject(obj)

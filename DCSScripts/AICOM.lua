@@ -335,7 +335,7 @@ function AICOM._SpawnGroups(ConfigForces, CPObj)
                                 AICOM.Config.OnSpawnGroup(spawngrp, stype, atkzone, grpconfig)
                               end
                           end, "MOVING", CPObj.Zone, _grp)
-                          
+      SpawnObj.SpawnVisible = false -- hide red units from f10 map and Ka50 ABRIS
       local NewGroup = SpawnObj:SpawnInZone(spawnzone, true)
       if NewGroup ~= nil then
         env.info("AICOM._SpawnGroups - Successfully spawned group " .. _template .. " in zone " .. spawnzone:GetName())

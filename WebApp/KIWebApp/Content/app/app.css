@@ -40,6 +40,10 @@ body {
         border: 1px solid black;
     }
 
+    .table td {
+        vertical-align: baseline !important;
+    }
+
 
 .tooltipster-content {
     font-size: 10px !important;
@@ -77,7 +81,7 @@ body {
 }
 
 .navbar {
-    margin-bottom: 0px !important;
+    margin-bottom: -10px !important;
 }
 
 .navbar-default .navbar-nav > li > a {
@@ -101,4 +105,16 @@ body {
 .navbar-default .navbar-brand:focus, .navbar-default .navbar-brand:hover {
     color: #c2cfd6 !important;
     background-color: transparent;
+}
+
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:focus, .navbar-default .navbar-nav > .open > a:hover {
+    color: #555;
+    background-color: #777 !important;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .open > a {
+    background-image: none !important;
+    background-image: none !important;
+    background-image: none !important;
+    background-image: none !important;
 }

@@ -336,19 +336,19 @@ function()
                               string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC OutPost")
                             )
                           end)
-    --[[
+
     UT.TestCompare(function() return 
                             not (
                               string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC FuelTruck") and 
                               string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC FuelTruck")
                             )
                           end)
-      ]]
+
     -- crates should be destroyed
-    --UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)
-    --UT.TestCompare(function() return not UT.TestData.OutpostPipeCrateObject:isExist() end)
-    --UT.TestCompare(function() return not UT.TestData.OutpostSupplyCrateObject:isExist() end)
-    --UT.TestCompare(function() return not UT.TestData.OutpostWoodCrateObject:isExist() end)
+    UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)
+    UT.TestCompare(function() return not UT.TestData.OutpostPipeCrateObject:isExist() end)
+    UT.TestCompare(function() return not UT.TestData.OutpostSupplyCrateObject:isExist() end)
+    UT.TestCompare(function() return not UT.TestData.OutpostWoodCrateObject:isExist() end)
   end
   
   -- next test for SLC.Unpack - this time where there is cargo around the player, but no valid assemblies to spawn
@@ -359,7 +359,7 @@ function()
                                               "SLCPilot1", SLC.Config.ComponentTypes.OutpostSupplyCrate)
     
     -- this should be nil, as it should not be possible to unpack anything
-    --UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
+    UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
   end
   
   
@@ -368,8 +368,13 @@ function()
 
 end,
 function()
-  UT.TestData.SpawnedGroupA:Destroy()
-  UT.TestData.SpawnedGroupB:Destroy()
+  if UT.TestData.SpawnedGroupA then
+    UT.TestData.SpawnedGroupA:Destroy()
+  end
+  
+  if UT.TestData.SpawnedGroupB then
+    UT.TestData.SpawnedGroupB:Destroy()
+  end
   
   UT.TestData.FuelTruckCrateObject:destroy()
   

@@ -233,12 +233,10 @@ end,
       UT.TestCompare(function() return _sm.Life == 20 end)
       
       UT.TestFunction(DSMT._manage, _sm, 0)
-      --UT.TestCompare(function() UT.Log("Called this test compare fnc") return not _sm.Done end)
-      --UT.Log("_sm.Done type: " .. type(_sm.Done)) 
+      UT.TestCompare(function() return _sm.Done == true end)
       UT.TestCompare(function() return _sm.Life == 30 end)
-      UT.TestCompare(function() return _sm.Done == false end)
       
-      UT.TestFunction(DSMT._manage, _sm, 0)
+      -- UT.TestFunction(DSMT._manage, _sm, 0)
       UT.TestCompare(function() return UT.TestData.ON_TIMEOUT_CALLED end)
       UT.TestCompare(function() return _sm.Done == true end)
       UT.TestCompare(function() return _missionStatus == "TIMEOUT" end) -- mission status should be TIMEOUT

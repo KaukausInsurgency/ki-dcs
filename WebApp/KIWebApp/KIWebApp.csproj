@@ -258,6 +258,7 @@
     <Compile Include="Models\SearchModel.cs" />
     <Compile Include="Models\SearchResultsModel.cs" />
     <Compile Include="Models\ServerModel.cs" />
+    <Compile Include="Models\ServerViewModel.cs" />
     <Compile Include="Models\SideMissionModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singletons\GLOBAL.cs" />
@@ -339,7 +340,10 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="Images\bg\bg-cover.png" />
+    <Content Include="Images\bg\bg-home-1920x1080.jpg" />
     <Content Include="Images\icon-stats-256x256.png" />
+    <Content Include="Images\map\map-none-800x450.jpg" />
     <Content Include="Images\markers\airport-blue-200x200.png" />
     <Content Include="Images\markers\airport-contested-200x200.png" />
     <Content Include="Images\markers\airport-neutral-200x200.png" />
@@ -373,6 +377,8 @@
     <Content Include="Images\role\role-mig21-30x30.png" />
     <Content Include="Images\role\role-mig29-30x30.png" />
     <Content Include="Images\role\role-none-30x30.png" />
+    <Content Include="Images\role\role-sample-30x30.png" />
+    <Content Include="Images\role\role-spectator-30x30.png" />
     <Content Include="Images\role\role-su25-30x30.png" />
     <Content Include="Images\role\role-su27-30x30.png" />
     <Content Include="Images\role\role-uh1h-30x30.png" />
@@ -447,7 +453,9 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>

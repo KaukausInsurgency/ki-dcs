@@ -10,7 +10,7 @@ namespace KIWebApp.Models
         public string PlayerName { get; set; }
         public int PlayerLives { get; set; }
         public bool PlayerBanned { get; set; }
-        public TimeSpan TotalGameTime { get; set; }
+        public string TotalGameTime { get; set; }
         public int TakeOffs { get; set; }
         public int Landings { get; set; }
         public int SlingLoadHooks { get; set; }

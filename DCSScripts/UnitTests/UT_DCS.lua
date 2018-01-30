@@ -15,8 +15,23 @@ function()
   UT.TestCompare(function() return Unit.getByName("DCSHelo"):getCategory() == Unit.Category.HELICOPTER end)
   UT.TestCompare(function() return Unit.getByName("DCSStructure"):getCategory() == Unit.Category.STRUCTURE end)
   
-  UT.ValidateSetup(function() return not Unit.getByName("DCSLateActivationUnit"):isActive() end) 
+  UT.TestCompare(function() return not Unit.getByName("DCSLateActivationUnit"):isActive() end) 
+  UT.TestCompare(function() return Group.getByName("DCSLateActivationUnit") ~= nil end)
   
+  -- Client slots should be visible in Group.getByName
+  UT.TestCompare(function() return Group.getByName("DCSClientSlot") ~= nil end)
+  
+  if true then
+    local found = false
+    for i, gp in pairs(coalition.getGroups(2, 0)) do
+      if gp:getName() == "DCSClientSlot" then
+        found = true
+        break
+      end
+    end
+    
+    UT.TestCompare(function() return found end)
+  end 
   -- test airbase getByName works
   UT.TestCompare(function() return Airbase.getByName("Batumi") ~= nil end)
   

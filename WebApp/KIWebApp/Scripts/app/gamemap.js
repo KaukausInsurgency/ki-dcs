@@ -1,5 +1,12 @@
 ﻿$(document).ready(function () {
 
+    if (!MODEL.Map.MapExists)
+    {
+        var headingcontent = $("<h><b>Warning: No map was found for this server</b></h>");
+        $("#Heading").append(headingcontent);
+        return;
+    }
+
     // async sleep function
     function Sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -20,10 +27,10 @@
         if (timer) {
             window.clearInterval(timer);
             timer = null;
-        };
+        }
         marker.removeClass("animate");
         marker.toggleClass("animating");
-    };
+    }
 
     function IsStringEmptyOrWhitespace(str) {
         return str.length === 0 || !str.trim();
@@ -60,7 +67,7 @@
             else
             {
                 tr += '<tr>';
-                for (var j = 0; j < arraytable[i].length; j++) {
+                for (j = 0; j < arraytable[i].length; j++) {
                     tr += '<td style="width:' + cellwidth + '%">' + arraytable[i][j] + '</td>';
                 }
                 tr += '</tr>';
@@ -170,7 +177,7 @@
 
     function RenderCapturePointsFirstTime(modelObj, rootImgPath)
     {
-        $(model.CapturePoints).each(function (i) {
+        $(modelObj.CapturePoints).each(function (i) {
             var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
             var Img = rootImgPath + this.Image;
             var tooltipid = "tip_cp_content_id_" + this.ID;
@@ -194,7 +201,7 @@
     }
 
     function RenderSideMissionsFirstTime(modelObj, rootImgPath) {
-        $(model.Missions).each(function (i) {
+        $(modelObj.Missions).each(function (i) {
             var ImagePoint = DCSPosToMapPos(this.Pos, modelObj.Map.DCSOriginPosition, modelObj.Map.Ratio);
             var Img = rootImgPath + this.Image;
             var tooltipid = "tip_sm_content_id_" + this.ID;
@@ -219,17 +226,14 @@
 
     function RenderMapFirstTime(modelObj, rootImgPath)
     {
-        var headingcontent = $("<h2>Server: " + modelObj.ServerName + "</h2></br><h><b>Status: " + modelObj.Status + "</b></h></br><h><b>Restarts In: " + modelObj.RestartTime + "</b></h>");
-        $("#Heading").append(headingcontent);
-
         RenderDepotsFirstTime(modelObj, rootImgPath);
         RenderCapturePointsFirstTime(modelObj, rootImgPath);
         RenderSideMissionsFirstTime(modelObj, rootImgPath);
     }
 
-    RenderMapFirstTime(model, ROOT);
-    var G_DCSOriginPos = model.Map.DCSOriginPosition;
-    var G_MapRatio = model.Map.Ratio;
+    RenderMapFirstTime(MODEL, ROOT);
+    var G_DCSOriginPos = MODEL.Map.DCSOriginPosition;
+    var G_MapRatio = MODEL.Map.Ratio;
 
     // setup signalR
     $.connection.hub.logging = true;
@@ -297,8 +301,8 @@
                 $(".mapcontent").append(dot);
                 var elem = $('[' + id_attribute + ']');
                 InitTooltip(elem);
-                var model = this;
-                var instances = $.tooltipster.instances('[' + id_attribute + ']');
+                model = this;
+                instances = $.tooltipster.instances('[' + id_attribute + ']');
                 $.each(instances, function (i, instance) {
                     instance.content(RenderSideMissionContent(model));
                 });   
@@ -327,18 +331,30 @@
 
             $('.table > tbody:last-child').append(row); // add row to table
         });
+
+        $('#dash-onlinecount').text(modelObj.length);
     };
+
+    GameHubProxy.client.UpdateServer = function (modelObj) {
+        $('#dash-status').text(modelObj.Status);
+        $('#dash-restart').text(modelObj.RestartTime);
+    };
+
 
     $.connection.hub.start().done(function ()
     {
 
         $(window).bind('beforeunload', function () {
             var GHubProxy = $.connection.gameHub;
-            GHubProxy.server.unsubscribe(model.ServerID);
+            GHubProxy.server.unsubscribe(MODEL.ServerID);
         });
 
         var GHubProxy = $.connection.gameHub;
-        GHubProxy.server.subscribe(model.ServerID);
+        GHubProxy.server.subscribe(MODEL.ServerID);
+    });
+
+    $.connection.hub.error(function (error) {
+        console.log('SignalR error: ' + error)
     });
     
     $(".mrk").hover(

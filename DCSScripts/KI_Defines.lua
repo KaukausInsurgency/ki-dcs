@@ -130,6 +130,7 @@ KI.Defines.UnitTypes =
 	["AJS37"] = "STRIKER",
 	["A-10A"] = "STRIKER",
 	["A-10C"] = "STRIKER",
+	["AV8BNA"] = "STRIKER",
 	["P-51B"] = "STRIKER",
 	["P-51D"] = "STRIKER",
 	["S-3B"] = "STRIKER",

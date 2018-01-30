@@ -27,6 +27,8 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, modelTi
   local playerName = KI.Null
   local UCID = KI.Null
   local sortieID = KI.Null
+  local playerSide = KI.Null
+  
   -- crate and static objects may be returned which do not have this function
   if dcs_event_obj.initiator.getPlayerName then
     playerName = dcs_event_obj.initiator:getPlayerName()  -- Its possible a player could be named "AI" which would blow this up
@@ -38,6 +40,12 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, modelTi
     end
   else
     playerName = "STATIC OBJECT"
+  end
+  
+  if dcs_event_obj.initiator.getCoalition then
+    playerSide = dcs_event_obj.initiator:getCoalition()
+  else
+    playerSide = 0
   end
   
   
@@ -79,7 +87,11 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, modelTi
     if dcs_event_obj.target.getPlayerName then
       targetPlayerName = dcs_event_obj.target:getPlayerName() or KI.Null
     end
-    targetSide = dcs_event_obj.target:getCoalition()
+    if dcs_event_obj.target.getCoalition then
+      targetSide = dcs_event_obj.target:getCoalition()
+    else
+      targetSide = 0
+    end
     
     if targetPlayerName ~= KI.Null then
       targetIsPlayer = true
@@ -97,7 +109,7 @@ GameEvent.CreateGameEvent = function(sessionID, serverID, dcs_event_obj, modelTi
     ["UCID"] = UCID,
     ["Event"] = KI.Defines.EventNames[dcs_event_obj.id],
     ["PlayerName"] = playerName,
-    ["PlayerSide"] = dcs_event_obj.initiator:getCoalition(),
+    ["PlayerSide"] = playerSide,
     ["ModelTime"] = modelTime,
     ["GameTime"] = dcs_event_obj.time,
     ["Role"] = dcs_event_obj.initiator:getTypeName(),

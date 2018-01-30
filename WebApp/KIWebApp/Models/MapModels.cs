@@ -19,6 +19,7 @@ namespace KIWebApp.Models
 
     public class GameMapModel
     {
+        public bool MapExists { get; set; }
         public Resolution Resolution { get; set; }
         public string ImagePath { get; set; }
         public Position DCSOriginPosition { get; set; }

@@ -6,6 +6,7 @@ end
 DWM.Config = {}
 
 -- The convoy template groups to use when spawning a logistics convoy from a supplier depot
+-- These are randomly selected when a convoy resupply is requested
 DWM.Config.ConvoyGroupTemplates = 
 {
   [1] = "LogisticConvoyTemplate1",

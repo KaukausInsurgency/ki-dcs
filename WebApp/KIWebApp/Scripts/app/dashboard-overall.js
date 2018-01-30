@@ -316,9 +316,9 @@ $(document).ready(function () {
     Highcharts.chart('sortie-success', {
 
         chart: {
-            margin: [0, 0, 20, 0],
+            margin: [0, 0, 50, 0],
             type: 'solidgauge',
-            height: '100%',
+            height: 190,
             backgroundColor: 'rgba(0,0,0,0)',
             spacingTop: 0,
             spacingBottom: 0,
@@ -330,10 +330,10 @@ $(document).ready(function () {
         title: {
             text: 'Sortie',
             style: {
-                fontSize: '18px'
+                fontSize: '1.8em'
             },
             margin: 1,
-            y: 145
+            y: 165
         },
 
         tooltip: {
@@ -341,7 +341,7 @@ $(document).ready(function () {
             backgroundColor: 'none',
             shadow: false,
             style: {
-                fontSize: '10px'
+                fontSize: '0.8em'
             },
             pointFormat: '{series.name}<br><span style="font-size:1.7em; color: {point.color}; font-weight: bold">{point.y}%</span>',
             positioner: function (labelWidth) {
@@ -401,7 +401,7 @@ $(document).ready(function () {
                 innerRadius: '75%',
                 y: model.SortieSuccessRatio
             }]
-        }]
+        }],
     });
 
     var chart = $('#sortie-success').highcharts(),
@@ -418,9 +418,9 @@ $(document).ready(function () {
     Highcharts.chart('sling-success', {
 
         chart: {
-            margin: [0, 0, 20, 0],
+            margin: [0, 0, 50, 0],
             type: 'solidgauge',
-            height: '100%',
+            height: 190,
             backgroundColor: 'rgba(0,0,0,0)',
             spacingTop: 0,
             spacingBottom: 0,
@@ -432,10 +432,10 @@ $(document).ready(function () {
         title: {
             text: 'Slingload',
             style: {
-                fontSize: '18px'
+                fontSize: '1.8em'
             },
             margin: 1,
-            y: 145
+            y: 165
         },
 
         tooltip: {
@@ -443,7 +443,7 @@ $(document).ready(function () {
             backgroundColor: 'none',
             shadow: false,
             style: {
-                fontSize: '10px'
+                fontSize: '0.8em'
             },
             pointFormat: '{series.name}<br><span style="font-size:1.7em; color: {point.color}; font-weight: bold">{point.y}%</span>',
             positioner: function (labelWidth) {
@@ -513,13 +513,12 @@ $(document).ready(function () {
     chart.tooltip.hide = function () { console.log() };
 
 
-
     Highcharts.chart('transport-success', {
 
         chart: {
-            margin: [0, 0, 20, 0],
+            margin: [0, 0, 50, 0],
             type: 'solidgauge',
-            height: '100%',
+            height: 190,
             backgroundColor: 'rgba(0,0,0,0)',
             spacingTop: 0,
             spacingBottom: 0,
@@ -531,10 +530,10 @@ $(document).ready(function () {
         title: {
             text: 'Transport',
             style: {
-                fontSize: '18px'
+                fontSize: '1.8em'
             },
             margin: 1,
-            y: 145
+            y: 165
         },
 
         tooltip: {
@@ -542,7 +541,7 @@ $(document).ready(function () {
             backgroundColor: 'none',
             shadow: false,
             style: {
-                fontSize: '10px'
+                fontSize: '0.8em'
             },
             pointFormat: '{series.name}<br><span style="font-size:1.7em; color: {point.color}; font-weight: bold">{point.y}%</span>',
             positioner: function (labelWidth) {
