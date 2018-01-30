@@ -864,11 +864,10 @@ function KIServer.TCPSocket.Connect()
   
   -- start connection
   KIServer.TCPSocket.Object = socket.tcp()
-  KIServer.TCPSocket.Object:settimeout(.0001)
   KIServer.TCPSocket.Object:settimeout(5)
+  KIServer.TCPSocket.Object:setoption("tcp-nodelay", true)
   KIServer.TCPSocket.IsConnected = false
   local _r, _err = KIServer.TCPSocket.Object:connect(KIServer.Config.TCP_SERVER_IP, KIServer.Config.TCP_SERVER_PORT)
-  
   KIServer.TCPSocket.Object:settimeout(.0001)
   if _r ~= 1 or _err then
     net.log("KIServer.TCPSocket.Connect - ERROR - Failed to connect to TCP Server (Reason: " .. _err .. ")")
