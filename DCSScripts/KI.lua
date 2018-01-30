@@ -272,15 +272,6 @@ local function StartKI()
 
   world.addEventHandler(KI.Hooks.GameEventHandler)
   env.info("KI - World Event Handlers registered")
-  
-  
-  --[[ debug 
-  KI.Scheduled.CheckDepotSupplyLevels({},5)
-  KI.Scheduled.CheckSideMissions({},5)
-  KI.Scheduled.CheckDepotSupplyLevels({},5)
-  KI.Scheduled.CheckConvoyCompletedRoute({},5)
-  AICOM.DoTurn({},5)
-  -- end debug]]
    
 end
 
