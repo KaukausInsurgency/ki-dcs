@@ -104,14 +104,14 @@ KI.Config.CP =
       "Beslan-Su25T-2",
       "Beslan-AJS37-1",
       "Beslan-AJS37-2",
-	  "Beslan-A10C-1",
-	  "Beslan-A10C-2",
-	  "Beslan-A10A-1",
-	  "Beslan-A10A-2",
-	  "Beslan-AV8B-1",
-	  "Beslan-AV8B-2",
-	  "Beslan-F5E3-1",
-	  "Beslan-F5E3-2",
+  	  "Beslan-A10C-1",
+  	  "Beslan-A10C-2",
+  	  "Beslan-A10A-1",
+  	  "Beslan-A10A-2",
+  	  "Beslan-AV8B-1",
+  	  "Beslan-AV8B-2",
+  	  "Beslan-F5E3-1",
+  	  "Beslan-F5E3-2",
     } 
   },
   { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
@@ -125,14 +125,14 @@ KI.Config.CP =
       "Nalchik-M2000C-2",
       "Nalchik-Mig21-1",
       "Nalchik-Mig21-2",
-	  "Nalchik-A10C-1",
-	  "Nalchik-A10C-2",
-	  "Nalchik-AJS37-1",
-	  "Nalchik-AJS37-2",
-	  "Nalchik-Su25T-1",
-	  "Nalchik-Su25T-2",
-	  "Nalchik-AV8B-1",
-	  "Nalchik-AV8B-2",
+  	  "Nalchik-A10C-1",
+  	  "Nalchik-A10C-2",
+  	  "Nalchik-AJS37-1",
+  	  "Nalchik-AJS37-2",
+  	  "Nalchik-Su25T-1",
+  	  "Nalchik-Su25T-2",
+  	  "Nalchik-AV8B-1",
+  	  "Nalchik-AV8B-2",
     } 
   },
   
@@ -153,10 +153,10 @@ KI.Config.CP =
       "Skala-UH1H-2",
       "Skala-UH1H-3",
       "Skala-UH1H-4",
-	  "Skala-SA342L-1",
-	  "Skala-SA342L-2",
-	  "Skala-SA342M-1",
-	  "Skala-SA342M-2"
+  	  "Skala-SA342L-1",
+  	  "Skala-SA342L-2",
+  	  "Skala-SA342M-1",
+  	  "Skala-SA342M-2"
     }
   },
   { name = "FARP Vetka", zone = "FARP Vetka Zone", spawnzone1 = "FARP Vetka Vehicle Spawn", spawnzone2 = "FARP Vetka Infantry Spawn",
@@ -176,10 +176,10 @@ KI.Config.CP =
       "Vetka-UH1H-2",
       "Vetka-UH1H-3",
       "Vetka-UH1H-4",
-	  "Vetka-SA342L-1",
-	  "Vetka-SA342L-2",
-	  "Vetka-SA342M-1",
-	  "Vetka-SA342M-2"
+  	  "Vetka-SA342L-1",
+  	  "Vetka-SA342L-2",
+  	  "Vetka-SA342M-1",
+  	  "Vetka-SA342M-2"
     }
   },
   { name = "FARP Torba", zone = "FARP Torba Zone", spawnzone1 = nil, spawnzone2 = nil,
@@ -199,10 +199,10 @@ KI.Config.CP =
       "Torba-UH1H-2",
       "Torba-UH1H-3",
       "Torba-UH1H-4",
-	  "Torba-SA342L-1",
-	  "Torba-SA342L-2",
-	  "Torba-SA342M-1",
-	  "Torba-SA342M-2"
+  	  "Torba-SA342L-1",
+  	  "Torba-SA342L-2",
+  	  "Torba-SA342M-1",
+  	  "Torba-SA342M-2"
     }
   },
   
