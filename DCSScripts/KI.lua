@@ -88,7 +88,6 @@ local function StartKI()
   
   
   assert(loadfile(path .. "GC.lua"))()
-  assert(loadfile(path .. "SLC_Config.lua"))()
   assert(loadfile(path .. "SLC.lua"))()
   assert(loadfile(path .. "LOCPOS.lua"))()
   assert(loadfile(path .. "DWM.lua"))()
@@ -96,7 +95,6 @@ local function StartKI()
   assert(loadfile(path .. "CP.lua"))()
   assert(loadfile(path .. "GameEvent.lua"))()
   assert(loadfile(path .. "CustomEvent.lua"))()
-  
   assert(loadfile(path .. "KI_Data.lua"))()
   assert(loadfile(path .. "KI_Defines.lua"))()
   assert(loadfile(path .. "KI_Socket.lua"))()
@@ -105,7 +103,6 @@ local function StartKI()
   assert(loadfile(path .. "KI_Loader.lua"))()
   assert(loadfile(path .. "KI_Scheduled.lua"))()
   assert(loadfile(path .. "KI_Hooks.lua"))()
-  assert(loadfile(path .. "AICOM_Config.lua"))()
   assert(loadfile(path .. "AICOM.lua"))()
   env.info("KI - Scripts Loaded")
 
