@@ -101,7 +101,7 @@ ConfigChecker.AICOMConfigDictionary =
           elseif not ConfigChecker.IsNumber(tt.AAEffectiveness) then
             msg = msg .. "\n" .. "AICOM.Config.Forces property 'AAEffectiveness' must be type number!"
             result = false
-          elseif not ConfigChecker.IsNumberPositive(tt.AAEffectiveness) then
+          elseif not ConfigChecker.IsNumberPositiveOrZero(tt.AAEffectiveness) then
             msg = msg .. "\n" .. "AICOM.Config.Forces property 'AAEffectiveness' must be positive number!"
             result = false
           end
@@ -112,7 +112,7 @@ ConfigChecker.AICOMConfigDictionary =
           elseif not ConfigChecker.IsNumber(tt.GNDEffectiveness) then
             msg = msg .. "\n" .. "AICOM.Config.Forces property 'GNDEffectiveness' must be type number!"
             result = false
-          elseif not ConfigChecker.IsNumberPositive(tt.GNDEffectiveness) then
+          elseif not ConfigChecker.IsNumberPositiveOrZero(tt.GNDEffectiveness) then
             msg = msg .. "\n" .. "AICOM.Config.Forces property 'GNDEffectiveness' must be positive number!"
             result = false
           end
@@ -125,17 +125,6 @@ ConfigChecker.AICOMConfigDictionary =
             result = false
           elseif not ConfigChecker.IsNumberPositive(tt.Speed) then
             msg = msg .. "\n" .. "AICOM.Config.Forces property 'Speed' must be positive number!"
-            result = false
-          end
-          
-          if tt.SpawnZone == nil then
-            msg = msg .. "\n" .. "AICOM.Config.Forces property 'Cost' cannot be nil!"
-            result = false
-          elseif not ConfigChecker.IsNumber(tt.SpawnZone) then
-            msg = msg .. "\n" .. "AICOM.Config.Forces property 'Cost' must be type number!"
-            result = false
-          elseif tt.SpawnZone ~= 1 and tt.SpawnZone ~= 2 then
-            msg = msg .. "\n" .. "AICOM.Config.Forces property 'SpawnZone' invalid value! - must be 1 or 2"
             result = false
           end
           

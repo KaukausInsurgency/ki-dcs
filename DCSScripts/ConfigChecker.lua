@@ -82,6 +82,10 @@ function ConfigChecker.IsNumberPositive(x)
   return x > 0, "Must be positive number!"
 end
 
+function ConfigChecker.IsNumberPositiveOrZero(x)
+  return x >= 0, "Must be positive number or 0!"
+end
+
 --- Check if a file or directory exists in this path
 function ConfigChecker.IsFile(file)
   local _filehandle, _err = io.open(file, "w")
