@@ -16,6 +16,8 @@ SLC.Config.PostOnRadioAction = nil
 SLC.Config.CrateQueryDistance = 50
 -- distance at which objects will be spawned 12 Oclock from helicopter
 SLC.Config.ObjectSpawnDistance = 25
+
+-- do not touch!
 SLC.Config.SpawnID = 0
 
 SLC.Config.PilotNames =
@@ -59,6 +61,7 @@ SLC.Config.InfantryTransportingHelicopters =
 }
 
 -- static definitions of base cargo types
+-- recommend not touching these as these values are specific to DCS internal crate logic to work
 SLC.Config.CargoTypes = 
 {
   Ammo = { Name = "ammo_cargo", MinWeight = 1000, MaxWeight = 2000, Category = "supplies"},
@@ -187,6 +190,7 @@ SLC.Config.ComponentTypes =
 }
 
 -- ComponentTypesOrder - is used to maintain order of menu items when iterating with ipairs
+-- if you change SLC.Config.ComponentTypes, YOU MUST UPDATE THIS LIST AS WELL!
 SLC.Config.ComponentTypesOrder =
 {
     "FuelTruckCrate",

@@ -71,6 +71,10 @@ function()
     UT.TestCompare(function() return ConfigChecker.SetConfigValue("T.A.C", "Test") == true end)
     UT.TestCompare(function() return T.A.C == "Test" end)
     UT.TestCompare(function() return ConfigChecker.GetConfigValue("T.A.C") == "Test" end)
+    
+    UT.TestCompare(function() return ConfigChecker.SetConfigValue("T.A.D", false) == true end)
+    UT.TestCompare(function() return T.A.D == false end)
+    UT.TestCompare(function() return ConfigChecker.GetConfigValue("T.A.D") == false end)
   end
       
 end,

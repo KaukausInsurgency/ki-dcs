@@ -2,66 +2,62 @@ if not KI then
   KI = { UTDATA = {} }
 end
 
-local function ValidateKIStart()
-  local requiredModules =
-  {
-    ["lfs"] = lfs ~= nil,
-    ["io"] = io ~= nil,
-    ["os"] = os ~= nil,
-    ["require"] = require ~= nil,
-    ["loadfile"] = loadfile ~= nil,
-    ["package.path"] = package.path ~= nil,
-    ["package.cpath"] = package.cpath ~= nil,
-    ["JSON"] = "Scripts\\JSON.lua",
-    ["Socket"] = "socket"
-  }
-  
-  local isValid = true    -- assume everything exists and is in place, then determine if it's false
-  local msg = ""
-  
-  local function errorHandler(err) 
-      -- do nothing
-  end
+-- arguments from DCS DoScript
+local path = ...
+assert(loadfile(path .. "ConfigChecker.lua"))()
 
-  for key, item in pairs(requiredModules) do 
-    local callSuccess, callResult
-    if key == "JSON" then
-      callSuccess, callResult = xpcall(function() return loadfile(item)() ~= nil end, errorHandler)
-    elseif key == "Socket" then
-      package.path = package.path..";.\\LuaSocket\\?.lua"
-      package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
-      callSuccess, callResult = xpcall(function() return require(item) ~= nil end, errorHandler)
-    else
-      callSuccess, callResult = xpcall(function() return item end, errorHandler)
-    end
-
-    if not callSuccess or not callResult then
-      isValid = false
-      msg = msg .. "\t" .. key .. ","
-    end
-  end
-  
-  if not isValid then
-    env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing: " .. msg)
-    env.info("KI - Please review MissionScripting.lua as important modules have been sanitized.")
-    return false
-  else
-    env.info("KI - STARTUP VALIDATION COMPLETE")
-    return true
-  end
-  
-  return isValid
-end
-
-if not ValidateKIStart() then
+if not ConfigChecker.ValidateModules() then
   trigger.action.outTextForCoalition(1, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
   trigger.action.outTextForCoalition(2, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
   return false
 end
 
+-- do a partial load of KI because we need access to certain modules
+assert(loadfile(path .. "Spatial.lua"))()
+assert(loadfile(path .. "KI_Toolbox.lua"))()
+
+assert(loadfile(path .. "Dictionaries\\KI_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\DWM_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\AICOM_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\SLC_Config_Dictionary.lua"))()
+
+if true then
+  local CanRunKI = true
+
+  if not ConfigChecker.Check(path .. "KI_Config.lua", ConfigChecker.KIConfigDictionary, "KI.Config", "ki_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "DWM_Config.lua", ConfigChecker.DWMConfigDictionary, "DWM.Config", "ki_dwm_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "AICOM_Config.lua", ConfigChecker.AICOMConfigDictionary, "AICOM.Config", "ki_aicom_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "SLC_Config.lua", ConfigChecker.SLCConfigDictionary, "SLC.Config", "ki_slc_config.log") then
+    CanRunKI = false
+  end
+  
+  if not CanRunKI then
+    env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW LOGS IN - " .. lfs.writedir() .. "Logs")
+    return false
+  else
+    env.info("KI - Config Check Completed Successfully")
+  end
+end
 
 
-local path = ...
+
+-- Load modules and packages
+
+--local initconnection = require("debugger")
+--initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
+
+-- load profiler
+--assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
+
 local require = require
 local loadfile = loadfile
 
@@ -70,24 +66,7 @@ package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
 
 local JSON = loadfile("Scripts\\JSON.lua")()
 local socket = require("socket")
-
---local initconnection = require("debugger")
---initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
-
--- load profiler
---assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
-
--- do a partial load of KI because we need access to certain modules
-assert(loadfile(path .. "Spatial.lua"))()
-assert(loadfile(path .. "KI_Toolbox.lua"))()
-assert(loadfile(path .. "ConfigChecker.lua"))()
-
-local kiconfigpath = path .. "KI_Config.lua"
---local kiconfigpath = path .. "KI_Config_BrokenTest.lua"
-if not ConfigChecker.KIConfig(kiconfigpath) then
-  env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW LOGS IN - " .. lfs.writedir() .. "Logs")
-  return false
-end
+-- End loading modules and packages
 
 
 
@@ -112,7 +91,6 @@ local function StartKI()
   assert(loadfile(path .. "SLC_Config.lua"))()
   assert(loadfile(path .. "SLC.lua"))()
   assert(loadfile(path .. "LOCPOS.lua"))()
-  assert(loadfile(path .. "DWM_Config.lua"))()
   assert(loadfile(path .. "DWM.lua"))()
   assert(loadfile(path .. "DSMT.lua"))()
   assert(loadfile(path .. "CP.lua"))()

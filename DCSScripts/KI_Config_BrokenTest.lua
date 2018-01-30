@@ -66,7 +66,7 @@ KI.Config.Depots =
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone1 = "Beslan Vehicle Spawn", spawnzone2 = "Beslan Infantry Spawn", 
+  { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone1 = nil, spawnzone2 = "Beslan Infantry Spawn", 
     type = "AIRPORT", text = "Tower Frequencies<br/>  - 141.000 MHz<br/>  - 42.400 MHz<br/>  - 270.000 MHz<br/>  - 4.750 MHz",
     capacity = 30,
     slots = 
@@ -74,7 +74,7 @@ KI.Config.CP =
       "Beslan-Su25T-1",
       "Beslan-Su25T-2",
       "Beslan-Su27-1",
-      "Beslan-Su27-2",
+      "Beslan-Su27-8",
     } 
   },
   { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
@@ -85,13 +85,13 @@ KI.Config.CP =
       "Nalchik-Mig29-1",
       "Nalchik-Mig29-2",
       "Nalchik-M2000C-1",
-      "Nalchik-M2000C-2",
+      "Nalchik-M234000C-2",
       "Nalchik-Mig21-1",
       "Nalchik-Mig21-2"
     } 
   },
   
-  { name = "FARP Skala", zone = "FARP Skala Zone", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "FARP Skala Infantry Spawn", 
+  { name = "FARP Skala", zone = "FARP Skala", spawnzone1 = "Vehicle Spawn A", spawnzone2 = "FARP Skala Infantry Spawn", 
     type = "FARP", text = "Tower Frequency - 127.500 MHz AM",
     capacity = 30,
     slots = 
@@ -126,14 +126,14 @@ KI.Config.CP =
       "Vetka-UH1H-1",
       "Vetka-UH1H-2",
       "Vetka-UH1H-3",
-      "Vetka-UH1H-4"
+      "Vetka-UH2461H-4"
     }
   },
   
   
   
   { name = "Tskhinvali City", zone = "Tskhinvali City Zone", capacity = 30, spawnzone1 = "Tskhinvali City Spawn Zone", spawnzone2 = "Tskhinvali City Spawn Zone", type = "CAPTUREPOINT"},
-  { name = "Java Village", zone = "Java Zone", capacity = 30, spawnzone1 = "Java Spawn Zone", spawnzone2 = "Java Spawn Zone", type = "CAPTUREPOINT"},
+  { name = "Java Village", zone = "Java Zone", capacity = 30, spawnzone1 = "Java Spawn Zone", spawnzone2 = "Java Spawn Zone", type = "geag"},
   
   { name = "Kazbegi Village", zone = "Kazbegi Zone", capacity = 30, spawnzone1 = "Kazbegi Vehicle Spawn", spawnzone2 = "Kazbegi Infantry Spawn", type = "CAPTUREPOINT"},
   { name = "Garbani Village", zone = "Garbani Zone", capacity = 30, spawnzone1 = "Garbani Vehicle Spawn", spawnzone2 = "Garbani Infantry Spawn", type = "CAPTUREPOINT" },
