@@ -592,7 +592,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
       env.info("KI.Hooks.GameEventHandler:onEvent(event) called")
 
       if event.id == world.event.S_EVENT_MISSION_END then
-        if trigger.misc.getUserFlag("9000") ~= 3 then
+        if trigger.misc.getUserFlag("9000") ~= 3 and trigger.misc.getUserFlag("9000") ~= 4 then
           env.info("KI.Hooks.GameEventHandler - Mission End Event raised")
           -- this has no function, but it is here so that we can unit test this behaviour
           KI.UTDATA.UT_MISSION_END_CALLED = true
