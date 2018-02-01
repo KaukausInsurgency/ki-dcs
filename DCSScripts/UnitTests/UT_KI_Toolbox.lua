@@ -71,7 +71,7 @@ UT.TestCase("KI_Toolbox", nil, nil,
     UT.TestCompare(function() return KI.Toolbox.SecondsToMinutes(7200) == 120 end)    
     
     -- MessageCoalition
-    UT.TestFunction(KI.Toolbox.MessageRedCoalition, "TEST MSG FOR RED COALITION")
-    UT.TestFunction(KI.Toolbox.MessageBlueCoalition, "TEST MSG FOR BLUE COALITION")
+    UT.TestFunction(KI.Toolbox.MessageCoalition, 1, "TEST MSG FOR RED COALITION")
+    UT.TestFunction(KI.Toolbox.MessageCoalition, 2, "TEST MSG FOR BLUE COALITION")
   end)
   

@@ -5,6 +5,12 @@ end
 
 KI.Config = {}
 
+-- The side of the allies (Players) - 1 is RED, 2 is BLUE
+KI.Config.AllySide = 1
+
+-- The side of the insurgents (AI) - 1 is RED, 2 IS BLUE
+KI.Config.InsurgentSide = 2
+
 -- Controls the maximum lifetime of a crate sitting idle at a depot until it is despawned
 KI.Config.CrateDespawnTime_Depot = KI.Toolbox.MinutesToSeconds(15)  
 
@@ -248,7 +254,7 @@ KI.Config.SideMissions =
         local args = {}
         args.CampObject = CampObj
         KI.AddSideMissionObject(CampObj.StaticName)
-        KI.Toolbox.MessageRedCoalition("ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
         -- create and initialize the task, init must return arguments
         return args
       end,
@@ -281,7 +287,7 @@ KI.Config.SideMissions =
       -- no return required
       oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
-        KI.Toolbox.MessageRedCoalition("MISSION COMPLETE - " .. missionName .. " - THE CAMP HAS BEEN SUCCESSFULLY DESTROYED!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CAMP HAS BEEN SUCCESSFULLY DESTROYED!")
       end,
       
       -- this function tells KI what should happen when the side mission is failed
@@ -296,7 +302,7 @@ KI.Config.SideMissions =
       -- no return required
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageRedCoalition("MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   }
   

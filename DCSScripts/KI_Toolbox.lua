@@ -179,13 +179,9 @@ function KI.Toolbox.SecondsToMinutes(s)
   return s / 60
 end
 
--- Messages entire red coalition for 30 seconds
-function KI.Toolbox.MessageRedCoalition(msg, t)
+-- Messages entire coalition
+function KI.Toolbox.MessageCoalition(side, msg, t)
   local msgtime = t or 30
-  trigger.action.outTextForCoalition(1, msg, msgtime)
+  trigger.action.outTextForCoalition(side, msg, msgtime)
 end
 
--- Messages entire blue coalition for 30 seconds
-function KI.Toolbox.MessageBlueCoalition(msg)
-  trigger.action.outTextForCoalition(2, msg, 30)
-end

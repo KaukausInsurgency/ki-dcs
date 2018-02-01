@@ -330,7 +330,7 @@ function KI.Scheduled.CheckConvoyCompletedRoute(args, time)
     else
       env.info("KI.Scheduled.CheckConvoyCompletedRoute - Convoy Group " .. gname .. " is dead - ignoring")
       _depot.IsSuppliesEnRoute = false
-      KI.Toolbox.MessageRedCoalition("A convoy heading for " .. _depot.Name .. " has been destroyed!", 30)
+      KI.Toolbox.MessageCoalition(KI.Config.AllySide, "A convoy heading for " .. _depot.Name .. " has been destroyed!", 30)
       table.insert(_keysToRemove, gname)
     end -- end if group alive
   end

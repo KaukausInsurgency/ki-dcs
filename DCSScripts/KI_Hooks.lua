@@ -12,7 +12,7 @@ function KI.Hooks.DWMOnDepotResupplied(depot)
 
       env.info("KI.Hooks.DWMOnDepotResupplied called")
 
-      KI.Toolbox.MessageRedCoalition("A convoy has successfully reached and resupplied " .. depot.Name .. "!", 30)
+      KI.Toolbox.MessageCoalition(KI.Config.AllySide, "A convoy has successfully reached and resupplied " .. depot.Name .. "!", 30)
   end, function(err) env.info("KI.Hooks.DWMOnDepotResupplied - ERROR - " .. err) end)
 end
 
@@ -350,7 +350,7 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
         env.info("GC.OnLifeExpired - crate is in depot and is being despawned")
         local _depot = _args.Depot
         if _args.WasMoved then
-          KI.Toolbox.MessageRedCoalition(_depot.Name .. " was resupplied with cargo (" .. n .. ") by " .. _args.PlayerUnit:getPlayerName())
+          KI.Toolbox.MessageCoalition(KI.Config.AllySide, _depot.Name .. " was resupplied with cargo (" .. n .. ") by " .. _args.PlayerUnit:getPlayerName())
           local _place = {}
 
           -- need to spoof the location into a DCS Airbase object,
@@ -361,7 +361,7 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
           _e.cargo = n
           KI.Hooks.GameEventHandler:onEvent(_e) -- raise the event
         else
-          KI.Toolbox.MessageRedCoalition("Crate " .. n .. " has been despawned and contents put back into depot!")
+          KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Crate " .. n .. " has been despawned and contents put back into depot!")
         end
 
         if string.match(n, "SLC FuelTruckCrate") then
@@ -391,7 +391,7 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
         end
       else
         env.info("GC.OnLifeExpired - crate is in wild and is being despawned")
-        KI.Toolbox.MessageRedCoalition("Crate " .. n .. " in the wild has been despawned!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Crate " .. n .. " in the wild has been despawned!")
       end
 
     end,
@@ -419,7 +419,7 @@ function KI.Hooks.GCOnLifeExpiredTroops(gc_item)
       if _args.Depot then
         env.info("GC.GCOnLifeExpiredTroops - troop is in depot and is being despawned")
         local _depot = _args.Depot
-        KI.Toolbox.MessageRedCoalition("Infantry " .. n .. " has been despawned!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Infantry " .. n .. " has been despawned!")
 
         local result = false
         local msg = ""
@@ -434,11 +434,11 @@ function KI.Hooks.GCOnLifeExpiredTroops(gc_item)
         end
 
         if not result then
-          KI.Toolbox.MessageRedCoalition(msg)
+          KI.Toolbox.MessageCoalition(KI.Config.AllySide, msg)
         end
       else
         env.info("GC.GCOnLifeExpiredTroops - troops is in wild and is being despawned")
-        KI.Toolbox.MessageRedCoalition("Infantry " .. n .. " in the wild has been despawned!")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Infantry " .. n .. " in the wild has been despawned!")
       end
 
     end,
