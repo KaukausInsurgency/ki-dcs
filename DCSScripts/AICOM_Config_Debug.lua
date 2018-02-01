@@ -13,12 +13,12 @@ end
 
 AICOM.Config = {}
 AICOM.Config.OnSpawnGroup = nil  -- callback method when the AI Commander spawns a unit (with arguments: MOOSE:GROUP and DCSVec3)
-AICOM.Config.TurnRate = 600     -- the rate at which the AI Commander can make moves/actions
+AICOM.Config.TurnRate = 30     -- the rate at which the AI Commander can make moves/actions
 AICOM.Config.InitMoves = 3      -- the number of moves the AI Commander can make a turn
 AICOM.Config.InitResource = 150 -- the number of units/resources the AI Commander has access to per turn
 AICOM.Config.PopulationCap = 100    -- the amount of enemy units that can be on the map, if this limit is reached AICOM will skip it's turn
 AICOM.Config.Random = math.random   -- the random function to use (can supply with mock function for Unit Testing)
-AICOM.Config.AmbushProbability = 25 -- the probability of the AI doing an ambush action on it's third turn
+AICOM.Config.AmbushProbability = 100 -- the probability of the AI doing an ambush action on it's third turn
 
 -- collection of zones the AI will randomly select for an ambush
 AICOM.Config.AmbushZones = 

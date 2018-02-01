@@ -229,8 +229,8 @@ function KI.Loader.ImportCoalitionGroups(data)
     
     -- check if the group has size > 0 and ignore if it does
     if _g["Size"] > 0 and #_g["Units"] > 0 and not IsSideMissionObject then
-      -- hide the group on the map if blue coalition
-      local _hidden = _g["Coalition"] ~= 1
+      -- hide the group on the map if insurgent coalition
+      local _hidden = _g["Coalition"] == KI.Config.InsurgentSide
       if not _hidden then
         env.info("KI.Loader.ImportCoalitionGroups Group " .. _g["Name"] .. " is not hidden")
       end

@@ -6,16 +6,19 @@ end
 KI.Config = {}
 
 -- The side of the allies (Players) - 1 is RED, 2 is BLUE
-KI.Config.AllySide = 1
+KI.Config.AllySide = 2
 
 -- The country ID to use when spawning allied cargo (required by coalition.AddStaticObject)
-KI.Config.AllyCountryID = country.id.RUSSIA
+KI.Config.AllyCountryID = country.id.USA
 
 -- The country name string to use when spawning allied cargo (required by coalition.AddStaticObject)
-KI.Config.AllyCountryName = "Russia"
+KI.Config.AllyCountryName = "USA"
 
 -- The side of the insurgents (AI) - 1 is RED, 2 IS BLUE
-KI.Config.InsurgentSide = 2
+KI.Config.InsurgentSide = 1
+
+KI.Config.DisplayDepotMarkers = true
+KI.Config.DisplayCapturePointMarkers = true
 
 -- Controls the maximum lifetime of a crate sitting idle at a depot until it is despawned
 KI.Config.CrateDespawnTime_Depot = 120
@@ -38,7 +41,7 @@ KI.Config.SaveMissionRate = 300
 KI.Config.CPUpdateRate = 15
 
 -- Controls the rate at which we check if a player is in a zone and display message to them
-KI.Config.PlayerInZoneCheckRate = 10
+KI.Config.PlayerInZoneCheckRate = 2
 
 -- controls the rate at which side missions are generated and/or managed from the queue
 KI.Config.SideMissionUpdateRate = 1200 
@@ -94,16 +97,15 @@ KI.Config.ConvoyMinimumDistanceToDepot = KI.Config.RespawnUnitWaypointDistance
 
 KI.Config.Depots =
 {
-  { name = "Urvan Depot", supplier = true },
-  { name = "Troickaya Depot", supplier = true },
 }
 
 -- configures capture points in mission
 KI.Config.CP =
 {
-  { name = "Beslan Airport", zone = "BeslanAirportZone", spawnzone = "BeslanAirportSpawnZone", type = "AIRPORT" },  
-  { name = "Beslan City", zone = "BeslanCityZone", spawnzone = "BeslanCitySpawnZone", type = "CAPTUREPOINT" },
-  { name = "Kirovo City", zone = "KirovoCityZone", spawnzone = "KirovoCitySpawnZone", type = "CAPTUREPOINT" },
+  { name = "Beslan Airport", zone = "BeslanAirportZone", type = "AIRPORT", capacity = 5, spawnzone1 = "BeslanAirportSpawnZone", spawnzone2 = "BeslanAirportSpawnZone" },  
+  { name = "Beslan City", zone = "BeslanCityZone", type = "CAPTUREPOINT", capacity = 5 },
+  { name = "Kirovo City", zone = "KirovoCityZone", type = "CAPTUREPOINT", capacity = 5, spawnzone1 = "KirovoCitySpawnZone", spawnzone2 = "KirovoCitySpawnZone" },
+  { name = "Gizel City", zone = "Gizel Zone", type = "CAPTUREPOINT", capacity = 5, spawnzone1 = "GizelSpawnZone", spawnzone2 = "GizelSpawnZone" },
 }
 
 -- configures side missions and their properties

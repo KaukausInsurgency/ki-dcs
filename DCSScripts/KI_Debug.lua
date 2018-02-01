@@ -1,69 +1,61 @@
 if not KI then
   KI = { UTDATA = {} }
 end
+-- arguments from DCS DoScript
+local path = ...
+assert(loadfile(path .. "ConfigChecker.lua"))()
 
-local function ValidateKIStart()
-  local requiredModules =
-  {
-    ["lfs"] = lfs,
-    ["io"] = io,
-    ["require"] = require,
-    ["loadfile"] = loadfile,
-    ["package.path"] = package.path,
-    ["package.cpath"] = package.cpath,
-    ["JSON"] = "Scripts\\JSON.lua",
-    ["Socket"] = "socket"
-  }
-  
-  local isValid = true    -- assume everything exists and is in place, then determine if it's false
-  local msg = ""
-  
-  local function errorHandler(err) 
-      -- do nothing
-  end
-
-  for key, item in pairs(requiredModules) do 
-    local callSuccess, callResult
-    if key == "JSON" then
-      callSuccess, callResult = xpcall(function() return loadfile(item)() ~= nil end, errorHandler)
-    elseif key == "Socket" then
-      package.path = package.path..";.\\LuaSocket\\?.lua"
-      package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
-      callSuccess, callResult = xpcall(function() return require(item) ~= nil end, errorHandler)
-    else
-      callSuccess, callResult = xpcall(function() return item ~= nil end, errorHandler)
-    end
-    
-    if not callSuccess or not callResult then
-      isValid = false
-      msg = msg .. "\t" .. key
-    end
-  end
-  
-  if not isValid then
-    env.info("KI - FATAL ERROR STARTING KAUKASUS INSURGENCY - The following modules are missing:\n" .. msg)
-    return false
-  else
-    env.info("KI - STARTUP VALIDATION COMPLETE")
-    return true
-  end
-  
-  return isValid
-end
-
-if not ValidateKIStart() then
-  trigger.action.outText("ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 30)
+if not ConfigChecker.ValidateModules() then
+  trigger.action.outTextForCoalition(1, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
+  trigger.action.outTextForCoalition(2, "ERROR STARTING KI - REQUIRED MODULES MISSING - SEE LOG", 300, true)
   return false
 end
 
+-- do a partial load of KI because we need access to certain modules
+assert(loadfile(path .. "Spatial.lua"))()
+assert(loadfile(path .. "KI_Toolbox.lua"))()
+
+assert(loadfile(path .. "Dictionaries\\KI_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\DWM_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\AICOM_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\SLC_Config_Dictionary.lua"))()
+if true then
+  local CanRunKI = true
+
+  if not ConfigChecker.Check(path .. "KI_Config_Debug.lua", ConfigChecker.KIConfigDictionary, "KI.Config", "ki_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "DWM_Config.lua", ConfigChecker.DWMConfigDictionary, "DWM.Config", "ki_dwm_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "AICOM_Config_Debug.lua", ConfigChecker.AICOMConfigDictionary, "AICOM.Config", "ki_aicom_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "SLC_Config.lua", ConfigChecker.SLCConfigDictionary, "SLC.Config", "ki_slc_config.log") then
+    CanRunKI = false
+  end
+  
+  if not CanRunKI then
+    env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW LOGS IN - " .. lfs.writedir() .. "Logs")
+    return false
+  else
+    env.info("KI - Config Check Completed Successfully")
+  end
+end
 
 
 
+-- Load modules and packages
 
+--local initconnection = require("debugger")
+--initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
 
+-- load profiler
+--assert(loadfile(path .. "Profiler\\PepperfishProfiler.lua"))()
 
-
-local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 local require = require
 local loadfile = loadfile
 
@@ -72,24 +64,25 @@ package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
 
 local JSON = loadfile("Scripts\\JSON.lua")()
 local socket = require("socket")
+-- End loading modules and packages
 
---local initconnection = require("debugger")
---initconnection( "127.0.0.1", 10000, "dcsserver", nil, "win", "" )
 
--- do a partial load of KI because we need access to certain data
-assert(loadfile(path .. "Spatial.lua"))()
-assert(loadfile(path .. "KI_Toolbox.lua"))()
-assert(loadfile(path .. "KI_Config_Debug.lua"))()
 
 env.info("KI - INITIALIZING")
 KI.JSON = JSON
 -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the database call will fail
 KI.Null = -9999   
 
+-- function that forces a mission restart
+KI.MissionRestart = function()
+  local _e = {}
+  _e.id = world.event.S_EVENT_MISSION_END
+  KI.Hooks.GameEventHandler:onEvent(_e)
+end
+
 env.info("KI - Loading Scripts")
 
 assert(loadfile(path .. "GC.lua"))()
-assert(loadfile(path .. "SLC_Config.lua"))()
 assert(loadfile(path .. "SLC.lua"))()
 assert(loadfile(path .. "LOCPOS.lua"))()
 assert(loadfile(path .. "DWM.lua"))()
@@ -106,9 +99,17 @@ assert(loadfile(path .. "KI_Init.lua"))()
 assert(loadfile(path .. "KI_Loader.lua"))()
 assert(loadfile(path .. "KI_Scheduled.lua"))()
 assert(loadfile(path .. "KI_Hooks.lua"))()
-assert(loadfile(path .. "AICOM_Config.lua"))()
 assert(loadfile(path .. "AICOM.lua"))()
 env.info("KI - Scripts Loaded")
+
+env.info("KI - Creating External Connections")
+-- Init UDP Sockets
+KI.UDPSendSocket = socket.udp()
+KI.UDPReceiveSocket = socket.udp()
+KI.UDPReceiveSocket:setsockname("*", KI.Config.SERVERMOD_RECEIVE_PORT)
+KI.UDPReceiveSocket:settimeout(.0001) --receive timer
+KI.SocketDelimiter = "\n"
+env.info("KI - External Connections created")
 
 
 env.info("KI - Initializing Data")
@@ -116,6 +117,8 @@ env.info("KI - Initializing Data")
 SLC.Config.PreOnRadioAction = KI.Hooks.SLCPreOnRadioAction
 SLC.Config.PostOnRadioAction = KI.Hooks.SLCPostOnRadioAction
 AICOM.Config.OnSpawnGroup = KI.Hooks.AICOMOnSpawnGroup
+DWM.Config.OnSpawnGroup = KI.Hooks.DWMOnSpawnGroup
+DWM.Config.OnDepotResupplied = KI.Hooks.DWMOnDepotResupplied
 --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
 GC.OnDespawn = KI.Hooks.GCOnDespawn
 KI.Init.Depots()
@@ -123,8 +126,134 @@ KI.Init.CapturePoints()
 KI.Init.SideMissions()
 SLC.InitSLCRadioItemsForUnits()
 AICOM.Init()
---KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
+KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
 env.info("KI - Data Loaded")
+
+env.info("KI - Initializing Scheduled Functions")
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(KI.Config.AllySide, t) end,
+                                 function(err) env.info("KI.Scheduled.IsPlayerInZone ERROR : " .. err) end)
+                                 
+  if not success then
+    return t + KI.Config.PlayerInZoneCheckRate
+  else
+    return result
+  end
+end, 1, timer.getTime() + KI.Config.PlayerInZoneCheckRate)
+
+
+xpcall(function() return KI.Scheduled.UpdateCPStatus(true,0) end,
+       function(err) env.info("KI.Scheduled.UpdateCPStatus (First Run) ERROR : " .. err) end)
+       
+-- this will be called instantly
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.UpdateCPStatus(args,t) end,
+                                 function(err) env.info("KI.Scheduled.UpdateCPStatus ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.CPUpdateRate
+  else
+    return result
+  end
+end, false, timer.getTime() + KI.Config.CPUpdateRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.CheckSideMissions(args,t) end,
+                                 function(err) env.info("KI.Scheduled.CheckSideMissions ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.SideMissionUpdateRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.SideMissionUpdateRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.CheckDepotSupplyLevels(args,t) end,
+                                 function(err) env.info("KI.Scheduled.CheckDepotSupplyLevels ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.DepotResupplyCheckRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.DepotResupplyCheckRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.CheckConvoyCompletedRoute(args,t) end,
+                                 function(err) env.info("KI.Scheduled.CheckConvoyCompletedRoute ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.ResupplyConvoyCheckRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.ResupplyConvoyCheckRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.DataTransmissionPlayers(args,t) end,
+                                 function(err) env.info("KI.Scheduled.DataTransmissionPlayers ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.DataTransmissionPlayerUpdateRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.DataTransmissionPlayerUpdateRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.DataTransmissionGameEvents(args,t) end,
+                                 function(err) env.info("KI.Scheduled.DataTransmissionGameEvents ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.DataTransmissionGameEventsUpdateRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.DataTransmissionGameEventsUpdateRate)
+
+
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return KI.Scheduled.DataTransmissionGeneral(args,t) end,
+                                 function(err) env.info("KI.Scheduled.DataTransmissionGeneral ERROR : " .. err) end)
+  if not success then
+    return t + KI.Config.DataTransmissionGeneralUpdateRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + KI.Config.DataTransmissionGeneralUpdateRate)
+
+
+timer.scheduleFunction(function(args, time) 
+  local success, result = xpcall(function() 
+        KI.Loader.SaveData() 
+        return time + KI.Config.SaveMissionRate 
+    end,
+    function(err) env.info("KI.Loader.SaveData ERROR : " .. err) end)
+    
+  if not success then
+    return t + KI.Config.SaveMissionRate
+  else
+    return result
+  end   
+end, {}, timer.getTime() + KI.Config.SaveMissionRate)
+  
+  
+timer.scheduleFunction(function(args, t)
+  local success, result = xpcall(function() return AICOM.DoTurn(args,t) end,
+                                 function(err) env.info("AICOM.DoTurn ERROR : " .. err) end)
+  if not success then
+    return t + AICOM.Config.TurnRate
+  else
+    return result
+  end
+end, {}, timer.getTime() + AICOM.Config.TurnRate)
+
+env.info("KI - Scheduled functions created")
+
+world.addEventHandler(KI.Hooks.GameEventHandler)
+env.info("KI - World Event Handlers registered")
+
+
 
 
 return true

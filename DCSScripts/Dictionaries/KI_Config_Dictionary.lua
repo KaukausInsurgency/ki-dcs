@@ -71,7 +71,7 @@ ConfigChecker.KIConfigDictionary =
   },
   
   { 
-    Name = "KI.Config.AllySide", Default = 2, 
+    Name = "KI.Config.AllySide",
     Rules = 
     {
       ConfigChecker.IsNumber,

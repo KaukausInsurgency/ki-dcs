@@ -154,11 +154,11 @@ function()
   
   UT.TestCompare(function() return AnalyzedCapturePoints[2].CapturePoint.Name == "RedCP10" end)
   UT.TestCompare(function() return AnalyzedCapturePoints[2].Cost == 12 end)
-  UT.TestCompare(function() return AnalyzedCapturePoints[2].Action == AICOM.Enum.Actions.Reinforce end)
+  UT.TestCompare(function() return AnalyzedCapturePoints[2].Action == AICOM.Enum.Actions.Attack end)
   
   UT.TestCompare(function() return AnalyzedCapturePoints[3].CapturePoint.Name == "BlueCP10" end)
   UT.TestCompare(function() return AnalyzedCapturePoints[3].Cost == 15 end)
-  UT.TestCompare(function() return AnalyzedCapturePoints[3].Action == AICOM.Enum.Actions.Attack end)
+  UT.TestCompare(function() return AnalyzedCapturePoints[3].Action == AICOM.Enum.Actions.Reinforce end)
   
   UT.TestCompare(function() return AnalyzedCapturePoints[4].CapturePoint.Name == "ContestedCP10" end)
   UT.TestCompare(function() return AnalyzedCapturePoints[4].Cost == 18 end)
@@ -166,11 +166,11 @@ function()
   
   UT.TestCompare(function() return AnalyzedCapturePoints[5].CapturePoint.Name == "RedCP20" end)
   UT.TestCompare(function() return AnalyzedCapturePoints[5].Cost == 17 end)
-  UT.TestCompare(function() return AnalyzedCapturePoints[5].Action == AICOM.Enum.Actions.Reinforce end)
+  UT.TestCompare(function() return AnalyzedCapturePoints[5].Action == AICOM.Enum.Actions.Attack end)
   
   UT.TestCompare(function() return AnalyzedCapturePoints[6].CapturePoint.Name == "BlueCP20" end)
   UT.TestCompare(function() return AnalyzedCapturePoints[6].Cost == 25 end)
-  UT.TestCompare(function() return AnalyzedCapturePoints[6].Action == AICOM.Enum.Actions.Attack end)
+  UT.TestCompare(function() return AnalyzedCapturePoints[6].Action == AICOM.Enum.Actions.Reinforce end)
   
   -- Test that capture points with no spawn zone are ignored in analysis - this should return 0 results
   local AnalysisResults = AICOM.Analyze({ [1] = UT.TestData.MockCapturePoint_NoSpawnZones })

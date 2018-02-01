@@ -336,7 +336,8 @@ function()
                               string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC OutPost")
                             )
                           end)
-
+    -- this is an expected failure - currently a bug in DCS when invoking cargo:destroy() the DEAD event is deferred
+    -- until after a piece of code has finished running   
     UT.TestCompare(function() return 
                             not (
                               string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC FuelTruck") and 
@@ -344,6 +345,8 @@ function()
                             )
                           end)
 
+    -- this is an expected failure - currently a bug in DCS when invoking cargo:destroy() the DEAD event is deferred
+    -- until after a piece of code has finished running
     -- crates should be destroyed
     UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)
     UT.TestCompare(function() return not UT.TestData.OutpostPipeCrateObject:isExist() end)
@@ -358,6 +361,8 @@ function()
     UT.TestData.OutpostSupplyCrateObject2 = SLC.SpawnCrate(UT.TestData.PlayerGroup, 
                                               "SLCPilot1", SLC.Config.ComponentTypes.OutpostSupplyCrate)
     
+    -- this is an expected failure - currently a bug in DCS when invoking cargo:destroy() the DEAD event is deferred
+    -- until after a piece of code has finished running
     -- this should be nil, as it should not be possible to unpack anything
     UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
   end
