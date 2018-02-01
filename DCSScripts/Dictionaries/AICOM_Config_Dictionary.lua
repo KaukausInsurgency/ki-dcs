@@ -12,7 +12,25 @@ ConfigChecker.AICOMConfigDictionary =
       function(x) return x < 900, "Low values will make the AI Spawn units more frequently, which can lead to performance issues. Recommend using values greater than 15 minutes." end,
     }
   },
-  { Name = "AICOM.Config.InitMoves", Default = 3, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive} },
+  { 
+    Name = "AICOM.Config.InitMoves", 
+    Rules = 
+    {
+      ConfigChecker.IsNumber, 
+      ConfigChecker.IsNumberPositive,
+      function(x)
+        local _cnt = 0
+        for i = 1, #KI.Config.CP do
+          local _cp = KI.Config.CP[i]
+          if _cp.spawnzone1 ~= nil and _cp.spawnzone2 ~= nil then
+            _cnt = _cnt + 1
+          end
+        end
+        
+        return x <= _cnt, "Invalid value - AICOM requires that InitMoves is less than or equal to the number of capturable points. Only " .. tostring(_cnt) .. " capturable points were found!"
+      end
+    } 
+  },
   { Name = "AICOM.Config.InitResource", Default = 125, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive} },
   { 
     Name = "AICOM.Config.PopulationCap", Default = 150, 
