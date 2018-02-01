@@ -80,6 +80,12 @@ ConfigChecker.AICOMConfigDictionary =
               if not _result then
                 msg = msg .. "\n" .. "AICOM.Config.Forces property 'Templates' - " .. _innerMsg
                 result = false
+              else
+                local _resultCoalition, _innerMsg2 = ConfigChecker.AreGroupsInsurgentSide(tt.Templates)
+                if not _resultCoalition then
+                  msg = msg .. "\n" .. "AICOM.Config.Forces property 'Templates' - " .. _innerMsg2
+                  result = false
+                end
               end
             end
           end

@@ -4,5 +4,5 @@ end
 
 ConfigChecker.DWMConfigDictionary = 
 {
-  { Name = "DWM.Config.ConvoyGroupTemplates", Rules = { ConfigChecker.IsTable, ConfigChecker.AreGroups } }
+  { Name = "DWM.Config.ConvoyGroupTemplates", Rules = { ConfigChecker.IsTable, ConfigChecker.AreGroups, ConfigChecker.AreGroupsAllySide } }
 }

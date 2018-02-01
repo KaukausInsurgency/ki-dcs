@@ -47,6 +47,38 @@ function ConfigChecker.AreGroups(x)
   return result, _msg
 end
 
+function ConfigChecker.AreGroupsAllySide(x)
+  local _msg = ""
+  local result = true
+  for i = 1, #x do
+    local _grp = Group.getByName(x[i])
+    if _grp ~= nil then
+      if _grp:getCoalition() ~= KI.Config.AllySide then
+        _msg = _msg .. "Group '" .. tostring(x[i]) .. "' is on the wrong coalition! Must be part of Ally Coalition!\n"
+        result = false
+      end
+    end
+  end
+  
+  return result, _msg
+end
+
+function ConfigChecker.AreGroupsInsurgentSide(x)
+  local _msg = ""
+  local result = true
+  for i = 1, #x do
+    local _grp = Group.getByName(x[i])
+    if _grp ~= nil then
+      if _grp:getCoalition() ~= KI.Config.InsurgentSide then
+        _msg = _msg .. "Group '" .. tostring(x[i]) .. "' is on the wrong coalition! Must be part of Insurgent Coalition!\n"
+        result = false
+      end
+    end
+  end
+  
+  return result, _msg
+end
+
 function ConfigChecker.AreClients(x)
 
   local _msg = ""
