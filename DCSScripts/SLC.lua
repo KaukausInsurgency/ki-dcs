@@ -306,7 +306,7 @@ end
 function SLC.SpawnSlingLoadableCargo(rawtype, comp, pos)
   env.info("SLC.SpawnSlingLoadableCargo Called")
 	local cargo_name = SLC.GenerateName(comp.SpawnName)
-	local obj = coalition.addStaticObject(country.id.RUSSIA, {
+	local obj = coalition.addStaticObject(KI.Config.AllyCountryID, {
 		country = "Russia",
 		category = "Cargos",
 		x = pos.x,

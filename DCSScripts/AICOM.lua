@@ -100,6 +100,15 @@ function AICOM.Analyze(CapturePoints)
     env.info("AICOM.Analyze - WARNING CapturePoints null")
     return {}
   end
+  local AllyOwn, InsurgentOwn
+  if KI.Config.AllySide == 1 then 
+    AllyOwn = "Red" 
+    InsurgentOwn = "Blue"
+  else 
+    AllyOwn = "Blue" 
+    InsurgentOwn = "Red"
+  end
+  
   local _cpAnalysis = {}
   for i = 1, #CapturePoints do
     local _cp = CapturePoints[i]
@@ -115,22 +124,31 @@ function AICOM.Analyze(CapturePoints)
       if _own == "Neutral" then
         _cost = _cost + 1
         _type = AICOM.Enum.Actions.Attack
-      elseif _own == "Blue" then
+      elseif _own == InsurgentOwn then
         _cost = _cost + 5
-        _type = AICOM.Enum.Actions.Attack
-      elseif _own == "Red" then
-        _cost = _cost + 7
         _type = AICOM.Enum.Actions.Reinforce
+      elseif _own == AllyOwn then
+        _cost = _cost + 7
+        _type = AICOM.Enum.Actions.Attack
       else
         -- contested
         _cost = _cost + 3
         _type = AICOM.Enum.Actions.Reinforce
       end
       
-      -- now include blue units and red units into the cost (with red units being half the cost of a blue unit)
-      _cost = _cost + _cp.BlueUnits
-      if _cp.RedUnits > 0 then
-        _cost = _cost + (_cp.RedUnits / 2)  -- add red units as a cost, but for half the price of blue units
+      local AllyUnits, InsurgentUnits
+      if KI.Config.AllySide == 1 then 
+        AllyUnits = _cp.RedUnits
+        InsurgentUnits = _cp.BlueUnits
+      else
+        AllyUnits = _cp.BlueUnits
+        InsurgentUnits = _cp.RedUnits
+      end
+      
+      -- now include allied units and insurgent units into the cost (with allied units being half the cost of an insurgent unit)
+      _cost = _cost + InsurgentUnits
+      if AllyUnits > 0 then
+        _cost = _cost + (AllyUnits / 2)  -- add allied units as a cost, but for half the price of insurgent units
       end
       
       table.insert(_cpAnalysis, { CapturePoint = _cp, Cost = _cost, Action = _type })
@@ -425,7 +443,7 @@ function AICOM.DoTurn(args, time)
   
   local fncSuccess, result = xpcall(function()
     -- check the pop cap and see if we've hit the limit
-    local _cap = AICOM.CalculatePopulationCap(coalition.getGroups(2, Group.Category.GROUND))
+    local _cap = AICOM.CalculatePopulationCap(coalition.getGroups(KI.Config.InsurgentSide, Group.Category.GROUND))
     if _cap >= AICOM.Config.PopulationCap then
       env.info("AICOM.DoTurn - pop cap has been reached (" .. tostring(_cap) .. "/" .. tostring(AICOM.Config.PopulationCap) .. ") - Doing nothing")
       KI.UTDATA.AICOM_POPCAP_REACHED = true

@@ -9,7 +9,7 @@ KI.Init = {}
 
 function KI.Init.Depots()
   env.info("KI.InitDepots called")
-  local objects = coalition.getStaticObjects(1)
+  local objects = coalition.getStaticObjects(KI.Config.AllySide)
   for i = 1, #objects do
     local obj = objects[i]
     local n = obj:getName()

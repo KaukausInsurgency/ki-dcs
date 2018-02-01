@@ -156,13 +156,11 @@ function KI.Loader.GenerateStaticTable(staticObj, category, component, isCargo)
   isCargo = isCargo or false
   
   local _country = ""
-  if staticObj:getCoalition() == 1 then
-    _country = "Russia"
+  if staticObj:getCoalition() == KI.Config.AllySide then
+    _country = KI.Config.AllyCountryName -- USA
   else
     _country = "Insurgents"
   end
-
-  --local _category = "Warehouses" -- this can also be 'Fortifications', 'Warehouses', 'Cargos'
   
   local staticData = 
   {

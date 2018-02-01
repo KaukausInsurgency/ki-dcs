@@ -151,7 +151,7 @@ local function StartKI()
   
   env.info("KI - Initializing Scheduled Functions")
   timer.scheduleFunction(function(args, t)
-    local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(1, t) end,
+    local success, result = xpcall(function() return KI.Scheduled.IsPlayerInZone(KI.Config.AllySide, t) end,
                                    function(err) env.info("KI.Scheduled.IsPlayerInZone ERROR : " .. err) end)
                                    
     if not success then

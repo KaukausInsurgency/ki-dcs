@@ -10,6 +10,12 @@ KI.Config = {}
 -- The side of the allies (Players) - 1 is RED, 2 is BLUE
 KI.Config.AllySide = 1
 
+-- The country ID to use when spawning allied cargo (required by coalition.AddStaticObject)
+KI.Config.AllyCountryID = country.id.RUSSIA
+
+-- The country name string to use when spawning allied cargo (required by coalition.AddStaticObject)
+KI.Config.AllyCountryName = "Russia"
+
 -- The side of the insurgents (AI) - 1 is RED, 2 IS BLUE
 KI.Config.InsurgentSide = 2
 

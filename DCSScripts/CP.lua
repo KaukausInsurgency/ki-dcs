@@ -52,13 +52,21 @@ function CP:Fortify(resource, val)
   val = val or 1
   local msg = ""
   local result = false
-  local newtotal = self.RedUnits + val
+  local AlliedUnits
+  
+  if KI.Config.AllySide == 1 then
+    AlliedUnits = self.RedUnits
+  else
+    AlliedUnits = self.BlueUnits
+  end
+  
+  local newtotal = AlliedUnits + val
   if newtotal <= self.MaxCapacity then
     env.info("CP:Fortify - CP has enough capacity to accept this fortification")
     result = true
     msg = self.Name .. " fortified with " .. resource .. "! (Capacity: " .. tostring(newtotal) .. " / " .. tostring(self.MaxCapacity) .. ")"
   else
-    msg = "Capture Point cannot be fortified any further! (Capacity: " .. tostring(self.RedUnits) .. " / " .. tostring(self.MaxCapacity) .. ")"
+    msg = "Capture Point cannot be fortified any further! (Capacity: " .. tostring(AlliedUnits) .. " / " .. tostring(self.MaxCapacity) .. ")"
   end
 
   return result, msg
@@ -79,7 +87,8 @@ function CP:SetCoalitionCounts(reds, blues)
   self.RedUnits = reds
   local own = CP.GetOwnership(self)
   if self.Owner ~= own then
-    trigger.action.outTextForCoalition(1, "ALERT --- " .. self.Name .. " is now " .. own, 10)
+    KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
+    KI.Toolbox.MessageCoalition(KI.Config.InsurgentSide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
     self.Owner = own
   end
 end

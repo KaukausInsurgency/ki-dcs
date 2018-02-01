@@ -147,8 +147,17 @@ end
 -- looping function that updates Capture Point unit counts and their status (whether contested, blue, red, neutral, etc)
 function KI.Scheduled.UpdateCPStatus(arg, time)
   env.info("KI.Scheduled.UpdateCPStatus called")
+  
+  local _AllyOwner 
+  if KI.Config.AllySide == 1 then
+    _AllyOwner = "Red"
+  else
+    _AllyOwner = "Blue"
+  end
+  
   local _rGroups = coalition.getGroups(1, Group.Category.GROUND)
   local _bGroups = coalition.getGroups(2, Group.Category.GROUND)
+  
   for i = 1, #KI.Data.CapturePoints do
     local _indicesToRemove = {}
     
@@ -158,10 +167,15 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     local _z = _cp.Zone
     local _slotsdisabled = false
     
+    
     -- arg is boolean indicating if this is a first time run of this function
-    -- on the very first call to UpdateCPStatus - set all slots to disabled
-    -- then let the function correct itself and open up any slots after counting all the units
-    if (_cp.BlueUnits > 0 or _cp.RedUnits <= 0) and not arg then
+    -- on the very first call to UpdateCPStatus - any capture points not owned by allied forces will have _slotsdisabled set to false
+    -- this is because we have not disabled any slots yet on our first run of this code
+    -- then let the function correct itself and open up / disable slots after counting all the units
+    -- on subsidiary calls to this function, we will set the _slotsdisabled to true to identify that these slots were disabled
+    -- in a previous call
+    -- this is done to remove redundant/duplicate calls to flag setting and dostring_in calls 
+    if (_cp:GetOwnership() ~= _AllyOwner) and not arg then
       _slotsdisabled = true
     end
     
@@ -223,19 +237,19 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     if _cp.Slots and #_cp.Slots > 0 then
       env.info("KI.Scheduled.UpdateCPStatus - CP has slots")
       -- enable slots
-      if _rcnt > 0 and _bcnt <= 0 and _slotsdisabled then
+      if _cp:GetOwnership() == _AllyOwner and _slotsdisabled then
         env.info("KI.Scheduled.UpdateCPStatus - Enabling slots for " .. _cp.Name)
         for s = 1, #_cp.Slots do
           trigger.action.setUserFlag(_cp.Slots[s],0)  
         end   
-      elseif (_rcnt <= 0 or _bcnt > 0) and not _slotsdisabled then -- disable slots
+      elseif _cp:GetOwnership() ~= _AllyOwner and not _slotsdisabled then -- disable slots
         env.info("KI.Scheduled.UpdateCPStatus - Disabling slots for " .. _cp.Name)
         for s = 1, #_cp.Slots do
           trigger.action.setUserFlag(_cp.Slots[s],100)  
         end 
       end
     end
-  end
+  end -- end for capture points
   
   return time + KI.Config.CPUpdateRate
 end
