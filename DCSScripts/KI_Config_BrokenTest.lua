@@ -8,7 +8,7 @@ end
 KI.Config = {}
 
 -- The side of the allies (Players) - 1 is RED, 2 is BLUE
-KI.Config.AllySide = 1
+KI.Config.AllySide = 2
 
 -- The country ID to use when spawning allied cargo (required by coalition.AddStaticObject)
 KI.Config.AllyCountryID = country.id.RUSSIA

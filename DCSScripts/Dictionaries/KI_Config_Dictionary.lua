@@ -70,6 +70,42 @@ ConfigChecker.KIConfigDictionary =
     Warnings = {ConfigChecker.IsReservedPort}
   },
   
+  { 
+    Name = "KI.Config.AllySide", Default = 2, 
+    Rules = 
+    {
+      ConfigChecker.IsNumber,
+      function(x)
+        return x == 1 or x == 2, "Invalid value - must be 1 or 2!"
+      end,
+      function(x)
+        if KI.Config.InsurgentSide ~= nil then
+          return KI.Config.InsurgentSide ~= x, "Invalid value - you cannot use the same side value for both AllySide and InsurgentSide!"
+        else
+          return true
+        end      
+      end
+    }
+  },
+  { 
+    Name = "KI.Config.InsurgentSide", Default = 1, 
+    Rules = 
+    {
+      ConfigChecker.IsNumber, 
+      function(x)
+        return x == 1 or x == 2, "Invalid value - must be 1 or 2!"
+      end,
+      function(x)
+        if KI.Config.AllySide ~= nil then
+          return KI.Config.AllySide ~= x, "Invalid value - you cannot use the same side value for both AllySide and InsurgentSide!"
+        else
+          return true
+        end      
+      end
+    }
+  },
+  { Name = "KI.Config.AllyCountryID", Rules = { ConfigChecker.IsNumber, ConfigChecker.IsNumberPositiveOrZero }},
+  { Name = "KI.Config.AllyCountryName", Rules = { ConfigChecker.IsString}},
   
   { Name = "KI.Config.CrateDespawnTime_Depot", Default = 300, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}},
   { Name = "KI.Config.CrateDespawnTime_Wild", Default = 14400, Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}}, 
