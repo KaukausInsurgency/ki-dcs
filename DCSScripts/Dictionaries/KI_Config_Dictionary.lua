@@ -88,7 +88,7 @@ ConfigChecker.KIConfigDictionary =
     }
   },
   { 
-    Name = "KI.Config.InsurgentSide", Default = 1, 
+    Name = "KI.Config.InsurgentSide",
     Rules = 
     {
       ConfigChecker.IsNumber, 
