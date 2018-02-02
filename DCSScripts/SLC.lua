@@ -492,7 +492,10 @@ function SLC.PerformAction(action, actionName, parentAction, transportGroup, pil
       env.info("SLC.PerformAction - Found PreOnRadioAction callback - invoking")
       if SLC.Config.PreOnRadioAction(actionName, parentAction, transportGroup, pilotname, comp) then
         env.info("SLC.PerformAction - PreOnRadioAction callback returned true, executing action")
-        local actionResult = action(transportGroup, pilotname, comp)
+        local ok, actionResult = xpcall(function() return action(transportGroup, pilotname, comp) end, 
+                                        function(err) env.info("SLC.PerformAction ERROR - " .. err) end)
+        if not ok then return end
+        
         if SLC.Config.PostOnRadioAction then
           SLC.Config.PostOnRadioAction(actionName, actionResult, parentAction, transportGroup, pilotname, comp)
         end
@@ -527,8 +530,7 @@ function SLC.AddSLCRadioItems(g, pilotname)
                          
   local submenus = {}
   -- generate menu items based on component types config (components are radio items that can be spawned in for pickup)
-  env.info("SLC.AddSLCRadioItems ComponentTypes count: " .. tostring(#SLC.Config.ComponentTypes))
-  --for crate, comp in pairs(SLC.Config.ComponentTypes) do
+
   for _, c in ipairs(SLC.Config.ComponentTypesOrder) do
     local comp = SLC.Config.ComponentTypes[c]
     env.info("SLC.AddSLCRadioItems - looping through component types for " .. comp.MenuName)

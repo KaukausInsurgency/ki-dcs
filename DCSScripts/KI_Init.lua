@@ -8,21 +8,21 @@ KI.Init = {}
 
 
 function KI.Init.Depots()
-  env.info("KI.InitDepots called")
+  env.info("KI.Init.Depots called")
   local objects = coalition.getStaticObjects(KI.Config.AllySide)
   for i = 1, #objects do
     local obj = objects[i]
     local n = obj:getName()
-    env.info("KI.InitDepotZones - looping through static objects (" .. n .. ")")
+    env.info("KI.Init.Depots - looping through static objects (" .. n .. ")")
     if string.match(n, "Depot") then
-      env.info("KI.InitDepotZones - found Depot object - initializing")
+      env.info("KI.Init.Depots - found Depot object - initializing")
       
       local IsSupplier = false
       local Capacity = 150
       for k = 1, #KI.Config.Depots do
         local cdepot = KI.Config.Depots[k]
         if cdepot.name == n then
-          env.info("KI.InitDepotZones - found match in KI.Config.Depots")
+          env.info("KI.Init.Depots - found match in KI.Config.Depots")
           IsSupplier = cdepot.supplier
           if IsSupplier then
             Capacity = -1
@@ -32,25 +32,19 @@ function KI.Init.Depots()
       
       -- temporarily change depot size to 400 to test convoy resupply
       local _depot = DWM:New(n, n .. " Zone", 7200, Capacity, IsSupplier)
-      _depot:SetResource("Infantry", 40, 1)
-      _depot:SetResource("APC", 8, 2)
-      _depot:SetResource("Tank", 8, 3)
-      _depot:SetResource("Fuel Truck", 4, 1)
-      _depot:SetResource("Command Truck", 4, 1)
-      _depot:SetResource("Ammo Truck", 4, 1)
-      _depot:SetResource("Power Truck", 4, 1)
-      _depot:SetResource("Fuel Tanks", 8, 1)
-      _depot:SetResource("Cargo Crates", 8, 1) 
-      _depot:SetResource("Watchtower Wood", 4, 2)
-      _depot:SetResource("Watchtower Supplies", 4, 1)
-      _depot:SetResource("Outpost Pipes", 4, 3)
-      _depot:SetResource("Outpost Wood", 4, 2)
-      _depot:SetResource("Outpost Supplies", 4, 1)
+      
+      env.info("KI.Init.Depots - Adding Content")
+      for j = 1, #DWM.Config.Contents do
+        local _content = DWM.Config.Contents[j]
+        _depot:SetResource(_content.Name, _content.InitialStock, _content.StockMultiplier)
+        env.info("KI.Init.Depots - Added Resource " .. _content.Name)
+      end
+
       table.insert(KI.Data.Depots, _depot)   
-      env.info("KI.InitDepotZones - DWM Instance created for " .. n)
+      env.info("KI.Init.Depots - DWM Instance created for " .. n)
       
       if KI.Config.DisplayDepotMarkers then
-        env.info("KI.InitDepotZones - Creating F10 Map Marker")
+        env.info("KI.Init.Depots - Creating F10 Map Marker")
         trigger.action.markToAll(KI.IncrementMarkerID(), _depot.Name, _depot.Zone:GetVec3())
       end
     end

@@ -71,6 +71,8 @@ SLC.Config.PilotNames =
   "SLCPilot47",
   "SLCPilot48",
   "SLCPilot49",
+  "SLCPilot50",
+  "SLCPilot51",
 }
 
 SLC.Config.InfantryTransportingHelicopters =
@@ -153,11 +155,22 @@ SLC.Config.ComponentTypes =
   TankCrate = 
   { 
     KeyName = "TankCrate",
+    ParentMenu = "Tank Crates",
     MenuName = "T-72 Crate", 
     SpawnName = "SLC TankCrate", 
     Type = "SmallContainer", 
     Weight = 4500,
     Assembler = "TankT72"
+  },
+  TankCrate2 = 
+  { 
+    KeyName = "TankCrate2",
+    ParentMenu = "Tank Crates",
+    MenuName = "T-90 Crate", 
+    SpawnName = "SLC Tank2Crate", 
+    Type = "SmallContainer", 
+    Weight = 4500,
+    Assembler = "TankT90"
   },
   
   WatchTowerWoodCrate = 
@@ -218,13 +231,13 @@ SLC.Config.ComponentTypesOrder =
     "PowerTruckCrate",
     "MechBTRCrate",
     "TankCrate",
+    "TankCrate2",
     "WatchTowerWoodCrate",
     "WatchTowerSupplyCrate",
     "OutpostPipeCrate",
     "OutpostSupplyCrate",
     "OutpostWoodCrate"
 }
-
 
 
 -- Assembler configuration - instructs SLC how to assemble an object
@@ -270,6 +283,13 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn TankT72 Template",
     SpawnName = "SLC TankT72", 
     Components = { TankCrate = SLC.Config.ComponentTypes.TankCrate },
+    Count = 1
+  },
+  TankT90 = 
+  { 
+    SpawnTemplate = "Spawn TankT72 Template",
+    SpawnName = "SLC TankT90", 
+    Components = { TankCrate2 = SLC.Config.ComponentTypes.TankCrate2 },
     Count = 1
   },
   

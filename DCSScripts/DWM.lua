@@ -121,12 +121,13 @@ function DWM:Give(resource, count)
 end
   
 function DWM:ViewResources()
+  env.info("DWM:ViewResources() called")
   local msg = "DWM - " .. self.Name .. "\n"
   if self.IsSupplier then
     msg = msg .. "Depot Capacity: infinite / infinite\n"
     msg = msg .. string.format("%-25s|%-5s", "Resource", "Count") .. "\n"
     for res, val in pairs(self.Resources) do
-      msg = msg .. string.format("%-25s|%-5d", res, "infinite") .. "\n"
+      msg = msg .. string.format("%-25s|%-8s", res, "infinite") .. "\n"
     end
   else
     msg = msg .. "Depot Capacity: " .. self.CurrentCapacity .. " / " .. self.Capacity .. "\n"
@@ -140,6 +141,7 @@ function DWM:ViewResources()
 end
 
 function DWM:GetResourceEncoded()
+  env.info("DWM:GetResourceEncoded() called")
   local msg = "Resource|Count\n"
   if self.IsSupplier then
     for res, val in pairs(self.Resources) do
@@ -156,6 +158,7 @@ end
   
 -- spawns a convoy group at the supplier depot, and invokes a callback if available
 function DWM:SpawnConvoy(Supplier)
+  env.info("DWM:SpawnConvoy() called")
   if not Supplier then return false end
   local _template = DWM.Config.ConvoyGroupTemplates[math.random(#DWM.Config.ConvoyGroupTemplates)]
   local SpawnObj = SPAWN:NewWithAlias(_template, KI.GenerateName(_template))

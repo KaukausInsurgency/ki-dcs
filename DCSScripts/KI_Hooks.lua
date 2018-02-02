@@ -107,39 +107,9 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
           env.info("SLC.Config.PreOnRadioAction - Group " .. transGroup.GroupName .. " inside zone " .. _depot.Zone.ZoneName)
           local result = false
           local msg = ""
-          -- if in zone, check DWM contents
-          if actionName == "Fuel Truck Crate" then
-            result, msg = _depot:Take("Fuel Truck", 1)
-          elseif actionName == "Command Truck Crate" then
-            result, msg = _depot:Take("Command Truck", 1)
-          elseif actionName == "Ammo Truck Crate" then
-            result, msg = _depot:Take("Ammo Truck", 1)
-          elseif actionName == "Power Truck Crate" then
-            result, msg = _depot:Take("Power Truck", 1)
-          elseif actionName == "BTR 80 Crate" then
-            result, msg = _depot:Take("APC", 1)
-          elseif actionName == "T-72 Crate" then
-            result, msg = _depot:Take("Tank", 1)
-          elseif actionName == "Watch Tower Wood" then
-            result, msg = _depot:Take("Watchtower Wood", 1)
-          elseif actionName == "Watch Tower Supply Crate" then
-            result, msg = _depot:Take("Watchtower Supplies", 1)
-          elseif actionName == "Outpost Pipes" then
-            result, msg = _depot:Take("Outpost Pipes", 1)
-          elseif actionName == "Outpost Supply Crate" then
-            result, msg = _depot:Take("Outpost Supplies", 1)
-          elseif actionName == "Outpost Wood" then
-            result, msg = _depot:Take("Outpost Wood", 1)
-          elseif actionName == "Infantry Squad" then
-            result, msg = _depot:Take("Infantry", comp.Size)
-          elseif actionName == "Anti Tank Squad" then
-            result, msg = _depot:Take("Infantry", comp.Size)
-          elseif actionName == "MANPADS Squad" then
-            result, msg = _depot:Take("Infantry", comp.Size)
-          else
-            env.info("SLC.Config.PreOnRadioAction - attempt to take an unknown resource from a depot")
-            return false
-          end
+          
+          -- if in zone, try to take content
+          result, msg = _depot:Take(actionName, 1)
 
           if not result then
             trigger.action.outTextForGroup(_groupID, msg, 15, false)
@@ -225,7 +195,15 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
             return obj:destroy()
           end,
           KI.Hooks.GCOnLifeExpiredCrate,
-          { LastPosition = actionResult:getPoint(), Depot = nil, Object = actionResult, DepotIdleTime = 0, WasMoved = false, PlayerUnit = transportGroup:GetDCSUnit(1) },
+          { 
+            LastPosition = actionResult:getPoint(), 
+            Depot = nil, 
+            Object = actionResult, 
+            DepotIdleTime = 0, 
+            WasMoved = false, 
+            PlayerUnit = transportGroup:GetDCSUnit(1),
+            Component = comp
+          },
           KI.Hooks.GC_Crate_IsIdle, KI.Hooks.GC_Crate_DepotExpired, KI.Config.CrateDespawnTime_Wild)
 
         GC.Add(gc_item)
@@ -245,7 +223,7 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
               return obj:Destroy()
             end,
             KI.Hooks.GCOnLifeExpiredTroops,
-            { Depot = nil, Object = actionResult },
+            { Depot = nil, Object = actionResult, Component = comp },
             KI.Hooks.GC_Troops_IsIdle, nil, KI.Config.CrateDespawnTime_Depot)
 
           GC.Add(gc_item)
@@ -289,6 +267,10 @@ function KI.Hooks.SLCPostOnRadioAction(actionName, actionResult, parentAction, t
         end
 
       elseif parentAction == "Crate Management" then
+        -- since it's possible unpack can fail when player tries to use it (ie. no valid assemblies / no crates nearby)
+        -- exit this handler gracefully if that is the case
+        if actionResult == nil then return end
+        
         env.info("SLC.Config.PostOnRadioAction - creating crate event")
         -- create the crate event and raise it
         -- get the location - since you can only unpack/pack at a capture point, look for capture point
@@ -342,12 +324,12 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
   local success, result = xpcall(
     function()
 
-      env.info("GC.GCOnLifeExpiredCrate callback called")
+      env.info("KI.Hooks.GCOnLifeExpiredCrate callback called")
       -- if the item is a crate and is inside a depot zone - despawn it and put contents back into depot
       local _args = gc_item.PredicateArgs
       local n = _args.Object:getName()
       if _args.Depot then
-        env.info("GC.OnLifeExpired - crate is in depot and is being despawned")
+        env.info("KI.Hooks.GCOnLifeExpiredCrate - crate is in depot and is being despawned")
         local _depot = _args.Depot
         if _args.WasMoved then
           KI.Toolbox.MessageCoalition(KI.Config.AllySide, _depot.Name .. " was resupplied with cargo (" .. n .. ") by " .. _args.PlayerUnit:getPlayerName())
@@ -364,31 +346,12 @@ function KI.Hooks.GCOnLifeExpiredCrate(gc_item)
           KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Crate " .. n .. " has been despawned and contents put back into depot!")
         end
 
-        if string.match(n, "SLC FuelTruckCrate") then
-          _depot:Give("Fuel Truck", 1)
-        elseif string.match(n, "SLC CommandTruckCrate") then
-          _depot:Give("Command Truck", 1)
-        elseif string.match(n, "SLC AmmoTruckCrate") then
-          _depot:Give("Ammo Truck", 1)
-        elseif string.match(n, "SLC PowerTruckCrate") then
-          _depot:Give("Power Truck", 1)
-        elseif string.match(n, "SLC BTRCrate") then
-          _depot:Give("APC", 1)
-        elseif string.match(n, "SLC TankCrate") then
-          _depot:Give("Tank", 1)
-        elseif string.match(n, "SLC WTWood") then
-          _depot:Give("Watchtower Wood", 1)
-        elseif string.match(n, "SLC WTCrate") then
-          _depot:Give("Watchtower Supplies", 1)
-        elseif string.match(n, "SLC OPPipe") then
-          _depot:Give("Outpost Pipes", 1)
-        elseif string.match(n, "SLC OPCrate") then
-          _depot:Give("Outpost Supplies", 1)
-        elseif string.match(n, "SLC OPWood") then
-          _depot:Give("Outpost Wood", 1)
+        if _args.Component == nil then
+          env.info("KI.Hooks.GCOnLifeExpiredCrate - ERROR - args.Component is nil")
         else
-          env.info("GC.OnLifeExpired - attempt to give an unknown resource to a depot (Entity: " .. n ..")")
+          _depot:Give(_args.Component.MenuName, 1)     
         end
+        
       else
         env.info("GC.OnLifeExpired - crate is in wild and is being despawned")
         KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Crate " .. n .. " in the wild has been despawned!")
@@ -423,14 +386,10 @@ function KI.Hooks.GCOnLifeExpiredTroops(gc_item)
 
         local result = false
         local msg = ""
-        if string.match(n, "SLC Infantry") then
-          result, msg = _depot:Give("Infantry", 10)
-        elseif string.match(n, "SLC ATInfantry") then
-          result, msg = _depot:Give("Infantry", 6)
-        elseif string.match(n, "SLC MANPADS") then
-          result, msg = _depot:Give("Infantry", 3)
+        if _args.Component == nil then
+          env.info("KI.Hooks.GCOnLifeExpiredCrate - ERROR - args.Component is nil")
         else
-          env.info("GC.GCOnLifeExpiredTroops - attempt to give an unknown resource to a depot (Entity: " .. n ..")")
+          result, msg = _depot:Give(_args.Component.MenuName, 1)
         end
 
         if not result then
@@ -729,6 +688,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         -- elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
         -- elseif event.id == world.event.S_EVENT_MISSION_START then
       elseif event.id == world.event.S_EVENT_BIRTH and playerName then
+        env.info("KI.Hooks.GameEventHandler - BIRTH for " .. event.initiator:getName())
         -- Initialize any radio menu items for the player
         SLC.InitSLCForUnit(event.initiator:getName())
 
