@@ -44,6 +44,8 @@ function KI.Hooks.DWMOnSpawnGroup(moosegrp, fromdepot, todepot)
       todepot.IsSuppliesEnRoute = true  -- should update the reference in KI.Data.Depots
 
       moosegrp:TaskRouteToZone(todepot.Zone, false, 60, "On Road")
+      
+      KI.Toolbox.MessageCoalition(KI.Config.AllySide, "A supply convoy from " .. fromdepot.Name .. " is enroute to " .. todepot.Name .. " - Protect the convoy!")
 
   end, function(err) env.info("KI.Hooks.DWMOnSpawnGroup - ERROR - " .. err) end)
 
@@ -647,6 +649,18 @@ function KI.Hooks.GameEventHandler:onEvent(event)
                 event,
                 timer.getTime())
             )
+            
+            local _group = event.initiator:getGroup()
+            if _group then
+              local _groupID = _group:getID()
+              local msg = "_______________________________________________________________________________________________________\n\n"
+              msg = msg .. "  You have Landed and regained your life\n\n"
+              msg = msg .. "  Lives - "..op.Lives.."/".."5".."\n"
+              msg = msg .. "_______________________________________________________________________________________________________\n"
+
+              trigger.action.outTextForGroup(_groupID, msg, 30, false)
+            end
+            
             return
           end
         end
