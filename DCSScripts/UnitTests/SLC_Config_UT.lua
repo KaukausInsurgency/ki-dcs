@@ -18,40 +18,6 @@ SLC.Config.CrateQueryDistance = 50
 SLC.Config.ObjectSpawnDistance = 25
 SLC.Config.SpawnID = 0
 
-SLC.Config.PilotNames =
-{
-  "SLCPilot1",
-  "SLCPilot2",
-  "SLCPilot3",
-  "SLCPilot4",
-  "SLCPilot5",
-  "SLCPilot6",
-  "SLCPilot7",
-  "SLCPilot8",
-  "SLCPilot9",
-  "SLCPilot10",
-  "SLCPilot11",
-  "SLCPilot12",
-  "SLCPilot13",
-  "SLCPilot14",
-  "SLCPilot15",
-  "SLCPilot16",
-  "SLCPilot17",
-  "SLCPilot18",
-  "SLCPilot19",
-  "SLCPilot20",
-  "SLCPilot21",
-  "SLCPilot22",
-  "SLCPilot23",
-  "SLCPilot24",
-  "SLCPilot25",
-  "SLCPilot26",
-  "SLCPilot27",
-  "SLCPilot28",
-  "SLCPilot29",
-  "SLCPilot30"
-}
-
 SLC.Config.InfantryTransportingHelicopters =
 {
   "Mi-8 MTV2",

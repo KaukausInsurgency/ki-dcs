@@ -124,7 +124,6 @@ GC.OnDespawn = KI.Hooks.GCOnDespawn
 KI.Init.Depots()
 KI.Init.CapturePoints()
 KI.Init.SideMissions()
-SLC.InitSLCRadioItemsForUnits()
 AICOM.Init()
 KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
 env.info("KI - Data Loaded")

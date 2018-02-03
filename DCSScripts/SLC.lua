@@ -596,21 +596,6 @@ end
 
 
 
--- InitSLCRadioItemsForUnits
--- Initializes and adds the SLC Radio Menu Items for each unit that is part of the SLC.Config.PilotNames table
--- If one of those units does not exist, it is skipped
-function SLC.InitSLCRadioItemsForUnits()
-  env.info("SLC - Calling InitSLCRadioItemsForUnits")
-  for i = 1, #SLC.Config.PilotNames do
-    local u = UNIT:FindByName(SLC.Config.PilotNames[i])
-    if u ~= nil then
-      env.info("SLC.InitSLCRadioItemsForUnits - Pilot " .. SLC.Config.PilotNames[i] .. " found, init radio items")
-      SLC.AddSLCRadioItems(u:GetGroup(), SLC.Config.PilotNames[i])
-    end
-  end
-end
-
-
 -- Init SLC by pilotname
 function SLC.InitSLCForUnit(unit_name)
   env.info("SLC - Calling InitSLCForUnit")
@@ -619,16 +604,15 @@ function SLC.InitSLCForUnit(unit_name)
     env.info("SLC - InitSLCForUnit - unit does not exist - aborting")
     return false 
   end
-  for i = 1, #SLC.Config.PilotNames do
-    if SLC.Config.PilotNames[i] == unit_name then
-      env.info("SLC Pilot " .. unit_name .. " found, initializing")
-      SLC.AddSLCRadioItems(u:GetGroup(), SLC.Config.PilotNames[i])
-      return true
-    end
-  end
   
-  env.info("SLC - InitSLCForUnit - Pilot Name not found in SLC table")
-  return false
+  if string.match(unit_name, "SLCPilot") then
+    env.info("SLC Pilot " .. unit_name .. " found, initializing")
+    SLC.AddSLCRadioItems(u:GetGroup(), unit_name)
+    return true
+  else
+    env.info("SLC - InitSLCForUnit - Pilot Name not found in SLC table")
+    return false
+  end 
 end
 
 

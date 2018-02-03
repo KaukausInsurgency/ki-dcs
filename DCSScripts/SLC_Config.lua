@@ -20,61 +20,6 @@ SLC.Config.ObjectSpawnDistance = 25
 -- do not touch!
 SLC.Config.SpawnID = 0
 
-SLC.Config.PilotNames =
-{
-  "SLCPilot1",
-  "SLCPilot2",
-  "SLCPilot3",
-  "SLCPilot4",
-  "SLCPilot5",
-  "SLCPilot6",
-  "SLCPilot7",
-  "SLCPilot8",
-  "SLCPilot9",
-  "SLCPilot10",
-  "SLCPilot11",
-  "SLCPilot12",
-  "SLCPilot13",
-  "SLCPilot14",
-  "SLCPilot15",
-  "SLCPilot16",
-  "SLCPilot17",
-  "SLCPilot18",
-  "SLCPilot19",
-  "SLCPilot20",
-  "SLCPilot21",
-  "SLCPilot22",
-  "SLCPilot23",
-  "SLCPilot24",
-  "SLCPilot25",
-  "SLCPilot26",
-  "SLCPilot27",
-  "SLCPilot28",
-  "SLCPilot29",
-  "SLCPilot30",
-  "SLCPilot31",
-  "SLCPilot32",
-  "SLCPilot33",
-  "SLCPilot34",
-  "SLCPilot35",
-  "SLCPilot36",
-  "SLCPilot37",
-  "SLCPilot38",
-  "SLCPilot39",
-  "SLCPilot40",
-  "SLCPilot41",
-  "SLCPilot42",
-  "SLCPilot43",
-  "SLCPilot44",
-  "SLCPilot45",
-  "SLCPilot46",
-  "SLCPilot47",
-  "SLCPilot48",
-  "SLCPilot49",
-  "SLCPilot50",
-  "SLCPilot51",
-}
-
 SLC.Config.InfantryTransportingHelicopters =
 {
   "Mi-8MT",
@@ -222,6 +167,7 @@ SLC.Config.ComponentTypes =
 }
 
 -- ComponentTypesOrder - is used to maintain order of menu items when iterating with ipairs
+-- move the values around in the way you would like to see them displayed in the F10 menu
 -- if you change SLC.Config.ComponentTypes, YOU MUST UPDATE THIS LIST AS WELL!
 SLC.Config.ComponentTypesOrder =
 {
