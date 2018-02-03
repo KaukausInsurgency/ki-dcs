@@ -95,74 +95,74 @@ ConfigChecker.SLCConfigDictionary =
         for key, t in pairs(x) do
         
           if not ConfigChecker.IsString(key) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes hash key must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes hash key must be type string!"
             result = false
           end
           
           if t.KeyName == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'KeyName' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'KeyName' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.KeyName) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'KeyName' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'KeyName' must be type string!"
             result = false
           elseif not t.KeyName == key then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'KeyName' must be the same as hash key! (hash key: " .. tostring(key) .. ", KeyName: " .. tostring(t.KeyName)
+            msg = msg .. "\n" .. "ComponentTypes property 'KeyName' must be the same as hash key! (hash key: " .. tostring(key) .. ", KeyName: " .. tostring(t.KeyName)
             result = false
           end
           
           if t.MenuName == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'MenuName' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'MenuName' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.MenuName) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'MenuName' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'MenuName' must be type string!"
             result = false
           end
           
           if t.SpawnName == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'SpawnName' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'SpawnName' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.SpawnName) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'SpawnName' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'SpawnName' must be type string!"
             result = false
           end
           
           if t.ParentMenu == nil then
 
           elseif not ConfigChecker.IsString(t.ParentMenu) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'ParentMenu' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'ParentMenu' must be type string!"
             result = false
           end
           
           if t.Type == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Type' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Type' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.Type) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Type' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Type' must be type string!"
             result = false
           elseif not IsCargoType(t.Type) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Type' - cannot find '" .. t.Type .. "' in SLC.Config.CargoTypes!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Type' - cannot find '" .. t.Type .. "' in SLC.Config.CargoTypes!"
             result = false
           end
           
           if t.Assembler == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Assembler' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Assembler' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.Assembler) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Assembler' must be type string!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Assembler' must be type string!"
             result = false
           elseif not IsAssemblerType(t.Assembler) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Assembler' - cannot find '" .. t.Assembler .. "' in SLC.Config.Assembler!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Assembler' - cannot find '" .. t.Assembler .. "' in SLC.Config.Assembler!"
             result = false
           end
           
           if t.Weight == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Weight' cannot be nil!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Weight' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsNumber(t.Weight) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Weight' must be type number!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Weight' must be type number!"
             result = false
           elseif not ConfigChecker.IsNumberPositive(t.Weight) then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypes property 'Weight' must be positive number!"
+            msg = msg .. "\n" .. "ComponentTypes property 'Weight' must be positive number!"
             result = false
           end
         end
@@ -185,7 +185,7 @@ ConfigChecker.SLCConfigDictionary =
         
         for _, k in pairs(x) do
           if SLC.Config.ComponentTypes[k] == nil then
-            msg = msg .. "\n" .. "SLC.Config.ComponentTypesOrder is out of sync with SLC.Config.ComponentTypes! (item: " .. tostring(x) .. " not found in SLC.Config.ComponentTypes)"
+            msg = msg .. "\n" .. "SLC.Config.ComponentTypesOrder is out of sync with SLC.Config.ComponentTypes! (item: " .. tostring(k) .. " not found in SLC.Config.ComponentTypes)"
             result = false
           end   
         end
@@ -230,56 +230,56 @@ ConfigChecker.SLCConfigDictionary =
         for key, t in pairs(x) do
         
           if not ConfigChecker.IsString(key) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler hash key must be type string!"
+            msg = msg .. "\n" .. "Assembler hash key must be type string!"
             result = false
           end
           
           if t.SpawnName == nil then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'SpawnName' cannot be nil!"
+            msg = msg .. "\n" .. "Assembler property 'SpawnName' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.SpawnName) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'SpawnName' must be type string!"
+            msg = msg .. "\n" .. "Assembler property 'SpawnName' must be type string!"
             result = false
           end
           
           if t.SpawnTemplate == nil then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'SpawnTemplate' cannot be nil!"
+            msg = msg .. "\n" .. "Assembler property 'SpawnTemplate' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsString(t.SpawnTemplate) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'SpawnTemplate' must be type string!"
+            msg = msg .. "\n" .. "Assembler property 'SpawnTemplate' must be type string!"
             result = false
           elseif not ConfigChecker.IsGroup(t.SpawnTemplate) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'SpawnTemplate' group " .. tostring(t.SpawnTemplate) .. " does not exist!"
+            msg = msg .. "\n" .. "Assembler property 'SpawnTemplate' group '" .. tostring(t.SpawnTemplate) .. "' does not exist!"
             result = false
           end
       
           if t.Components == nil then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'Components' cannot be nil!"
+            msg = msg .. "\n" .. "Assembler property 'Components' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsTable(t.Components) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'Components' must be type table!"
+            msg = msg .. "\n" .. "Assembler property 'Components' must be type table!"
             result = false
           else
             for comp_key, comp in pairs(t.Components) do
               if not IsComponentType(comp_key) then
-                msg = msg .. "\n" .. "SLC.Config.Assembler property 'Components' hash key not found in SLC.Config.ComponentTypes! (key: " .. tostring(comp_key) .. ")"
+                msg = msg .. "\n" .. "Assembler property 'Components' hash key not found in SLC.Config.ComponentTypes! (key: " .. tostring(comp_key) .. ")"
                 result = false
               elseif comp ~= SLC.Config.ComponentTypes[comp_key] then
-                msg = msg .. "\n" .. "SLC.Config.Assembler property 'Components' object does not equal object defined in SLC.Config.ComponentTypes! (key: " .. tostring(comp_key) .. ")"
+                msg = msg .. "\n" .. "Assembler property 'Components' object does not equal object defined in SLC.Config.ComponentTypes! (key: " .. tostring(comp_key) .. ")"
                 result = false
               end
             end
           end
           
           if t.Count == nil then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'Count' cannot be nil!"
+            msg = msg .. "\n" .. "Assembler property 'Count' cannot be nil!"
             result = false
           elseif not ConfigChecker.IsNumber(t.Count) then
-            msg = msg .. "\n" .. "SLC.Config.Assembler property 'Count' must be type number!"
+            msg = msg .. "\n" .. "Assembler property 'Count' must be type number!"
             result = false
           else
             if t.Components == nil or CountHash(t.Components) ~= t.Count then
-              msg = msg .. "\n" .. "SLC.Config.Assembler property 'Count' must equal the number of items defined in property 'Components'!"
+              msg = msg .. "\n" .. "Assembler property 'Count' must equal the number of items defined in property 'Components'!"
               result = false
             end
           end

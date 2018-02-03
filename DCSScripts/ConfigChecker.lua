@@ -297,6 +297,9 @@ function ConfigChecker.Check(path, dict, configname, logfilename)
           table.insert(filedata, "KI ConfigChecker - ERROR - property " .. _config.Name .. " Cannot be defaulted to any value - Aborting")
           canrun = false
         end
+        
+        -- seperate each config item by newline for better readability
+        table.insert(filedata, "\n")
       
       else
         -- successful config item - if there are warnings try validating those as well
@@ -311,6 +314,7 @@ function ConfigChecker.Check(path, dict, configname, logfilename)
         end -- end if warnings
         
       end -- end if failed/succeeded
+      
       
     end -- end for
     
