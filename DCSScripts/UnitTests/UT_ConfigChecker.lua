@@ -1,5 +1,8 @@
 UT.TestCase("ConfigChecker", 
 function()
+  UT.ValidateSetup(function() return StaticObject.getByName("ConfigCheckerStatic") ~= nil end)
+  UT.ValidateSetup(function() return Group.getByName("ConfigCheckerGroup") ~= nil end)
+  UT.ValidateSetup(function() return ZONE:New("ConfigCheckerZone") ~= nil end)
 end, nil,
 function()
   if true then
@@ -44,6 +47,30 @@ function()
     
     UT.TestCompare(function() return ConfigChecker.IsPath(lfs.writedir() .. "Logs") end)
     UT.TestCompare(function() return not ConfigChecker.IsPath(lfs.writedir() .. "GarbageRandomFOlderNotExist234134513") end)
+    
+    UT.TestCompare(function() return not ConfigChecker.IsStaticObject("Random") end)
+    UT.TestCompare(function() return ConfigChecker.IsStaticObject("ConfigCheckerStatic") end)
+    
+    UT.TestCompare(function() return not ConfigChecker.IsZone("Random") end)
+    UT.TestCompare(function() return ConfigChecker.IsZone("ConfigCheckerZone") end)
+    
+    UT.TestCompare(function() return not ConfigChecker.AreZones({"Random"}) end)
+    UT.TestCompare(function() return not ConfigChecker.AreZones({"ConfigCheckerZone", "Random"}) end)
+    UT.TestCompare(function() return ConfigChecker.AreZones({"ConfigCheckerZone"}) end)
+    
+    UT.TestCompare(function() return not ConfigChecker.IsGroup("Random") end)
+    UT.TestCompare(function() return ConfigChecker.IsGroup("ConfigCheckerGroup") end)
+    
+    UT.TestCompare(function() return not ConfigChecker.AreGroups({"Random"}) end)
+    UT.TestCompare(function() return not ConfigChecker.AreGroups({"ConfigCheckerGroup", "Random"}) end)
+    UT.TestCompare(function() return ConfigChecker.AreGroups({"ConfigCheckerGroup"}) end)
+    
+    KI.Config.AllySide = 1
+    UT.TestCompare(function() return ConfigChecker.AreGroupsAllySide({"ConfigCheckerGroup"}) end)
+    KI.Config.InsurgentSide = 2
+    UT.TestCompare(function() return not ConfigChecker.AreGroupsInsurgentSide({"ConfigCheckerGroup"}) end)
+    
+    UT.TestCompare(function() return ConfigChecker.AreClients("SampleClient") end)
 
     T = 
     {

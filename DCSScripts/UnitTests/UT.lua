@@ -91,7 +91,10 @@ function UT.TestFunction(fnc, ...)
   return xpcall(_test, UT.ErrorHandler)
 end
 
-function UT.TestCompare(cmp)
+function UT.TestCompare(cmp, msg, expectedfailure)
+  msg = msg or ""
+  expectedfailure = expectedfailure or false
+
   --local line = ""
   --line = debug.getinfo(1).currentline
   local errorstr = "NO ERROR"
@@ -103,9 +106,14 @@ function UT.TestCompare(cmp)
     --env.info("UT: PASS - " .. debug.getinfo(2, "n").name .. " - Line: " .. debug.getinfo(2).currentline)
     UT.Pass = UT.Pass + 1
   else
-    local m = "UT: FAILURE - ERROR - " .. errorstr .. " - " .. debug.traceback("TestCompare TraceBack", 2)
-    UT.Log(m)
-    UT.Fail = UT.Fail + 1
+    if not expectedfailure then
+      local m = "UT: FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. errorstr .. " - " .. debug.traceback("TestCompare TraceBack", 2)
+      UT.Log(m)
+      UT.Fail = UT.Fail + 1
+    else
+      local m = "UT: EXPECTED FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. errorstr .. " - " .. debug.traceback("TestCompare TraceBack", 2)
+      UT.Log(m)
+    end
   end
 end
 

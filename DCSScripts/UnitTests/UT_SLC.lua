@@ -343,15 +343,15 @@ function()
                               string.match(UT.TestData.SpawnedGroupA.Result.GroupName, "SLC FuelTruck") and 
                               string.match(UT.TestData.SpawnedGroupB.Result.GroupName, "SLC FuelTruck")
                             )
-                          end)
+                          end, "SLC Unpacked the same crate twice", true)
 
     -- this is an expected failure - currently a bug in DCS when invoking cargo:destroy() the DEAD event is deferred
     -- until after a piece of code has finished running
     -- crates should be destroyed
-    UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end)
-    UT.TestCompare(function() return not UT.TestData.OutpostPipeCrateObject:isExist() end)
-    UT.TestCompare(function() return not UT.TestData.OutpostSupplyCrateObject:isExist() end)
-    UT.TestCompare(function() return not UT.TestData.OutpostWoodCrateObject:isExist() end)
+    UT.TestCompare(function() return not UT.TestData.FuelTruckCrateObject:isExist() end, "SLC Unpack did not destroy crate", true)
+    UT.TestCompare(function() return not UT.TestData.OutpostPipeCrateObject:isExist() end, "SLC Unpack did not destroy crate", true)
+    UT.TestCompare(function() return not UT.TestData.OutpostSupplyCrateObject:isExist() end, "SLC Unpack did not destroy crate", true)
+    UT.TestCompare(function() return not UT.TestData.OutpostWoodCrateObject:isExist() end, "SLC Unpack did not destroy crate", true)
   end
   
   -- next test for SLC.Unpack - this time where there is cargo around the player, but no valid assemblies to spawn
@@ -364,7 +364,7 @@ function()
     -- this is an expected failure - currently a bug in DCS when invoking cargo:destroy() the DEAD event is deferred
     -- until after a piece of code has finished running
     -- this should be nil, as it should not be possible to unpack anything
-    UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end)
+    UT.TestCompare(function() return SLC.Unpack(UT.TestData.PlayerGroup, "SLCPilot1") == nil end, "SLC Unpack was successful even though no valid assembler was found", true)
   end
   
   
@@ -374,21 +374,36 @@ function()
 end,
 function()
   if UT.TestData.SpawnedGroupA then
-    UT.TestData.SpawnedGroupA:Destroy()
+    UT.TestData.SpawnedGroupA.Result:Destroy()
   end
   
   if UT.TestData.SpawnedGroupB then
-    UT.TestData.SpawnedGroupB:Destroy()
+    UT.TestData.SpawnedGroupB.Result:Destroy()
   end
   
-  UT.TestData.FuelTruckCrateObject:destroy()
+  if UT.TestData.FuelTruckCrateObject then
+    UT.TestData.FuelTruckCrateObject:destroy()
+  end
   
-  UT.TestData.OutpostPipeCrateObject:destroy()
-  UT.TestData.OutpostSupplyCrateObject:destroy()
-  UT.TestData.OutpostWoodCrateObject:destroy()
+  if UT.TestData.OutpostPipeCrateObject then
+    UT.TestData.OutpostPipeCrateObject:destroy()
+  end
   
-  UT.TestData.OutpostPipeCrateObject2:destroy()
-  UT.TestData.OutpostSupplyCrateObject2:destroy()
+  if UT.TestData.OutpostSupplyCrateObject then
+    UT.TestData.OutpostSupplyCrateObject:destroy()
+  end
+  
+  if UT.TestData.OutpostWoodCrateObject then
+    UT.TestData.OutpostWoodCrateObject:destroy()
+  end
+  
+  if UT.TestData.OutpostPipeCrateObject2 then
+    UT.TestData.OutpostPipeCrateObject2:destroy()
+  end
+  
+  if UT.TestData.OutpostSupplyCrateObject2 then
+    UT.TestData.OutpostSupplyCrateObject2:destroy()
+  end
 end)
 
 

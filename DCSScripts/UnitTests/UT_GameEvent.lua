@@ -222,7 +222,7 @@ function()
     UT.TestCompare(function() return ge["TargetName"] == "TestKIScoreEnemyAir1" end)
     UT.TestCompare(function() return ge["TargetModel"] == "Su-25T" end)
     UT.TestCompare(function() return ge["TargetType"] == "STRIKER" end)
-    UT.TestCompare(function() return ge["TargetCategory"] == "AIR" end) -- expected failure - current bug in DCS returns bad category
+    UT.TestCompare(function() return ge["TargetCategory"] == "AIR" end,"Target Category not 'AIR'",true) -- expected failure - current bug in DCS returns bad category
     UT.TestCompare(function() return ge["TargetSide"] == 2 end)
     UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return ge["TargetPlayerUCID"] == KI.Null end)
@@ -247,7 +247,7 @@ function()
     UT.TestCompare(function() return ge["TargetName"] == "TestKIScoreEnemyGround1" end)
     UT.TestCompare(function() return ge["TargetModel"] == "T-55" end)
     UT.TestCompare(function() return ge["TargetType"] == "TANK" end)
-    UT.TestCompare(function() return ge["TargetCategory"] == "GROUND" end)  -- expected failure - current bug in DCS returns bad category
+    UT.TestCompare(function() return ge["TargetCategory"] == "GROUND" end,"Target Category not 'GROUND'",true)  -- expected failure - current bug in DCS returns bad category
     UT.TestCompare(function() return ge["TargetSide"] == 2 end)
     UT.TestCompare(function() return ge["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return ge["TargetPlayerUCID"] == KI.Null end)

@@ -265,7 +265,7 @@ function()
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetName"] == "TestKIScoreEnemyAir1" end)
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetModel"] == "Su-25T" end)
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetType"] == "STRIKER" end)
-    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetCategory"] == "AIR" end)  -- expected failure - current bug in DCS returns bad category
+    UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetCategory"] == "AIR" end, "Target Category is not 'AIR'", true)  -- expected failure - current bug in DCS returns bad category
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetIsPlayer"] == false end)
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerUCID"] == KI.Null end)
     UT.TestCompare(function() return KI.Data.GameEventQueue[3]["TargetPlayerName"] == KI.Null end)
