@@ -32,6 +32,37 @@ function KI.Query.FindCP_Group(transGroup)
   return nil
 end
 
+function KI.Query.FindFriendlyCPAirport()
+  env.info("KI.Query.FindFriendlyCPAirport called")
+  
+  local cp = nil  
+  local allyOwn = "Red"
+  
+  if KI.Config.AllySide == 2 then
+    allyOwn = "Blue"
+  end
+  
+  for _, _cp in pairs(KI.Data.CapturePoints) do
+  
+    if _cp.Type == CP.Enum.AIRPORT and _cp:GetOwnership() == allyOwn then
+    
+      if cp == nil then
+        cp = _cp
+      else
+        if KI.Config.AllySide == 2 and (_cp.BlueUnits > cp.BlueUnits) then
+          cp = _cp
+        elseif KI.Config.AllySide == 1 and (_cp.RedUnits > cp.RedUnits) then
+          cp = _cp
+        end
+      end
+      
+    end
+    
+  end
+
+  return cp
+end
+
 -- returns nearest Depot or nil with StaticObject as parameter
 function KI.Query.FindDepot_Static(obj)
   env.info("KI.Query.FindDepot_Static called")

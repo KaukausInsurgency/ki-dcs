@@ -90,6 +90,37 @@ function KI.Hooks.AICOMOnSpawnGroup(moosegrp, spawntype, atkzone, grpconfig)
   end, function(err) env.info("KI.Hooks.AICOMOnSpawnGroup - ERROR - " .. err) end)
 end
 
+
+function KI.Hooks.CSCIPreOnRadioAction(actionName, parentAction, mooseGroup, supportType, capturePoint)
+  local success, result = xpcall(
+    function()
+      env.info("CSCI.Config.PreOnRadioAction called")
+      
+      if parentAction == CSCI.AirdropParentMenu then
+          
+        local spawncp = KI.Query.FindFriendlyCPAirport()
+        
+        if spawncp == nil then
+          local _groupID = mooseGroup:GetDCSObject():getID()
+          trigger.action.outTextForGroup(_groupID, "Unable to call in support! Allies do not own any friendly airports!", 15, false)
+          return false
+        else
+          return true
+        end   
+      
+      end
+    end,
+    function(err) env.info("CSCI.Config.PreOnRadioAction ERROR - " .. err) end)
+
+  if success then
+    return result
+  else
+    return false
+  end
+  
+end
+
+
 -- KI Hooks into SLC and integration with DWM Depots
 function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilotname, comp)
   local success, result = xpcall(
@@ -703,9 +734,11 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         -- elseif event.id == world.event.S_EVENT_MISSION_START then
       elseif event.id == world.event.S_EVENT_BIRTH and playerName then
         env.info("KI.Hooks.GameEventHandler - BIRTH for " .. event.initiator:getName())
+        
         -- Initialize any radio menu items for the player
         SLC.InitSLCForUnit(event.initiator:getName())
-
+        CSCI.InitCSCIForUnit(event.initiator:getName())
+        
         -- we track the unitID so that we can link slingload hook/unhook events to a player
         KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator
 

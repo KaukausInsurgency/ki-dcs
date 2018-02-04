@@ -610,7 +610,7 @@ function SLC.InitSLCForUnit(unit_name)
     SLC.AddSLCRadioItems(u:GetGroup(), unit_name)
     return true
   else
-    env.info("SLC - InitSLCForUnit - Pilot Name not found in SLC table")
+    env.info("SLC - InitSLCForUnit - Pilot Name does not match 'SLCPilot' - aborting")
     return false
   end 
 end

@@ -20,23 +20,28 @@ assert(loadfile(path .. "Dictionaries\\KI_Config_Dictionary.lua"))()
 assert(loadfile(path .. "Dictionaries\\DWM_Config_Dictionary.lua"))()
 assert(loadfile(path .. "Dictionaries\\AICOM_Config_Dictionary.lua"))()
 assert(loadfile(path .. "Dictionaries\\SLC_Config_Dictionary.lua"))()
+assert(loadfile(path .. "Dictionaries\\CSCI_Config_Dictionary.lua"))()
 
 if true then
   local CanRunKI = true
 
-  if not ConfigChecker.Check(path .. "KI_Config.lua", ConfigChecker.KIConfigDictionary, "KI.Config", "ki_config.log") then
+  if not ConfigChecker.Check(path .. "Config\\KI_Config.lua", ConfigChecker.KIConfigDictionary, "KI.Config", "ki_config.log") then
     CanRunKI = false
   end
   
-  if not ConfigChecker.Check(path .. "DWM_Config.lua", ConfigChecker.DWMConfigDictionary, "DWM.Config", "ki_dwm_config.log") then
+  if not ConfigChecker.Check(path .. "Config\\DWM_Config.lua", ConfigChecker.DWMConfigDictionary, "DWM.Config", "ki_dwm_config.log") then
     CanRunKI = false
   end
   
-  if not ConfigChecker.Check(path .. "AICOM_Config.lua", ConfigChecker.AICOMConfigDictionary, "AICOM.Config", "ki_aicom_config.log") then
+  if not ConfigChecker.Check(path .. "Config\\AICOM_Config.lua", ConfigChecker.AICOMConfigDictionary, "AICOM.Config", "ki_aicom_config.log") then
     CanRunKI = false
   end
   
-  if not ConfigChecker.Check(path .. "SLC_Config.lua", ConfigChecker.SLCConfigDictionary, "SLC.Config", "ki_slc_config.log") then
+  if not ConfigChecker.Check(path .. "Config\\SLC_Config.lua", ConfigChecker.SLCConfigDictionary, "SLC.Config", "ki_slc_config.log") then
+    CanRunKI = false
+  end
+  
+  if not ConfigChecker.Check(path .. "Config\\CSCI_Config.lua", ConfigChecker.CSCIConfigDictionary, "CSCI.Config", "ki_csci_config.lua") then
     CanRunKI = false
   end
   
@@ -104,6 +109,7 @@ local function StartKI()
   assert(loadfile(path .. "KI_Scheduled.lua"))()
   assert(loadfile(path .. "KI_Hooks.lua"))()
   assert(loadfile(path .. "AICOM.lua"))()
+  assert(loadfile(path .. "CSCI.lua"))()
   env.info("KI - Scripts Loaded")
 
 
@@ -133,6 +139,7 @@ local function StartKI()
   AICOM.Config.OnSpawnGroup = KI.Hooks.AICOMOnSpawnGroup
   DWM.Config.OnSpawnGroup = KI.Hooks.DWMOnSpawnGroup
   DWM.Config.OnDepotResupplied = KI.Hooks.DWMOnDepotResupplied
+  CSCI.Config.PreOnRadioAction = KI.Hooks.CSCIPreOnRadioAction
   
   --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
   GC.OnDespawn = KI.Hooks.GCOnDespawn
@@ -140,6 +147,7 @@ local function StartKI()
   KI.Init.CapturePoints()
   KI.Init.SideMissions()
   AICOM.Init()
+  CSCI.Init()
   KI.Loader.LoadData()          -- this can fail, and it's safe to ignore (ie. If starting a brand new game from scratch)
   env.info("KI - Data Loaded")
   
