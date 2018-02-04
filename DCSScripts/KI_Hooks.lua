@@ -121,6 +121,15 @@ function KI.Hooks.CSCIPreOnRadioAction(actionName, parentAction, mooseGroup, sup
 end
 
 
+function KI.Hooks.CSCIOnSupportRequestCalled(actionname, parentaction, spawncp, destcp, supporttype)
+  env.info("CSCI.Config.CSCIOnSupportRequestCalled called")
+  xpcall(function() 
+    KI.Toolbox.MessageCoalition(KI.Config.AllySide, parentaction .. " - " .. actionname .. 
+         " has been requested for " .. destcp.Name .. " - aircraft on route from friendly airbase " .. spawncp.Name)
+  end, function(err) env.info("CSCI.Config.CSCIOnSupportRequestCalled ERROR - " .. err) end)
+end
+
+
 -- KI Hooks into SLC and integration with DWM Depots
 function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilotname, comp)
   local success, result = xpcall(

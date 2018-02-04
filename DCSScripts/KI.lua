@@ -140,6 +140,7 @@ local function StartKI()
   DWM.Config.OnSpawnGroup = KI.Hooks.DWMOnSpawnGroup
   DWM.Config.OnDepotResupplied = KI.Hooks.DWMOnDepotResupplied
   CSCI.Config.PreOnRadioAction = KI.Hooks.CSCIPreOnRadioAction
+  CSCI.Config.OnSupportRequestCalled = KI.Hooks.CSCIOnSupportRequestCalled
   
   --GC.OnLifeExpired = KI.Hooks.GCOnLifeExpired
   GC.OnDespawn = KI.Hooks.GCOnDespawn

@@ -77,7 +77,7 @@ function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, supporttyp
       
       if isvalid then
         env.info("CSCI.PerformAction - Invoking action")
-        action(actionname, supporttype, capturepoint)
+        action(actionname, parentmenu, supporttype, capturepoint)
         
         env.info("CSCI.PerformAction - Updating Remaining Calls")
         -- update the counts
@@ -113,29 +113,44 @@ function CSCI.ShowAirdropContents(moosegrp)
   trigger.action.outTextForGroup(_groupID, msg, 20, false)
 end
 
-function CSCI.CreateAirdrop(actionname, supporttype, capturepoint)
+function CSCI.CreateAirdrop(actionname, parentaction, supporttype, destcp)
   env.info("CSCI.CreateAirdrop() called for " .. actionname)
   local spawncp = KI.Query.FindFriendlyCPAirport()
   
   if spawncp ~= nil then
-    
+    local SpawnedGroup = CSCI.SpawnVehicle(supporttype.SpawnTemplate, parentaction, spawncp, destcp, supporttype)
+    if SpawnedGroup ~= nil then
+      if CSCI.Config.OnSupportRequestCalled then
+        env.info("CSCI.CreateAirdrop - found callback CSCI.Config.OnSupportRequestCalled - invoking")
+        CSCI.Config.OnSupportRequestCalled(actionname, parentaction, spawncp, destcp, supporttype)
+      end
+    else
+      env.info("CSCI.CreateAirdrop ERROR - SpawnedGroup is nil!")
+    end
+  else
+    env.info("CSCI.CreateAirdrop ERROR - could not find friendly airport CP!")
   end
 end
 
-function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone)
-  local wp = COORDINATE:WaypointAir
+function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone, supporttype)
+  env.info("CSCI.OnSpawnGroup() called")
+  moosegrp:TaskRouteToZone(destzone, false, supporttype.PlaneCruisingSpeed, FORMATION.Cone)
 end
 
-function CSCI.SpawnVehicle(template, parentAction, spawncp, destcp)
+function CSCI.SpawnVehicle(template, parentAction, spawncp, destcp, supporttype)
+  env.info("CSCI.SpawnVehicle() called")
   local SpawnObj = SPAWN:New(template)
-                    :OnSpawnGroup(function( spawngrp, parentAction, spawnzone, destzone ) 
-                        CSCI.Config.OnSpawnGroup(spawngrp, parentAction, spawnzone, destzone)
-                    end, parentAction, spawncp.Zone, destcp.Zone)
+                    :OnSpawnGroup(function( spawngrp, parentAction, spawnzone, destzone, stype ) 
+                        xpcall(function() 
+                                  CSCI.OnSpawnGroup(spawngrp, parentAction, spawnzone, destzone, stype) 
+                               end,
+                               function(err) env.info("CSCI.SpawnVehicle:OnSpawnGroup ERROR - " .. err) end)
+                    end, parentAction, spawncp.Zone, destcp.Zone, supporttype)
   local NewGroup = SpawnObj:SpawnInZone(spawncp.Zone, true)
   if NewGroup ~= nil then
-    env.info("AICOM._SpawnGroups - Successfully spawned group " .. _template .. " in zone " .. spawnzone:GetName())
+    env.info("CSCI.SpawnVehicle - Successfully spawned group " .. template .. " in zone " .. spawncp.Name)
   else
-    env.info("AICOM._SpawnGroups - ERROR - Failed to spawn group " .. _template .. " in zone " .. spawnzone:GetName())
+    env.info("CSCI.SpawnVehicle - ERROR - Failed to spawn group " .. template .. " in zone " .. spawncp.Name)
   end
   
   return NewGroup

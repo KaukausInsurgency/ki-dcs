@@ -9,6 +9,8 @@ CSCI.Config = {}
 -- must return true / false
 CSCI.Config.PreOnRadioAction = nil
 
+-- Passed parameters actionname, parentaction, spawncp, destcp, supporttype
+CSCI.Config.OnSupportRequestCalled = nil
 
 -- if this is set to true, the CSCI menu will only be available for clients with a unit name that contains 'CSCIPilot'
 -- otherwise it will be available to all client units
@@ -20,7 +22,7 @@ CSCI.Config.AirdropTypes =
   {
     MenuName = "Infantry Paradrop",
     SpawnTemplate = "C130",
-    SpawnIn = "Ramp Hot",
+    SpawnIn = "Ramp Hot", -- unused atm
     Cooldown = 1800,
     MaxCallsPerCooldown = 3,
     MaxCallsPerSession = 15,

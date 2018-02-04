@@ -223,6 +223,11 @@ function()
     UT.TestCompare(function() return resultset2 == nil end)   
   end
   
+  if true then
+    -- KI.Query.FindFriendlyCPAirport()
+    UT.TestCompare(function() return 1 == 2 end)
+  end
+  
 end,
 
 -- TearDown
