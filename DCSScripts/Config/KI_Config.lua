@@ -105,11 +105,14 @@ KI.Config.Depots =
 }
 
 -- configures capture points in mission
+-- for CP of type "AIRPORT" a property airbase is required - this must be the name of the airbase in DCS to spawn airdrops from
+-- see http://flightcontrol-master.github.io/MOOSE/Documentation/Airbase.html##(AIRBASE).Caucasus for list of valid enums to use
 KI.Config.CP =
 {
   { name = "Beslan Airport", zone = "Beslan Airport Zone", spawnzone1 = "Beslan Vehicle Spawn", spawnzone2 = "Beslan Infantry Spawn", 
     type = "AIRPORT", text = "Tower Frequencies<br/>  - 141.000 MHz<br/>  - 42.400 MHz<br/>  - 270.000 MHz<br/>  - 4.750 MHz",
     capacity = 30,
+    airbase = AIRBASE.Caucasus.Beslan,
     slots = 
     {
       "Beslan-Su25T-1",
@@ -128,6 +131,7 @@ KI.Config.CP =
   },
   { name = "Nalchik Airport", zone = "Nalchik Airport Zone", spawnzone1 = nil, spawnzone2 = nil, 
     type = "AIRPORT", text = "Tower Frequencies<br/>  - 136.000 MHz<br/>  - 41.400 MHz<br/>  - 265.000 MHz<br/>  - 4.500 MHz",
+    airbase = AIRBASE.Caucasus.Nalchik,
     capacity = 30,
     slots =
     {

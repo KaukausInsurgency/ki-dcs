@@ -27,8 +27,14 @@ end
 
 
 
-function CSCI.CanCall(actionname, supportypes)
+function CSCI.CanCall(actionname, capturepoint)
   env.info("CSCI.CanCall() called")
+  
+  if capturepoint.CSCICalled then
+    env.info("CSCI.CanCall - This capture point already has combat support requested, cannot call support again")
+    return false, "Cannot call support! There is already active combat support on route to this capture point!"
+  end
+  
   local supportdata = CSCI.Data[actionname]
   
   if supportdata ~= nil then
@@ -51,7 +57,36 @@ function CSCI.CanCall(actionname, supportypes)
   end
 end
 
-function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, supporttype, capturepoint)
+function CSCI.CreateCooldownTimer(supportdata, csci_config)
+  env.info("CSCI.CreateCooldownTimer() called")
+  
+  -- reset Cooldown value
+  supportdata.Cooldown = csci_config.Cooldown
+  
+  -- start timer function every 1 second to decrement counter
+  timer.scheduleFunction(function(args, t) 
+      env.info("CSCI.CooldownTimer - INVOKED SCHEDULE!")
+      local ok, result = xpcall(function()
+        env.info("CSCI.CooldownTimer: " .. tostring(args.supportdata.Cooldown))
+        args.supportdata.Cooldown = args.supportdata.Cooldown - 1
+        if (args.supportdata.Cooldown == 0) then
+          env.info("CSCI.CooldownTimer - cooldown for " .. csci_config.MenuName .. " has ended")
+          args.supportdata.CooldownCallsRemaining = args.csci_config.MaxCallsPerCooldown
+          return nil
+        else
+          return t + 1
+        end    
+      end, function(err) env.info("CSCI.CooldownTimer ERROR - " .. err) end)
+      
+      if not ok then
+        return nil
+      else
+        return result
+      end
+    end, { supportdata = supportdata, csci_config = csci_config}, timer.getTime() + 1)
+end
+
+function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, csci_config, capturepoint)
   xpcall(function()
     env.info("CSCI.PerformAction called (actionname: " .. actionname .. ", parentmenu: " .. parentmenu .. ")")
     
@@ -62,7 +97,7 @@ function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, supporttyp
       return
     end
     
-    local cancall, msg = CSCI.CanCall(actionname)
+    local cancall, msg = CSCI.CanCall(actionname, capturepoint)
       
     if cancall then
     
@@ -72,20 +107,27 @@ function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, supporttyp
       
       if CSCI.Config.PreOnRadioAction then
         env.info("CSCI.PerformAction - found PreOnRadioAction callback - invoking")
-        isvalid = CSCI.Config.PreOnRadioAction(actionname, parentmenu, moosegrp, supporttype, capturepoint)
+        isvalid = CSCI.Config.PreOnRadioAction(actionname, parentmenu, moosegrp, csci_config, capturepoint)
       end
       
       if isvalid then
         env.info("CSCI.PerformAction - Invoking action")
-        action(actionname, parentmenu, supporttype, capturepoint)
-        
-        env.info("CSCI.PerformAction - Updating Remaining Calls")
+        action(actionname, parentmenu, csci_config, capturepoint)
+           
         -- update the counts
+        capturepoint.CSCICalled = true
+        
         local supportdata = CSCI.Data[actionname]
         
         if supportdata then
+          env.info("CSCI.PerformAction - Updating Remaining Calls")
           supportdata.CooldownCallsRemaining = supportdata.CooldownCallsRemaining - 1
           supportdata.CallsRemaining = supportdata.CallsRemaining - 1
+          
+          if supportdata.CooldownCallsRemaining ~= csci_config.MaxCallsPerCooldown then  
+            env.info("CSCI.PerformAction - Cooldown activated")       
+            CSCI.CreateCooldownTimer(supportdata, csci_config)
+          end
         else
           env.info("CSCI.PerformAction ERROR - supportdata is nil!")
         end
@@ -113,17 +155,20 @@ function CSCI.ShowAirdropContents(moosegrp)
   trigger.action.outTextForGroup(_groupID, msg, 20, false)
 end
 
-function CSCI.CreateAirdrop(actionname, parentaction, supporttype, destcp)
+function CSCI.CreateAirdrop(actionname, parentaction, csci_config, destcp)
   env.info("CSCI.CreateAirdrop() called for " .. actionname)
   local spawncp = KI.Query.FindFriendlyCPAirport()
   
   if spawncp ~= nil then
-    local SpawnedGroup = CSCI.SpawnVehicle(supporttype.SpawnTemplate, parentaction, spawncp, destcp, supporttype)
+  
+    local SpawnedGroup = CSCI.SpawnAircraft(csci_config.SpawnTemplate, parentaction, spawncp, destcp, csci_config)
     if SpawnedGroup ~= nil then
       if CSCI.Config.OnSupportRequestCalled then
         env.info("CSCI.CreateAirdrop - found callback CSCI.Config.OnSupportRequestCalled - invoking")
-        CSCI.Config.OnSupportRequestCalled(actionname, parentaction, spawncp, destcp, supporttype)
+        CSCI.Config.OnSupportRequestCalled(actionname, parentaction, spawncp, destcp, csci_config)
       end
+      
+      CSCI.CreateAirdropManager(SpawnedGroup, csci_config, destcp)
     else
       env.info("CSCI.CreateAirdrop ERROR - SpawnedGroup is nil!")
     end
@@ -132,25 +177,93 @@ function CSCI.CreateAirdrop(actionname, parentaction, supporttype, destcp)
   end
 end
 
-function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone, supporttype)
-  env.info("CSCI.OnSpawnGroup() called")
-  moosegrp:TaskRouteToZone(destzone, false, supporttype.PlaneCruisingSpeed, FORMATION.Cone)
+function CSCI.CreateAirdropManager(moosegrp, csci_config, destcp)
+  env.info("CSCI.CreateAirdropManager() called")
+  
+  timer.scheduleFunction(
+    function(args, t)
+    
+      local ok, result = 
+      xpcall(function()
+      
+          if not args.Group:IsAlive() then 
+            env.info("CSCI.CreateAirdropManager() - Aircraft is dead - stopping")
+            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Airdrop heading to " .. args.DestinationCP.Name .. " has been shot down!")
+            args.DestinationCP.CSCICalled = false
+            return nil 
+          end
+          
+          local distance = Spatial.Distance(args.Group:GetVec3(), args.DestinationCP.Zone:GetVec3())
+          env.info("CSCI.CreateAirdropManager - distance: " .. tostring(distance))
+          if distance < args.Config.AirdropDistance then
+            env.info("CSCI.CreateAirdropManager() - airdrop within zone distance")
+            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Aircraft has started airdrop!")
+            CSCI.SpawnCargoInTime(csci_config, destcp)     
+            return nil    
+          else
+            return t + 5     
+          end
+          
+        end, 
+      function(err) env.info("CSCI.CreateAirdropManager() ERROR - " .. err) end)
+    
+      if not ok then
+        return nil
+      else
+        return result
+      end
+    end, 
+    { Group = moosegrp, Config = csci_config, DestinationCP = destcp}, timer.getTime() + 5)
 end
 
-function CSCI.SpawnVehicle(template, parentAction, spawncp, destcp, supporttype)
-  env.info("CSCI.SpawnVehicle() called")
-  local SpawnObj = SPAWN:New(template)
-                    :OnSpawnGroup(function( spawngrp, parentAction, spawnzone, destzone, stype ) 
+function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone, csci_config)
+  env.info("CSCI.OnSpawnGroup() called")
+  env.info("CSCI.OnSpawnGroup - PlaneCruisingAltitude: " .. tostring(csci_config.PlaneCruisingAltitude))
+  env.info("CSCI.OnSpawnGroup - PlaneCruisingSpeed: " .. tostring(csci_config.PlaneCruisingSpeed))
+  moosegrp:RouteToVec3(
+  { 
+    x = destzone:GetVec3().x, 
+    y = destzone:GetVec3().y + csci_config.PlaneCruisingAltitude, 
+    z = destzone:GetVec3().z 
+  }, csci_config.PlaneCruisingSpeed)
+end
+
+function CSCI.SpawnCargoInTime(csci_config, destcp)
+  env.info("CSCI.SpawnCargoInTime() called")
+  timer.scheduleFunction(function(args, t)
+    xpcall(function()
+        for _, template in pairs(args.Config.CargoTemplate) do
+          local SpawnObj = SPAWN:NewWithAlias(template, KI.GenerateName(template))
+          local NewGroup = SpawnObj:SpawnInZone(args.DestinationCP.Zone, true)
+          if NewGroup ~= nil then
+            env.info("CSCI.SpawnCargoInTime - Successfully spawned group " .. template .. " in zone " .. args.DestinationCP.Name)
+            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Airdrop landed at " .. args.DestinationCP.Name)
+          else
+            env.info("CSCI.SpawnCargoInTime - ERROR - Failed to spawn group " .. template .. " in zone " .. args.DestinationCP.Name)
+          end
+        end
+    end,
+    function(err) env.info("CSCI.SpawnCargoInTime - ERROR - " .. err) end)
+    
+    args.DestinationCP.CSCICalled = false
+    return nil    
+  end, { Config = csci_config, DestinationCP = destcp}, timer.getTime() + csci_config.ParachuteTime)
+end
+
+function CSCI.SpawnAircraft(template, parentAction, spawncp, destcp, csci_config)
+  env.info("CSCI.SpawnAircraft() called")
+  local SpawnObj = SPAWN:NewWithAlias(template, KI.GenerateName(template))
+                    :OnSpawnGroup(function( spawngrp, parentAction, spawnzone, destzone, config ) 
                         xpcall(function() 
-                                  CSCI.OnSpawnGroup(spawngrp, parentAction, spawnzone, destzone, stype) 
+                                  CSCI.OnSpawnGroup(spawngrp, parentAction, spawnzone, destzone, config) 
                                end,
-                               function(err) env.info("CSCI.SpawnVehicle:OnSpawnGroup ERROR - " .. err) end)
-                    end, parentAction, spawncp.Zone, destcp.Zone, supporttype)
-  local NewGroup = SpawnObj:SpawnInZone(spawncp.Zone, true)
+                               function(err) env.info("CSCI.SpawnAircraft:OnSpawnGroup ERROR - " .. err) end)
+                    end, parentAction, spawncp.Zone, destcp.Zone, csci_config)
+  local NewGroup = SpawnObj:SpawnAtAirbase(AIRBASE:FindByName(spawncp.Airbase), nil, 3000)
   if NewGroup ~= nil then
-    env.info("CSCI.SpawnVehicle - Successfully spawned group " .. template .. " in zone " .. spawncp.Name)
+    env.info("CSCI.SpawnAircraft - Successfully spawned group " .. template .. " in zone " .. spawncp.Name)
   else
-    env.info("CSCI.SpawnVehicle - ERROR - Failed to spawn group " .. template .. " in zone " .. spawncp.Name)
+    env.info("CSCI.SpawnAircraft - ERROR - Failed to spawn group " .. template .. " in zone " .. spawncp.Name)
   end
   
   return NewGroup

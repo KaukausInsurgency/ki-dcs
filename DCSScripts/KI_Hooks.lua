@@ -99,10 +99,13 @@ function KI.Hooks.CSCIPreOnRadioAction(actionName, parentAction, mooseGroup, sup
       if parentAction == CSCI.AirdropParentMenu then
           
         local spawncp = KI.Query.FindFriendlyCPAirport()
-        
+        local _groupID = mooseGroup:GetDCSObject():getID()
         if spawncp == nil then
-          local _groupID = mooseGroup:GetDCSObject():getID()
+          
           trigger.action.outTextForGroup(_groupID, "Unable to call in support! Allies do not own any friendly airports!", 15, false)
+          return false
+        elseif spawncp.Name == capturePoint.Name then
+          trigger.action.outTextForGroup(_groupID, "Unable to call in support! Cannot call airdrop on this airbase!", 15, false)
           return false
         else
           return true

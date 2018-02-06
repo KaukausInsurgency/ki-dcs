@@ -282,6 +282,16 @@ ConfigChecker.KIConfigDictionary =
             result = false
           end
           
+          if tt.type ~= nil and tt.type == "AIRPORT" then
+            if tt.airbase == nil then
+              msg = msg .. "\n" .. "cp property 'airport' cannot be nil for cp type 'AIRPORT'!"
+              result = false
+            elseif not ConfigChecker.IsString(tt.airbase) then
+              msg = msg .. "\n" .. "cp property 'airbase' must be type string!"
+              result = false
+            end
+          end
+          
           if tt.text == nil then
 
           elseif not ConfigChecker.IsString(tt.text) then

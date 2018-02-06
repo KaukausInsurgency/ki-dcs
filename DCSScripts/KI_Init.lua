@@ -59,6 +59,8 @@ function KI.Init.CapturePoints()
     local _cp = CP:New(ccp.name, ccp.zone, ccp.type, ccp.spawnzone1, ccp.spawnzone2, ccp.text)  
     _cp.Slots = ccp.slots
     _cp.MaxCapacity = ccp.capacity
+    _cp.Airbase = ccp.airbase
+    _cp.CSCICalled = false
     table.insert(KI.Data.CapturePoints, _cp)   
     env.info("KI.Init.CapturePoints - CP Instance created for " .. _cp.Name)
     

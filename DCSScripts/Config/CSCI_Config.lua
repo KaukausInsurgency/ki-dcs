@@ -22,21 +22,19 @@ CSCI.Config.AirdropTypes =
   {
     MenuName = "Infantry Paradrop",
     SpawnTemplate = "C130",
-    SpawnIn = "Ramp Hot", -- unused atm
     Cooldown = 1800,
-    MaxCallsPerCooldown = 3,
+    MaxCallsPerCooldown = 1,
     MaxCallsPerSession = 15,
-    PlaneCruisingSpeed = 600,
+    PlaneCruisingSpeed = 700,
     PlaneCruisingAltitude = 2000,
-    AirdropDistance = 10000,
-    ParachuteTime = 120,
-    CargoTemplate = {"Airborne1", "Airborne2"} 
+    AirdropDistance = 12000,
+    ParachuteTime = 30,
+    CargoTemplate = {"InfantrySquadTemplate", "InfantrySquadTemplate"} 
   },
   ["Vehicle Airdrop"] = 
   {
     MenuName = "Vehicle Airdrop",
     SpawnTemplate = "C130",
-    SpawnIn = "Ramp Hot",
     Cooldown = 1200,
     MaxCallsPerCooldown = 3,
     MaxCallsPerSession = 20,
@@ -50,7 +48,6 @@ CSCI.Config.AirdropTypes =
   {
     MenuName = "Supply Airdrop",
     SpawnTemplate = "C130",
-    SpawnIn = "Ramp Hot",
     Cooldown = 900,
     MaxCallsPerCooldown = 3,
     MaxCallsPerSession = 25,
@@ -64,7 +61,6 @@ CSCI.Config.AirdropTypes =
   {
     MenuName = "FARP Support Airdrop",
     SpawnTemplate = "C130",
-    SpawnIn = "Ramp Hot",
     Cooldown = 600,
     MaxCallsPerCooldown = 1,
     MaxCallsPerSession = 4,
