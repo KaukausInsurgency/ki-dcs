@@ -41,7 +41,7 @@ if true then
     CanRunKI = false
   end
   
-  if not ConfigChecker.Check(path .. "Config\\CSCI_Config.lua", ConfigChecker.CSCIConfigDictionary, "CSCI.Config", "ki_csci_config.lua") then
+  if not ConfigChecker.Check(path .. "Config\\CSCI_Config.lua", ConfigChecker.CSCIConfigDictionary, "CSCI.Config", "ki_csci_config.log") then
     CanRunKI = false
   end
   

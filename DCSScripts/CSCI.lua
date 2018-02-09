@@ -67,7 +67,7 @@ function CSCI.CreateCooldownTimer(supportdata, csci_config)
   timer.scheduleFunction(function(args, t) 
       env.info("CSCI.CooldownTimer - INVOKED SCHEDULE!")
       local ok, result = xpcall(function()
-        env.info("CSCI.CooldownTimer: " .. tostring(args.supportdata.Cooldown))
+        --env.info("CSCI.CooldownTimer: " .. tostring(args.supportdata.Cooldown))
         args.supportdata.Cooldown = args.supportdata.Cooldown - 1
         if (args.supportdata.Cooldown == 0) then
           env.info("CSCI.CooldownTimer - cooldown for " .. csci_config.MenuName .. " has ended")
@@ -194,7 +194,7 @@ function CSCI.CreateAirdropManager(moosegrp, csci_config, destcp)
           end
           
           local distance = Spatial.Distance(args.Group:GetVec3(), args.DestinationCP.Zone:GetVec3())
-          env.info("CSCI.CreateAirdropManager - distance: " .. tostring(distance))
+          --env.info("CSCI.CreateAirdropManager - distance: " .. tostring(distance))
           if distance < args.Config.AirdropDistance then
             env.info("CSCI.CreateAirdropManager() - airdrop within zone distance")
             KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Aircraft has started airdrop!")

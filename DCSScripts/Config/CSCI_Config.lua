@@ -31,19 +31,6 @@ CSCI.Config.AirdropTypes =
     ParachuteTime = 30,
     CargoTemplate = {"InfantrySquadTemplate", "InfantrySquadTemplate"} 
   },
-  ["Vehicle Airdrop"] = 
-  {
-    MenuName = "Vehicle Airdrop",
-    SpawnTemplate = "C130",
-    Cooldown = 1200,
-    MaxCallsPerCooldown = 3,
-    MaxCallsPerSession = 20,
-    PlaneCruisingSpeed = 600,
-    PlaneCruisingAltitude = 2000,
-    AirdropDistance = 10000,
-    ParachuteTime = 120,
-    CargoTemplate = {"Humvee"} 
-  },
   ["Supply Airdrop"] = 
   {
     MenuName = "Supply Airdrop",
@@ -54,22 +41,9 @@ CSCI.Config.AirdropTypes =
     PlaneCruisingSpeed = 600,
     PlaneCruisingAltitude = 2000,
     AirdropDistance = 10000,
-    ParachuteTime = 120,
-    CargoTemplate = {"Supply Crate"} 
+    ParachuteTime = 30,
+    CargoTemplate = {"InfantrySquadTemplate"} 
   }, 
-  ["FARP Support Airdrop"] = 
-  {
-    MenuName = "FARP Support Airdrop",
-    SpawnTemplate = "C130",
-    Cooldown = 600,
-    MaxCallsPerCooldown = 1,
-    MaxCallsPerSession = 4,
-    PlaneCruisingSpeed = 600,
-    PlaneCruisingAltitude = 2000,
-    AirdropDistance = 10000,
-    ParachuteTime = 120,
-    CargoTemplate = {"FARP Power", "FARP Ammo"} 
-  },
 
 }
 

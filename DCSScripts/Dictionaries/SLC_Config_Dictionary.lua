@@ -105,7 +105,7 @@ ConfigChecker.SLCConfigDictionary =
           elseif not ConfigChecker.IsString(t.KeyName) then
             msg = msg .. "\n" .. "ComponentTypes property 'KeyName' must be type string!"
             result = false
-          elseif not t.KeyName == key then
+          elseif not (t.KeyName == key) then
             msg = msg .. "\n" .. "ComponentTypes property 'KeyName' must be the same as hash key! (hash key: " .. tostring(key) .. ", KeyName: " .. tostring(t.KeyName)
             result = false
           end
