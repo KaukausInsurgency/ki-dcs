@@ -490,7 +490,7 @@ function KI.Hooks.GC_Crate_IsIdle(args)
       
       -- if the distance is less than 5 metres and no players are nearby, increment count
       if crate_distance < 5 and not _isPlayerNear then
-        env.info("KI.Hooks.GC_Crate_Predicate - crate position has not changed since last check and no players nearby")
+        env.info("KI.Hooks.GC_Crate_IsIdle - crate position has not changed since last check and no players nearby")
         if args.Depot then
           args.DepotIdleTime = args.DepotIdleTime + GC.LoopRate
         else
@@ -498,19 +498,19 @@ function KI.Hooks.GC_Crate_IsIdle(args)
         end
         return true
       elseif crate_distance >= 5 then
-        env.info("KI.Hooks.GC_Crate_Predicate - crate position has changed, resetting")
+        env.info("KI.Hooks.GC_Crate_IsIdle - crate position has changed, resetting")
         args.LastPosition = _newPos
         args.WasMoved = true
         
         if _punit then
-          env.info("KI.Hooks.GC_Crate_Predicate - closest player found that changed crate")
+          env.info("KI.Hooks.GC_Crate_IsIdle - closest player found that changed crate")
           args.PlayerUnit = _punit -- assume that the closest player to the cargo is the one that is slingloading it / should get credit for resupply
           args.PlayerDistance = _pdistance
         end
         return false
       end
     end,
-    function(err) env.info("KI.Hooks.GC_Crate_Predicate ERROR - " .. err) end)
+    function(err) env.info("KI.Hooks.GC_Crate_IsIdle ERROR - " .. err) end)
 
   if success then
     return result
@@ -745,11 +745,12 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         -- elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then
         -- elseif event.id == world.event.S_EVENT_MISSION_START then
       elseif event.id == world.event.S_EVENT_BIRTH and playerName then
-        env.info("KI.Hooks.GameEventHandler - BIRTH for " .. event.initiator:getName())
+        local unitname = event.initiator:getName()
+        env.info("KI.Hooks.GameEventHandler - BIRTH for " .. unitname)
         
         -- Initialize any radio menu items for the player
-        SLC.InitSLCForUnit(event.initiator:getName())
-        CSCI.InitCSCIForUnit(event.initiator:getName())
+        SLC.InitSLCForUnit(unitname)
+        CSCI.InitCSCIForUnit(unitname)
         
         -- we track the unitID so that we can link slingload hook/unhook events to a player
         KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator

@@ -318,8 +318,13 @@ function CSCI.InitCSCIForUnit(unit_name)
   env.info("CSCI.InitCSCIForUnit called")
   local u = UNIT:FindByName(unit_name)
   if not u then 
-    env.info("CSCI.InitCSCIForUnit - unit does not exist - aborting")
-    return false 
+    env.info("CSCI.InitCSCIForUnit - Moose Unit not found - Registering manually")
+    -- workaround for issue #209
+    u = UNIT:Register(unit_name)
+    if not u then
+      env.info("CSCI.InitCSCIForUnit - unit does not exist - aborting")
+      return false 
+    end
   end
   
   if CSCI.Config.RestrictToCSCIPilot then
