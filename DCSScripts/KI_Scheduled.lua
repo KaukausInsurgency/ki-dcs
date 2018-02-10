@@ -158,6 +158,18 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
   local _rGroups = coalition.getGroups(1, Group.Category.GROUND)
   local _bGroups = coalition.getGroups(2, Group.Category.GROUND)
   
+  -- get ship groups and join them to the red and blue group lists
+  if true then
+    local _rShips = coalition.getGroups(1, Group.Category.SHIP)
+    local _bShips = coalition.getGroups(2, Group.Category.SHIP)
+    for i = 1, #_rShips do
+        _rGroups[#_rGroups + 1] = _rShips[i]
+    end
+    for i = 1, #_bShips do
+        _bGroups[#_bGroups + 1] = _bShips[i]
+    end
+  end
+  
   for i = 1, #KI.Data.CapturePoints do
     local _indicesToRemove = {}
     
@@ -182,17 +194,23 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     
     -- loop through red groups
     for j = 1, #_rGroups do
-      local _runits = _rGroups[j]:getUnits()
-      local _inZone = false
-      for k = 1, #_runits do
-        local _rpos = _runits[k]:getPoint()
-        if _z:IsVec3InZone(_rpos) then
-          _rcnt = _rcnt + 1 -- increment counter for red
-          _inZone = true
+      if _rGroups[j]:isExist() then
+        local _runits = _rGroups[j]:getUnits()
+        local _inZone = false
+        for k = 1, #_runits do
+          if _runits[k]:isActive() then
+            local _rpos = _runits[k]:getPoint()
+            if _z:IsVec3InZone(_rpos) then
+              _rcnt = _rcnt + 1 -- increment counter for red
+              _inZone = true
+            end
+          end
         end
-      end
-      if _inZone then
-        table.insert(_indicesToRemove, j)
+        if _inZone then
+          table.insert(_indicesToRemove, j) -- remove groups already found in zones from being iterated over next time around
+        end
+      else
+        table.insert(_indicesToRemove, j) -- remove inactive / dead groups from being iterated over next time around
       end
     end
     
@@ -208,17 +226,23 @@ function KI.Scheduled.UpdateCPStatus(arg, time)
     _indicesToRemove = {}
     
     for j = 1, #_bGroups do
-      local _bunits = _bGroups[j]:getUnits()
-      local _inZone = false
-      for k = 1, #_bunits do
-        local _bpos = _bunits[k]:getPoint()
-        if _z:IsVec3InZone(_bpos) then
-          _bcnt = _bcnt + 1 -- increment counter for red
-          _inZone = true
+      if _bGroups[j]:isExist() then
+        local _bunits = _bGroups[j]:getUnits()
+        local _inZone = false
+        for k = 1, #_bunits do
+          if _bunits[k]:isActive() then
+            local _bpos = _bunits[k]:getPoint()
+            if _z:IsVec3InZone(_bpos) then
+              _bcnt = _bcnt + 1 -- increment counter for red
+              _inZone = true
+            end
+          end
         end
-      end
-      if _inZone then
-        table.insert(_indicesToRemove, j)
+        if _inZone then
+          table.insert(_indicesToRemove, j) -- remove groups already found in zones from being iterated over next time around
+        end
+      else
+        table.insert(_indicesToRemove, j) -- remove inactive / dead groups from being iterated over next time around
       end
     end
     
