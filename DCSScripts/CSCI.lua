@@ -316,21 +316,19 @@ end
 -- Init CSCI by pilotname
 function CSCI.InitCSCIForUnit(unit_name)
   env.info("CSCI.InitCSCIForUnit called")
-  local u = UNIT:FindByName(unit_name)
+  local u = Unit.getByName(unit_name)
   if not u then 
-    env.info("CSCI.InitCSCIForUnit - Moose Unit not found - Registering manually")
-    -- workaround for issue #209
-    u = UNIT:Register(unit_name)
-    if not u then
-      env.info("CSCI.InitCSCIForUnit - unit does not exist - aborting")
-      return false 
-    end
+	env.info("CSCI.InitCSCIForUnit - unit does not exist - aborting")
+	return false 
   end
+  
+  -- Issue #208 workaround
+  local groupname = u:getGroup():getName()
   
   if CSCI.Config.RestrictToCSCIPilot then
     if string.match(unit_name, "CSCIPilot") then
       env.info("CSCI Pilot " .. unit_name .. " found, initializing")
-      CSCI.AddCSCIRadioItems(u:GetGroup())
+      CSCI.AddCSCIRadioItems(GROUP:Register(groupname))
       return true
     else
       env.info("CSCI.InitCSCIForUnit - Pilot Name does not match 'CSCIPilot' aborting")
@@ -338,7 +336,7 @@ function CSCI.InitCSCIForUnit(unit_name)
     end 
   else
     env.info("CSCI.InitCSCIForUnit - no restictions - adding to client")
-    CSCI.AddCSCIRadioItems(u:GetGroup())
+    CSCI.AddCSCIRadioItems(GROUP:Register(groupname))
     return true
   end
 end

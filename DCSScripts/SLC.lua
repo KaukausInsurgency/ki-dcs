@@ -599,22 +599,20 @@ end
 -- Init SLC by pilotname
 function SLC.InitSLCForUnit(unit_name)
   env.info("SLC.InitSLCForUnit() called")
-  local u = UNIT:FindByName(unit_name)
+  local u = Unit.getByName(unit_name)
   
-  -- If the unit has not been found, register them manually into MOOSE DB
+  -- If the unit has not been found
   if not u then 
-    env.info("SLC.InitSLCForUnit - Moose Unit not found - Registering manually")
-    -- workaround for issue #209
-    u = UNIT:Register(unit_name)
-    if not u then
-      env.info("SLC.InitSLCForUnit - Failed to register Moose Unit - unit does not exist - aborting")
-      return false 
-    end
+	env.info("SLC.InitSLCForUnit - unit does not exist - aborting")
+	return false 
   end
+  
+  -- Issue #208 workaround
+  local groupname = u:getGroup():getName()
   
   if string.match(unit_name, "SLCPilot") then
     env.info("SLC.InitSLCForUnit - SLC Pilot " .. unit_name .. " found, initializing")
-    SLC.AddSLCRadioItems(u:GetGroup(), unit_name)
+    SLC.AddSLCRadioItems(GROUP:Register(groupname), unit_name)
     return true
   else
     env.info("SLC.InitSLCForUnit - Pilot Name does not match 'SLCPilot' - aborting")
