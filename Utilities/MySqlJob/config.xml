@@ -1,0 +1,19 @@
+<MySqlJob>
+    <Name>Calculate Statistics</Name>
+    <Steps>
+        <Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_step1_import_gameevent_data.sql</Step>
+        <Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_calculate_player_total_stats.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_calculate_player_total_online_time.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_calculate_airframe_stats.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_calculate_airframe_sorties.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_calculate_airframe_kd.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_add_player_session_series.sql</Step>
+		<Step>C:\Users\david\Documents\GitHub\KI\SQL\Jobs\ki_job_steplast_backup_gameevent_data.sql</Step>
+    </Steps>
+    <EmailTo>david.zalewski@outlook.com</EmailTo>
+	<EmailAccount Email="email@account.com" Password="password" />
+	<SMTP Server="smtp-mail.outlook.com" Port="587" UseSSL="true" />
+	<ConnectionString>Server=127.0.0.1; Database=ki; Uid=sample; Pwd=sample;</ConnectionString>
+    <LogPath>C:\Users\david\Documents\GitHub\MySqlJob</LogPath>
+	<TestEmail>false</TestEmail>
+</MySqlJob>
