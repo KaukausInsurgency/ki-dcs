@@ -13,25 +13,25 @@ SELECT server_id, session_id, ucid, role, sortie_id,
         SUM(CASE WHEN event = "SLING_UNHOOK" THEN 1 ELSE 0 END) AS SlingUnhooks,
         (
 			SELECT model_time
-            FROM ki.raw_gameevents_log
+            FROM tmp_gameevents
             WHERE id = 
 				(
 					SELECT MIN(id)
-					FROM ki.raw_gameevents_log
+					FROM tmp_gameevents
 					WHERE sortie_id = l.sortie_id AND server_id = l.server_id AND session_id = l.session_id
 				)
         ) AS SortieStartTime,
         (
 			SELECT model_time
-            FROM ki.raw_gameevents_log
+            FROM tmp_gameevents
             WHERE id = 
 				(
 					SELECT MAX(id)
-					FROM ki.raw_gameevents_log
+					FROM tmp_gameevents
 					WHERE sortie_id = l.sortie_id AND server_id = l.server_id AND session_id = l.session_id
                 )
         ) AS SortieEndTime
-FROM ki.raw_gameevents_log l
+FROM tmp_gameevents l
 WHERE ucid IS NOT NULL AND sortie_id IS NOT NULL
 GROUP BY server_id, session_id, ucid, role, sortie_id;
 

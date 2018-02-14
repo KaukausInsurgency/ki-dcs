@@ -9,4 +9,8 @@ TRUNCATE TABLE rpt_player_session_series;
 INSERT INTO raw_connection_log
 SELECT * FROM backup_connection_log;
 
+INSERT INTO raw_gameevents_log
+SELECT * FROM backup_gameevents_log;
+
 TRUNCATE TABLE backup_connection_log;
+TRUNCATE TABLE backup_gameevents_log;
