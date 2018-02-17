@@ -139,7 +139,7 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
     function()
       env.info("SLC.Config.PreOnRadioAction called")
       local _groupID = transGroup:GetDCSObject():getID()
-      env.info("SLC.Config.PreOnRadioAction - got group ID")
+
       -- check if this is a depot call
       if parentAction == "Depot Management" or parentAction == "Troop Management" then
         -- immediately return if the player is trying to view the depot contents
@@ -167,25 +167,30 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
         end
       elseif parentAction == "Crate Management" then
         local _cp = KI.Query.FindCP_Group(transGroup)
-        if not _cp then
+        if not _cp and not SLC.Config.AllowCrateUnpackInWild then
           env.info("SLC.Config.PreOnRadioAction - Crate Unpacking cannot be called outside of a capture zone")
           trigger.action.outTextForGroup(_groupID, "SLC - You cannot unpack crates in the wild or at depots! Unpack this crate in a capture zone!", 15, false)
           return false
-        else
+        elseif _cp ~= nil then
           local result, msg = _cp:Fortify("Vehicle")
           trigger.action.outTextForGroup(_groupID, msg, 15, false)
           return result
+        else
+          env.info("SLC.Config.PreOnRadioAction - Crate Unpacked in wild")
+          trigger.action.outTextForGroup(_groupID, "Successfully unpacked crate in the wild!", 15, false)
+          return true
         end
       elseif parentAction == "Deploy Management" then
         -- pass through if check cargo was called
         if actionName == "Check Cargo" then
           return true
         end
-
+      
         local _cp = KI.Query.FindCP_Group(transGroup)
         local _grp = SLC.TransportInstances[pilotname]
+      
         -- if the pilot has troops already loaded and not in capture point, disallow
-        if not _cp and _grp then
+        if not _cp and _grp and not SLC.Config.AllowInfantryUnloadInWild then
           env.info("SLC.Config.PreOnRadioAction - Troop Deployment cannot be called outside of a capture zone")
           trigger.action.outTextForGroup(_groupID, "SLC - You cannot deploy infantry in the wild or at depots! Bring them to a capture zone!", 15, false)
           return false
@@ -194,10 +199,14 @@ function KI.Hooks.SLCPreOnRadioAction(actionName, parentAction, transGroup, pilo
           local result, msg = _cp:Fortify("Infantry", _grp.Size)
           trigger.action.outTextForGroup(_groupID, msg, 15, false)
           return result
+        elseif _grp then
+          env.info("SLC.Config.PreOnRadioAction - Troop Deployment in wild")
+          trigger.action.outTextForGroup(_groupID, "Successfully unloaded troops in the wild!", 15, false)
+          return true
         else
           env.info("SLC.Config.PreOnRadioAction - Pilot is trying to load troops")
           return true
-        end
+        end   
       else
         return true
       end

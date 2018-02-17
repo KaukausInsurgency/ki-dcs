@@ -30,6 +30,14 @@ ConfigChecker.SLCConfigDictionary =
       end
     }
   },
+  {
+    Name = "SLC.Config.AllowCrateUnpackInWild", Default = false,
+    Rules = { ConfigChecker.IsBoolean }
+  },
+  {
+    Name = "SLC.Config.AllowInfantryUnloadInWild", Default = false,
+    Rules = { ConfigChecker.IsBoolean }
+  },
   { 
     Name = "SLC.Config.SpawnID", Default = 0,
     Rules = { 

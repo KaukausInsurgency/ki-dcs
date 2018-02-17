@@ -17,6 +17,12 @@ SLC.Config.CrateQueryDistance = 50
 -- distance at which objects will be spawned 12 Oclock from helicopter
 SLC.Config.ObjectSpawnDistance = 25
 
+-- controls whether crates can be unpacked outside of a capture zone and in the wild
+SLC.Config.AllowCrateUnpackInWild = true
+
+-- controls whether infantry can be unloaded outside of a capture zone and in the wild
+SLC.Config.AllowInfantryUnloadInWild = true
+
 -- do not touch!
 SLC.Config.SpawnID = 0
 

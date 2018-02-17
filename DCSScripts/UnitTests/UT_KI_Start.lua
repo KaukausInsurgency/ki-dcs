@@ -88,8 +88,6 @@ assert(loadfile(path .. "AICOM.lua"))()
 KI.UTDATA = {}
 KI.Null = -9999
 
-local socket = require 'socket'
-
 env.info("KI - Loading Tests")
 
 assert(loadfile(path .. "UnitTests\\UT.lua"))()
@@ -103,37 +101,21 @@ assert(loadfile(path .. "UnitTests\\UT_CP.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DSMT.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_DWM.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_GC.lua"))()
-socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_AICOM.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Query.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Loader.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Toolbox.lua"))()
-socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_SLC.lua"))()
-socket.sleep(0.5)
 assert(loadfile(path .. "UnitTests\\UT_GameEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_CustomEvent.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Hooks_EH.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Scheduled.lua"))()
 --assert(loadfile(path .. "UnitTests\\UT_KI_Socket.lua"))()
 assert(loadfile(path .. "UnitTests\\UT_KI_Score.lua"))()
-
--- TO BE IMPLEMENTED
-
-
-
+assert(loadfile(path .. "UnitTests\\UT_SLC_Callbacks.lua"))()
 
 -- End the test
 UT.EndTest()
 
-
-
-
---local staticObj = StaticObject.getByName("TestCargoSLC")
---env.info("TestCargoSLC Alive (Should be true): " .. tostring(staticObj:isExist()))
---env.info("TestCargoSLC GetLife (Should be true): " .. tostring(staticObj:getLife()))
---staticObj:destroy()
---env.info("TestCargoSLC Alive (Should be false): " .. tostring(staticObj:isExist()))
---env.info("TestCargoSLC GetLife (Should be false): " .. tostring(staticObj:getLife()))
 env.info("KI - Tests Complete")
 return true
