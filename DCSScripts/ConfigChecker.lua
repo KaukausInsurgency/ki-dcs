@@ -261,12 +261,13 @@ function ConfigChecker.Check(path, dict, configname, logfilename)
     
       local _config = dict[i]
       local _val = ConfigChecker.GetConfigValue(_config.Name)
+      local _optional = _config.Optional or false
       local _failed = false
       
-      if _val == nil then
+      if _val == nil and not _optional then
         table.insert(filedata, "KI ConfigChecker - property " .. _config.Name .. " cannot be undefined!")
         _failed = true
-      else
+      elseif _val ~= nil then
       
         for r = 1, #_config.Rules do
           local _rule = _config.Rules[r]
@@ -375,7 +376,7 @@ function ConfigChecker.ValidateModules()
     env.info("KI - Please review MissionScripting.lua as important modules have been sanitized.")
     return false
   else
-    env.info("KI - STARTUP VALIDATION COMPLETE")
+    env.info("KI - STARTUP MODULE VALIDATION COMPLETE")
     return true
   end
   

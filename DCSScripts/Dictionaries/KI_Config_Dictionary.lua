@@ -38,6 +38,10 @@ ConfigChecker.KIConfigDictionary =
       function(x) return x < 60, "Low values can have a significant impact on game performance" end
     }
   },
+  {
+    Name = "KI.Config.IgnoreSaveGroupPrefix", Default = "", Optional = true,
+    Rules = { ConfigChecker.IsString }
+  },
   { 
     Name = "KI.Config.CPUpdateRate", Default = 10, 
     Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}
