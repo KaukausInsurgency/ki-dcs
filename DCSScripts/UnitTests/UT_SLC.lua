@@ -227,6 +227,12 @@ function()
     UT.TestCompare(function() return SLC.GenerateName("Test") == "Test Spawn4" end)
   end
   
+  if true then
+    UT.TestCompare(function() return SLC.IsSLCUnit("SLCPilot someguy") end, "SLC.IsSLCUnit must return true")
+    UT.TestCompare(function() return SLC.IsSLCUnit("135135SLCPilotaer") end, "SLC.IsSLCUnit must return true")
+    UT.TestCompare(function() return not SLC.IsSLCUnit("someunit") end, "SLC.IsSLCUnit must return false")
+  end
+  
 end)
 
 

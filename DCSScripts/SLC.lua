@@ -593,6 +593,13 @@ function SLC.AddSLCRadioItems(g, pilotname)
 end
 
 
+function SLC.IsSLCUnit(unit_name)
+  if string.match(unit_name, "SLCPilot") then
+    return true
+  else
+    return false
+  end
+end
 
 
 
@@ -603,14 +610,14 @@ function SLC.InitSLCForUnit(unit_name)
   
   -- If the unit has not been found
   if not u then 
-	env.info("SLC.InitSLCForUnit - unit does not exist - aborting")
-	return false 
+  	env.info("SLC.InitSLCForUnit - unit does not exist - aborting")
+  	return false 
   end
   
   -- Issue #208 workaround
   local groupname = u:getGroup():getName()
   
-  if string.match(unit_name, "SLCPilot") then
+  if SLC.IsSLCUnit(unit_name) then
     env.info("SLC.InitSLCForUnit - SLC Pilot " .. unit_name .. " found, initializing")
     SLC.AddSLCRadioItems(GROUP:Register(groupname), unit_name)
     return true
