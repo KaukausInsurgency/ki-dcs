@@ -225,7 +225,7 @@ function()
   
   if true then
     -- KI.Query.FindFriendlyCPAirport()
-    UT.TestCompare(function() return 1 == 2 end)
+    UT.TestCompare(function() return 1 == 2 end, "KI.Query.FindFriendlyCPAirport tests not implemented")
   end
   
 end,

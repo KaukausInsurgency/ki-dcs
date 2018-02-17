@@ -273,7 +273,7 @@ function()
   end
   
   if true then
-    local evt = GenerateEventMock(GameEvent.BIRTH, Unit.getByName("SLCPilot1"))
+    local evt = GenerateEventMock(GameEvent.BIRTH, Unit.getByName("TestKIScoreEnemyAir1"))
     UT.TestFunction(KI.Hooks.GameEventHandler.onEvent, KI.Hooks.GameEventHandler, evt)
     UT.TestCompare(function() return #KI.Data.GameEventQueue == 3 end)    -- birth event should not be captured here
   end
