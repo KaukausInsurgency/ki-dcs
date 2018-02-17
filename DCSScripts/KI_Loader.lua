@@ -79,41 +79,50 @@ end
 -- extracts key information about the coalitions groups and packs it into a simple table for serialization and file write
 function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
   env.info("KI.Loader.ExtractCoalitionGroupData called")
+  local ignoreprefixgroups = false
+  if KI.Config.IgnoreSaveGroupPrefix ~= nil and KI.Config.IgnoreSaveGroupPrefix ~= "" then
+    ignoreprefixgroups = true
+  end
+  
   for i, gp in pairs(coalition.getGroups(side, category)) do
     if gp:isExist() then
-      local _group = 
-      { 
-        Coalition = gp:getCoalition(), 
-        Size = gp:getSize(), 
-        Name = gp:getName(), 
-        ID = gp:getID(), 
-        Category = gp:getCategory(),
-      }
-      _group.Units = {}
-      local _first = true
-      local _groupActive = false
-      for k, up in pairs(gp:getUnits()) do
-        _groupActive = up:isActive()
-        if up:isExist() and up:getLife() > 0 and _groupActive then
-          if _first then
-            _group.Country = up:getCountry()
-            _first = false
+      if not ignoreprefixgroups or (ignoreprefixgroups and not string.match(gp:getName(),KI.Config.IgnoreSaveGroupPrefix)) then
+        local _group = 
+        { 
+          Coalition = gp:getCoalition(), 
+          Size = gp:getSize(), 
+          Name = gp:getName(), 
+          ID = gp:getID(), 
+          Category = gp:getCategory(),
+        }
+        _group.Units = {}
+        local _first = true
+        local _groupActive = false
+        for k, up in pairs(gp:getUnits()) do
+          _groupActive = up:isActive()
+          if up:isExist() and up:getLife() > 0 and _groupActive then
+            if _first then
+              _group.Country = up:getCountry()
+              _first = false
+            end
+            local _unit = 
+            { 
+              Name = up:getName(), 
+              ID = up:getID(), 
+              Type = up:getTypeName(), 
+              Position = up:getPosition(), 
+              Heading = mist.getHeading(up, true) 
+            }
+            table.insert(_group.Units, _unit)
           end
-          local _unit = 
-          { 
-            Name = up:getName(), 
-            ID = up:getID(), 
-            Type = up:getTypeName(), 
-            Position = up:getPosition(), 
-            Heading = mist.getHeading(up, true) 
-          }
-          table.insert(_group.Units, _unit)
         end
-      end
-      if _groupActive then
-        table.insert(byrefTable, _group)
+        if _groupActive then
+          table.insert(byrefTable, _group)
+        else
+          env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " is not active - ignoring")
+        end
       else
-        env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " is not active - ignoring")
+        env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " matched prefix - ignoring")
       end
     else
       env.info("KI.Loader.ExtractCoalitionGroupsData - Group " .. gp:getName() .. " does not exist - ignoring")

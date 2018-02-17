@@ -34,6 +34,9 @@ KI.Config.RespawnTimeBeforeWaypointTasking = 20
 -- Controls the rate at which mission data is saved to file
 KI.Config.SaveMissionRate = KI.Toolbox.MinutesToSeconds(5)
 
+-- If this is not nil and not an empty string, KI will ignore saving this group to file, and the group will not be respawned on restart
+KI.Config.IgnoreSaveGroupPrefix = nil
+
 -- Controls the rate at which all capture points are updated/managed by KI Engine
 KI.Config.CPUpdateRate = 15
 
