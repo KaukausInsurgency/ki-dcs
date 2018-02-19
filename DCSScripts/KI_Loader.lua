@@ -38,7 +38,7 @@ function KI.Loader.GenerateUnitsTable(unitsObj)
         ["y"] = unitsObj[i].Position.p.z,
         ["x"] = unitsObj[i].Position.p.x,
         ["name"] = unitsObj[i].Name,
-        ["playerCanDrive"] = false,
+        ["playerCanDrive"] = true,        -- Issue #207 on github
         ["heading"] = unitsObj[i].Heading,
       }
     table.insert(unitsData, _unit)
