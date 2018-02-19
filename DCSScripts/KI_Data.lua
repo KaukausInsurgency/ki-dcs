@@ -65,3 +65,43 @@ function KI.AddSideMissionObject(obj)
   env.info("KI.AddSideMissionObject called")
   table.insert(KI.Data.SideMissionGroundObjects, obj)
 end
+
+function KI.InitSideMissionMenu(unitname)
+  env.info("KI.InitSideMissionMenu called")
+  local unit = Unit.getByName(unitname)
+  if unit == nil then
+    env.info("KI.InitSideMissionMenu WARNING - unit does not exist - aborting")
+    return
+  end
+  
+  local moosegrp = GROUP:Register(unit:getGroup():getName())
+  local groupID = unit:getGroup():getID()
+  local function ViewSideMission(gID)
+  
+    xpcall(function()
+      env.info("ViewSideMission called")
+      local msgdelay = 1
+      local i = 1
+      
+      for _, m in pairs(KI.Data.ActiveMissions) do
+        
+        local msg = "Task (" .. tostring(i) .. "): " .. m.Name .. "\n"
+        msg = msg .. m.Desc .. "\n"
+        msg = msg .. "MGRS: " .. m.CurrentPosition.MGRS .. "\n"
+        msg = msg .. "Lat Long: " .. m.CurrentPosition.LatLong
+
+        timer.scheduleFunction(function(args, t)   
+          trigger.action.outTextForGroup(args.groupID, args.msg, 20, false)
+          return nil
+        end, { groupID = gID, msg = msg }, timer.getTime() + msgdelay)
+        
+        msgdelay = msgdelay + 15
+        i = i + 1
+    
+      end
+      
+    end, function(err) env.info("ViewSideMission ERROR - " .. err) end)
+  end
+  
+  MENU_GROUP_COMMAND:New(moosegrp, "View Active Side Missions", nil, ViewSideMission, groupID)
+end

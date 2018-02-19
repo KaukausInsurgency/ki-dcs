@@ -760,6 +760,7 @@ function KI.Hooks.GameEventHandler:onEvent(event)
         -- Initialize any radio menu items for the player
         SLC.InitSLCForUnit(unitname)
         CSCI.InitCSCIForUnit(unitname)
+        KI.InitSideMissionMenu(unitname)
         
         -- we track the unitID so that we can link slingload hook/unhook events to a player
         KI.Data.UnitIDs[tostring(event.initiator.id_)] = event.initiator
