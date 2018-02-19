@@ -126,7 +126,7 @@ end
 function KI.Query.FindNearestPlayer_Static(cargo)
   env.info("KI.Query.FindNearestPlayer_Static called")
   
-  if not cargo then 
+  if not cargo or not cargo:isExist() then 
     env.info("KI.Query.FindNearestPlayer_Static - static is nil - exiting")
     return nil 
   end
