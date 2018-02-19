@@ -175,9 +175,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetDepotImage`(Status VARCHAR(45)) RETURNS varchar(132) CHARSET utf8
 BEGIN
-	IF (Status = "Online") THEN
+	IF (Status = "Red") THEN
 		RETURN "Images/markers/depot-red-256x256.png";
-	ELSEIF (Status = "Captured") THEN
+	ELSEIF (Status = "Blue") THEN
 		RETURN "Images/markers/depot-blue-256x256.png";
 	ELSEIF (Status = "Contested") THEN
 		RETURN "Images/markers/depot-contested-256x256.png";
@@ -1330,4 +1330,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-27  1:02:24
+-- Dump completed on 2018-02-18 19:31:10

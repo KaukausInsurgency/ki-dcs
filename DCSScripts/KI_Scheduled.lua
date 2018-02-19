@@ -496,6 +496,10 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   table.insert(DepotSegments, {})  -- create an inner array
   if true then
     local index = 1
+    local depot_status = "Red"
+    if KI.Config.AllySide == 2 then
+      depot_status = "Blue"
+    end
     for i = 1, #KI.Data.Depots do
       -- segment depots every 6 elements
         if i % 6 == 0 then
@@ -514,7 +518,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       { 
         ServerID = KI.Data.ServerID, 
         Name = _depot.Name,
-        Status = "Online",
+        Status = depot_status,
         ResourceString = _depot:GetResourceEncoded(),
         CurrentCapacity = _currentCapacity,
         Capacity = _maxCapacity,
