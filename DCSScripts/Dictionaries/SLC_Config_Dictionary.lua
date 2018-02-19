@@ -279,6 +279,14 @@ ConfigChecker.SLCConfigDictionary =
             end
           end
           
+          if t.IsJTAC == nil then
+            msg = msg .. "\n" .. "Assembler property 'IsJTAC' cannot be nil!"
+            result = false
+          elseif not ConfigChecker.IsBoolean(t.IsJTAC) then
+            msg = msg .. "\n" .. "Assembler property 'IsJTAC' must be type boolean!"
+            result = false
+          end
+          
           if t.Count == nil then
             msg = msg .. "\n" .. "Assembler property 'Count' cannot be nil!"
             result = false

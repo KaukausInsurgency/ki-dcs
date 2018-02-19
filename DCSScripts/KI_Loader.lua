@@ -560,6 +560,9 @@ function KI.Loader.SaveData()
   t.SLC.TransportInstances = SLC.TransportInstances
   t.SLC.ZoneInstances = SLC.ZoneInstances
   
+  -- JTAC objects
+  t.JTACs = GLOBAL_JTAC_UNITS
+  
   if KI.Toolbox.WriteFile(t, KI.Config.PathMissionData) then
     env.info("KI.Loader.SaveData - successful write to file: " .. KI.Config.PathMissionData)
   else
@@ -661,6 +664,13 @@ function KI.Loader.LoadData()
       return false
     else
       KI.Data.TaskID = _dataTable["TaskID"] -- load the current TaskID saved in memory
+    end
+    
+    if _dataTable["JTACs"] then
+      env.info("KI.Loader.LoadData - Loading JTACs")
+      for grpname, u in pairs(_dataTable["JTACs"]) do
+        JTACAutoLase(grpname)    
+      end
     end
     
     return true

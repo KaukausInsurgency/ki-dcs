@@ -31,8 +31,8 @@ end
 
 
 -- Add Infantry Instance to InfantryInstances table
-function SLC.AddInfantryInstance(g, st, sn, mn, s)
-  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn, MenuName = mn, Size = s })
+function SLC.AddInfantryInstance(g, st, sn, mn, s, jtac)
+  table.insert(SLC.InfantryInstances, { Group = g, SpawnTemplate = st, SpawnName = sn, MenuName = mn, Size = s, IsJTAC = jtac })
 end
 
 
@@ -159,6 +159,7 @@ function SLC.GetNearbyInfantryGroups(groupTransport)
             SpawnName = inf.SpawnName, 
             MenuName = inf.MenuName, 
             Size = inf.Size,
+            IsJTAC = inf.IsJTAC,
             Distance = distance 
           })
       else
@@ -269,7 +270,7 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   --env.info("SLC.SpawnGroup spVec3 (x = " .. tostring(spawnpos.x) .. ", y = " .. tostring(spawnpos.y) .. ", z = " .. tostring(spawnpos.z) .. ")")
   local NewGroup = SpawnVeh:SpawnFromVec3(spawnpos)
   -- add to map of infantry instances
-  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName, NewGroup:GetSize())
+  SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName, NewGroup:GetSize(), infcomp.IsJTAC)
   env.info("SLC.Infantry Spawned as Group " .. NewGroup.GroupName)
   local _groupID = g:GetDCSObject():getID()
   trigger.action.outTextForGroup(_groupID, "SLC - Infantry has been spawned at your 12 O'clock position", 10, false)
@@ -362,6 +363,15 @@ function SLC.Unpack(transportGroup, pilotname)
       if i == 0 then
         env.info("SLC.Unpack - spawning object on first crate position")
         local SpawnVeh = SPAWN:NewWithAlias(assembly.assembler.SpawnTemplate, SLC.GenerateName(assembly.assembler.SpawnName))
+        if assembly.assembler.IsJTAC then
+          env.info("SLC.Unpack - Group is JTAC")
+          SpawnVeh:OnSpawnGroup(
+            function( spawngrp ) 
+              env.info("SLC.Unpack:OnSpawnGroup Callback - initializing JTAC")
+              JTACAutoLase(spawngrp.GroupName)                
+            end
+          )
+        end
         NewGroup = SpawnVeh:SpawnFromVec3(crate.Object:getPoint())
         env.info("SLC.Unpack Spawned Group " .. NewGroup.GroupName)
         i = i + 1
@@ -391,10 +401,20 @@ function SLC.UnloadTroops(g, p)
   
   local pos = Spatial.PositionAt12Oclock(g, SLC.Config.ObjectSpawnDistance)
   local SpawnVeh = SPAWN:NewWithAlias(troopInfo.SpawnTemplate, SLC.GenerateName(troopInfo.SpawnName))
+  if troopInfo.IsJTAC then
+    env.info("SLC.UnloadTroops - Group is JTAC")
+    SpawnVeh:OnSpawnGroup(
+      function( spawngrp ) 
+        env.info("SLC.Unpack:OnSpawnGroup Callback - initializing JTAC")
+        JTACAutoLase(spawngrp.GroupName)                
+      end
+    )
+  end
+  
   local NewGroup = SpawnVeh:SpawnFromVec3(pos, SLC.IncrementSpawnID())
   
   env.info("SLC.UnloadTroops - spawned unloaded group " .. NewGroup.GroupName .. " - adding to instance map")
-  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName, NewGroup:GetSize())
+  SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName, NewGroup:GetSize(), troopInfo.IsJTAC)
   env.info("SLC.UnloadTroops - removing TransportInstance for " .. p)
   SLC.TransportInstances[p] = nil
   local _groupID = g:GetDCSObject():getID()

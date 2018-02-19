@@ -45,6 +45,13 @@ if true then
     CanRunKI = false
   end
   
+  -- need to load this dictionary here as it depends on some values from KI.Config
+  assert(loadfile(path .. "Dictionaries\\JTAC_Config_Dictionary.lua"))()
+  
+  if not ConfigChecker.Check(path .. "Config\\JTAC_Config.lua", ConfigChecker.JTACConfigDictionary, "JTAC.Config", "ki_jtac_config.log") then
+    CanRunKI = false
+  end
+  
   if not CanRunKI then
     env.info("KI - FAILED TO START BECAUSE OF CONFIGURATION ERRORS - REVIEW LOGS IN - " .. lfs.writedir() .. "Logs")
     return false
@@ -90,7 +97,7 @@ local function StartKI()
   end
 
   env.info("KI - Loading Scripts")
-  
+  assert(loadfile(path.. "\\Dependencies\\JTACAutoLase.lua"))()
   
   assert(loadfile(path .. "GC.lua"))()
   assert(loadfile(path .. "SLC.lua"))()

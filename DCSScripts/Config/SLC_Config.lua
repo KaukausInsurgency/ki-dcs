@@ -26,6 +26,7 @@ SLC.Config.AllowInfantryUnloadInWild = true
 -- do not touch!
 SLC.Config.SpawnID = 0
 
+-- Names of Airframes that are allowed to transport infantry
 SLC.Config.InfantryTransportingHelicopters =
 {
   "Mi-8MT",
@@ -200,6 +201,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn FuelTruck Template",
     SpawnName = "SLC FuelTruck", 
     Components = { FuelTruckCrate = SLC.Config.ComponentTypes.FuelTruckCrate },
+    IsJTAC = false,
     Count = 1
   },
   CommandTruck = 
@@ -207,6 +209,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn CommandTruck Template",
     SpawnName = "SLC CommandTruck", 
     Components = { CommandTruckCrate = SLC.Config.ComponentTypes.CommandTruckCrate },
+    IsJTAC = false,
     Count = 1
   },
   AmmoTruck = 
@@ -214,6 +217,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn AmmoTruck Template",
     SpawnName = "SLC AmmoTruck", 
     Components = { AmmoTruckCrate = SLC.Config.ComponentTypes.AmmoTruckCrate },
+    IsJTAC = false,
     Count = 1
   },
   PowerTruck = 
@@ -221,6 +225,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn PowerTruck Template",
     SpawnName = "SLC PowerTruck", 
     Components = { PowerTruckCrate = SLC.Config.ComponentTypes.PowerTruckCrate },
+    IsJTAC = false,
     Count = 1
   },
   MechBTR = 
@@ -228,6 +233,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn MechBTR Template",
     SpawnName = "SLC MechBTR", 
     Components = { MechBTRCrate = SLC.Config.ComponentTypes.MechBTRCrate },
+    IsJTAC = true,
     Count = 1
   },
   TankT72 = 
@@ -235,6 +241,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn TankT72 Template",
     SpawnName = "SLC TankT72", 
     Components = { TankCrate = SLC.Config.ComponentTypes.TankCrate },
+    IsJTAC = false,
     Count = 1
   },
   TankT90 = 
@@ -242,6 +249,7 @@ SLC.Config.Assembler =
     SpawnTemplate = "Spawn TankT72 Template",
     SpawnName = "SLC TankT90", 
     Components = { TankCrate2 = SLC.Config.ComponentTypes.TankCrate2 },
+    IsJTAC = false,
     Count = 1
   },
   
@@ -254,6 +262,7 @@ SLC.Config.Assembler =
       WatchTowerWoodCrate = SLC.Config.ComponentTypes.WatchTowerWoodCrate, 
       WatchTowerSupplyCrate = SLC.Config.ComponentTypes.WatchTowerSupplyCrate 
     },
+    IsJTAC = false,
     Count = 2
   },
   OutPost = 
@@ -266,6 +275,7 @@ SLC.Config.Assembler =
       OutpostSupplyCrate = SLC.Config.ComponentTypes.OutpostSupplyCrate,
       OutpostWoodCrate = SLC.Config.ComponentTypes.OutpostWoodCrate 
     },
+    IsJTAC = false,
     Count = 3
   }
 }
@@ -278,6 +288,7 @@ SLC.Config.InfantryTypes =
     MenuName = "Infantry Squad", 
     SpawnTemplate = "InfantrySquadTemplate",
     SpawnName = "SLC Infantry",
+    IsJTAC = true,
     Size = 10
   },
   ATSquad = 
@@ -286,6 +297,7 @@ SLC.Config.InfantryTypes =
     MenuName = "Anti Tank Squad", 
     SpawnTemplate = "ATSquadTemplate",
     SpawnName = "SLC ATInfantry",
+    IsJTAC = false,
     Size = 6
   },
   MANPADSquad = 
@@ -294,6 +306,7 @@ SLC.Config.InfantryTypes =
     MenuName = "MANPADS Squad", 
     SpawnTemplate = "MANPADSSquadTemplate",
     SpawnName = "SLC MANPADS",
+    IsJTAC = false,
     Size = 3
   }
 }
