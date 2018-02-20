@@ -44,13 +44,13 @@ KI.Config.CPUpdateRate = 15
 KI.Config.PlayerInZoneCheckRate = 3
 
 -- controls the rate at which side missions are generated and/or managed from the queue
-KI.Config.SideMissionUpdateRate = KI.Toolbox.MinutesToSeconds(30)  
+KI.Config.SideMissionUpdateRate = 60 -- KI.Toolbox.MinutesToSeconds(30)  
 
 -- adds a randomness increment time to the update rate each run through
-KI.Config.SideMissionUpdateRateRandom = KI.Toolbox.MinutesToSeconds(15)  
+KI.Config.SideMissionUpdateRateRandom = 60 -- KI.Toolbox.MinutesToSeconds(15)  
 
 -- controls the maximum amount of active side missions can run at a time
-KI.Config.SideMissionsMax = 1
+KI.Config.SideMissionsMax = 3
 
 -- controls the maximum amount of time a side mission can remain active
 KI.Config.SideMissionMaxTime = KI.Toolbox.HoursToSeconds(1)  
@@ -264,9 +264,37 @@ KI.Config.SideMissions =
         env.info("DSMT.init called - creating side mission " .. missionName .. " chosen zone : " .. chosenZone.ZoneName)
         local SpawnVeh = SPAWNSTATIC:NewFromStatic("TemplateInsCamp", 2)
         local CampObj = SpawnVeh:SpawnFromPointVec2(chosenZone:GetRandomPointVec2(), math.random(359), KI.GenerateName("Insurgent Camp"))
+        local GroundForces = {}
+        
+        -- randomly spawn in between 1 and 2 infantry squads
+        for i = 1, #math.random(2) do
+          local SpawnGrp = SPAWN:NewWithAlias("InsCampSquad", KI.GenerateName("Insurgent Camp Force"))
+          table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+        end
+        
+        -- randomly spawn in between 1 and 2 manpad squads
+        for i = 1, #math.random(2) do
+          local SpawnGrp = SPAWN:NewWithAlias("InsMANPADSqd", KI.GenerateName("Insurgent Camp Force"))
+          table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+        end
+        
+        local VehicleTemplates = { "InsReccePlt", "InsAAAReccePlt" }
+        local ChosenVehicleTemplate = VehicleTemplates[math.random(#VehicleTemplates)]
+        
+        local SpawnGrp = SPAWN:NewWithAlias(ChosenVehicleTemplate, KI.GenerateName("Insurgent Camp Force"))
+        table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+        
+        -- Preparing arguments to send back
         local args = {}
         args.CampObject = CampObj
-        KI.AddSideMissionObject(CampObj.StaticName)
+        args.GroundForces = GroundForces
+        
+        -- Register the side mission objects so that they are ignored in saving/writing (Side Mission will be restarted on restart)
+        -- KI.AddSideMissionObject(CampObj:getName())
+        for _, moosegrp in pairs(GroundForces) do
+          KI.AddSideMissionObject(moosegrp.GroupName)
+        end
+        
         KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
         -- create and initialize the task, init must return arguments
         return args
@@ -277,8 +305,21 @@ KI.Config.SideMissions =
       destroy = function(args)
         -- destroys and cleans up task resources, must return true/false to indicate cleanup succeeded
         env.info("DSMT.destroy called - destroying camp object")
-        xpcall(function() args.CampObject:destroy() end,
-               function(err) env.info("DSMT.destroy (Destroy Camp) ERROR : " .. err) end)
+        xpcall(function() 
+        
+          -- invoke MOOSEGRP:Destroy() on any groups that are still alive
+          for _, moosegrp in pairs(args.GroundForces) do
+            if moosegrp:IsAlive() then
+              moosegrp:Destroy()
+            end
+          end
+          
+          -- invoke DCSStatic:destroy() if static object is still alive
+          -- SPAWNSTATIC returns DCS StaticObject type
+          if args.CampObject:isExist() then
+            args.CampObject:destroy()
+          end
+        end, function(err) env.info("DSMT.destroy (Destroy Camp) ERROR : " .. err) end)
         
       end,
         
@@ -313,6 +354,190 @@ KI.Config.SideMissions =
       -- this function tells KI what should happen when the side mission time runs out
       -- use this function to display messages to all players
       -- no return required
+      ontimeout = function(missionName, chosenZone, args)
+        env.info("DSMT.ontimeout called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+      end
+  },
+  { 
+      name = "Destroy Convoy Heading to Coban", 
+      desc = "Recon has reported sightings of an enemy convoy in Mayramadag, heading towards the village of Coban.<br/>Command has tasked that this convoy be destroyed to minimize the enemies ability to resupply.",
+      image = "camp",
+      rate = 30,
+      zones = { },
+      init = function(missionName, chosenZone)
+        env.info("DSMT.init called - creating side mission " .. missionName)
+       
+        local SpawnGrp = SPAWN:NewWithAlias("InsConvoyA", KI.GenerateName("Insurgent Convoy"))
+        local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
+        
+        -- Preparing arguments to send back
+        local args = {}
+        args.Convoy = Convoy
+        args.DestZone = ZONE:New("ConvoyA Zone")
+        
+        -- Register the side mission objects so that they are ignored in saving/writing (Side Mission will be restarted on restart)
+        KI.AddSideMissionObject(Convoy.GroupName)
+        
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Coban!")
+        -- create and initialize the task, init must return arguments
+        return args
+      end,
+      
+      destroy = function(args)
+        env.info("DSMT.destroy called - destroying convoy object")
+        xpcall(function() 
+          if args.Convoy:IsAlive() then
+            args.Convoy:Destroy()
+          end
+        end, function(err) env.info("DSMT.destroy (Destroy Convoy) ERROR : " .. err) end)
+        
+      end,
+        
+      complete = function(missionName, chosenZone, args)
+        env.info("DSMT.complete called - checking if Convoy is alive")
+        return not args.Convoy:IsAlive()
+      end,
+      
+      fail = function(missionName, chosenZone, args)
+        return args.Convoy:IsPartlyInZone(args.DestZone)
+      end,
+      
+      oncomplete = function(missionName, chosenZone, args)
+        env.info("DSMT.oncomplete called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
+      end,
+      
+      onfail = function(missionName, chosenZone, args)
+        env.info("DSMT.onfail called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
+      end,
+      
+      ontimeout = function(missionName, chosenZone, args)
+        env.info("DSMT.ontimeout called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+      end
+  },
+  { 
+      name = "Destroy Convoy Heading to Gerpegezh", 
+      desc = "Recon has reported sightings of an enemy armored convoy in the mountains north of Verh. Balkanya, heading towards the village of Gerpegezh. Command has tasked that this convoy be destroyed. The convoy is escorted by self-propelled AAA and Vehicle SAM based systems.",
+      image = "camp",
+      rate = 30,
+      zones = { },
+      init = function(missionName, chosenZone)
+        env.info("DSMT.init called - creating side mission " .. missionName)
+       
+        local SpawnGrp = SPAWN:NewWithAlias("InsConvoyB", KI.GenerateName("Insurgent Convoy"))
+        local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
+        
+        -- Preparing arguments to send back
+        local args = {}
+        args.Convoy = Convoy
+        args.DestZone = ZONE:New("ConvoyB Zone")
+        
+        -- Register the side mission objects so that they are ignored in saving/writing (Side Mission will be restarted on restart)
+        KI.AddSideMissionObject(Convoy.GroupName)
+        
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Gerpegezh!")
+        -- create and initialize the task, init must return arguments
+        return args
+      end,
+      
+      destroy = function(args)
+        env.info("DSMT.destroy called - destroying convoy object")
+        xpcall(function() 
+          if args.Convoy:IsAlive() then
+            args.Convoy:Destroy()
+          end
+        end, function(err) env.info("DSMT.destroy (Destroy Convoy) ERROR : " .. err) end)    
+      end,
+        
+      complete = function(missionName, chosenZone, args)
+        env.info("DSMT.complete called - checking if Convoy is alive")
+        return not args.Convoy:IsAlive()
+      end,
+      
+      fail = function(missionName, chosenZone, args)
+        return args.Convoy:IsPartlyInZone(args.DestZone)
+      end,
+      
+      oncomplete = function(missionName, chosenZone, args)
+        env.info("DSMT.oncomplete called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
+      end,
+      
+      onfail = function(missionName, chosenZone, args)
+        env.info("DSMT.onfail called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
+      end,
+      
+      ontimeout = function(missionName, chosenZone, args)
+        env.info("DSMT.ontimeout called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+      end
+  },
+  { 
+      name = "Transport Cargo to Kardzhin Depot", 
+      desc = "A sensitive package of equipment requires an airlift to Kardzhin Depot",
+      image = "camp",
+      rate = 30,
+      zones = { "SM Cargo A Zone" },
+      init = function(missionName, chosenZone)
+        env.info("DSMT.init called - creating side mission " .. missionName)
+        local obj = coalition.addStaticObject(KI.Config.AllyCountryID, {
+          country = "Russia",
+          category = "Cargos",
+          x = chosenZone:GetVec3(0).x,
+          y = chosenZone:GetVec3(0).z,
+          type = "fueltank_cargo",
+          name = KI.GenerateName("Side Mission Cargo"),
+          mass = 3500,
+          canCargo = true
+        })
+        
+        local args = {}
+        args.Cargo = obj
+        args.DestZone = ZONE:New("Kardzhin Depot Zone")
+        
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Cargo airlift required to Kardzhin Depot!")
+        -- create and initialize the task, init must return arguments
+        return args
+      end,
+      
+      destroy = function(args)
+        env.info("DSMT.destroy called - destroying cargo object")
+        xpcall(function() 
+          if args.Cargo:isActive() then
+            args.Cargo:destroy()
+          end
+        end, function(err) env.info("DSMT.destroy (cargo) ERROR : " .. err) end)    
+      end,
+        
+      complete = function(missionName, chosenZone, args)
+        env.info("DSMT.complete called - checking if cargo is in zone")
+        
+        -- cargo must be alive, NOT in AIR (or it's velocity less than 5cm a second)
+        if args.Cargo:isExist() and (not args.Cargo:inAir() or mist.vec.mag(obj:getVelocity()) < 0.05) then
+          return args.DestZone:IsVec3InZone(args.Cargo:getPosition())
+        else
+          return false
+        end
+      end,
+      
+      fail = function(missionName, chosenZone, args)
+        return not args.Cargo:isExist()
+      end,
+      
+      oncomplete = function(missionName, chosenZone, args)
+        env.info("DSMT.oncomplete called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - SUPPLIES SUCCESSFULLY TRANSPORTED TO KARDZHIN DEPOT!")
+      end,
+      
+      onfail = function(missionName, chosenZone, args)
+        env.info("DSMT.onfail called")
+        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE SUPPLIES HAVE BEEN DESTROYED!")
+      end,
+      
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
         KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
