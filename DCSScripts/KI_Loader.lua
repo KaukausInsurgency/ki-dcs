@@ -247,6 +247,7 @@ function KI.Loader.ImportCoalitionGroups(data)
       -- if the group is spawned successfully
       if _newg ~= nil then
         env.info("KI.Loader.ImportCoalitionGroups Newly Spawned Group created -- " .. _newg:getName())
+        KI.Toolbox.TryDisableAIDispersion(_newg, "DCS")
         local _wp = KI.Data.Waypoints[_newg:getName()]
         if _wp then
           env.info("KI.Loader.ImportCoalitionGroups - found waypoints for group " .. _newg:getName())   
@@ -264,6 +265,8 @@ function KI.Loader.ImportCoalitionGroups(data)
             timer.scheduleFunction(function(args, t) 
               env.info("KI.Loader.ImportCoalitionGroups - Scheduled Spawn called")
               args.grp:TaskRouteToVec2(args.pos, args.pos.speed, args.pos.formation)
+              
+              KI.Toolbox.TryDisableAIDispersion(args.grp, "MOOSE")
               return nil
             end, { grp = moosegrp, pos = _wp}, timer.getTime() + KI.Config.RespawnTimeBeforeWaypointTasking)
             

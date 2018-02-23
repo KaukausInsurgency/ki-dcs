@@ -47,6 +47,8 @@ function KI.Hooks.DWMOnSpawnGroup(moosegrp, fromdepot, todepot)
       
       KI.Toolbox.MessageCoalition(KI.Config.AllySide, "A supply convoy from " .. fromdepot.Name .. " is enroute to " .. todepot.Name .. " - Protect the convoy!")
 
+      KI.Toolbox.TryDisableAIDispersion(moosegrp, "MOOSE")
+      
   end, function(err) env.info("KI.Hooks.DWMOnSpawnGroup - ERROR - " .. err) end)
 
 end
@@ -86,6 +88,8 @@ function KI.Hooks.AICOMOnSpawnGroup(moosegrp, spawntype, atkzone, grpconfig)
 
         GC.Add(gc_item)
       end
+      
+      KI.Toolbox.TryDisableAIDispersion(moosegrp, "MOOSE")
 
   end, function(err) env.info("KI.Hooks.AICOMOnSpawnGroup - ERROR - " .. err) end)
 end

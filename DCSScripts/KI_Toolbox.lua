@@ -185,3 +185,24 @@ function KI.Toolbox.MessageCoalition(side, msg, t)
   trigger.action.outTextForCoalition(side, msg, msgtime)
 end
 
+-- Will try to disable AI Dispersion under fire if the config setting is turned on
+-- This is to help get around transport.dll crashes that appear to be linked to this setting
+-- If this is ever patched by ED this setting can be turned off
+function KI.Toolbox.TryDisableAIDispersion(grp, grptype)
+  env.info("KI.Toolbox.TryDisableAIDispersion called")
+  if KI.Config.TransportDLLCrashDisableAIDispersionUnderFire then
+    env.info("KI.Toolbox.TryDisableAIDispersion - disabling dispersion")
+    local _controller = nil
+    if grptype == "MOOSE" then
+      _controller = grp:GetDCSObject():getController()
+    elseif grptype == "DCS" then
+      _controller = grp:getController()
+    else
+      local _group = Group.getByName(grp)
+      _controller = _group:getController()
+    end
+    
+    Controller.setOption(_controller, AI.Option.Ground.id.DISPERSE_ON_ATTACK, false)
+  end
+end
+

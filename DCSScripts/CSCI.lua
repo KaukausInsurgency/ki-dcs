@@ -226,6 +226,8 @@ function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone, csci_con
     y = destzone:GetVec3().y + csci_config.PlaneCruisingAltitude, 
     z = destzone:GetVec3().z 
   }, csci_config.PlaneCruisingSpeed)
+  
+  KI.Toolbox.TryDisableAIDispersion(moosegrp, "MOOSE")
 end
 
 function CSCI.SpawnCargoInTime(csci_config, destcp)
@@ -238,6 +240,7 @@ function CSCI.SpawnCargoInTime(csci_config, destcp)
           if NewGroup ~= nil then
             env.info("CSCI.SpawnCargoInTime - Successfully spawned group " .. template .. " in zone " .. args.DestinationCP.Name)
             KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Airdrop landed at " .. args.DestinationCP.Name)
+            KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
           else
             env.info("CSCI.SpawnCargoInTime - ERROR - Failed to spawn group " .. template .. " in zone " .. args.DestinationCP.Name)
           end

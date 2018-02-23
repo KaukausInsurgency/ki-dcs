@@ -269,6 +269,7 @@ function SLC.SpawnGroup(g, pilotName, infcomp)
   --env.info("SLC.SpawnGroup gVec3 (x = " .. tostring(g:GetVec3().x) .. ", y = " .. tostring(g:GetVec3().y) .. ", z = " .. tostring(g:GetVec3().z) .. ")")
   --env.info("SLC.SpawnGroup spVec3 (x = " .. tostring(spawnpos.x) .. ", y = " .. tostring(spawnpos.y) .. ", z = " .. tostring(spawnpos.z) .. ")")
   local NewGroup = SpawnVeh:SpawnFromVec3(spawnpos)
+  KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
   -- add to map of infantry instances
   SLC.AddInfantryInstance(NewGroup, infcomp.SpawnTemplate, infcomp.SpawnName, infcomp.MenuName, NewGroup:GetSize(), infcomp.IsJTAC)
   env.info("SLC.Infantry Spawned as Group " .. NewGroup.GroupName)
@@ -373,6 +374,7 @@ function SLC.Unpack(transportGroup, pilotname)
           )
         end
         NewGroup = SpawnVeh:SpawnFromVec3(crate.Object:getPoint())
+        KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
         env.info("SLC.Unpack Spawned Group " .. NewGroup.GroupName)
         i = i + 1
       end
@@ -412,6 +414,7 @@ function SLC.UnloadTroops(g, p)
   end
   
   local NewGroup = SpawnVeh:SpawnFromVec3(pos, SLC.IncrementSpawnID())
+  KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
   
   env.info("SLC.UnloadTroops - spawned unloaded group " .. NewGroup.GroupName .. " - adding to instance map")
   SLC.AddInfantryInstance(NewGroup, troopInfo.SpawnTemplate, troopInfo.SpawnName, troopInfo.MenuName, NewGroup:GetSize(), troopInfo.IsJTAC)

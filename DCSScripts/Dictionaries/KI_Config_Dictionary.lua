@@ -42,6 +42,10 @@ ConfigChecker.KIConfigDictionary =
     Name = "KI.Config.IgnoreSaveGroupPrefix", Default = "", Optional = true,
     Rules = { ConfigChecker.IsString }
   },
+  {
+    Name = "KI.Config.TransportDLLCrashDisableAIDispersionUnderFire", Default = false,
+    Rules = { ConfigChecker.IsBoolean }
+  },
   { 
     Name = "KI.Config.CPUpdateRate", Default = 10, 
     Rules = {ConfigChecker.IsNumber, ConfigChecker.IsNumberPositive}

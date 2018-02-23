@@ -59,7 +59,7 @@ KI.Config.SideMissionMaxTime = KI.Toolbox.HoursToSeconds(1)
 KI.Config.SideMissionsDestroyTime = KI.Toolbox.MinutesToSeconds(15) 
 
 -- parent folder of saved game files
-KI.Config.ParentFolder = "Missions\\KIAlpha\\"
+KI.Config.ParentFolder = "Missions\\Kaukasus Insurgency\\"
 
 -- path to saved game file
 KI.Config.PathMissionData = lfs.writedir() .. KI.Config.ParentFolder .. "KI_Entities.lua"
@@ -100,6 +100,11 @@ KI.Config.DisplayDepotMarkers = false
 
 -- Determines whether F10 Map Markers will be rendered for all capture point positions - true turns this on
 KI.Config.DisplayCapturePointMarkers = true 
+
+-- Determines whether AI ground units will spawn with the setting 'Dispersion under fire' on or off
+-- This is to help get around transport.dll crashes that appear to be linked to this setting
+-- If this is ever patched by ED this setting can be turned off
+KI.Config.TransportDLLCrashDisableAIDispersionUnderFire = true
 
 KI.Config.Depots =
 {
@@ -267,22 +272,30 @@ KI.Config.SideMissions =
         local GroundForces = {}
         
         -- randomly spawn in between 1 and 2 infantry squads
-        for i = 1, #math.random(2) do
+        for i = 1, math.random(2) do
           local SpawnGrp = SPAWN:NewWithAlias("InsCampSquad", KI.GenerateName("Insurgent Camp Force"))
-          table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+          local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
+          
+          KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
+          table.insert(GroundForces, NewGroup)
         end
         
         -- randomly spawn in between 1 and 2 manpad squads
-        for i = 1, #math.random(2) do
+        for i = 1, math.random(2) do
           local SpawnGrp = SPAWN:NewWithAlias("InsMANPADSqd", KI.GenerateName("Insurgent Camp Force"))
-          table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+          local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
+    
+          KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")   
+          table.insert(GroundForces, NewGroup)
         end
         
         local VehicleTemplates = { "InsReccePlt", "InsAAAReccePlt" }
         local ChosenVehicleTemplate = VehicleTemplates[math.random(#VehicleTemplates)]
         
         local SpawnGrp = SPAWN:NewWithAlias(ChosenVehicleTemplate, KI.GenerateName("Insurgent Camp Force"))
-        table.insert(GroundForces, SpawnGrp:SpawnInZone(chosenZone, true))
+        local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
+        KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")   
+        table.insert(GroundForces, NewGroup)
         
         -- Preparing arguments to send back
         local args = {}
@@ -364,12 +377,13 @@ KI.Config.SideMissions =
       desc = "Recon has reported sightings of an enemy convoy in Mayramadag, heading towards the village of Coban.<br/>Command has tasked that this convoy be destroyed to minimize the enemies ability to resupply.",
       image = "camp",
       rate = 30,
-      zones = { },
+      zones = { "ConvoyA Zone" },
       init = function(missionName, chosenZone)
         env.info("DSMT.init called - creating side mission " .. missionName)
        
         local SpawnGrp = SPAWN:NewWithAlias("InsConvoyA", KI.GenerateName("Insurgent Convoy"))
         local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
+        KI.Toolbox.TryDisableAIDispersion(Convoy, "MOOSE")   
         
         -- Preparing arguments to send back
         local args = {}
@@ -423,12 +437,13 @@ KI.Config.SideMissions =
       desc = "Recon has reported sightings of an enemy armored convoy in the mountains north of Verh. Balkanya, heading towards the village of Gerpegezh. Command has tasked that this convoy be destroyed. The convoy is escorted by self-propelled AAA and Vehicle SAM based systems.",
       image = "camp",
       rate = 30,
-      zones = { },
+      zones = { "ConvoyB Zone" },
       init = function(missionName, chosenZone)
         env.info("DSMT.init called - creating side mission " .. missionName)
        
         local SpawnGrp = SPAWN:NewWithAlias("InsConvoyB", KI.GenerateName("Insurgent Convoy"))
         local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
+        KI.Toolbox.TryDisableAIDispersion(Convoy, "MOOSE")   
         
         -- Preparing arguments to send back
         local args = {}
@@ -518,7 +533,7 @@ KI.Config.SideMissions =
         
         -- cargo must be alive, NOT in AIR (or it's velocity less than 5cm a second)
         if args.Cargo:isExist() and (not args.Cargo:inAir() or mist.vec.mag(obj:getVelocity()) < 0.05) then
-          return args.DestZone:IsVec3InZone(args.Cargo:getPosition())
+          return args.DestZone:IsVec3InZone(args.Cargo:getPoint())
         else
           return false
         end
