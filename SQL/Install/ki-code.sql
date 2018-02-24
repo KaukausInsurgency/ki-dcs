@@ -731,6 +731,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetOrAddServer`(
     )
 BEGIN
 	IF ((SELECT EXISTS (SELECT 1 FROM server WHERE server.ip_address = IP)) = 1) THEN
+		UPDATE server SET name = ServerName WHERE ip_address = IP;
 		SELECT server_id FROM server WHERE ip_address = IP;
     ELSE
 		-- New Entry, Insert the new server into the database
@@ -1330,4 +1331,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-18 19:31:10
+-- Dump completed on 2018-02-24 13:33:52
