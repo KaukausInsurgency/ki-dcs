@@ -31,7 +31,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_DeleteInactiveMissions` ON SCHEDULE EVERY 5 MINUTE STARTS '2017-12-26 21:40:45' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Deletes inactive missions' DO DELETE FROM ki.side_mission
+/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_DeleteInactiveMissions` ON SCHEDULE EVERY 5 MINUTE STARTS '2017-12-26 21:40:45' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Deletes inactive missions' DO DELETE FROM side_mission
 		WHERE status != "Active" AND fnc_GetMissionInactiveTimeInSeconds(side_mission_id) > 300 */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;;
@@ -50,7 +50,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_PlayerGainLife` ON SCHEDULE EVERY 1 HOUR STARTS '2017-12-15 14:19:05' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Restores 1 life to each player every hour' DO UPDATE ki.player
+/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_PlayerGainLife` ON SCHEDULE EVERY 1 HOUR STARTS '2017-12-15 14:19:05' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Restores 1 life to each player every hour' DO UPDATE player
 		SET lives = lives + 1
 		WHERE lives < 5 */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
@@ -70,7 +70,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_ServerStatusCheck` ON SCHEDULE EVERY 5 MINUTE STARTS '2017-12-15 15:49:29' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Checks the status of servers' DO UPDATE ki.server
+/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `e_ServerStatusCheck` ON SCHEDULE EVERY 5 MINUTE STARTS '2017-12-15 15:49:29' ON COMPLETION NOT PRESERVE ENABLE COMMENT 'Checks the status of servers' DO UPDATE server
 		SET status = "Offline"
         WHERE fnc_GetLastHeartbeatInSeconds(server_id) > 300 AND status <> "Offline" */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
@@ -204,7 +204,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetLastHeartbeatInSeconds`( Serv
 BEGIN
 	SET @LastHeartbeat = 0;
 	SELECT TIME_TO_SEC( TIMEDIFF( NOW(), COALESCE(last_heartbeat, FROM_UNIXTIME(0)) )) INTO @LastHeartbeat
-	FROM ki.server WHERE server_id = ServerID;
+	FROM server WHERE server_id = ServerID;
     
     RETURN @LastHeartbeat;
 END ;;
@@ -227,7 +227,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetMissionInactiveTimeInSeconds`
 BEGIN
 	SET @TimeDiff = 0;
 	SELECT TIME_TO_SEC( TIMEDIFF( NOW(), COALESCE(time_inactive, FROM_UNIXTIME(0)) )) INTO @TimeDiff
-	FROM ki.side_mission WHERE side_mission_id = SideMissionID;
+	FROM side_mission WHERE side_mission_id = SideMissionID;
     
     RETURN @TimeDiff;
 END ;;
@@ -273,7 +273,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `fnc_GetSessionLastHeartbeatInSeconds
 BEGIN
 	SET @LastHeartbeat = 0;
 	SELECT TIME_TO_SEC( TIMEDIFF( NOW(), COALESCE(last_heartbeat, FROM_UNIXTIME(0)) )) INTO @LastHeartbeat
-	FROM ki.session WHERE server_id = ServerID AND session_id = SessionID;
+	FROM session WHERE server_id = ServerID AND session_id = SessionID;
     
     RETURN @LastHeartbeat;
 END ;;
@@ -610,7 +610,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `BanPlayer`(
 	UCID VARCHAR(128)
 )
 BEGIN
-	UPDATE ki.player SET banned = 1 WHERE player.ucid = UCID;
+	UPDATE player SET banned = 1 WHERE player.ucid = UCID;
     SELECT UCID;
 END ;;
 DELIMITER ;
@@ -640,7 +640,7 @@ BEGIN
         DELETE FROM depot WHERE server_id = ServerID;
 	END IF;
 	DELETE FROM online_players WHERE server_id = ServerID;
-    UPDATE ki.server SET status = "Online" WHERE server_id = ServerID;
+    UPDATE server SET status = "Online" WHERE server_id = ServerID;
 	INSERT INTO session (server_id, start, real_time_start, game_time_start)
     VALUES (ServerID, NOW(), RealTimeStart, GameTimeStart);
     SELECT LAST_INSERT_ID() AS SessionID;
@@ -674,7 +674,7 @@ BEGIN
 			real_time_end = RealTimeEnd,
             game_time_end = GameTimeEnd
 		WHERE server_id = ServerID AND session_id = SessionID;
-    UPDATE ki.server SET status = ServerStatus WHERE server_id = ServerID;
+    UPDATE server SET status = ServerStatus WHERE server_id = ServerID;
     SELECT 1;
 END ;;
 DELIMITER ;
@@ -758,7 +758,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `IsPlayerBanned`(
 	UCID VARCHAR(128)
 )
 BEGIN
-    SELECT banned, player.ucid AS UCID FROM ki.player WHERE player.ucid = UCID;
+    SELECT banned, player.ucid AS UCID FROM player WHERE player.ucid = UCID;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -777,7 +777,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `log`(sproc VARCHAR(128), text VARCHAR(5000))
 BEGIN
-	INSERT INTO ki.sproc_log (sproc_log.sproc, sproc_log.text)
+	INSERT INTO sproc_log (sproc_log.sproc, sproc_log.text)
     VALUES (sproc, text);
 END ;;
 DELIMITER ;
@@ -801,7 +801,7 @@ BEGIN
 	s.session_id AS SessionID,
 	s.event AS Event,
 	COUNT(s.event) AS EventCount
-	FROM ki.rpt_player_session_series s
+	FROM rpt_player_session_series s
 	RIGHT JOIN
 		( 	
 			SELECT DISTINCT session_id
@@ -837,8 +837,8 @@ BEGIN
 	SELECT 
 		s.event AS Event,
 		s.game_time - ss.game_time_start AS Time
-	FROM ki.rpt_player_session_series s
-    INNER JOIN ki.session ss
+	FROM rpt_player_session_series s
+    INNER JOIN session ss
 		ON s.session_id = ss.session_id
 	WHERE s.ucid = UCID AND s.session_id = 
 		 ( 	
@@ -885,7 +885,7 @@ BEGIN
         kills / CASE WHEN (deaths + ejects) = 0 THEN 1 ELSE (deaths + ejects) END AS KillDeathEjectRatio,
         transport_dismounts / transport_mounts AS TransportSuccessRatio
 	FROM rpt_overall_stats r
-    INNER JOIN ki.player p
+    INNER JOIN player p
     ON r.ucid = p.ucid
     WHERE r.ucid = UCID;
 END ;;
@@ -934,12 +934,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SendHeartbeat`(
         IN RestartTime INT
     )
 BEGIN
-	UPDATE ki.server 
+	UPDATE server 
 		SET last_heartbeat = NOW(),
         status = "Online",
 		restart_time = RestartTime
 	WHERE server_id = ServerID;
-    UPDATE ki.session
+    UPDATE session
 		SET last_heartbeat = NOW()
 	WHERE server_id = ServerID and session_id = SessionID;
 	SELECT 1;
@@ -963,7 +963,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UnbanPlayer`(
 	UCID VARCHAR(128)
 )
 BEGIN
-	UPDATE ki.player SET banned = 0 WHERE player.ucid = UCID;
+	UPDATE player SET banned = 0 WHERE player.ucid = UCID;
     SELECT UCID;
 END ;;
 DELIMITER ;
@@ -1284,7 +1284,7 @@ BEGIN
 	SELECT player.ucid AS UCID,
 		   player.name AS Name,
            player.banned AS Banned
-    FROM ki.player 
+    FROM player 
     WHERE LOWER(player.name) LIKE CONCAT("%", LOWER(Criteria), "%");
 END ;;
 DELIMITER ;
@@ -1331,4 +1331,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-24 13:33:52
+-- Dump completed on 2018-02-25 11:17:58
