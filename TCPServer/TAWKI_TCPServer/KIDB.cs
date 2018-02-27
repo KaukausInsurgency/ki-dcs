@@ -88,7 +88,6 @@ namespace TAWKI_TCPServer
             catch (Exception ex)
             {
                 LogToFile("Error executing query against MySQL (Action: " + action + ") - " + ex.Message, log);
-                Console.WriteLine("Problem Encountered Sending Data to DB " + ex.Message);
                 result.Error = "Error executing query against MySQL (Action: " + action + ") - " + ex.Message;
             }
             finally
@@ -159,7 +158,6 @@ namespace TAWKI_TCPServer
             catch (Exception ex)
             {
                 LogToFile("Error executing query against MySQL (Action: " + action + ") - " + ex.Message, log);
-                Console.WriteLine("Problem Encountered Sending Data to DB " + ex.Message);
                 result.Error = "Error executing query against MySQL (Action: " + action + ") - " + ex.Message;
             }
             finally
@@ -249,7 +247,6 @@ namespace TAWKI_TCPServer
 
         public static void OnSend(object sender, IPCSendEventArgs e)
         {
-            Console.WriteLine("Sent data to client");
             LogToFile("Server Sent: " + e.data, ((SocketClient)(sender)).LogFile);
         }
 

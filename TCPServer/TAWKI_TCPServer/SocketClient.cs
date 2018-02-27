@@ -40,7 +40,7 @@ namespace TAWKI_TCPServer
         public event SendEventEventHandler SendEvent;
         public delegate void SendEventEventHandler(object sender, IPCSendEventArgs e);
 
-        public SocketClient(Socket s, int request_size, int clientID, string log = "")
+        public SocketClient(Socket s, int request_size, string log = "")
         {
             _clientsock = s;
             _address = ((IPEndPoint)_clientsock.RemoteEndPoint).Address.ToString();
@@ -55,7 +55,7 @@ namespace TAWKI_TCPServer
             {
                 log = Directory.GetCurrentDirectory();
             }
-            this._logPath = log + "\\" + DateTime.Now.ToString("yyyyMMdd") + "_client_" + clientID.ToString() + ".log";
+            this._logPath = log + "\\" + DateTime.Now.ToString("yyyyMMdd") + "_client_" + _address.Replace('.','_').Replace(":","_") + ".log";
             this.ConnectedEvent += KIDB.OnConnect;
             this.DisconnectedEvent += KIDB.OnDisconnect;
             this.SendEvent += KIDB.OnSend;
@@ -194,28 +194,15 @@ namespace TAWKI_TCPServer
                 {
 
                     int req_size = -1;
-                    //Console.WriteLine("Request Data:" + _req_buffer.Decode(numBytes));
                     if (!int.TryParse(_req_buffer.Decode(numBytes), out req_size))
                     {
                         throw new Exception("Client request is corrupted");
                     }
                     if (req_size > 0)
                     {
-                        //Thread.Sleep(500);
-                        //_clientsock.ReceiveBufferSize = req_size;
                         _buffer = new SockBuffer(req_size);
                         int num_bytes_request = 0;
                         int time_out = 0;   // 15 seconds
-                        //int offset = 0;
-                        /*
-                        while (num_bytes_request < req_size)
-                        {     
-                            
-                            //_clientsock.Available
-                            num_bytes_request += _clientsock.Receive(_buffer.BufferByte, 0, _buffer.Size, SocketFlags.None);
-                            //offset = num_bytes_request - 1;
-                        }
-                         * */
                        
                         while (_clientsock.Available < req_size)
                         {

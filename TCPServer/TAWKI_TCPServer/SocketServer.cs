@@ -126,7 +126,7 @@ namespace TAWKI_TCPServer
             {
                 try
                 {
-                    SocketClient client = new SocketClient(_serversock.EndAccept(ar), _request_size, _clients.Count);
+                    SocketClient client = new SocketClient(_serversock.EndAccept(ar), _request_size);
                     
                     bool is_valid = false;
 
