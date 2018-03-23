@@ -283,6 +283,16 @@ local function StartKI()
     end
   end, {}, timer.getTime() + AICOM.Config.TurnRate)
   
+  timer.scheduleFunction(function(args, t)
+    local success, result = xpcall(function() return KI.Scheduled.IncrementPlayerLives(args,t) end,
+                                   function(err) env.info("KI.Scheduled.IncrementPlayerLives ERROR : " .. err) end)
+    if not success then
+      return t + 60
+    else
+      return result
+    end  
+  end, {}, timer.getTime() + 60)
+  
   env.info("KI - Scheduled functions created")
 
   world.addEventHandler(KI.Hooks.GameEventHandler)

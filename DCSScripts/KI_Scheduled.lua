@@ -688,3 +688,20 @@ function KI.Scheduled.DataTransmissionGameEvents(args, time)
   end
   return time + KI.Config.DataTransmissionGameEventsUpdateRate
 end
+
+
+
+function KI.Scheduled.IncrementPlayerLives(args,time)
+  env.info("KI.Scheduled.IncrementPlayerLives called")
+  for pid, op in pairs(KI.Data.OnlinePlayers) do
+    if op.Lives ~= KI.Null and op.Lives < 5 then
+      op.Lives = op.Lives + 1
+    end
+  end
+  
+  KI.Toolbox.MessageCoalition(1, "Players have regained 1 life!", 60)
+  KI.Toolbox.MessageCoalition(2, "Players have regained 1 life!", 60)
+  
+  return time + 60
+  -- return time + 3600
+end
