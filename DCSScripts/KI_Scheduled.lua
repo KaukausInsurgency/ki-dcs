@@ -702,6 +702,5 @@ function KI.Scheduled.IncrementPlayerLives(args,time)
   KI.Toolbox.MessageCoalition(1, "Players have regained 1 life!", 60)
   KI.Toolbox.MessageCoalition(2, "Players have regained 1 life!", 60)
   
-  return time + 60
-  -- return time + 3600
+  return time + 3600
 end

@@ -287,11 +287,11 @@ local function StartKI()
     local success, result = xpcall(function() return KI.Scheduled.IncrementPlayerLives(args,t) end,
                                    function(err) env.info("KI.Scheduled.IncrementPlayerLives ERROR : " .. err) end)
     if not success then
-      return t + 60
+      return t + 3600
     else
       return result
     end  
-  end, {}, timer.getTime() + 60)
+  end, {}, timer.getTime() + 3600)
   
   env.info("KI - Scheduled functions created")
 
