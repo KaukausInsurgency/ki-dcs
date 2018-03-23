@@ -1,0 +1,18 @@
+1. Create a new folder where repos will be staged
+2. cd ~/Documents/Github/STAGINGFOLDER
+3. git clone {RepoAURL : https://github.com/...}
+4. git clone {RepoBURL : https://github.com/...}
+5. cd ~/Documents/Github/STAGINGFOLDER/RepoA
+6. git remote rm origin
+7. git filter-branch --subdirectory-filter MYFOLDER -- --all
+8. mkdir MYFOLDER
+9. mv * MYFOLDER (May get error here about moving folder into subdirectory of itself - safe to ignore)
+10. git add .
+11. git commit
+12. cd ~/Documents/Github/STAGINGFOLDER/RepoB
+13. git remote add master ~/Documents/Github/STAGINGFOLDER/RepoA
+14. git pull ~/Documents/Github/STAGINGFOLDER/RepoA master --allow-unrelated-histories
+15. git remote rm master
+16. git push
+17. Will ask for credentials to connect to RepoB on github - type them in 
+18. Migration Complete
