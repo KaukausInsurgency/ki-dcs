@@ -1,6 +1,0 @@
-<Config>
-	<DBConnect>Server=127.0.0.1; Database=ki; Uid=KITestAcc; Pwd=test;</DBConnect>
-	<Port>9983</Port>
-	<MaxConnections>4</MaxConnections>
-	<WhiteList>192.168.1.254;::ffff:127.0.0.1</WhiteList>
-</Config>
