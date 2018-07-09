@@ -277,6 +277,7 @@ net.log("KI Server Tools - Frameworks loaded")
 
 KIServer = {}
 
+KIServer.Version = "AAAA"
 KIServer.SocketDelimiter = "\n"   -- delimiter used to segment messages (not needed for UDP)
 KIServer.JSON = JSON
 KIServer.LastOnFrameTimeInitCheck = 0         
@@ -289,12 +290,15 @@ KIServer.GameEventsDirectory = lfs.writedir() .. "Missions\\Kaukasus Insurgency\
 KIServer.Null = -9999             -- nil placeholder - we need this because JSON requests require all parameters be passed in (including nils) otherwise the TCP Server call will fail
 KIServer.Flag = 9000              -- this flag is set when the GAME is ready to receive SessionID and ServerID
 KIServer.Config = {}
+KIServer.REDIS = "REDIS"
+KIServer.MYSQL = "MYSQL"
 
 
 
 
 KIServer.Actions = {}
-KIServer.Actions.UpdatePlayer = "UpdatePlayer"                -- updates player table with life count, online_player with role
+KIServer.Actions.UpdatePlayer = "UpdatePlayer"                      -- updates player table with life count
+KIServer.Actions.UpdateOnlinePlayers = "AddOrUpdateOnlinePlayers"   -- updates the online player list
 KIServer.Actions.GetOrAddPlayer = "GetOrAddPlayer"            -- adds or gets existing player record
 KIServer.Actions.AddConnectEvent = "AddConnectionEvent"       -- adds connect / disconnect events and adds player to online_players table
 KIServer.Actions.AddGameEvent = "AddGameEvent"
@@ -308,6 +312,7 @@ KIServer.Actions.IsPlayerBanned = "IsPlayerBanned"
 KIServer.Actions.BanPlayer = "BanPlayer"
 KIServer.Actions.UnbanPlayer = "UnbanPlayer"
 KIServer.Actions.SendHeartbeat = "SendHeartbeat"
+KIServer.Actions.AddChat = "AddOrUpdateChat"
 
 KIServer.FlagValues = {}
 KIServer.FlagValues.MISSION_READY_TO_RECEIVE = 1
@@ -337,7 +342,14 @@ function KIServer.RequestServerID()
     end
   end
   
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestServer, false, { ServerName = KIServer.Config.ServerName })
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestServer, KIServer.MYSQL, false, 
+    { 
+      ServerName = KIServer.Config.ServerName, 
+      Version = KIServer.Version, 
+      Description = KIServer.Config.ServerDescription,
+      SimpleRadioEnabled = KIServer.Config.SimpleRadioEnabled,
+      SimpleRadioIP = KIServer.Config.SimpleRadioIPAddress
+    })
   local result = false
   
   if KIServer.TCPSocket.SendUntilComplete(request, 10) then
@@ -371,16 +383,11 @@ function KIServer.RequestNewSession()
     end
   end
   
-  if KIServer.Config.RefreshMissionData then
-    net.log("KIServer.RequestNewSession - WARNING - RefreshMissionData is enabled - please turn this off in KIServerConfig.lua when running a live server")
-  end
-  
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, false, 
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RequestSession, KIServer.MYSQL, false, 
     { 
       ServerID = KIServer.Data.ServerID, 
       RealTimeStart = DCS.getRealTime(), 
-      GameTimeStart = DCS.getModelTime(), 
-      RefreshMissionData = KIServer.Config.RefreshMissionData 
+      GameTimeStart = DCS.getModelTime()
     })
   local result = false
   
@@ -422,7 +429,7 @@ function KIServer.RequestEndSession()
     _status = "Restarting"
   end
   
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, false, 
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.EndSession, KIServer.MYSQL, false, 
                 { 
                   ServerID = KIServer.Data.ServerID, 
                   SessionID = KIServer.Data.SessionID, 
@@ -527,7 +534,6 @@ function KIServer.SetFlagValue(_flag, _number)
   return true
 end
 
-
 local function InitKIServerConfig()
   local UseDefaultConfig = false
   net.log("InitKIServerConfig() called")
@@ -535,7 +541,6 @@ local function InitKIServerConfig()
   local _config, _error = KIServer.ReadFileJSON(KIServer.ConfigFileDirectory)
   if _config then
     net.log("InitKIServerConfig() - Reading From Config File")
-    KIServer.Config.RefreshMissionData = _config["RefreshMissionData"]
     KIServer.Config.MissionName = _config["MissionName"]
     KIServer.Config.DataRefreshRate = _config["DataRefreshRate"]
     KIServer.Config.BanCheckRate = _config["BanCheckRate"]
@@ -544,7 +549,10 @@ local function InitKIServerConfig()
     KIServer.Config.TCPCheckReceiveRate = _config["TCPCheckReceiveRate"]
     KIServer.Config.ServerPlayerID = _config["ServerPlayerID"]
     KIServer.Config.ServerName = _config["ServerName"]
+    KIServer.Config.ServerDescription = _config["ServerDescription"]
     KIServer.Config.MissionRestartTime = _config["MissionRestartTime"]
+    KIServer.Config.SimpleRadioEnabled = _config["SimpleRadioEnabled"]
+    KIServer.Config.SimpleRadioIPAddress = _config["SimpleRadioIPAddress"]
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = tonumber(_config["GAMEGUI_SEND_TO_PORT"])
     KIServer.Config.SERVER_SESSION_SEND_TO_PORT = tonumber(_config["SERVER_SESSION_SEND_TO_PORT"])
@@ -559,13 +567,7 @@ local function InitKIServerConfig()
   end
   
   if UseDefaultConfig then
-    net.log("InitKIServerConfig() - There was a problem reading from an existing config - using default settings")
-    -- RefreshMissionData - this setting determines whether the database should delete all 
-    -- [capture_point, depot] records and reload new ones each time a session is created 
-    -- this will cause issues with SignalR temporarily and will involve refreshing the game page so that the new IDs are referenced on the page
-    -- Do this only when you are testing adding new locations on the map and testing the results of that work
-    -- This setting should be turned OFF in live environment
-    KIServer.Config.RefreshMissionData = false        
+    net.log("InitKIServerConfig() - There was a problem reading from an existing config - using default settings")     
     KIServer.Config.MissionName = "Kaukasus Insurgency"
     KIServer.Config.DataRefreshRate = 5   -- how often should the server check the UDP Socket to update its data in memory
     KIServer.Config.BanCheckRate = 300 -- how often should the server send request for banlist from TCP Server
@@ -575,6 +577,8 @@ local function InitKIServerConfig()
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
     KIServer.Config.MissionRestartTime = 14400  -- 4 hrs time until restart
+    KIServer.Config.SimpleRadioEnabled = false
+    KIServer.Config.SimpleRadioIPAddress = ""
     
     KIServer.Config.GAMEGUI_SEND_TO_PORT = 6005
     KIServer.Config.SERVER_SESSION_SEND_TO_PORT = 6007
@@ -772,19 +776,19 @@ function KIServer.TryProcessMissionData()
               table.insert(BulkPlayerUpdateRequest, KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo))
             end      
           end
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, true, BulkPlayerUpdateRequest)
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.REDIS, true, BulkPlayerUpdateRequest)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.CapturePoints then
           net.log("KIServer.TryProcessMissionData() - got CapturePoints data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, true, Data.CapturePoints)
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, KIServer.REDIS, true, Data.CapturePoints)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.Depots then
           net.log("KIServer.TryProcessMissionData() - got Depots data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, true, Data.Depots)
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, KIServer.REDIS, true, Data.Depots)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.SideMissions then
           net.log("KIServer.TryProcessMissionData() - got SideMissions data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateSideMission, true, Data.SideMissions)
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateSideMission, KIServer.REDIS, true, Data.SideMissions)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         end
         -- if we fail to decode the JSON of the packet, continue on
@@ -809,7 +813,7 @@ function KIServer.TryProcessGameEvents()
       local _data, _err = loadfile(filePath)
 
       if _data then
-        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, true, _data())
+        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, KIServer.MYSQL, true, _data())
         if KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessGameEvents()", 3) then
           net.log("KIServer.TryProcessGameEvents() - Successfully sent GameEvents to TCP Server")
         end
@@ -838,7 +842,7 @@ function KIServer.SendUpdatePlayer(pid)
   
   net.log("KIServer.SendUpdatePlayer() called")
   local UpdatePlayerReq = KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo)
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.MYSQL false, UpdatePlayerReq)
   KIServer.Wrapper.SafeTCPSend(request, "KIServer.SendUpdatePlayer()")
 end
 
@@ -888,11 +892,12 @@ end
 
 -- Creates the message in the correct format the server expects
 -- Encodes into JSON, and appends size of message in first 6 characters of string
-function KIServer.TCPSocket.CreateMessage(action_name, is_bulk_query, data)
+function KIServer.TCPSocket.CreateMessage(action_name, dest, is_bulk_query, data)
   net.log("KIServer.TCPSocket.CreateMessage called")
   local _msg = 
   {
     Action = action_name,
+    Destination = dest,
     BulkQuery = is_bulk_query,
     Data = data,
   }
@@ -1103,8 +1108,13 @@ KIHooks.onSimulationFrame = function()
           end
         end
         
-        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, true, UpdatePlayerList)
-        KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame")        
+        -- update player lives in database
+        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL, true, UpdatePlayerList)
+        KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame")  
+        
+        -- remove all online players
+        local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.REDIS, true, {})
+        KIServer.Wrapper.SafeTCPSend(request2, "KIHooks.onSimulationFrame")  
       end
       KIHooks.onPlayerDisconnect(1, 5)
       
@@ -1225,7 +1235,7 @@ KIHooks.onSimulationFrame = function()
     net.log("KIHooks.onSimulationFrame - Sending Heartbeat")
     KIServer.LastOnFrameTimeHeartbeat = DCS.getModelTime()
     local restart_time = KIServer.Config.MissionRestartTime - DCS.getModelTime()
-    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.SendHeartbeat, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID, RestartTime = restart_time })
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.SendHeartbeat, KIServer.MYSQL, false, { ServerID = KIServer.Data.ServerID, SessionID = KIServer.Data.SessionID, RestartTime = restart_time })
     KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame - SendHeartbeat")
   end
   
@@ -1241,7 +1251,7 @@ KIHooks.onSimulationFrame = function()
       table.insert(UCIDList, { UCID = pinfo.UCID })
     end
     
-    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.IsPlayerBanned, true, UCIDList)
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.IsPlayerBanned, KIServer.MYSQL, true, UCIDList)
     KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame - IsPlayerBanned")
   end
 end
@@ -1319,7 +1329,7 @@ KIHooks.onPlayerConnect = function(playerID)
     
     -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
     -- this should prevent any blocking on our end and keep the server from lagging out
-    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, KIServer.MYSQL, false, ServerEvent)
     KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerConnect")
   end
   --net.log("sending connect message to mission-side")
@@ -1347,7 +1357,7 @@ KIHooks.onPlayerConnect = function(playerID)
   -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
   -- this should prevent any blocking on our end and keep the server from lagging out
   if true then
-    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.GetOrAddPlayer, false, { UCID = player.ucid, Name = player.name })
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.GetOrAddPlayer, KIServer.MYSQL, false, { UCID = player.ucid, Name = player.name })
     KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerConnect")
   end
   
@@ -1398,7 +1408,7 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
     
     -- Lets pre-emptively invoke a TCP Send request to the TCP Server now, and pick up the results later in the main loop
     -- this should prevent any blocking on our end and keep the server from lagging out
-    local request1 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, false, ServerEvent)
+    local request1 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddConnectEvent, KIServer.MYSQL, false, ServerEvent)
     KIServer.Wrapper.SafeTCPSend(request1, "KIHooks.onPlayerConnect()")
     
     -- do not update the player lives if they are NULL, we do not want to cause an invalid state in the TCP Server
@@ -1406,7 +1416,7 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
       pinfo.Role = ""
       pinfo.Side = 0
       local UpdatePlayerReq = KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo)
-      local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, false, UpdatePlayerReq)
+      local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.MYSQL, false, UpdatePlayerReq)
       KIServer.Wrapper.SafeTCPSend(request2, "KIHooks.onPlayerConnect()")
     end
     
@@ -1603,7 +1613,7 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
           ["Cargo"] = KIServer.Null
         }
         
-        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, false, gameevent)
+        local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddGameEvent, KIServer.MYSQL, false, gameevent)
         if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onGameEvent()", 3) then
           net.log("KIHooks.onGameEvent() - Successfully sent GameEvent to TCP Server")
         end
@@ -1613,6 +1623,23 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
     
   end
   
+end
+
+KIHooks.onPlayerTrySendChat = function(playerID, msg, all) -- -> filteredMessage | "" - empty string drops the message
+    if all then
+      local pinfo = net.get_player_info(playerID)
+      local chat =
+      {
+        Name = pinfo.name,
+        Side = pinfo.side,
+        Message = msg
+      }
+      local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddChat, KIServer.REDIS, false, chat)
+      if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerTrySendChat()", 3) then
+        net.log("KIHooks.onPlayerTrySendChat() - Successfully sent Chat to TCP Server")
+      end
+    end
+    return msg
 end
 
 net.log("KI Server Tools Initialization Complete")
