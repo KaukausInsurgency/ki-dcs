@@ -298,7 +298,6 @@ KIServer.MYSQL = "MYSQL"
 
 KIServer.Actions = {}
 KIServer.Actions.UpdatePlayer = "UpdatePlayer"                      -- updates player table with life count
-KIServer.Actions.UpdateOnlinePlayers = "AddOrUpdateOnlinePlayers"   -- updates the online player list
 KIServer.Actions.GetOrAddPlayer = "GetOrAddPlayer"            -- adds or gets existing player record
 KIServer.Actions.AddConnectEvent = "AddConnectionEvent"       -- adds connect / disconnect events and adds player to online_players table
 KIServer.Actions.AddGameEvent = "AddGameEvent"
@@ -776,7 +775,7 @@ function KIServer.TryProcessMissionData()
               table.insert(BulkPlayerUpdateRequest, KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo))
             end      
           end
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.REDIS, true, BulkPlayerUpdateRequest)
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL, true, BulkPlayerUpdateRequest)
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.CapturePoints then
           net.log("KIServer.TryProcessMissionData() - got CapturePoints data from Mission - sending to TCP Server")
@@ -842,7 +841,7 @@ function KIServer.SendUpdatePlayer(pid)
   
   net.log("KIServer.SendUpdatePlayer() called")
   local UpdatePlayerReq = KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo)
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.MYSQL false, UpdatePlayerReq)
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL false, UpdatePlayerReq)
   KIServer.Wrapper.SafeTCPSend(request, "KIServer.SendUpdatePlayer()")
 end
 
@@ -1111,10 +1110,6 @@ KIHooks.onSimulationFrame = function()
         -- update player lives in database
         local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL, true, UpdatePlayerList)
         KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onSimulationFrame")  
-        
-        -- remove all online players
-        local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.REDIS, true, {})
-        KIServer.Wrapper.SafeTCPSend(request2, "KIHooks.onSimulationFrame")  
       end
       KIHooks.onPlayerDisconnect(1, 5)
       
@@ -1416,7 +1411,7 @@ function KIHooks.onPlayerDisconnect(playerID, reason)
       pinfo.Role = ""
       pinfo.Side = 0
       local UpdatePlayerReq = KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo)
-      local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdateOnlinePlayers, KIServer.MYSQL, false, UpdatePlayerReq)
+      local request2 = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL, false, UpdatePlayerReq)
       KIServer.Wrapper.SafeTCPSend(request2, "KIHooks.onPlayerConnect()")
     end
     
