@@ -226,7 +226,6 @@ if IsMockTest then
       DCS.onSimulationFrame()
       loop_count = loop_count - 1
       if loop_count < 10 then
-        DCS.getModelTime = function() return nil end
         DCS.getMissionName = function() return "Randomstuff" end
       end
     end
