@@ -225,7 +225,45 @@ function()
   
   if true then
     -- KI.Query.FindFriendlyCPAirport()
-    UT.TestCompare(function() return 1 == 2 end, "KI.Query.FindFriendlyCPAirport tests not implemented")
+    KI.Data.CapturePoints = {}
+    UT.TestCompare(function() return KI.Query.FindFriendlyCPAirport() == nil end, "Result should be nil")
+    
+    KI.Config.AllySide = 1
+    
+    table.insert(KI.Data.CapturePoints, CP:New("CP1", "TestCPZone", CP.Enum.AIRPORT)) -- insert neutral cp
+    
+    if true then
+      local cp = CP:New("CP2", "TestCPZone", CP.Enum.AIRPORT)
+      cp.BlueUnits = 5
+      table.insert(KI.Data.CapturePoints, cp)
+      UT.TestCompare(function() return KI.Query.FindFriendlyCPAirport() == nil end, 
+        "Result should be nil, no friendly airports")
+    end
+    
+    if true then
+      local cp = CP:New("CP3", "TestCPZone", CP.Enum.AIRPORT)
+      cp.RedUnits = 1
+      table.insert(KI.Data.CapturePoints, cp)
+      local resultcp = KI.Query.FindFriendlyCPAirport()
+      UT.TestCompare(function() return resultcp ~= nil end, "Result should not be nil")
+      UT.TestCompare(function() return resultcp.Name == "CP3" end, "Name should be CP3")
+    end
+    
+    if true then
+      local cp = CP:New("CP4", "TestCPZone", CP.Enum.AIRPORT)
+      cp.RedUnits = 15
+      table.insert(KI.Data.CapturePoints, cp)
+      local resultcp = KI.Query.FindFriendlyCPAirport()
+      UT.TestCompare(function() return resultcp ~= nil end, "Result should not be nil")
+      UT.TestCompare(function() return resultcp.Name == "CP4" end, "Name should be CP4")
+    end
+    
+    if true then
+      KI.Config.AllySide = 2
+      local resultcp = KI.Query.FindFriendlyCPAirport()
+      UT.TestCompare(function() return resultcp ~= nil end, "Result should not be nil")
+      UT.TestCompare(function() return resultcp.Name == "CP2" end, "Name should be CP2")
+    end
   end
   
 end,
@@ -236,4 +274,5 @@ function()
   KI.Data.SideMissions = {}
   KI.Data.Depots = {}
   KI.Data.OnlinePlayers = {}
+  KI.Config.AllySide = 1
 end)

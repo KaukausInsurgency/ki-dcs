@@ -7,6 +7,7 @@ UT.TestCase("CP",
   function()
     UT.TestData.Zone = ZONE:New("TestCPZone")
     UT.TestData.Vec3 = UT.TestData.Zone:GetVec3(0)
+    UT.TestData.PV = POINT_VEC2:NewFromVec3(UT.TestData.Vec3)
   end,
     function()    
       
@@ -22,8 +23,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-        UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
+        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
+        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
       end
       
       -- testing constructor with 1 optional param
@@ -38,8 +39,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-        UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
+        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
+        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
       end
       
       -- testing constructor with 2 optional param
@@ -54,8 +55,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-        UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
+        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
+        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
       end
         
       -- testing constructor with 3 optional param
@@ -70,8 +71,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == "VHF 130.000 AM MHz" end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.X == UT.TestData.Vec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-        UT.TestCompare(function() return _cp.Position.Y == UT.TestData.Vec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view      
+        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
+        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
       end
       
       

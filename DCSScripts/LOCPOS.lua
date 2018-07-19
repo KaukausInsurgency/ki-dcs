@@ -8,8 +8,8 @@ LOCPOS =
 {
   LatLong = "",
   MGRS = "",
-  X = 0,                -- DCS pos.z coordinate
-  Y = 0                 -- DCS pos.x coordinate
+  Latitude = 0,                -- DCS pos.z coordinate converted to latitude
+  Longitude = 0                 -- DCS pos.x coordinate converted to longitude
 }
 
 function LOCPOS:NewFromZone(zone)
@@ -26,9 +26,9 @@ function LOCPOS:NewFromZone(zone)
   self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
   self.MGRS = coordinates:ToStringMGRS()
   self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
-  local vec3 = coordinates:GetVec3()
-  self.X = vec3.z
-  self.Y = vec3.x
+  local pv = POINT_VEC2:NewFromVec3(coordinates:GetVec3())
+  self.Latitude = pv:GetLat()
+  self.Longitude = pv:GetLon()
   return self
 end
 
@@ -46,8 +46,8 @@ function LOCPOS:NewFromVec3(vec3)
   self.LatLong = string.gsub(coordinates:ToStringLLDDM(), "LL DDM, ", "")
   self.MGRS = coordinates:ToStringMGRS()
   self.MGRS = string.gsub(self.MGRS, "MGRS, ", "")
-  local vec3 = coordinates:GetVec3()
-  self.X = vec3.z
-  self.Y = vec3.x
+  local pv = POINT_VEC2:NewFromVec3(coordinates:GetVec3())
+  self.Latitude = pv:GetLat()
+  self.Longitude = pv:GetLon()
   return self
 end

@@ -19,6 +19,7 @@ UT.TestCase("DWM",
       
       local _z = ZONE:New("Test Depot Zone")
       local _zvec3 = _z:GetVec3(0)
+      local _pv = POINT_VEC2:NewFromVec3(_zvec3)
       
       local _d = DWM:New("Test Depot", "Test Depot Zone")
       UT.TestCompare(function() return _d.Zone ~= nil end)
@@ -30,8 +31,8 @@ UT.TestCase("DWM",
       UT.TestCompare(function() return _d.CurrentCapacity == 0 end)
       UT.TestCompare(function() return _d.IsSupplier == false end)
       UT.TestCompare(function() return _d.SupplyCheckRate == 600 end)
-      UT.TestCompare(function() return _d.Position.X == _zvec3.z end)      -- DCS treats the z axis as the 2d x axis from the map point of view
-      UT.TestCompare(function() return _d.Position.Y == _zvec3.x end)      -- DCS treats the x axis as the 2d y axis from the map point of view
+      UT.TestCompare(function() return _d.Position.Latitude == _pv:GetLat() end)
+      UT.TestCompare(function() return _d.Position.Longitude == _pv:GetLon() end)
       
       -- testing SetResource method
       UT.TestFunction(DWM.SetResource, _d, "Infantry", 30, 1)

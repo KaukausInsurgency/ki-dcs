@@ -484,8 +484,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         Text = _cp.Text or KI.Null,
         LatLong = _cp.Position.LatLong,
         MGRS = _cp.Position.MGRS,
-        X = _cp.Position.X,
-        Y = _cp.Position.Y
+        Latitude = _cp.Position.Latitude,
+        Longitude = _cp.Position.Longitude
       }
       table.insert(CapturePointSegments[index], data)
     end
@@ -524,8 +524,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         Capacity = _maxCapacity,
         LatLong = _depot.Position.LatLong,
         MGRS = _depot.Position.MGRS,
-        X = _depot.Position.X,
-        Y = _depot.Position.Y
+        Latitude = _depot.Position.Latitude,
+        Longitude = _depot.Position.Longitude
       }
       table.insert(DepotSegments[index], data)
     end
@@ -560,8 +560,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           TaskDesc = _task.Desc,   
           LatLong = _task.CurrentPosition.LatLong,
           MGRS = _task.CurrentPosition.MGRS,
-          X = _task.CurrentPosition.X,
-          Y = _task.CurrentPosition.Y
+          Latitude = _task.CurrentPosition.Latitude,
+          Longitude = _task.CurrentPosition.Longitude
         }
         KI.Data.ActiveMissions[i].InsertNewDBRecord = false   -- set to false, as we dont need to add the same record multiple times
       else
@@ -577,8 +577,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           TaskDesc = KI.Null,          
           LatLong = KI.Null,
           MGRS = KI.Null,
-          X = KI.Null,
-          Y = KI.Null
+          Latitude = KI.Null,
+          Longitude = KI.Null
         }
       end
       table.insert(DSMTSegments[index], data)
@@ -603,8 +603,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           Image = _task.Image,
           LatLong = _task.CurrentPosition.LatLong,
           MGRS = _task.CurrentPosition.MGRS,
-          X = _task.CurrentPosition.X,
-          Y = _task.CurrentPosition.Y
+          Latitude = _task.CurrentPosition.Latitude,
+          Longitude = _task.CurrentPosition.Longitude
         }
       else
         data = 
@@ -619,8 +619,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           TaskDesc = KI.Null,        
           LatLong = KI.Null,
           MGRS = KI.Null,
-          X = KI.Null,
-          Y = KI.Null
+          Latitude = KI.Null,
+          Longitude = KI.Null
         }
       end
       table.insert(inactivemissionsegments, data)
