@@ -220,12 +220,12 @@ if IsMockTest then
     DCS.onPlayerConnect(1)
     DCS.onPlayerConnect(6)
     
-    local loop_count = 3000
+    local loop_count = 60
     while loop_count > 0 do
-      sleep(0.25)
+      sleep(0.50)
       DCS.onSimulationFrame()
       loop_count = loop_count - 1
-      if loop_count < 2900 then
+      if loop_count < 10 then
         DCS.getModelTime = function() return nil end
         DCS.getMissionName = function() return "Randomstuff" end
       end
@@ -354,7 +354,7 @@ function KIServer.RequestServerID()
   if KIServer.TCPSocket.SendUntilComplete(request, 10) then
     local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(10))
     if response and response.Result then
-      KIServer.Data.ServerID = response.Data[1]
+      KIServer.Data.ServerID = response.Data[1][1]
       result = true
     elseif response and response.Error then
       net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
@@ -393,7 +393,7 @@ function KIServer.RequestNewSession()
   if KIServer.TCPSocket.SendUntilComplete(request, 10) then
     local response = KIServer.TCPSocket.DecodeMessage(KIServer.TCPSocket.ReceiveUntilComplete(10))
     if response and response.Result then
-      KIServer.Data.SessionID = response.Data[1]
+      KIServer.Data.SessionID = response.Data[1][1]
       result = true
     elseif response and response.Error then
       net.log("KIServer.RequestNewSession - TRANSACTION ERROR - " .. response.Error)
