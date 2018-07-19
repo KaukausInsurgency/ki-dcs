@@ -106,7 +106,7 @@ if IsMockTest then
       return "observer"
     end
   end
-  DCS.getMissionName = function() return "KaukasusInsurgency" end
+  DCS.getMissionName = function() return "KIAlpha" end
   DCS.setUserCallbacks = function(obj) 
     DCS.onSimulationFrame = obj.onSimulationFrame
     DCS.onPlayerTryConnect = obj.onPlayerTryConnect
@@ -841,7 +841,7 @@ function KIServer.SendUpdatePlayer(pid)
   
   net.log("KIServer.SendUpdatePlayer() called")
   local UpdatePlayerReq = KIServer.Wrapper.CreateUpdatePlayerRequestObject(pinfo)
-  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL false, UpdatePlayerReq)
+  local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.UpdatePlayer, KIServer.MYSQL, false, UpdatePlayerReq)
   KIServer.Wrapper.SafeTCPSend(request, "KIServer.SendUpdatePlayer()")
 end
 
