@@ -298,7 +298,6 @@ function KI.Scheduled.CheckSideMissions(args, time)
     if sidemission then
       env.info("KI.Scheduled.CheckSideMissions - chosen side mission - starting ...")
       sidemission.TaskID = KI.IncrementTaskID()
-      sidemission.InsertNewDBRecord = true
       sidemission:Start()
       table.insert(KI.Data.ActiveMissions, sidemission)
     end
@@ -475,6 +474,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       local data = 
       { 
         ServerID = KI.Data.ServerID, 
+        ID = _cp.ID,
         Name = _cp.Name,
         Type = _cp.Type,
         Status = _cp:GetOwnership(),
@@ -517,6 +517,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       local data = 
       { 
         ServerID = KI.Data.ServerID, 
+        ID = _depot.ID,
         Name = _depot.Name,
         Status = depot_status,
         ResourceString = _depot:GetResourceEncoded(),
@@ -550,7 +551,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         { 
           IsAdd = true,
           ServerID = KI.Data.ServerID, 
-          ServerMissionID = _task.TaskID,
+          ID = _task.TaskID,
           Status = _task.Status,
           TimeRemaining = _task.Expiry - _task.Life,
           Image = _task.Image,
@@ -573,7 +574,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         { 
           IsAdd = true,
           ServerID = KI.Data.ServerID, 
-          ServerMissionID = _task.TaskID,
+          ID = _task.TaskID,
           Status = _task.Status,
           TimeRemaining = _task.Expiry - _task.Life,
           TaskName = _task.Name,

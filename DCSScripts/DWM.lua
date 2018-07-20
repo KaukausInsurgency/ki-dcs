@@ -15,6 +15,13 @@ DWM.Suppliers = {}       -- list of suppliers
 DWM.IsSuppliesEnRoute = false    -- bool: whether an active convoy is already on route to supply the depot
 DWM.Position = {}
 
+DWM._ID = 0
+
+function DWM._incrementID()
+  DWM._ID = DWM._ID + 1
+  return DWM._ID
+end
+
 function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   local self = KI.Toolbox.DeepCopy( DWM )
 
@@ -49,6 +56,7 @@ function DWM:New(staticName, zone, checkRate, capacity, isSupplier)
   self.IsSupplier = isSupplier
   self.SupplyCheckRate = checkRate
   self.IsSuppliesEnRoute = false
+  self.ID = DWM._incrementID()
   
   return self
 end

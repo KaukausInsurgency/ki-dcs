@@ -354,6 +354,9 @@ function KI.Loader.ImportCapturePoints(data)
         _cp.BlueUnits = _s["BlueUnits"]
         _cp.Owner = _s["Owner"]
         _cp.Defenses = _s["Defenses"]
+        if _s["ID"] ~= nil then
+          _cp.ID = _s["ID"]
+        end
         break
       end
       
@@ -395,6 +398,9 @@ function KI.Loader.ImportDWM(data)
         depot.CurrentCapacity = _depotdata["CurrentCapacity"]
         depot.Resources = _depotdata["Resources"] -- overwrite the existing resources of the depot
         depot.IsSuppliesEnRoute = _depotdata["IsSuppliesEnRoute"] or false
+        if _depotdata["ID"] ~= nil then
+          depot.ID = _depotdata["ID"]
+        end
       end
     end
   end
@@ -447,7 +453,8 @@ function KI.Loader.ImportGC(data)
                                 end,
                                 KI.Hooks.GCOnLifeExpiredCrate,
                                 { LastPosition = _static:getPoint(), Depot = nil, Object = _static, DepotIdleTime = 0 },
-                                KI.Hooks.GC_Crate_IsIdle, KI.Hooks.GC_Crate_DepotExpired, KI.Config.CrateDespawnTime_Wild)
+                                KI.Hooks.GC_Crate_IsIdle, KI.Hooks.GC_Crate_DepotExpired, 
+                                KI.Config.CrateDespawnTime_Wild)
         gc_item.LifeTime = _gcdata["LifeTime"]
         GC.Add(gc_item)
       else

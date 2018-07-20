@@ -21,6 +21,13 @@ CP =
   Slots = {}            -- list of group name player slots - used in slot blocking
 }
 
+CP._ID = 0
+
+function CP._incrementID()
+  CP._ID = CP._ID + 1
+  return CP._ID
+end
+
 function CP:New(name, zone, type, spawnzone1, spawnzone2, text)
   env.info("CP:New called")
   local self = KI.Toolbox.DeepCopy(CP)
@@ -44,6 +51,7 @@ function CP:New(name, zone, type, spawnzone1, spawnzone2, text)
     self.Text = text
   end
   self.MaxCapacity = 0
+  self.ID = CP._incrementID()
   return self
 end
 
