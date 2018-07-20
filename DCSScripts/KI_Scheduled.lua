@@ -546,9 +546,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
         table.insert(DSMTSegments, {})
       end
       local _task = KI.Data.ActiveMissions[i]
-      local data = {}
-      if _task.InsertNewDBRecord then
-        data = 
+      local data = 
         { 
           IsAdd = true,
           ServerID = KI.Data.ServerID, 
@@ -563,24 +561,6 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           Latitude = _task.CurrentPosition.Latitude,
           Longitude = _task.CurrentPosition.Longitude
         }
-        KI.Data.ActiveMissions[i].InsertNewDBRecord = false   -- set to false, as we dont need to add the same record multiple times
-      else
-        data = 
-        { 
-          IsAdd = false,
-          ServerID = KI.Data.ServerID, 
-          ServerMissionID = _task.TaskID,
-          Status = _task.Status,
-          TimeRemaining = _task.Expiry - _task.Life,
-          Image = _task.Image,
-          TaskName = KI.Null,
-          TaskDesc = KI.Null,          
-          LatLong = KI.Null,
-          MGRS = KI.Null,
-          Latitude = KI.Null,
-          Longitude = KI.Null
-        }
-      end
       table.insert(DSMTSegments[index], data)
     end
     
@@ -589,9 +569,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
     local inactivemissionsegments = {}
     for i = 1, #KI.Data.InactiveMissionsQueue do
       local _task = KI.Data.InactiveMissionsQueue[i]
-      local data = {}
-      if _task.InsertNewDBRecord then
-        data = 
+      local data = 
         { 
           IsAdd = true,
           ServerID = KI.Data.ServerID, 
@@ -606,23 +584,6 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           Latitude = _task.CurrentPosition.Latitude,
           Longitude = _task.CurrentPosition.Longitude
         }
-      else
-        data = 
-        { 
-          IsAdd = false,
-          ServerID = KI.Data.ServerID, 
-          ServerMissionID = _task.TaskID,
-          Status = _task.Status,
-          TimeRemaining = _task.Expiry - _task.Life,
-          Image = _task.Image,
-          TaskName = KI.Null,
-          TaskDesc = KI.Null,        
-          LatLong = KI.Null,
-          MGRS = KI.Null,
-          Latitude = KI.Null,
-          Longitude = KI.Null
-        }
-      end
       table.insert(inactivemissionsegments, data)
     end
     

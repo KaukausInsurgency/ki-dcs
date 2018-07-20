@@ -1633,21 +1633,29 @@ KIHooks.onGameEvent = function(eventName, playerID, killerUnitType, killerSide, 
 end
 
 KIHooks.onPlayerTrySendChat = function(playerID, msg, all) -- -> filteredMessage | "" - empty string drops the message
-    if all then
-      local pinfo = net.get_player_info(playerID)
-      local chat =
-      {
-        Name = pinfo.name,
-        Side = pinfo.side,
-        Message = msg
-      }
-      local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddChat, KIServer.REDIS, 
-        false, KIServer.Wrapper.CreateRedisRequest(chat))
-      if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerTrySendChat()", 3) then
-        net.log("KIHooks.onPlayerTrySendChat() - Successfully sent Chat to TCP Server")
-      end
+  net.log("KIHooks.onPlayerTrySendChat() called")
+  
+  if all == nil then
+    net.log("KIHooks.onPlayerTrySendChat() - all is nil!")
+  end
+  
+  if all then
+    local pinfo = net.get_player_info(playerID)
+    local chat =
+    {
+      Name = pinfo.name,
+      Side = pinfo.side,
+      Message = msg
+    }
+    local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddChat, KIServer.REDIS, 
+      false, KIServer.Wrapper.CreateRedisRequest(chat))
+    if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerTrySendChat()", 3) then
+      net.log("KIHooks.onPlayerTrySendChat() - Successfully sent Chat to TCP Server")
     end
-    return msg
+  else
+    net.log("KIHooks.onPlayerTrySendChat() - all is false")
+  end
+  return msg
 end
 
 net.log("KI Server Tools Initialization Complete")
