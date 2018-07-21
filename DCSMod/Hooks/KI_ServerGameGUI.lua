@@ -1648,7 +1648,7 @@ KIHooks.onPlayerTrySendChat = function(playerID, msg, all) -- -> filteredMessage
       Message = msg
     }
     local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddChat, KIServer.REDIS, 
-      false, KIServer.Wrapper.CreateRedisRequest(chat))
+      true, KIServer.Wrapper.CreateRedisRequest(chat))
     if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerTrySendChat()", 3) then
       net.log("KIHooks.onPlayerTrySendChat() - Successfully sent Chat to TCP Server")
     end

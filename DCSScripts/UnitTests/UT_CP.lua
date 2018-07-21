@@ -7,10 +7,9 @@ UT.TestCase("CP",
   function()
     UT.TestData.Zone = ZONE:New("TestCPZone")
     UT.TestData.Vec3 = UT.TestData.Zone:GetVec3(0)
-    UT.TestData.PV = POINT_VEC2:NewFromVec3(UT.TestData.Vec3)
   end,
     function()    
-      
+      local _lat, _lon = coord.LOtoLL(UT.TestData.Vec3)
       -- testing base contructor
       if true then
         local _cp = CP:New("Test CP", "TestCPZone", CP.Enum.CAPTUREPOINT)
@@ -23,8 +22,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
-        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
+        UT.TestCompare(function() return _cp.Position.Latitude == _lat end)
+        UT.TestCompare(function() return _cp.Position.Longitude == _lon end)
       end
       
       -- testing constructor with 1 optional param
@@ -39,8 +38,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
-        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
+        UT.TestCompare(function() return _cp.Position.Latitude == _lat end)
+        UT.TestCompare(function() return _cp.Position.Longitude == _lon end)
       end
       
       -- testing constructor with 2 optional param
@@ -55,8 +54,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == nil end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
-        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
+        UT.TestCompare(function() return _cp.Position.Latitude == _lat end)
+        UT.TestCompare(function() return _cp.Position.Longitude == _lon end)
       end
         
       -- testing constructor with 3 optional param
@@ -71,8 +70,8 @@ UT.TestCase("CP",
         UT.TestCompare(function() return _cp.Text == "VHF 130.000 AM MHz" end)
         UT.TestCompare(function() return _cp.Type == CP.Enum.CAPTUREPOINT end)
         UT.TestCompare(function() return _cp.MaxCapacity == 0 end)
-        UT.TestCompare(function() return _cp.Position.Latitude == UT.TestData.PV:GetLat() end)
-        UT.TestCompare(function() return _cp.Position.Longitude == UT.TestData.PV:GetLon() end)
+        UT.TestCompare(function() return _cp.Position.Latitude == _lat end)
+        UT.TestCompare(function() return _cp.Position.Longitude == _lon end)
       end
       
       
