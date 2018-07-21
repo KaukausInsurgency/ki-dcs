@@ -2040,6 +2040,7 @@ KISSB.onPlayerConnect = KIHooks.onPlayerConnect
 KISSB.onPlayerDisconnect = KIHooks.onPlayerDisconnect
 KISSB.onPlayerTryConnect = KIHooks.onPlayerTryConnect
 KISSB.onSimulationFrame = KIHooks.onSimulationFrame
+KISSB.onPlayerTrySendChat = KIHooks.onPlayerTrySendChat
 
 DCS.setUserCallbacks(KISSB)
 
