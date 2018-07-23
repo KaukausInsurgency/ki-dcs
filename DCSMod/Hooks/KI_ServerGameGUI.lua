@@ -780,18 +780,20 @@ function KIServer.TryProcessMissionData()
         elseif Data.CapturePoints then
           net.log("KIServer.TryProcessMissionData() - got CapturePoints data from Mission - sending to TCP Server")
           local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateCapturePoint, 
-            KIServer.REDIS, false, 
-            KIServer.Wrapper.CreateRedisRequest(Data.CapturePoints))
+              KIServer.REDIS, true, 
+              KIServer.Wrapper.CreateRedisRequest(Data.CapturePoints))
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.Depots then
           net.log("KIServer.TryProcessMissionData() - got Depots data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, KIServer.REDIS, 
-            false, KIServer.Wrapper.CreateRedisRequest(Data.Depots))
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateDepot, 
+              KIServer.REDIS, true, 
+              KIServer.Wrapper.CreateRedisRequest(Data.Depots))
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         elseif Data.SideMissions then
           net.log("KIServer.TryProcessMissionData() - got SideMissions data from Mission - sending to TCP Server")
-          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateSideMission, KIServer.REDIS, 
-            false, KIServer.Wrapper.CreateRedisRequest(Data.SideMissions))
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddOrUpdateSideMission, 
+              KIServer.REDIS, true, 
+              KIServer.Wrapper.CreateRedisRequest(Data.SideMissions))
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
         end
         -- if we fail to decode the JSON of the packet, continue on
@@ -1648,7 +1650,7 @@ KIHooks.onPlayerTrySendChat = function(playerID, msg, all) -- -> filteredMessage
       Message = msg
     }
     local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.AddChat, KIServer.REDIS, 
-      true, KIServer.Wrapper.CreateRedisRequest(chat))
+      false, KIServer.Wrapper.CreateRedisRequest(chat))
     if KIServer.Wrapper.SafeTCPSend(request, "KIHooks.onPlayerTrySendChat()", 3) then
       net.log("KIHooks.onPlayerTrySendChat() - Successfully sent Chat to TCP Server")
     end
