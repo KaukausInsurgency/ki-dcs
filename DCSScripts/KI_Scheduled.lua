@@ -534,6 +534,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   
   env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Active Missions Data")
   local DSMTSegments = {}
+  local MissionsToRemove = {}
   
   if true then
     local index = 1
@@ -568,6 +569,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
     env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Inactive Missions Data")
     -- prepare the inactive mission segment queue
     local inactivemissionsegments = {}
+    
     for i = 1, #KI.Data.InactiveMissionsQueue do
       local _task = KI.Data.InactiveMissionsQueue[i]
       local data = 
@@ -586,6 +588,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           Longitude = _task.CurrentPosition.Longitude
         }
       table.insert(inactivemissionsegments, data)
+      table.insert(MissionsToRemove, { ID = _task.TaskID }) -- invokes request to remove keys from redis
     end
     
     KI.Data.InactiveMissionsQueue = {}  -- empty the queue
@@ -627,6 +630,13 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
       )
   end
   env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Side Missions to Server MOD")
+  
+  if #MissionsToRemove > 0 then
+    socket.try(
+        KI.UDPSendSocket:sendto(KI.JSON:encode({ExpiredMissions = MissionsToRemove}) .. KI.SocketDelimiter, 
+                                "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)
+      )
+  end
   
   return time + KI.Config.DataTransmissionGeneralUpdateRate
 end

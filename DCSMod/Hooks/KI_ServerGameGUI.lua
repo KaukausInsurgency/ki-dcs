@@ -303,6 +303,7 @@ KIServer.Actions.AddGameEvent = "AddGameEvent"
 KIServer.Actions.AddOrUpdateCapturePoint = "AddOrUpdateCapturePoint"
 KIServer.Actions.AddOrUpdateDepot = "AddOrUpdateDepot"
 KIServer.Actions.AddOrUpdateSideMission = "AddOrUpdateSideMission"
+KIServer.Actions.RemoveSideMission = "RemoveSideMission"
 KIServer.Actions.RequestSession = "CreateSession"
 KIServer.Actions.EndSession = "EndSession"
 KIServer.Actions.RequestServer = "GetOrAddServer"
@@ -795,6 +796,12 @@ function KIServer.TryProcessMissionData()
               KIServer.REDIS, true, 
               KIServer.Wrapper.CreateRedisRequest(Data.SideMissions))
           KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")
+        elseif Data.ExpiredMissions then
+          net.log("KIServer.TryProcessMissionData() - got Expired SideMissions from Mission - sending to TCP Server")
+          local request = KIServer.TCPSocket.CreateMessage(KIServer.Actions.RemoveSideMission,
+              KIServer.REDIS, true,
+              KIServer.Wrapper.CreateRedisRequest(Data.ExpiredMissions))
+          KIServer.Wrapper.SafeTCPSend(request, "KIServer.TryProcessMissionData()")  
         end
         -- if we fail to decode the JSON of the packet, continue on
       end
