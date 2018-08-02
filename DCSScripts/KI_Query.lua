@@ -133,7 +133,7 @@ function KI.Query.FindNearestPlayer_Static(cargo)
   local punit = nil
   local pdistance = nil
   for pid, op in pairs(KI.Data.OnlinePlayers) do
-    if op.Unit then
+    if op.Unit and op.Unit:isExist() then
     
       local d = Spatial.Distance(op.Unit:getPoint(), cargo:getPoint()) 
       if pdistance and d < pdistance then
