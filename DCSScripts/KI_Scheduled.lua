@@ -534,14 +534,12 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   
   env.info("KI.Scheduled.DataTransmissionGeneral - Preparing Active Missions Data")
   local DSMTSegments = {}
+  table.insert(DSMTSegments, {})
   local MissionsToRemove = {}
   
   if true then
     local index = 1
     for i = 1, #KI.Data.ActiveMissions do
-      if index == 1 then
-        table.insert(DSMTSegments, {})  -- create an inner array
-      end
       -- segment dsmt every 6 elements
       if i % 6 == 0 then
         index = index + 1
@@ -598,8 +596,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
     end
   end
 
-  env.info("KI.Scheduled.DataTransmissionGeneral - DSMTSegments count: " .. tostring(#DSMTSegments))
-  --env.info("KI.Scheduled.DataTransmissionGeneral - dumping capture points : " .. KI.Toolbox.Dump(CapturePointSegments))
+  --env.info("KI.Scheduled.DataTransmissionGeneral - DSMTSegments count: " .. tostring(#DSMTSegments))
+  --env.info("KI.Scheduled.DataTransmissionGeneral - dumping side missions : " .. KI.Toolbox.Dump(DSMTSegments))
   --env.info("KI.Scheduled.DataTransmissionGeneral - dumping depots : " .. KI.Toolbox.Dump(DepotSegments))
 
   env.info("KI.Scheduled.DataTransmissionGeneral - prepaing UDP Send to Server MOD")
