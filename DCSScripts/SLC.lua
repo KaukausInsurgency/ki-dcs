@@ -37,11 +37,9 @@ end
 
 
 -- checks if the passed in group is capable of transporting infantry
-function SLC.CanTransportInfantry(moosegrp)
+function SLC.CanTransportInfantry(u)
   env.info("SLC.CanTransportInfantry called")
-  if not moosegrp then return false end
-  
-  local _u = moosegrp:GetUnit(1):GetDCSObject()
+  if not u or not u:isExist() then return false end
   
   -- if this setting is nil or 0, allow all helos to transport
   if not SLC.Config.InfantryTransportingHelicopters or #SLC.Config.InfantryTransportingHelicopters == 0 then
@@ -50,13 +48,13 @@ function SLC.CanTransportInfantry(moosegrp)
   end
   
   for i = 1, #SLC.Config.InfantryTransportingHelicopters do
-    if _u:getTypeName() == SLC.Config.InfantryTransportingHelicopters[i] then
-      env.info("SLC.CanTransportInfantry - group " .. moosegrp.GroupName .. " is capable to transport infantry")
+    if u:getTypeName() == SLC.Config.InfantryTransportingHelicopters[i] then
+      env.info("SLC.CanTransportInfantry - unit " .. u:getName() .. " is capable to transport infantry")
       return true
     end
   end
   
-  env.info("SLC.CanTransportInfantry - group " .. moosegrp.GroupName .. " cannot transport infantry")
+  env.info("SLC.CanTransportInfantry - group " .. u:getName() .. " cannot transport infantry")
   return false
 end
 
@@ -539,7 +537,7 @@ end
 --AddSLCRadioItems
 --Adds the necessary SLC Radio Menu Options for the group
 --Accepts parameter MOOSE:GROUP Object
-function SLC.AddSLCRadioItems(g, pilotname)
+function SLC.AddSLCRadioItems(g, u, pilotname)
   env.info("SLC.AddSLCRadioItems Group name - " .. g.GroupName)
   local m_main = MENU_GROUP:New(g, "SLC Menu")
   
@@ -600,7 +598,7 @@ function SLC.AddSLCRadioItems(g, pilotname)
                                             SLC.Pack, "Pack Nearest", g, pilotname)
     
   -- this menu will only be available if the airframe is capable of transporting infantry
-  if SLC.CanTransportInfantry(g) then
+  if SLC.CanTransportInfantry(u) then
     local m_deploy = MENU_GROUP:New(g, "Deploy Management", m_main)
       
       local m_loadunload = MENU_GROUP_COMMAND:New(g, "Load/Unload Troops", m_deploy, 
@@ -642,7 +640,7 @@ function SLC.InitSLCForUnit(unit_name)
   
   if SLC.IsSLCUnit(unit_name) then
     env.info("SLC.InitSLCForUnit - SLC Pilot " .. unit_name .. " found, initializing")
-    SLC.AddSLCRadioItems(GROUP:Register(groupname), unit_name)
+    SLC.AddSLCRadioItems(GROUP:Register(groupname), u, unit_name)
     return true
   else
     env.info("SLC.InitSLCForUnit - Pilot Name does not match 'SLCPilot' - aborting")
