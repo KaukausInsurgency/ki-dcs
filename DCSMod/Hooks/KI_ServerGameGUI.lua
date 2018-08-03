@@ -974,11 +974,10 @@ function KIServer.TCPSocket.SendUntilComplete(msg, timeout)
         return false
       end
     end
-    net.log("KIServer.TCPSocket.SendUntilComplete - bytes sent: "..tostring(bytes_sent))
-    net.log("KIServer.TCPSocket.SendUntilComplete - sent string: '" .. _msgCopy:sub(1, bytes_sent).."'")
+    -- net.log("KIServer.TCPSocket.SendUntilComplete - bytes sent: "..tostring(bytes_sent))
+    -- net.log("KIServer.TCPSocket.SendUntilComplete - sent string: '" .. _msgCopy:sub(1, bytes_sent).."'")
     _msgCopy = _msgCopy:sub(bytes_sent + 1) -- shrink the msg down to what has not been sent
-    net.log("KIServer.TCPSocket.SendUntilComplete - Remaining buffer length: " 
-              .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
+    -- net.log("KIServer.TCPSocket.SendUntilComplete - Remaining buffer length: " .. tostring(string.len(_msgCopy)) .. " data : '" .. _msgCopy .. "'")
   end
   return true
 end
