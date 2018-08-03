@@ -553,6 +553,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           ID = _task.TaskID,
           Status = _task.Status,
           TimeRemaining = _task.Expiry - _task.Life,
+          TimeStarted = _task.TimeStarted,
+          TimeEnded = _task.TimeEnded,
           Image = _task.Image,
           TaskName = _task.Name,
           TaskDesc = _task.Desc,   
@@ -569,6 +571,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
     local inactivemissionsegments = {}
     
     for i = 1, #KI.Data.InactiveMissionsQueue do
+      env.info("KI.Scheduled.DataTransmissionGeneral - Looping through InactiveMissionsQueue")
       local _task = KI.Data.InactiveMissionsQueue[i]
       local data = 
         { 
@@ -577,6 +580,8 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
           ID = _task.TaskID,
           Status = _task.Status,
           TimeRemaining = _task.Expiry - _task.Life,
+          TimeStarted = _task.TimeStarted,
+          TimeEnded = _task.TimeEnded,
           TaskName = _task.Name,
           TaskDesc = _task.Desc,
           Image = _task.Image,
@@ -592,6 +597,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
     KI.Data.InactiveMissionsQueue = {}  -- empty the queue
     
     if #inactivemissionsegments > 0 then
+      env.info("KI.Scheduled.DataTransmissionGeneral - Inserting inactive mission segments")
       table.insert(DSMTSegments, inactivemissionsegments)
     end
   end
@@ -630,6 +636,7 @@ function KI.Scheduled.DataTransmissionGeneral(args, time)
   env.info("KI.Scheduled.DataTransmissionGeneral - sent JSON Side Missions to Server MOD")
   
   if #MissionsToRemove > 0 then
+    env.info("KI.Scheduled.DataTransmissionGeneral - sending MissionsToRemove")
     socket.try(
         KI.UDPSendSocket:sendto(KI.JSON:encode({ExpiredMissions = MissionsToRemove}) .. KI.SocketDelimiter, 
                                 "127.0.0.1", KI.Config.SERVERMOD_SEND_TO_PORT)

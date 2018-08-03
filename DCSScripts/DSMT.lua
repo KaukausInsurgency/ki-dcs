@@ -27,6 +27,8 @@ function DSMT:New(taskName, taskHTMLDesc, taskHTMLImage)
   self.Life = 0
   self.Done = false
   self.Status = ""
+  self.TimeStarted = 0
+  self.TimeEnded = 0
   return self
 end
 
@@ -133,21 +135,15 @@ function DSMT._manage(self, time)
     
     if self.Complete(self.Name, self.CurrentZone, self.Arguments) then
       self.OnComplete(self.Name, self.CurrentZone, self.Arguments)
-      self.Done = true
-      self.Status = "Complete"
-      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      self:_setDone("Complete")
       return nil
     elseif self.Fail(self.Name, self.CurrentZone, self.Arguments) then
       self.OnFail(self.Name, self.CurrentZone, self.Arguments)
-      self.Done = true
-      self.Status = "Failed"
-      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      self:_setDone("Failed")
       return nil
     elseif self.Life >= self.Expiry then
       self.OnTimeout(self.Name, self.CurrentZone, self.Arguments)
-      self.Done = true
-      self.Status = "Timeout"
-      DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+      self:_setDone("Timeout")
       return nil
     else 
       self.Status = "Active"
@@ -162,6 +158,13 @@ function DSMT._manage(self, time)
   end  
 end
 
+function DSMT:_setDone(status)
+  self.Done = true
+  self.Status = status
+  self.TimeEnded = timer.getAbsTime()
+  DSMT._invoke(DSMT._destroy, self.DestroyTime, self)
+end
+
 function DSMT._invoke(fnc, rate, args)
   env.info("DSMT._invoke called")
   timer.scheduleFunction(fnc, args, timer.getTime() + rate)
@@ -173,6 +176,7 @@ function DSMT:Start(chosenzone)
   if self:_initMission(chosenzone) then
     -- invoke the manager
     self.Status = "Active"
+    self.TimeStarted = timer.getAbsTime()
     DSMT._invoke(DSMT._manage, self.CheckRate, self)
   end
 end
