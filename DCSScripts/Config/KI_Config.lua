@@ -522,7 +522,7 @@ KI.Config.SideMissions =
       destroy = function(args)
         env.info("DSMT.destroy called - destroying cargo object")
         xpcall(function() 
-          if args.Cargo:isActive() then
+          if args.Cargo:isExist() then
             args.Cargo:destroy()
           end
         end, function(err) env.info("DSMT.destroy (cargo) ERROR : " .. err) end)    
