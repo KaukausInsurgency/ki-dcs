@@ -14,6 +14,7 @@ function DSMT:New(taskName, taskHTMLDesc, taskHTMLImage)
   
   self.Name = taskName
   self.Desc = taskHTMLDesc
+  self.DescNoHtml = taskHTMLDesc:gsub("<.->", "")
   self.Image = taskHTMLImage
   
   self.Zones = {}

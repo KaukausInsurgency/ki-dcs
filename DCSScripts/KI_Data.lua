@@ -86,7 +86,7 @@ function KI.InitSideMissionMenu(unitname)
       for _, m in pairs(KI.Data.ActiveMissions) do
         
         local msg = "Task (" .. tostring(i) .. "): " .. m.Name .. "\n"
-        msg = msg .. m.Desc .. "\n"
+        msg = msg .. m.DescNoHtml .. "\n"
         msg = msg .. "MGRS: " .. m.CurrentPosition.MGRS .. "\n"
         msg = msg .. "Lat Long: " .. m.CurrentPosition.LatLong
 
