@@ -13,7 +13,7 @@ function()
   UT.TestCompare(function() return Unit.getByName("DCSPlane"):getCategory() == Unit.Category.AIRPLANE end)
   UT.TestCompare(function() return Unit.getByName("DCSGroundUnit"):getCategory() == Unit.Category.GROUND_UNIT end)
   UT.TestCompare(function() return Unit.getByName("DCSHelo"):getCategory() == Unit.Category.HELICOPTER end)
-  UT.TestCompare(function() return Unit.getByName("DCSStructure"):getCategory() == Unit.Category.STRUCTURE end)
+  UT.TestCompare(function() return Unit.getByName("DCSStructure"):getCategory() == Unit.Category.GROUND_UNIT end)
   
   UT.TestCompare(function() return not Unit.getByName("DCSLateActivationUnit"):isActive() end) 
   UT.TestCompare(function() return Group.getByName("DCSLateActivationUnit") ~= nil end)

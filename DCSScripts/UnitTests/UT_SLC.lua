@@ -481,9 +481,10 @@ function()
     
     -- Only 1 of the groups should be destroyed and nil, not both 
     -- (since we're not sure which based on dcs runtime, use xor
+	-- GROUP:IsAlive returns false if the group is inactive, but returns NIL if the group does not exist
     UT.TestCompare(function() return 
-          (UT.TestData.MANPADSquad:IsAlive() or UT.TestData.ATSquad:IsAlive()) and 
-          (not (UT.TestData.MANPADSquad:IsAlive() and UT.TestData.ATSquad:IsAlive())) end)
+         (UT.TestData.MANPADSquad:IsAlive() or UT.TestData.ATSquad:IsAlive()) and 
+         (not (UT.TestData.MANPADSquad:IsAlive() == nil and UT.TestData.ATSquad:IsAlive() == nil)) end)
             
     -- Check that SLC is storing the reference properly
     UT.TestCompare(function() return SLC.TransportInstances["SLCPilot1"] ~= nil end)

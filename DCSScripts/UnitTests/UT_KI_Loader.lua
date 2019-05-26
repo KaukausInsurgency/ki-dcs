@@ -412,7 +412,7 @@ function()
       local v3 = ZONE:New("TestCPZone"):GetVec3()
       KI.Data.Waypoints["WP_Group_Far"] = { x = v3.x, y = v3.y, z = v3.z }
       KI.Data.Waypoints["WP_Group_Close"] = {x = -124175.84375, y = 759919.5625, z = 759919.5625}  -- setting this to be the same position that the unit is in
-      UT.TestFunction(KI.Loader.ImportCoalitionGroups, UT.TestData.coalitionExtract)     
+      KI.Loader.ImportCoalitionGroups(UT.TestData.coalitionExtract)   
       UT.TestCompare(function() return KI.Data.Waypoints["WP_Group_Close"] == nil end)  -- The function should remove this group from the hash
       UT.TestCompare(function() return KI.Data.Waypoints["WP_Group_Far"] ~= nil end)  -- This group should still be in the hash
     end
