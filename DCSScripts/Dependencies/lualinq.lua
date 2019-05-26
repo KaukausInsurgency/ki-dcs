@@ -28,7 +28,7 @@
 -- ------------------------------------------------------------------------
 
 -- how much log information is printed: 3 => verbose, 2 => info, 1 => only warning and errors, 0 => only errors, -1 => silent
-LOG_LEVEL = 1
+LOG_LEVEL = 3
 
 -- prefix for the printed logs
 LOG_PREFIX = "LuaLinq: "
@@ -71,7 +71,17 @@ function _dumpData(self)
 			if (i ~= 1) then
 				dumpdata = dumpdata .. ", "
 			end
-			dumpdata = dumpdata .. tostring(self.m_Data[i])
+			local val = ""
+			if type(self.m_Data[i]) == "table" then
+			  val = "table { "
+			  for k,v in pairs(self.m_Data[i]) do
+			    val = val .. k .. " = " .. tostring(v) .. ", "
+			  end
+			  val = val .. "}"
+			else
+			  val = tostring(self.m_Data[i])
+			end
+			dumpdata = dumpdata .. val
 		end
 	end
 	
@@ -165,7 +175,7 @@ function _new_lualinq(method, collection)
 	self.intersectBy = _intersectionby
 	
 	
-	logq(self, "from")
+	logq(self, method)
 
 	return self
 end
@@ -346,7 +356,7 @@ function _selectManyUnion(self, ...)
       end
     end
   end
-	return _new_lualinq(":selectManyMultiple", result)  
+	return _new_lualinq(":selectManyUnion", result)  
 end
 
 -- Replaces items with those contained in arrays returned by the selector function
