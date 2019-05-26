@@ -575,6 +575,7 @@ local function InitKIServerConfig()
     KIServer.Config.HeartbeatCheckRate = 30 -- how often the server should contact the TCP server about it's connection status
     KIServer.Config.ServerPlayerID = 1     -- The player ID of the server that is hosting the mission (host will always be 1)
     KIServer.Config.ServerName = "Dev Kaukasus Insurgency Server"
+    KIServer.Config.ServerDescription = "Default Server Description"
     KIServer.Config.MissionRestartTime = 14400  -- 4 hrs time until restart
     KIServer.Config.SimpleRadioEnabled = false
     KIServer.Config.SimpleRadioIPAddress = ""
