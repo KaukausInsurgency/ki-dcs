@@ -31,6 +31,27 @@ do
 	end
 end
 
+--Unit.getCategory() fix
+SEAM_CATEGORIES = {}
+do
+	local categories = merge_all_unit_categories()
+	for _,v in pairs(categories.Ground) do
+		SEAM_CATEGORIES[v.Name] = Unit.Category.GROUND_UNIT
+	end
+	for _,v in pairs(categories.Plane) do
+		SEAM_CATEGORIES[v.Name] = Unit.Category.AIRPLANE
+	end
+	for _,v in pairs(categories.Helicopter) do
+		SEAM_CATEGORIES[v.Name] = Unit.Category.HELICOPTER
+	end
+	for _,v in pairs(categories.Ship) do
+		SEAM_CATEGORIES[v.Name] = Unit.Category.SHIP
+	end
+	for _,v in pairs(categories.Structure) do
+		SEAM_CATEGORIES[v.Name] = Unit.Category.STRUCTURE
+	end
+end
+
 do
 	--trigger.actions wrappers
 	function trigger.action.addOtherCommand(name, userFlagName, userFlagValue)
@@ -111,6 +132,30 @@ do
 	function Unit.getLife0(self)
 		return self:getDesc().life
 	end	
+	
+	-- Seams
+	Object.seamIsExist = Object.isExist
+	Object.seamDestroy = Object.destroy
+	
+	StaticObject.destroy = function(object)
+	  object.seamIsDestroyed = true
+	  Object.seamDestroy(object)
+	end
+	  
+	Object.isExist = function(object)
+	  if object.seamIsDestroyed then
+		return false
+	  else
+		return Object.seamIsExist(object)
+	  end
+	end
+	
+	Unit.seamGetCategory = Unit.getCategory
+	
+	Unit.getCategory = function(unit)
+		return SEAM_CATEGORIES[unit:getTypeName()]
+	end
+	
 end
 
 dofile('Scripts/World/EventHandlers.lua')

@@ -2760,3 +2760,29 @@ function merge_all_units_to_AGGRESSORS()
 	end
 	cache = nil
 end
+
+local function merge_basic_unit_list_country(country_src,country_target)
+	merge_unit_list(country_src.Units.Planes.Plane					,country_target.Plane)
+	merge_unit_list(country_src.Units.Ships.Ship 					,country_target.Ship)
+	merge_unit_list(country_src.Units.Cars.Car 						,country_target.Ground)
+	merge_unit_list(country_src.Units.Helicopters.Helicopter		,country_target.Helicopter)
+	merge_unit_list(country_src.Units.Fortifications.Fortification	,country_target.Structure)
+end
+
+function merge_all_unit_categories()
+	local categories = {}
+	categories.Plane = {}
+	categories.Helicopter = {}
+	categories.Ground = {}
+	categories.Ship = {}
+	categories.Structure = {}
+	
+	local AGGRESSORS = country:get("AGGRESSORS")
+	for i,o in pairs(country.by_country) do
+		if o ~= AGGRESSORS then
+			merge_basic_unit_list_country(o,categories)
+		end
+	end
+	
+	return categories
+end

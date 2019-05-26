@@ -69,7 +69,7 @@ function class(tbl, parent)
 	parent = parent or voidClass
 	tbl.className_ = tbl.className_ or 'unknown ('..tostring(tbl)..')'
 	tbl.__index = tbl
-	tbl.__newindex = objectModificationHandler
+	--tbl.__newindex = objectModificationHandler
 	tbl.__eq = LuaObject.__eq
 	tbl.__le = LuaObject.__le
 	tbl.__lt = LuaObject.__lt
