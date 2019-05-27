@@ -251,11 +251,24 @@ function KI.Loader.ImportCoalitionGroups(data)
         local _wp = KI.Data.Waypoints[_newg:getName()]
         if _wp then
           env.info("KI.Loader.ImportCoalitionGroups - found waypoints for group " .. _newg:getName())   
+		  
+          -- need to properly register this group and units with MOOSE in order for GROUP to work
+          -- TODO - move this into a seperate helper class for wrapping units up like this
+          -- this is caused by another DCS timing issue, where-by event-birth is called a few frames after some code has executed
+          -- MOOSE actually auto handles this by registering any units created via event-birth 
+          -- in this case here the event birth has not fired when the group was spawned above
+          -- therefore MOOSE does not know about it and it has not been registered
+          -- this work around addresses this issue
+          for _, _unit in pairs(_newg:getUnits()) do
+            _DATABASE:AddUnit(_unit:getName())
+            _DATABASE:AddGroup(_newg:getName())
+          end
+           
           local moosegrp = GROUP:Find(_newg)
           local grpvec2 = moosegrp:GetVec3()
           _wp.z = _wp.y -- translate vec3 back into vec2
-          env.info("AICOM.Spawn vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", z = " .. grpvec2.z .. "}")
-          env.info("AICOM.Spawn vec2: Waypoint {x = " .. _wp.x .. ", z = " .. _wp.z .. "}")
+          env.info("KI.Loader.ImportCoalitionGroups vec2: Group " .. moosegrp.GroupName .. " {x = " .. grpvec2.x .. ", z = " .. grpvec2.z .. "}")
+          env.info("KI.Loader.ImportCoalitionGroups vec2: Waypoint {x = " .. _wp.x .. ", z = " .. _wp.z .. "}")
           local distance = Spatial.Distance(_wp, grpvec2)
           env.info("KI.Loader.ImportCoalitionGroups - group " .. _newg:getName() .. " distance to waypoint - " .. tostring(distance))
           if distance > KI.Config.RespawnUnitWaypointDistance then

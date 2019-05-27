@@ -60,6 +60,7 @@ end
 local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 
 env.info("KI - Loading Files")
+assert(loadfile(path .. "Dependencies\\Moose_2.4.13.lua"))()
 assert(loadfile(path .. "ConfigChecker.lua"))()
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()

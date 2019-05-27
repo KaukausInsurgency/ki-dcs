@@ -409,6 +409,9 @@ function()
     
     -- test KI.Loader.ImportCoalitionGroups
     if true then
+      -- test to see if waypoints or dropped from data if the spawned unit is close enough to it
+      -- only units that are a certain distance away from their wp after being spawned will be tasked to move there again
+      -- this checks to see if this check is happening and the correct behaviour is observed
       local v3 = ZONE:New("TestCPZone"):GetVec3()
       KI.Data.Waypoints["WP_Group_Far"] = { x = v3.x, y = v3.y, z = v3.z }
       KI.Data.Waypoints["WP_Group_Close"] = {x = -124175.84375, y = 759919.5625, z = 759919.5625}  -- setting this to be the same position that the unit is in

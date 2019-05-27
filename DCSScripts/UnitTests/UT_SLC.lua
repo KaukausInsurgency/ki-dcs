@@ -62,30 +62,42 @@ function()
   
   -- SLC.CanTransportInfantry(moosegrp)
   if true then
+    local function GetDCSUnitFromGroupName(groupname)
+	   return GROUP:FindByName(groupname):GetDCSObject():getUnit(1)
+	end
+	local SLCMi8Unit = GetDCSUnitFromGroupName("SLCMi8")
+	local SLCHueyUnit = GetDCSUnitFromGroupName("SLCHuey")
+	local SLCGazelleUnit = GetDCSUnitFromGroupName("SLCGazelle")
+	local SLCKa50Unit = GetDCSUnitFromGroupName("KA50 SLC")
+	local SLCA10Unit = GetDCSUnitFromGroupName("SLCA10")
+  
+    -- test CanTransportInfantry when only Mi-8MT and UH-1H allowed
     SLC.Config.InfantryTransportingHelicopters =
     {
       "Mi-8MT",
       "UH-1H"
     }
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == false end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == false end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == false end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCMi8Unit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCHueyUnit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCGazelleUnit) == false end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCKa50Unit) == false end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCA10Unit) == false end)
     
+	-- Test CanTransportInfantry when list is empty
     SLC.Config.InfantryTransportingHelicopters = {}
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCMi8Unit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCHueyUnit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCGazelleUnit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCKa50Unit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCA10Unit) == true end)
     
+	-- Test CanTransportInfantry when list is nil
     SLC.Config.InfantryTransportingHelicopters = nil
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCMi8")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCHuey")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCGazelle")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("KA50 SLC")) == true end)
-    UT.TestCompare(function() return SLC.CanTransportInfantry(GROUP:FindByName("SLCA10")) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCMi8Unit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCHueyUnit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCGazelleUnit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCKa50Unit) == true end)
+    UT.TestCompare(function() return SLC.CanTransportInfantry(SLCA10Unit) == true end)
   end
   
   
