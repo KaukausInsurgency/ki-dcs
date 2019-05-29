@@ -8,8 +8,6 @@ UT.FileData = {}      -- Stores log data to be written after test case completio
 UT.FilePath = ""      -- File path that is dynamically generated based on test case
 UT.TestData = {}      -- Stores User Test Data - used in Setup and Teardown functions
 UT.AbortTest = false  -- Whether the test must be aborted because of an error during validation
-UT.CaughtError = ""   -- Stores an error that was caught in the UT.ErrorHandler when using xpcall
-UT.StackTrace = ""    -- Stores the stacktrace when ErrorHandler is invoked from xpcall
 UT.FilePathAllFailures = lfs.writedir() .. "Missions\\Kaukasus Insurgency\\Tests\\UnitTestResults.txt"
 UT.FailedTestCases = {} -- stores an array of failed test cases to be written to a special file
 
@@ -64,32 +62,31 @@ function UT.WriteToFile()
 end
 
 function UT.ErrorHandler(err)
-  UT.CaughtError = err
-  UT.StackTrace = debug.traceback(err)
-end
-
-function UT.GetCaughtError()
-  if UT.CaughtError == "" then
-    return "NO ERROR"
-  end
-  local _err = UT.CaughtError
-  UT.CaughtError = ""
-  return _err
-end
-
-function UT.GetStackTrace()
-  if UT.StackTrace == "" then
-    return "NO STACK TRACE FOUND"
-  end
-  local _trace = UT.StackTrace
-  UT.StackTrace = ""
-  return _trace
+  return debug.traceback(err)
 end
 
 function UT.Reset()
   UT.Pass = 0
   UT.Fail = 0
   UT.TestData = {}
+end
+
+function KI.Evaluate(fnc, title, msg)
+  msg = msg or "NO MESSAGE"
+  
+  local _success, _result = xpcall(fnc, UT.ErrorHandler)
+  local _m = ""
+  local _evalResult = true
+  if not _success then
+    _m = "UT: " .. title .. " FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. _result
+    _evalResult = false
+  elseif not _result then
+    _result = UT.ErrorHandler("NO ERROR")
+    _m = "UT: " .. title .. " FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. _result
+    _evalResult = false
+  end
+  
+  return _evalResult, _m
 end
 
 function UT.TestFunction(fnc, ...)
@@ -99,51 +96,45 @@ function UT.TestFunction(fnc, ...)
     return fnc( unpack( args, 1, n ) ) 
   end
   
-  return xpcall(_test, UT.ErrorHandler)
+  local _success, _result = xpcall(_test, UT.ErrorHandler)
+  
+  if _success then
+    UT.Pass = UT.Pass + 1
+  else
+    local _m = "UT: TestFunction FAILURE - ERROR - " .. _result
+    UT.Log(_m)
+    UT.Fail = UT.Fail + 1
+  end
 end
 
 function UT.TestCompare(cmp, msg, expectedfailure)
   msg = msg or ""
   expectedfailure = expectedfailure or false
-
-  --local line = ""
-  --line = debug.getinfo(1).currentline
-  local errorstr = "NO ERROR"
-  local stacktrace = ""
-  local _success, _result = xpcall(cmp, function(err) 
-	errorstr = err 
-	stacktrace = debug.traceback(err)
-  end)
-  -- debug.traceback()
-  -- debug.getinfo(1, "n").name returns current function name
-  -- debug.getinfo(2) returns calling function
-  if _success and _result then
-    --env.info("UT: PASS - " .. debug.getinfo(2, "n").name .. " - Line: " .. debug.getinfo(2).currentline)
+  local _result, _message = KI.Evaluate(cmp, "TEST CASE", msg)
+  
+  if _result then
     UT.Pass = UT.Pass + 1
   else
     if not expectedfailure then
-      local m = "UT: FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. errorstr .. " - " .. stacktrace -- debug.traceback("TestCompare TraceBack", 2)
-      UT.Log(m)
+      UT.Log(_message)
       UT.Fail = UT.Fail + 1
     else
-      local m = "UT: EXPECTED FAILURE - MESSAGE - " .. msg .. " - ERROR - " .. errorstr .. " - " .. stacktrace -- debug.traceback("TestCompare TraceBack", 2)
+      local m = "(expected failure)" .. _message
       UT.Log(m)
     end
   end
 end
 
 function UT.ValidateSetup(cmp)
-  local _success, _result = xpcall(cmp, UT.ErrorHandler)
-  if not _success or not _result then
-    local m = "UT: Setup Validate Failed - ERROR - " .. UT.GetCaughtError() .. " - " .. UT.GetStackTrace() -- debug.traceback("TestCompare TraceBack", 2)
-    UT.Log(m)
+  local _result, _message = KI.Evaluate(cmp, "SETUP VALIDATE", "ValidateSetup")
+  if not _result then
+    UT.Log(_message)
     UT.AbortTest = true
   end
 end
 
 function UT.TestCompareOnce(cmp)
   if cmp() then
-    --env.info("UT: PASS - " .. debug.getinfo(2, "n").name .. " - Line: " .. debug.getinfo(2).currentline)
     UT.Pass = UT.Pass + 1
   else
     local m = "UT: FAILURE - " .. " - " .. debug.traceback("TestCompareOnce TraceBack", 2)
@@ -163,11 +154,14 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   -- if there is any validation, check that the resources are valid before attempting test case
   if validFnc ~= nil then
     UT.Log("UT - Validating Test Setup")
-    local _success, _r = xpcall (validFnc, UT.ErrorHandler)
+    local _success, _err = xpcall(validFnc, UT.ErrorHandler)
+    if _err == nil then
+      _err = "NO ERROR"
+    end
     if _success and (not UT.AbortTest) then
       UT.Log("UT - Test Setup Validation Complete")
     else
-      UT.Log("UT - Test Setup Validation FAILED - ERROR - " .. UT.GetCaughtError() .. " - STACKTRACE - " .. UT.GetStackTrace())
+      UT.Log("UT - Test Setup Validation FAILED - ERROR - " .. _err)
       UT.Log("UT - Test Case FAILED - Setup is not valid!")    
       table.insert(UT.FailedTestCases, casename)
       UT.WriteToFile()
@@ -181,11 +175,14 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   -- check if a setup function exists and run it
   if setupFnc ~= nil then
     UT.Log("UT - Running Setup for " .. casename)
-    local _setupSuccess, _r = xpcall (setupFnc, UT.ErrorHandler)
+    local _setupSuccess, _err = xpcall (setupFnc, UT.ErrorHandler)
+    if _err == nil then
+      _err = "NO ERROR"
+    end
     if _setupSuccess then
       UT.Log("UT - Setup Complete")
     else
-      UT.Log("UT - Setup FAILED - ERROR - " .. UT.GetCaughtError() .. " - " .. UT.GetStackTrace())
+      UT.Log("UT - Setup FAILED - ERROR - " .. _err)
       UT.Log("UT - Test Case FAILED - Setup failed to complete!")
       UT.WriteToFile()
       UT.Reset()
@@ -196,7 +193,10 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
     UT.Log("UT - No Setup Found for " .. casename .. " - Ignoring")
   end
   
-  local _caseSuccess, _result  = xpcall (fnc, UT.ErrorHandler)
+  local _caseSuccess, _err = xpcall (fnc, UT.ErrorHandler)
+  if _err == nil then
+    _err = "NO ERROR"
+  end
   local _failed = false
   if _caseSuccess then   
     UT.Log("============================================================")
@@ -210,7 +210,7 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
       _failed = true
     end
   else
-    UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. UT.GetCaughtError() .. " - TraceBack - " .. UT.GetStackTrace()) --debug.traceback())
+    UT.Log("UT ERROR IN TEST CASE " .. casename .. " - Error - " .. _err) --debug.traceback())
     UT.Log("UT - Test Case FAILED - Error in Test Case!")
     table.insert(UT.FailedTestCases, casename)
     _failed = true
@@ -222,9 +222,12 @@ function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   -- tear down the test data
   if teardownFnc ~= nil then
     UT.Log("Tearing Down Test Case Data")
-    local _TearDownResult, _result = xpcall(teardownFnc, UT.ErrorHandler)
+    local _TearDownResult, _err = xpcall(teardownFnc, UT.ErrorHandler)
+    if _err == nil then
+      _err = "NO ERROR"
+    end
     if (not _TearDownResult) then
-      UT.Log("Tear Down FAILED - ERROR - " .. UT.GetCaughtError() .. " - " .. UT.GetStackTrace())
+      UT.Log("Tear Down FAILED - ERROR - " .. _err)
       if not _failed then
         table.insert(UT.FailedTestCases, casename)
       end

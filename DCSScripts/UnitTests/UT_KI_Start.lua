@@ -56,11 +56,21 @@ if not ValidateKIStart() then
   return false
 end
 
-
 local path = "C:\\Users\\david\\Documents\\GitHub\\KI\\DCSScripts\\"
 
+if KI_UT_START_FIRST_INIT == nil then
+  KI_UT_START_FIRST_INIT = true
+  package.path = package.path .. ";" .. path.. "\\Dependencies\\lualinq.lua"
+end
+
+package.loaded.lualinq = nil  -- required to reload the require module
+lualinq = require("lualinq")
+
+-- THESE CANNOT BE LOADED HERE --
+--JSON = loadfile("Scripts\\JSON.lua")()
+
 env.info("KI - Loading Files")
-assert(loadfile(path .. "Dependencies\\Moose_2.4.13.lua"))()
+
 assert(loadfile(path .. "ConfigChecker.lua"))()
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()

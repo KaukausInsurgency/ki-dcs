@@ -75,9 +75,11 @@ local loadfile = loadfile
 
 package.path = package.path..";.\\LuaSocket\\?.lua"
 package.cpath = package.cpath..";.\\LuaSocket\\?.dll"
+package.path = package.path .. ";" .. path.. "\\Dependencies\\lualinq.lua"
 
 local JSON = loadfile("Scripts\\JSON.lua")()
 local socket = require("socket")
+local lualinq = require ("lualinq")
 -- End loading modules and packages
 
 

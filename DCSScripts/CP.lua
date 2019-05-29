@@ -82,10 +82,12 @@ end
   
 function CP:ViewResources()
   local msg = "CP - " .. self.Name .. "\n"
-  msg = msg .. string.format("%-25s|%-5s|%-5s", "Defense", "Count", "limit") .. "\n"
-  for res, val in pairs(self.Defenses) do
-    msg = msg .. string.format("%-25s|%-5d|%-5d", res, val.qty, val.cap) .. "\n"
-  end
+  msg = msg .. "Status: " .. self:GetOwnership() .. " Red: " 
+        .. tostring(self.RedUnits) .. " Blue: " .. self.BlueUnits .. "\n"
+  --msg = msg .. string.format("%-25s|%-5s|%-5s", "Defense", "Count", "limit") .. "\n"
+  --for res, val in pairs(self.Defenses) do
+  --  msg = msg .. string.format("%-25s|%-5d|%-5d", res, val.qty, val.cap) .. "\n"
+  --end
   return msg
 end
 
