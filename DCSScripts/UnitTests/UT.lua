@@ -132,16 +132,6 @@ function UT.ValidateSetup(cmp)
     UT.AbortTest = true
   end
 end
-
-function UT.TestCompareOnce(cmp)
-  if cmp() then
-    UT.Pass = UT.Pass + 1
-  else
-    local m = "UT: FAILURE - " .. " - " .. debug.traceback("TestCompareOnce TraceBack", 2)
-    UT.Log(m)
-    UT.Fail = UT.Fail + 1
-  end
-end
   
 function UT.TestCase(casename, validFnc, setupFnc, fnc, teardownFnc)
   -- setup file path

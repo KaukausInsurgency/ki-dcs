@@ -70,7 +70,7 @@ end,
       
       -- testing SelectZone method
       UT.TestFunction(DSMT._selectZone, _zones)
-      UT.TestCompareOnce(function()
+      UT.TestCompare(function()
           local _z = DSMT._selectZone(_sm.Zones)
           env.info("UT_DSMT ZoneName : " .. _z.ZoneName )
           env.info("UT_DSMT _zones[1] : " .. _zones[1])

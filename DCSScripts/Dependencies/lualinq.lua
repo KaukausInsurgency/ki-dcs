@@ -138,6 +138,7 @@ local _foreach
 local _foreach
 local _intersection
 local _intersectionby
+local _join
 local _last
 local _map
 local _max
@@ -175,6 +176,7 @@ local function _new_lualinq(method, collection)
   self.skip           = _skip
   self.zip            = _zip
 
+  self.join           = _join
   self.distinct       = _distinct
   self.union          = _union
   self.except         = _except
@@ -462,6 +464,24 @@ function _zip(self, otherlinq, joiner)
   end
 
   return _new_lualinq(":zip", result)
+end
+
+-- Joins two collections together on the specified on function and join function
+function _join(self, otherlinq, on, joiner)
+  otherlinq = from(otherlinq)
+  
+  local result = {}
+  
+  for _, lvalue in ipairs(self.m_Data) do
+    for _, rvalue in ipairs(otherlinq.m_Data) do
+      if on(lvalue, rvalue) then
+        _tableInsert(result, joiner(lvalue, rvalue))
+        break
+      end
+    end
+  end
+  
+  return _new_lualinq(":join", result)
 end
 
 -- Returns only distinct items, using an optional comparator

@@ -231,6 +231,17 @@ function()
   UT.TestData.coalitionExtract =
   {
     ['SideMissionGroundObjects'] = { "SMObject" },
+    ['StaticObjects'] = 
+    {
+      [1] = {
+        ['Coalition'] = 1,
+        ['Name'] = 'SMObject',
+      },
+      [2] = {
+        ['Coalition'] = 1,
+        ['Name'] = 'StaticObject',
+      }
+    },
     ['GroundGroups'] =
     {
       [1] = {
@@ -468,6 +479,32 @@ function()
       UT.TestCompare(function() return #_linqResults:toArray() == 2 end, "GetGroundGroupsForImport - expected 2 results")
       UT.TestCompare(function() return _linqResults:contains("WP_Group_Close", function(g, item) return g.Name == item end) end, "GetGroundGroupsForImport - result did not contain expected group")
       UT.TestCompare(function() return _linqResults:contains("WP_Group_Far", function(g, item) return g.Name == item end) end, "GetGroundGroupsForImport - result did not contain expected group")
+    end
+    
+    -- GetStaticObjectsForImport
+    if true then
+      local _linqResults = KI.Loader.GetStaticObjectsForImport(UT.TestData.coalitionExtract)
+      UT.TestCompare(function() return #_linqResults:toArray() == 1 end, "GetStaticObjectsForImport - expected 1 result")
+      UT.TestCompare(function() return _linqResults:contains("StaticObject", function(g, item) return g.Name == item end) end, "GetStaticObjectsForImport - result did not contain expected StaticObject")
+    end
+    
+    -- KI.Loader.GetTasksForImport tests
+    if true then
+      local _data = {
+        ActiveMissions = {
+          { Name = "Task A", Done = false },
+          { Name = "Task B", Done = true },
+          { Name = "Task C", Done = true },
+          { Name = "Task D", Done = false }
+        }
+      }
+      local _sideMissions = {
+        { Name = "Task A" },
+      }
+      local _linqResults = KI.Loader.GetTasksForImport(_data, _sideMissions)
+      UT.TestCompare(function() return #_linqResults:toArray() == 1 end, "GetTasksForImport - expected 1 result")
+      UT.TestCompare(function() return _linqResults:toArray()[1].Task.Name == "Task A" end, "GetTasksForImport - result did not contain expected Task")   
+      UT.TestCompare(function() return _linqResults:toArray()[1].SideMission.Name == "Task A" end, "GetTasksForImport - result did not contain expected SideMission")   
     end
     
     -- GetGroupsForExtraction tests

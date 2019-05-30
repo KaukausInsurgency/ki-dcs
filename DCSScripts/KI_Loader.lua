@@ -26,17 +26,14 @@ local _tryDisableAIDispersion = KI.Toolbox.TryDisableAIDispersion
 local _envInfo = env.info
 local _tableInsert = table.insert
 local _stringMatch = string.match
+local _lualinq = lualinq
 
 -- prunes dead groups from KI.Data.Waypoints
 -- KI.Data.Waypoints is a hash table, thus need to convert back using toDictionary()
 function KI.Loader.PruneWaypoints(data, waypoints)
-  waypoints = lualinq.from(waypoints)
-                      :intersection(data["GroundGroups"], function(a,b) 
-                        return a.Name == b.key 
-                      end)
-                      :toDictionary(function(val) 
-                        return val.key, val.value
-                      end)
+  waypoints = _lualinq.from(waypoints)
+                      :intersection(data["GroundGroups"], function(a,b) return a.Name == b.key end)
+                      :toDictionary(function(val) return val.key, val.value end)
   
   return waypoints
 end
@@ -105,9 +102,16 @@ end
 -- Gets the GroundGroup data and filters out any side mission objects as well as empty groups (groups with no units)
 function KI.Loader.GetGroundGroupsForImport(data)
   _envInfo("KI.Loader.GetGroundGroupsForImport called")
-  return lualinq.from(data["GroundGroups"])
+  return _lualinq.from(data["GroundGroups"])
          :except(data["SideMissionGroundObjects"], function(_sm,_g) return _sm == _g.Name end)
          :where(function(_g) return _g.Size > 0 and #_g.Units > 0 end)
+end
+
+-- Gets the StaticObjects data and filters out any side mission objects
+function KI.Loader.GetStaticObjectsForImport(data)
+  _envInfo("KI.Loader.GetGroundGroupsForImport called")
+  return _lualinq.from(data["StaticObjects"])
+         :except(data["SideMissionGroundObjects"], function(_sm,_g) return _sm == _g.Name end)
 end
 
 -- Gets DCS Groups for side and category, filtering for only existing groups and if there is an ignore prefix set
@@ -120,7 +124,7 @@ function KI.Loader.GetGroupsForExtraction(side, category, getGroupFunction)
     _ignorePrefixGroups = true
   end
 
-  return lualinq.from(getGroupFunction(side, category))
+  return _lualinq.from(getGroupFunction(side, category))
              :where(function(group) return 
                 group:isExist() and group:getUnit(1) ~= nil and
                 group:getUnit(1):isActive() and group:getUnit(1):getLife() > 0 
@@ -132,6 +136,14 @@ function KI.Loader.GetGroupsForExtraction(side, category, getGroupFunction)
                   not _stringMatch(group:getName(), _ignoreSaveGroupPrefix)
                 )
               end)
+end
+
+function KI.Loader.GetTasksForImport(data, sidemissions)
+  _envInfo("KI.Loader.GetTasksForImport called")
+  return _lualinq.from(data["ActiveMissions"])
+              :where(function(task) return not task.Done end)
+              :join(sidemissions, function(t, s) return s.Name == t.Name end, 
+                                  function(t, s) return { Task = t, SideMission = s } end)
 end
 
 -- generates unit table that DCS Spawn Group expects
@@ -204,6 +216,7 @@ function KI.Loader.ExtractCoalitionGroupData(side, category, byrefTable)
       Name = dcsGroup:getName(), 
       ID = dcsGroup:getID(), 
       Category = dcsGroup:getCategory(),
+      Country = 0,
       Units = {}
     }
     local _first = true
@@ -304,7 +317,6 @@ function KI.Loader.ImportCoalitionGroups(data)
   
   -- first, remove any dead group entries from the waypoints table as there's no need to store a dead groups waypoint information
   KI.Data.Waypoints = KI.Loader.PruneWaypoints(data, KI.Data.Waypoints)
-  -- GetGroundGroupsForImport
   local _linqResults = KI.Loader.GetGroundGroupsForImport(data)
   
   _linqResults:foreach(function(_g)
@@ -333,48 +345,36 @@ end
 
 function KI.Loader.ImportStaticObjects(data)
   _envInfo("KI.Loader.ImportStaticObjects called")
-  for i = 1, #data["StaticObjects"] do
-    local _s = data["StaticObjects"][i]
-    local IsSideMissionObject = false
-    for k = 1, #data["SideMissionGroundObjects"] do
-      local _sm = data["SideMissionGroundObjects"][k]
-      if _s["Name"] == _sm then
-        _envInfo("KI.Loader.ImportStaticObjects - found side mission static object - ignoring")
-        IsSideMissionObject = true
-        break
-      end
-    end
-    
-    if not IsSideMissionObject then
-    
+ 
+  local _linqResults = KI.Loader.GetStaticObjectsForImport(data)
+ 
+  _linqResults:foreach(function(_s)
       local obj = coalition.addStaticObject(_s["CountryID"], {
-        country = _s["Country"],
-        category = _s["Category"],
-        x = _s["x"],
-        y = _s["y"],
-        type = _s["Type"],
-        name = _s["Name"],
-        mass = _s["Mass"],
-        canCargo = _s["CanCargo"],
-        heading = _s["Heading"]
-      })
+      country = _s["Country"],
+      category = _s["Category"],
+      x = _s["x"],
+      y = _s["y"],
+      type = _s["Type"],
+      name = _s["Name"],
+      mass = _s["Mass"],
+      canCargo = _s["CanCargo"],
+      heading = _s["Heading"]
+    })
+  
+    -- if the static object belongs to SLC, Relink the Cargo with SLC module (and GC if necessary)
+    if obj then
+      _envInfo("KI.Loader.ImportStaticObjects - static object spawned (" .. _s["Name"] .. ")")
     
-      -- if the static object belongs to SLC, Relink the Cargo with SLC module (and GC if necessary)
-      if obj then
-        _envInfo("KI.Loader.ImportStaticObjects - static object spawned (" .. _s["Name"] .. ")")
-      
-        if _s["Component"] == "SLC" then
-          SLC.RelinkCargo(obj)
-        elseif _s["Component"] == "DSMT" then
-          -- somepoint will need to relink the GC and DSMT to this item
-        end
-      else
-        _envInfo("KI.Loader.ImportStaticObjects - ERROR - Static Object failed to spawn (" .. _s["Name"] .. ")")
+      if _s["Component"] == "SLC" then
+        _envInfo("KI.Loader.ImportStaticObjects - static object (" .. _s["Name"] .. ") is part of SLC - relinking to cargo")
+        SLC.RelinkCargo(obj)
+      elseif _s["Component"] == "DSMT" then
+        -- somepoint will need to relink the GC and DSMT to this item
       end
-    
+    else
+      _envInfo("KI.Loader.ImportStaticObjects - ERROR - Static Object failed to spawn (" .. _s["Name"] .. ")")
     end
-    
-  end
+  end)
   
   return true
 end
@@ -462,14 +462,9 @@ function KI.Loader.ImportGC(data)
       local _grp = GROUP:FindByName(_gcdata["Name"])
       if _grp ~= nil then
         _envInfo("KI.Loader.ImportGC - Adding Group " .. _gcdata["Name"] .. " to GC Queue")
-        local gc_item = GCItem:New(_gcdata["Name"], 
-                                _grp, 
-                                function(obj)
-                                  return obj:IsAlive()
-                                end,
-                                function(obj)
-                                  return obj:Destroy()
-                                end,
+        local gc_item = GCItem:New(_gcdata["Name"], _grp, 
+                                function(obj) return obj:IsAlive() end,
+                                function(obj) return obj:Destroy() end,
                                 KI.Hooks.GCOnLifeExpiredTroops,
                                 { Depot = nil, Object = _grp },
                                 KI.Hooks.GC_Troops_IsIdle, nil, KI.Config.CrateDespawnTime_Depot)
@@ -484,14 +479,9 @@ function KI.Loader.ImportGC(data)
       
       if _static ~= nil then
         _envInfo("KI.Loader.ImportGC - Adding Static Object " .. _gcdata["Name"] .. " to GC Queue")
-        local gc_item = GCItem:New(_gcdata["Name"], 
-                                _static, 
-                                function(obj)
-                                  return obj:isExist()
-                                end,
-                                function(obj)
-                                  return obj:destroy()
-                                end,
+        local gc_item = GCItem:New(_gcdata["Name"], _static, 
+                                function(obj) return obj:isExist() end,
+                                function(obj) return obj:destroy() end,
                                 KI.Hooks.GCOnLifeExpiredCrate,
                                 { LastPosition = _static:getPoint(), Depot = nil, Object = _static, DepotIdleTime = 0 },
                                 KI.Hooks.GC_Crate_IsIdle, KI.Hooks.GC_Crate_DepotExpired, 
@@ -510,70 +500,44 @@ end
 function KI.Loader.ImportDSMT(data)
   _envInfo("KI.Loader.ImportDSMT called")
   
-  for i = 1, #data["ActiveMissions"] do
+  local _linqResults = KI.Loader.GetTasksForImport(data, KI.Data.SideMissions)
+  
+  _linqResults:foreach(function(result)
+    local _task = result.Task
+    local _sideMission = result.SideMission
     
-    local task = data["ActiveMissions"][i]
-    local taskFound = false
+    _envInfo("KI.Loader.ImportDSMT - found side mission " .. _task.Name .. " - reinitializing")
+    local _activemission = KI.Toolbox.DeepCopy(_sideMission)
     
-    if not task.Done then
-    
-      _envInfo("KI.Loader.ImportDSMT - searching for side mission " .. task.Name)
+    _envInfo("KI.Loader.ImportDSMT - finding current zone")
+    for _z = 1, #_sideMission.Zones do          
+      local _zone = _sideMission.Zones[_z]
+      local _p = _zone.Zone.point
+      local _cp = _task["CurrentZone"]["Zone"]["point"]
       
-      -- locate the existing task in this table
-      for j = 1, #KI.Data.SideMissions do
-      
-        local _sidemission = KI.Data.SideMissions[j]
-        
-        if task.Name == _sidemission.Name then
-        
-          taskFound = true
-          _envInfo("KI.Loader.ImportDSMT - found side mission " .. task.Name .. " - reinitializing")
-          local activemission = KI.Toolbox.DeepCopy(_sidemission)
-          
-          _envInfo("KI.Loader.ImportDSMT - finding current zone")
-          for z = 1, #_sidemission.Zones do
-          
-            local _zone = _sidemission.Zones[z]
-            local p = _zone.Zone.point
-            local cp = task["CurrentZone"]["Zone"]["point"]
-            
-            if p.y == cp.y and p.x == cp.x and p.z == cp.z then
-              _envInfo("KI.Loader.ImportDSMT - found zone " .. _zone:GetName())
-              activemission.CurrentZone = _zone
-              break
-            end
-            
-          end
-          
-          if activemission.CurrentZone then
-            activemission.InsertNewDBRecord = task.InsertNewDBRecord
-            activemission.TaskID = task.TaskID
-            activemission.Expiry = task.Expiry
-            activemission.DestroyTime = task.DestroyTime
-            activemission.Life = task.Life
-            activemission.Done = task.Done
-            activemission:Start(activemission.CurrentZone)
-            _tableInsert(KI.Data.ActiveMissions, activemission)
-            _envInfo("KI.Loader.ImportDSMT - created active mission")
-          else
-            _envInfo("KI.Loader.ImportDSMT - ERROR - could not find CurrentZone for mission!")
-          end
-          
-          break         
-        end
-        
-      end -- end for
-      
-    end -- if not task done
-    
-    if not taskFound and not task.Done then
-      _envInfo("KI.Loader.ImportDSMT - ERROR - could not find side mission " .. task.Name .. " !")
+      if _p.y == _cp.y and _p.x == _cp.x and _p.z == _cp.z then
+        _envInfo("KI.Loader.ImportDSMT - found zone " .. _zone:GetName())
+        _activemission.CurrentZone = _zone
+        break
+      end            
     end
     
-  end -- end for
+    if _activemission.CurrentZone then
+      _activemission.InsertNewDBRecord = _task.InsertNewDBRecord
+      _activemission.TaskID = _task.TaskID
+      _activemission.Expiry = _task.Expiry
+      _activemission.DestroyTime = _task.DestroyTime
+      _activemission.Life = _task.Life
+      _activemission.Done = _task.Done
+      _activemission:Start(_activemission.CurrentZone)
+      _tableInsert(KI.Data.ActiveMissions, _activemission)
+      _envInfo("KI.Loader.ImportDSMT - created active mission '" .. _task.Name .. "'")
+    else
+      _envInfo("KI.Loader.ImportDSMT - ERROR - could not find CurrentZone for mission!")
+    end        
+  end)
 
-  return true
-  
+  return true 
 end
 
 

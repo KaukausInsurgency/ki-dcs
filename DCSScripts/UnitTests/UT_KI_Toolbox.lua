@@ -31,7 +31,7 @@ UT.TestCase("KI_Toolbox", nil, nil,
     
     -- Test Dump
     UT.TestFunction(KI.Toolbox.Dump, _copy)
-    UT.TestCompareOnce(function() env.info(KI.Toolbox.Dump(_testTable)) return true end)
+    UT.TestFunction(KI.Toolbox.Dump, _testTable)
     
     -- Test Serialize
     UT.TestFunction(KI.Toolbox.SerializeTable, _copy)
