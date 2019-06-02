@@ -276,7 +276,7 @@ KI.Config.SideMissions =
           local SpawnGrp = SPAWN:NewWithAlias("InsCampSquad", KI.GenerateName("Insurgent Camp Force"))
           local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
           
-          KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
+          KI.GameUtils.TryDisableAIDispersion(NewGroup)
           table.insert(GroundForces, NewGroup)
         end
         
@@ -285,7 +285,7 @@ KI.Config.SideMissions =
           local SpawnGrp = SPAWN:NewWithAlias("InsMANPADSqd", KI.GenerateName("Insurgent Camp Force"))
           local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
     
-          KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")   
+          KI.GameUtils.TryDisableAIDispersion(NewGroup)   
           table.insert(GroundForces, NewGroup)
         end
         
@@ -294,7 +294,7 @@ KI.Config.SideMissions =
         
         local SpawnGrp = SPAWN:NewWithAlias(ChosenVehicleTemplate, KI.GenerateName("Insurgent Camp Force"))
         local NewGroup = SpawnGrp:SpawnInZone(chosenZone, true)
-        KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")   
+        KI.GameUtils.TryDisableAIDispersion(NewGroup)   
         table.insert(GroundForces, NewGroup)
         
         -- Preparing arguments to send back
@@ -308,7 +308,7 @@ KI.Config.SideMissions =
           KI.AddSideMissionObject(moosegrp.GroupName)
         end
         
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
         -- create and initialize the task, init must return arguments
         return args
       end,
@@ -354,7 +354,7 @@ KI.Config.SideMissions =
       -- no return required
       oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CAMP HAS BEEN SUCCESSFULLY DESTROYED!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CAMP HAS BEEN SUCCESSFULLY DESTROYED!")
       end,
       
       -- this function tells KI what should happen when the side mission is failed
@@ -369,7 +369,7 @@ KI.Config.SideMissions =
       -- no return required
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   },
   { 
@@ -383,7 +383,7 @@ KI.Config.SideMissions =
        
         local SpawnGrp = SPAWN:NewWithAlias("InsConvoyA", KI.GenerateName("Insurgent Convoy"))
         local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
-        KI.Toolbox.TryDisableAIDispersion(Convoy, "MOOSE")   
+        KI.GameUtils.TryDisableAIDispersion(Convoy)   
         
         -- Preparing arguments to send back
         local args = {}
@@ -393,7 +393,7 @@ KI.Config.SideMissions =
         -- Register the side mission objects so that they are ignored in saving/writing (Side Mission will be restarted on restart)
         KI.AddSideMissionObject(Convoy.GroupName)
         
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Coban!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Coban!")
         -- create and initialize the task, init must return arguments
         return args
       end,
@@ -419,17 +419,17 @@ KI.Config.SideMissions =
       
       oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
       end,
       
       onfail = function(missionName, chosenZone, args)
         env.info("DSMT.onfail called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
       end,
       
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   },
   { 
@@ -443,7 +443,7 @@ KI.Config.SideMissions =
        
         local SpawnGrp = SPAWN:NewWithAlias("InsConvoyB", KI.GenerateName("Insurgent Convoy"))
         local Convoy = SpawnGrp:SpawnWithIndex(KI.IncrementSpawnID())
-        KI.Toolbox.TryDisableAIDispersion(Convoy, "MOOSE")   
+        KI.GameUtils.TryDisableAIDispersion(Convoy)   
         
         -- Preparing arguments to send back
         local args = {}
@@ -453,7 +453,7 @@ KI.Config.SideMissions =
         -- Register the side mission objects so that they are ignored in saving/writing (Side Mission will be restarted on restart)
         KI.AddSideMissionObject(Convoy.GroupName)
         
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Gerpegezh!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Convoy that has been spotted heading towards Gerpegezh!")
         -- create and initialize the task, init must return arguments
         return args
       end,
@@ -478,17 +478,17 @@ KI.Config.SideMissions =
       
       oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - THE CONVOY HAS BEEN SUCCESSFULLY DESTROYED!")
       end,
       
       onfail = function(missionName, chosenZone, args)
         env.info("DSMT.onfail called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE CONVOY SUCCESSFULLY REACHED ITS DESTINATION!")
       end,
       
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   },
   { 
@@ -514,7 +514,7 @@ KI.Config.SideMissions =
         args.Cargo = obj
         args.DestZone = ZONE:New("Kardzhin Depot Zone")
         
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Cargo airlift required to Kardzhin Depot!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Cargo airlift required to Kardzhin Depot!")
         -- create and initialize the task, init must return arguments
         return args
       end,
@@ -545,17 +545,17 @@ KI.Config.SideMissions =
       
       oncomplete = function(missionName, chosenZone, args)
         env.info("DSMT.oncomplete called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - SUPPLIES SUCCESSFULLY TRANSPORTED TO KARDZHIN DEPOT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION COMPLETE - " .. missionName .. " - SUPPLIES SUCCESSFULLY TRANSPORTED TO KARDZHIN DEPOT!")
       end,
       
       onfail = function(missionName, chosenZone, args)
         env.info("DSMT.onfail called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE SUPPLIES HAVE BEEN DESTROYED!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - THE SUPPLIES HAVE BEEN DESTROYED!")
       end,
       
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   }
   

@@ -125,8 +125,9 @@ function UT.TestCompare(cmp, msg, expectedfailure)
   end
 end
 
-function UT.ValidateSetup(cmp)
-  local _result, _message = KI.Evaluate(cmp, "SETUP VALIDATE", "ValidateSetup")
+function UT.ValidateSetup(cmp, msg)
+  msg = msg or "ValidateSetup"
+  local _result, _message = KI.Evaluate(cmp, "SETUP VALIDATE", msg)
   if not _result then
     UT.Log(_message)
     UT.AbortTest = true

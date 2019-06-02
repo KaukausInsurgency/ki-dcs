@@ -22,7 +22,7 @@ KI.Loader = {}
 -- define locals to prevent constant lookups when trying to access global
 local _kiDataWaypoints = KI.Data.Waypoints
 local _generateGroupTable = KI.Loader.GenerateGroupTable
-local _tryDisableAIDispersion = KI.Toolbox.TryDisableAIDispersion
+local _tryDisableAIDispersion = KI.GameUtils.TryDisableAIDispersion
 local _envInfo = env.info
 local _tableInsert = table.insert
 local _stringMatch = string.match
@@ -38,26 +38,9 @@ function KI.Loader.PruneWaypoints(data, waypoints)
   return waypoints
 end
 
+--todo: remove later
 function KI.Loader.SyncWithMoose(dcsGroup)
-  -- need to properly register this group and units with MOOSE in order for GROUP to work
-  -- this is caused by another DCS timing issue, where-by event-birth is called a few frames after some code has executed
-  -- MOOSE actually auto handles this by registering any units created via event-birth 
-  -- in this case here the event birth has not fired when the group was spawned above
-  -- therefore MOOSE does not know about it and it has not been registered
-  -- this work around addresses this issue
-  local _groupName = dcsGroup:getName()
-  local _mooseGroup = GROUP:Find(dcsGroup)
-  
-  if _mooseGroup == nil then
-    _envInfo("KI.Loader.SyncWithMoose - group '" .. _groupName .. "' not found in MOOSE Database - syncing")
-    _DATABASE:AddGroup(_groupName)
-    for _, _unit in pairs(dcsGroup:getUnits()) do
-      _DATABASE:AddUnit(_unit:getName())                
-    end             
-    _mooseGroup = GROUP:Find(dcsGroup)
-  end
-  
-  return _mooseGroup
+  return KI.GameUtils.SyncWithMoose(dcsGroup)
 end
 
 -- handles waypoints for spawned groups - ie whether group needs to be retasked with moving to waypoint, or whether waypoint is complete

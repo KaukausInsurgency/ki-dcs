@@ -97,8 +97,8 @@ function CP:SetCoalitionCounts(reds, blues)
   self.RedUnits = reds
   local own = CP.GetOwnership(self)
   if self.Owner ~= own then
-    KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
-    KI.Toolbox.MessageCoalition(KI.Config.InsurgentSide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
+    KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
+    KI.GameUtils.MessageCoalition(KI.Config.InsurgentSide, "ALERT --- " .. self.Name .. " is now " .. own, 10)
     self.Owner = own
   end
 end

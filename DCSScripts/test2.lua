@@ -1,7 +1,43 @@
-env.info("Starting Test")
+-- example shows how logging aspect could be injected into existing functions
 
-env.info("DCSStructure typename: " .. Unit.getByName("DCSStructure"):getTypeName())
+local m = {
+  a = {},
+  b = {},
+}
 
+
+m.__index = m 
+m.a.fna = function(xr) return xr end
+m.b.fnb = function() return true end
+m.a.v = 25
+m.b.v2 = "string"
+
+local n = setmetatable( {}, m )
+n.__index = m
+
+local function logAspect(t, id, name)
+  id = id or name
+  for i,v in pairs(t) do   
+    if type(v) == "function" then
+      local _v = v
+      t[i] = function(...)
+        print(id .. "." .. i .. "() called")
+        return _v(...)
+      end
+    elseif type(v) == "table" then
+      if i == "__index" then
+        print("Ignoring meta method __index")
+      else
+        logAspect(v, id .. "." .. i, name)
+      end
+    end
+  end
+end
+
+logAspect(m, "m")
+
+print(tostring(m.a.fna(22)))
+print(tostring(m.b.fnb()))
 
 if 1 == 2 then
 

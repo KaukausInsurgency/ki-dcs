@@ -188,7 +188,7 @@ KI.Config.SideMissions =
         local args = {}
         args.CampObject = CampObj
         KI.AddSideMissionObject(CampObj.StaticName)
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "ALERT!! NEW MISSION - Destroy the Insurgent Camp that has been uncovered!")
         -- create and initialize the task, init must return arguments
         return args
       end,   
@@ -213,7 +213,7 @@ KI.Config.SideMissions =
       -- no return required
       ontimeout = function(missionName, chosenZone, args)
         env.info("DSMT.ontimeout called")
-        KI.Toolbox.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
+        KI.GameUtils.MessageCoalition(KI.Config.AllySide, "MISSION FAILED - " .. missionName .. " - TIME HAS RUN OUT!")
       end
   }
   

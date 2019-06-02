@@ -367,7 +367,7 @@ function KI.Scheduled.CheckConvoyCompletedRoute(args, time)
     else
       env.info("KI.Scheduled.CheckConvoyCompletedRoute - Convoy Group " .. gname .. " is dead - ignoring")
       _depot.IsSuppliesEnRoute = false
-      KI.Toolbox.MessageCoalition(KI.Config.AllySide, "A convoy heading for " .. _depot.Name .. " has been destroyed!", 30)
+      KI.GameUtils.MessageCoalition(KI.Config.AllySide, "A convoy heading for " .. _depot.Name .. " has been destroyed!", 30)
       table.insert(_keysToRemove, gname)
     end -- end if group alive
   end
@@ -676,8 +676,8 @@ function KI.Scheduled.IncrementPlayerLives(args,time)
     end
   end
   
-  KI.Toolbox.MessageCoalition(1, "Players have regained 1 life!", 60)
-  KI.Toolbox.MessageCoalition(2, "Players have regained 1 life!", 60)
+  KI.GameUtils.MessageCoalition(1, "Players have regained 1 life!", 60)
+  KI.GameUtils.MessageCoalition(2, "Players have regained 1 life!", 60)
   
   return time + 3600
 end

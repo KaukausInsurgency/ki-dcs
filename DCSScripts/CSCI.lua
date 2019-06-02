@@ -24,118 +24,147 @@ function CSCI.Init()
   env.info("CSCI.Init() complete")
 end
 
+-- internal functions
 
+function CSCI.CheckPreCondition(actionname, parentmenu, moosegrp, csci_config, capturepoint)
+  env.info("CSCI.CheckPreCondition called")  
+  local _isvalid = true
+      
+  if CSCI.Config.PreOnRadioAction then
+    env.info("CSCI.CheckPreCondition - found PreOnRadioAction callback - invoking")
+    _isvalid = CSCI.Config.PreOnRadioAction(actionname, parentmenu, moosegrp, csci_config, capturepoint)
+  end
+  
+  return _isvalid
+end
 
+function CSCI.TryGetActionData(actionname)
+  env.info("CSCI.TryGetActionData called")
+  local _data = CSCI.Data[actionname]
+  
+  if _data == nil then
+    env.info("CSCI.TryGetActionData - action '" .. actionname .. "' not found!")
+  end
+        
+  return _data ~= nil, _data
+end
 
-function CSCI.CanCall(actionname, capturepoint)
+function CSCI.ModifyState(actionData, capturePoint, csciConfig)
+  env.info("CSCI.ModifyState called")
+  -- update the state of capture point and actionData
+  capturePoint.CSCICalled = true
+  
+  env.info("CSCI.PerformAction - Updating Remaining Calls")
+  actionData.CooldownCallsRemaining = actionData.CooldownCallsRemaining - 1
+  actionData.CallsRemaining = actionData.CallsRemaining - 1
+  
+  if actionData.CooldownCallsRemaining ~= csciConfig.MaxCallsPerCooldown then  
+    env.info("CSCI.PerformAction - Cooldown activated")       
+    CSCI.CreateCooldownTimer(actionData, csciConfig)
+  end
+end
+
+function CSCI.IsValidCSCIUnit(unitName)
+  env.info("CSCI.IsValidCSCIUnit called")
+  local _dcsUnit = Unit.getByName(unitName)
+  
+  if not _dcsUnit then 
+    env.info("CSCI.IsValidCSCIUnit - unit does not exist")
+    return false 
+  end
+  
+  if CSCI.Config.RestrictToCSCIPilot then
+    if string.match(unitName, "CSCIPilot") then
+      env.info("CSCI.IsValidCSCIUnit - CSCI Pilot '" .. unitName .. "' found")
+      return true
+    else
+      env.info("CSCI.IsValidCSCIUnit - Pilot Name '" .. unitName .. "' does not match 'CSCIPilot' aborting")
+      return false
+    end 
+  else
+    env.info("CSCI.IsValidCSCIUnit - no restictions")
+    return true
+  end
+end
+
+-- returns 2 values, bool whether action can be called, string message if it cannot
+function CSCI.CanCall(actionData, capturepoint)
   env.info("CSCI.CanCall() called")
+  
+  if actionData == nil then 
+    return false, "Cannot call support! Invalid support type!"
+  end
   
   if capturepoint.CSCICalled then
     env.info("CSCI.CanCall - This capture point already has combat support requested, cannot call support again")
     return false, "Cannot call support! There is already active combat support on route to this capture point!"
   end
   
-  local supportdata = CSCI.Data[actionname]
-  
-  if supportdata ~= nil then
-    env.info("CSCI.CanCall supportdata found for " .. actionname)
-    if supportdata.CooldownCallsRemaining > 0 and supportdata.CallsRemaining > 0 then
-      env.info("CSCI.CanCall - Can still call this support type")
-      return true
-    elseif supportdata.CooldownCallsRemaining <= 0 then
-      env.info("CSCI.CanCall - No calls remaining for cooldown period - waiting for cooldown to expire")
-      return false, "Cannot call support! On cooldown (" .. tostring(supportdata.Cooldown) .. " seconds remaining)"
-    elseif supportdata.CallsRemaining <= 0 then
-      env.info("CSCI.CanCall - This support type can no longer be called in this session")
-      return false, "Cannot call support! No more requests can be made for this session! Wait until server restart!"
-    else
-      env.info("CSCI.CanCall ERROR - impossible else statement reached!")
-    end
-  else
-    env.info("CSCI.CanCall ERROR - invalid support type called! (actionname: " .. tostring(actionname) .. ")")
-    return false, "Cannot call support! Invalid support type!"
+  if actionData.CooldownCallsRemaining > 0 and actionData.CallsRemaining > 0 then
+    env.info("CSCI.CanCall - Can call this support type")
+    return true
+  elseif actionData.CooldownCallsRemaining <= 0 then
+    env.info("CSCI.CanCall - No calls remaining for cooldown period - waiting for cooldown to expire")
+    return false, "Cannot call support! On cooldown (" .. tostring(actionData.Cooldown) .. " seconds remaining)"
+  elseif actionData.CallsRemaining <= 0 then
+    env.info("CSCI.CanCall - This support type can no longer be called in this session")
+    return false, "Cannot call support! No more requests can be made for this session! Wait until server restart!"
   end
 end
 
-function CSCI.CreateCooldownTimer(supportdata, csci_config)
+function CSCI.CreateCooldownTimer(actionData, csciConfig)
   env.info("CSCI.CreateCooldownTimer() called")
   
   -- reset Cooldown value
-  supportdata.Cooldown = csci_config.Cooldown
+  actionData.Cooldown = csciConfig.Cooldown
   
   -- start timer function every 1 second to decrement counter
   timer.scheduleFunction(function(args, t) 
-      env.info("CSCI.CooldownTimer - INVOKED SCHEDULE!")
-      local ok, result = xpcall(function()
-        --env.info("CSCI.CooldownTimer: " .. tostring(args.supportdata.Cooldown))
-        args.supportdata.Cooldown = args.supportdata.Cooldown - 1
-        if (args.supportdata.Cooldown == 0) then
-          env.info("CSCI.CooldownTimer - cooldown for " .. csci_config.MenuName .. " has ended")
-          args.supportdata.CooldownCallsRemaining = args.csci_config.MaxCallsPerCooldown
-          return nil
-        else
-          return t + 1
-        end    
-      end, function(err) env.info("CSCI.CooldownTimer ERROR - " .. err) end)
-      
-      if not ok then
+    local ok, result = xpcall(function()
+      local _actionData = args.actionData
+      _actionData.Cooldown = _actionData.Cooldown - 1
+      if (_actionData.Cooldown == 0) then
+        env.info("CSCI.CooldownTimer - cooldown for " .. csciConfig.MenuName .. " has ended")
+        args.supportdata.CooldownCallsRemaining = args.csciConfig.MaxCallsPerCooldown
         return nil
       else
-        return result
-      end
-    end, { supportdata = supportdata, csci_config = csci_config}, timer.getTime() + 1)
+        return t + 1
+      end    
+    end, function(err) env.info("CSCI.CooldownTimer ERROR - " .. err) end)
+    
+    if not ok then
+      return nil
+    else
+      return result
+    end
+  end, { actionData = actionData, csciConfig = csciConfig}, timer.getTime() + 1)
 end
 
-function CSCI.PerformAction(action, actionname, parentmenu, moosegrp, csci_config, capturepoint)
+function CSCI.PerformAction(action, actionName, parentmenu, moosegrp, csciConfig, capturepoint)
   xpcall(function()
-    env.info("CSCI.PerformAction called (actionname: " .. actionname .. ", parentmenu: " .. parentmenu .. ")")
+    env.info("CSCI.PerformAction called (actionname: " .. actionName .. ", parentmenu: " .. parentmenu .. ")")
     
-    local _groupID = moosegrp:GetDCSObject():getID()
-    
-    if actionname == CSCI.ActionViewAirdropsRemaining then
+    if actionName == CSCI.ActionViewAirdropsRemaining then
       action(moosegrp)
       return
     end
     
-    local cancall, msg = CSCI.CanCall(actionname, capturepoint)
+    local _notNil, _actionData = CSCI.TryGetActionData(actionName)
+    local _cancall, _msg = CSCI.CanCall(_actionData, capturepoint)
       
-    if cancall then
-    
-      env.info("CSCI.PerformAction - can call this support option")
-      
-      local isvalid = true
-      
-      if CSCI.Config.PreOnRadioAction then
-        env.info("CSCI.PerformAction - found PreOnRadioAction callback - invoking")
-        isvalid = CSCI.Config.PreOnRadioAction(actionname, parentmenu, moosegrp, csci_config, capturepoint)
-      end
-      
-      if isvalid then
+    if _cancall and _notNil then
+      env.info("CSCI.PerformAction - can call this support option")    
+      if CSCI.CheckPreCondition(actionName, parentmenu, moosegrp, csciConfig, capturepoint) then
         env.info("CSCI.PerformAction - Invoking action")
-        action(actionname, parentmenu, csci_config, capturepoint)
-           
-        -- update the counts
-        capturepoint.CSCICalled = true
-        
-        local supportdata = CSCI.Data[actionname]
-        
-        if supportdata then
-          env.info("CSCI.PerformAction - Updating Remaining Calls")
-          supportdata.CooldownCallsRemaining = supportdata.CooldownCallsRemaining - 1
-          supportdata.CallsRemaining = supportdata.CallsRemaining - 1
-          
-          if supportdata.CooldownCallsRemaining ~= csci_config.MaxCallsPerCooldown then  
-            env.info("CSCI.PerformAction - Cooldown activated")       
-            CSCI.CreateCooldownTimer(supportdata, csci_config)
-          end
-        else
-          env.info("CSCI.PerformAction ERROR - supportdata is nil!")
-        end
-      end
-      
+        action(actionName, parentmenu, csciConfig, capturepoint)           
+        CSCI.ModifyState(_actionData, capturepoint, csciConfig)
+      else
+        env.info("CSCI.PerformAction - PreCondition returned false - action was not executed")
+      end      
     else
+      local _groupID = moosegrp:GetDCSObject():getID()
       env.info("CSCI.PerformAction - cannot call this support option")
-      trigger.action.outTextForGroup(_groupID, msg, 10, false)
+      trigger.action.outTextForGroup(_groupID, _msg, 10, false)
     end
   end,
   function(err) env.info("CSCI.PerformAction ERROR - " .. err) end)   
@@ -182,13 +211,13 @@ function CSCI.CreateAirdropManager(moosegrp, csci_config, destcp)
   
   timer.scheduleFunction(
     function(args, t)
-    
+
       local ok, result = 
       xpcall(function()
       
           if not args.Group:IsAlive() then 
             env.info("CSCI.CreateAirdropManager() - Aircraft is dead - stopping")
-            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Airdrop heading to " .. args.DestinationCP.Name .. " has been shot down!")
+            KI.GameUtils.MessageCoalition(KI.Config.AllySide, "Airdrop heading to " .. args.DestinationCP.Name .. " has been shot down!")
             args.DestinationCP.CSCICalled = false
             return nil 
           end
@@ -197,13 +226,12 @@ function CSCI.CreateAirdropManager(moosegrp, csci_config, destcp)
           --env.info("CSCI.CreateAirdropManager - distance: " .. tostring(distance))
           if distance < args.Config.AirdropDistance then
             env.info("CSCI.CreateAirdropManager() - airdrop within zone distance")
-            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Aircraft has started airdrop!")
+            KI.GameUtils.MessageCoalition(KI.Config.AllySide, "Aircraft has started airdrop!")
             CSCI.SpawnCargoInTime(csci_config, destcp)     
             return nil    
-          else
-            return t + 5     
           end
           
+          return t + 5             
         end, 
       function(err) env.info("CSCI.CreateAirdropManager() ERROR - " .. err) end)
     
@@ -227,7 +255,7 @@ function CSCI.OnSpawnGroup(moosegrp, parentAction, spawnzone, destzone, csci_con
     z = destzone:GetVec3().z 
   }, csci_config.PlaneCruisingSpeed)
   
-  KI.Toolbox.TryDisableAIDispersion(moosegrp, "MOOSE")
+  KI.GameUtils.TryDisableAIDispersion(moosegrp)
 end
 
 function CSCI.SpawnCargoInTime(csci_config, destcp)
@@ -239,8 +267,8 @@ function CSCI.SpawnCargoInTime(csci_config, destcp)
           local NewGroup = SpawnObj:SpawnInZone(args.DestinationCP.Zone, true)
           if NewGroup ~= nil then
             env.info("CSCI.SpawnCargoInTime - Successfully spawned group " .. template .. " in zone " .. args.DestinationCP.Name)
-            KI.Toolbox.MessageCoalition(KI.Config.AllySide, "Airdrop landed at " .. args.DestinationCP.Name)
-            KI.Toolbox.TryDisableAIDispersion(NewGroup, "MOOSE")
+            KI.GameUtils.MessageCoalition(KI.Config.AllySide, "Airdrop landed at " .. args.DestinationCP.Name)
+            KI.GameUtils.TryDisableAIDispersion(NewGroup)
           else
             env.info("CSCI.SpawnCargoInTime - ERROR - Failed to spawn group " .. template .. " in zone " .. args.DestinationCP.Name)
           end
@@ -317,29 +345,17 @@ function CSCI.AddCSCIRadioItems(moosegrp)
 end
 
 -- Init CSCI by pilotname
-function CSCI.InitCSCIForUnit(unit_name)
+function CSCI.InitCSCIForUnit(unitName)
   env.info("CSCI.InitCSCIForUnit called")
-  local u = Unit.getByName(unit_name)
-  if not u then 
-	env.info("CSCI.InitCSCIForUnit - unit does not exist - aborting")
-	return false 
+  
+  if not CSCI.IsValidCSCIUnit(unitName) then 
+    env.info("CSCI.InitCSCIForUnit - unit is invalid - aborting")
+    return false 
   end
   
-  -- Issue #208 workaround
-  local groupname = u:getGroup():getName()
+  local _dcsUnit = Unit.getByName(unitName) 
+  local _mooseGroup = KI.GameUtils.SyncWithMoose(_dcsUnit)  -- Issue #208 workaround
+  CSCI.AddCSCIRadioItems(_mooseGroup)
   
-  if CSCI.Config.RestrictToCSCIPilot then
-    if string.match(unit_name, "CSCIPilot") then
-      env.info("CSCI Pilot " .. unit_name .. " found, initializing")
-      CSCI.AddCSCIRadioItems(GROUP:Register(groupname))
-      return true
-    else
-      env.info("CSCI.InitCSCIForUnit - Pilot Name does not match 'CSCIPilot' aborting")
-      return false
-    end 
-  else
-    env.info("CSCI.InitCSCIForUnit - no restictions - adding to client")
-    CSCI.AddCSCIRadioItems(GROUP:Register(groupname))
-    return true
-  end
+  return true
 end

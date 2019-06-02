@@ -134,10 +134,10 @@ local function StartKI()
   
   env.info("KI - Getting Data From Server...")
   if not KI.Init.GetServerAndSession() then
-    KI.Toolbox.MessageCoalition(KI.Config.AllySide, "FAILED TO GET ServerID and SessionID from Database! Check Connection!")
+    KI.GameUtils.MessageCoalition(KI.Config.AllySide, "FAILED TO GET ServerID and SessionID from Database! Check Connection!")
     return false
   else
-    KI.Toolbox.MessageCoalition(KI.Config.AllySide, "RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")")
+    KI.GameUtils.MessageCoalition(KI.Config.AllySide, "RECEIVED DATA FROM DATABASE (ServerID : " .. tostring(KI.Data.ServerID) .. ", SessionID : " .. tostring(KI.Data.SessionID) .. ")")
   end
 
 
