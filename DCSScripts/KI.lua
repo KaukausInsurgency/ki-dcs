@@ -15,6 +15,7 @@ end
 -- do a partial load of KI because we need access to certain modules
 assert(loadfile(path .. "Spatial.lua"))()
 assert(loadfile(path .. "KI_Toolbox.lua"))()
+assert(loadfile(path .. "KI_GameUtils.lua"))()
 
 assert(loadfile(path .. "Dictionaries\\KI_Config_Dictionary.lua"))()
 assert(loadfile(path .. "Dictionaries\\DWM_Config_Dictionary.lua"))()
