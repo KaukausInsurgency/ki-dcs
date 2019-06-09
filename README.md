@@ -1,3 +1,5 @@
+<a href='http://158.69.193.117:8080/job/KI-Test-DCS/'><img src='http://158.69.193.117:8080/job/KI-Test-DCS/badge/icon'></a>
+
 # KI
 Kaukasus Insurgency Main Development Branch
 
